@@ -1,9 +1,10 @@
 package blocks
 
 import (
-  "os"
+  //"os"
+  "log"
   "testing"
-  "encoding/json"
+  //"encoding/json"
 )
 
 func TestApplication(t *testing.T) {
@@ -13,9 +14,11 @@ func TestApplication(t *testing.T) {
     t.Errorf("Unexpected empty application title")
   }
 
-  app.Load("test/fixtures/mock-app")
+  // app.Base = "test/fixtures/mock-app"
 
-  expected := 2
+  app.Load("test/fixtures/mock-app", nil)
+
+  expected := 4
   if len(app.Files) != expected {
     t.Errorf("Unexpected number of files %d", len(app.Files))  
   }
@@ -24,21 +27,13 @@ func TestApplication(t *testing.T) {
   if len(app.Pages) != expected {
     t.Errorf("Unexpected number of pages %d", len(app.Pages))  
   }
-}
 
-func TestApplicationJson(t *testing.T) {
-  app := Application{Title: "Mock Application"}
-  app.Load("test/fixtures/mock-app")
-  b, err := json.Marshal(app)
-  if err != nil {
-    t.Errorf("%s", err)
+  if len(app.Pages[0].UserData) == 0 {
+    t.Errorf("Unexpected empty user data for %s", app.Pages[0].file.Path)  
   }
 
-  os.Stdout.Write(append(b, 0x0A))
+  log.Println(app.Pages[0].file.Path)
+  log.Println(app.Pages[0].UserData)
 
-  //expected := `{"doctype":"\u003c!doctype html\u003e","data":null,"blocks":[{"title":"Mock Title","content":"Mock Content"}]}`
-
-  //if string(b) != expected {
-    //t.Errorf("unexpected JSON output")  
-  //}
+  app.Render(&app.Pages[0])
 }

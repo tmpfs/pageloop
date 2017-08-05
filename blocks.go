@@ -1,6 +1,10 @@
+/*
+  Data model for HTML pages written as template blocks.
+*/
 package blocks
 
 import(
+  "os"
   // . "fmt"
 )
 
@@ -8,7 +12,27 @@ const (
   HTML5 = "<!doctype html>"
 )
 
+type Application struct {
+  Name string `json: "name"`
+  Title string `json:"title"`
+  Pages []Page `json:"pages"`
+  Files []File `json:"files"`
+  Base string `json:"base"`
+  Urls map [string] File
+}
+
+type File struct {
+  Path string `json:"path"`
+  Directory bool `json:"directory"`
+  Relative string `json:"relative"`
+  Url string `json:"url"` 
+  Index bool `json:"index"`
+  info os.FileInfo
+  data []byte
+}
+
 type Page struct {
+  File
   DocType string `json:"doctype"`
   UserData map[string] interface{} `json:"data"`
   Blocks []Block  `json:"blocks"`

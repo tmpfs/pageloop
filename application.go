@@ -2,67 +2,94 @@ package blocks
 
 import (
   "os"
-  //"fmt"
-  "regexp"
+  "log"
+  "strings"
   "path/filepath"
   "io/ioutil"
+  "encoding/json"
 )
 
-var templateFile = regexp.MustCompile(`\.html?$`)
+/*
+  Load an application using the given Reader implementation.
 
-type File struct {
-  Path string `json:"path"`
-  Directory bool `json:"directory"`
-  info os.FileInfo
-  data []byte
+  If a nil reader is given the default file system reader is used.
+*/
+func (app *Application) Load(path string, reader Reader) Application {
+  if reader == nil {
+    reader = FileSystemReader{}
+  }
+  reader.Read(path, app)
+  app.Urls = make(map[string] File)
+  app.SetComputedFields(path)
+  app.Merge()
+  return *app
 }
 
-type Application struct {
-  Title string `json:"title"`
-  Pages []Page `json:"pages"`
-  Files []File `json:"files"`
+
+/*
+  Set initial relative computed path and URL path.
+
+  Also indicate whether a file is an index file and build the 
+  map of URLs to files.
+*/
+func (app *Application) SetComputedFields(path string) Application {
+  for _, file := range app.Files {
+    // includes the leading slash
+    file.Relative = strings.TrimPrefix(file.Path, path)
+    if app.Name != "" {
+      file.Relative = "/" + app.Name + file.Relative
+    }
+    file.Url = app.UrlFromPath(file.Relative)
+
+    if INDEX_FILE.MatchString(file.Path) {
+      file.Index = true
+    }
+
+    app.Urls[file.Url] = file
+  }
+  return *app
 }
 
-func (app *Application) Load(path string) Application {
-  filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-    if err != nil {
-      return err
-    }
-    fh, err := os.Open(path)
-    if err != nil {
-      return err
-    }
-    defer fh.Close()
-
-    stat, err := fh.Stat()
-    if err != nil {
-      return err
-    }
-
-    mode := stat.Mode()
-
-    var file File
-
-    if mode.IsDir() {
-      file = File{Path: path, Directory: true, info: stat}
-    } else if mode.IsRegular() {
-      file = File{Path: path, info: stat}
-      bytes, err := ioutil.ReadFile(path)
+/*
+  Merge user data with page structs loading user data from a JSON
+  file with the same name of the HTML file that created the page.
+*/
+func (app *Application) Merge() Application {
+  for index, page := range app.Pages {
+    if TEMPLATE_FILE.MatchString(page.file.Path) {
+      dir, name := filepath.Split(page.file.Path)
+      dataPath := TEMPLATE_FILE.ReplaceAllString(name, ".json")
+      dataPath = filepath.Join(dir, dataPath)
+      fh, err := os.Open(dataPath)
       if err != nil {
-        return err
+        if !os.IsNotExist(err) {
+          log.Fatal(err)
+        }
       }
-      file.data = bytes
+      if fh != nil {
+        defer fh.Close()
+        contents, err := ioutil.ReadFile(dataPath)
+        if err != nil {
+          log.Fatal(err)
+        }
+        page.UserData = make(map[string] interface{})
+        err = json.Unmarshal(contents, &page.UserData)
+        if err != nil {
+          log.Fatal(err)
+        }
+        log.Printf("%+v\n", page.UserData)
+        app.Pages[index] = page
+      }
     }
-
-    if templateFile.MatchString(path) {
-      page := Page{file: file}
-      app.Pages = append(app.Pages, page)
-    } else {
-      app.Files = append(app.Files, file)
-    }
-
-    return nil
-  })
+  }
 
   return *app
+}
+
+/*
+  Determine a URL from a relative path.
+*/
+func (app *Application) UrlFromPath(path string) string {
+  var url string = strings.Join(strings.Split(path, string(os.PathSeparator)), "/")
+  return url
 }
