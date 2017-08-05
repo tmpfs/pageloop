@@ -7,7 +7,15 @@ import (
   "path/filepath"
   "io/ioutil"
   "encoding/json"
+  "gopkg.in/yaml.v2"
 )
+
+const (
+  JSON string = ".json"
+  YAML string = ".yml"
+)
+
+var types = []string{YAML, JSON}
 
 /*
   Load an application using the given Reader implementation.
@@ -57,33 +65,49 @@ func (app *Application) SetComputedFields(path string) Application {
 func (app *Application) Merge() Application {
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {
-      dir, name := filepath.Split(page.file.Path)
-      dataPath := TEMPLATE_FILE.ReplaceAllString(name, ".json")
-      dataPath = filepath.Join(dir, dataPath)
-      fh, err := os.Open(dataPath)
-      if err != nil {
-        if !os.IsNotExist(err) {
-          log.Fatal(err)
-        }
-      }
-      if fh != nil {
-        defer fh.Close()
-        contents, err := ioutil.ReadFile(dataPath)
-        if err != nil {
-          log.Fatal(err)
-        }
-        page.UserData = make(map[string] interface{})
-        err = json.Unmarshal(contents, &page.UserData)
-        if err != nil {
-          log.Fatal(err)
-        }
-        log.Printf("%+v\n", page.UserData)
-        app.Pages[index] = page
-      }
+      app.GetUserData(&page)
+      app.Pages[index] = page
     }
   }
 
   return *app
+}
+
+func (app *Application) GetUserData(page *Page) map[string] interface{} {
+  dir, name := filepath.Split(page.file.Path)
+  for _, dataType := range types {
+    dataPath := TEMPLATE_FILE.ReplaceAllString(name, dataType)
+    dataPath = filepath.Join(dir, dataPath)
+    fh, err := os.Open(dataPath)
+    if err != nil {
+      if !os.IsNotExist(err) {
+        log.Fatal(err)
+      }
+    }
+    if fh != nil {
+      defer fh.Close()
+      contents, err := ioutil.ReadFile(dataPath)
+      if err != nil {
+        log.Fatal(err)
+      }
+
+      page.UserData = make(map[string] interface{})
+
+      if dataType == JSON {
+        err = json.Unmarshal(contents, &page.UserData)
+        if err != nil {
+          log.Fatal(err)
+        }
+      } else if dataType == YAML {
+        err = yaml.Unmarshal(contents, &page.UserData)
+        if err != nil {
+          log.Fatal(err)
+        }
+      }
+      break
+    }
+  }
+  return page.UserData
 }
 
 /*

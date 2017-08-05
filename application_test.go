@@ -18,7 +18,7 @@ func TestApplication(t *testing.T) {
 
   app.Load("test/fixtures/mock-app", nil)
 
-  expected := 4
+  expected := 5
   if len(app.Files) != expected {
     t.Errorf("Unexpected number of files %d", len(app.Files))  
   }
