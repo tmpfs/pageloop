@@ -2,7 +2,7 @@ package blocks
 
 import (
   "os"
-  "fmt"
+  //"fmt"
   "path/filepath"
   "io/ioutil"
 )
@@ -41,18 +41,14 @@ func (app *Application) Load(path string) Application {
     var file File
 
     if mode.IsDir() {
-      file = File{directory: true}
-      fmt.Println(path)
-      fmt.Println(stat)
+      file = File{path: path, directory: true, info: stat}
     } else if mode.IsRegular() {
       file = File{path: path, info: stat}
-
       bytes, err := ioutil.ReadFile(path)
       if err != nil {
         return err
       }
       file.data = bytes
-      fmt.Println(path)
     }
     return nil
   })
