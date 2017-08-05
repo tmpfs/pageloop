@@ -12,6 +12,8 @@ func TestApplication(t *testing.T) {
   if app.Title == "" {
     t.Errorf("Unexpected empty application title")
   }
+
+  app.Load("test/fixtures/mock-app")
 }
 
 func TestApplicationJson(t *testing.T) {
