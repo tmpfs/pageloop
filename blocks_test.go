@@ -65,7 +65,7 @@ func TestJson(t *testing.T) {
 
   os.Stdout.Write(append(b, 0x0A))
 
-  expected := `{"doctype":"\u003c!doctype html\u003e","blocks":[{"title":"Mock Title","content":"Mock Content"}],"data":null}`
+  expected := `{"doctype":"\u003c!doctype html\u003e","data":null,"blocks":[{"title":"Mock Title","content":"Mock Content"}]}`
 
   if string(b) != expected {
     t.Errorf("unexpected JSON output")  
