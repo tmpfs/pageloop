@@ -5,7 +5,9 @@ package blocks
 
 import(
   "os"
-  // . "fmt"
+  "log"
+  "bytes"
+  "golang.org/x/net/html"
 )
 
 const (
@@ -54,6 +56,38 @@ type MarkdownBlock struct {
 
 type HtmlBlock struct {
   Block
+}
+
+/*
+  Parse blocks from the file data associated with this page.
+*/
+func (p *Page) Parse() Page {
+  r := bytes.NewBuffer(p.file.data)
+  doc, err := html.Parse(r)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  var f func(*html.Node)
+  f = func(n *html.Node) {
+    for c := n.FirstChild; c != nil; c = c.NextSibling {
+      log.Printf("type: %d\n", c.Type)
+      if c.Type == html.ElementNode {
+        log.Println(c.Data)
+        log.Println(c.Attr)
+        for _, attrs := range c.Attr {
+          if attrs.Key == "id" {
+            log.Println("got id attribute")
+          }
+        }
+      }
+
+      f(c)
+    }
+  }
+
+  f(doc)
+  return *p
 }
 
 func (p *Page) RemoveBlock(b Block) Page {

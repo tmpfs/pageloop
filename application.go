@@ -67,6 +67,7 @@ func (app *Application) Merge() Application {
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {
       app.GetUserData(&page)
+      app.Pages[index].Parse()
       app.Pages[index] = page
     }
   }
