@@ -3,6 +3,7 @@ package blocks
 import (
   "os"
   "log"
+  "bytes"
   "strings"
   "path/filepath"
   "io/ioutil"
@@ -74,6 +75,39 @@ func (app *Application) Merge() Application {
 }
 
 func (app *Application) GetUserData(page *Page) map[string] interface{} {
+  page.UserData = make(map[string] interface{})
+
+  // frontmatter
+  if FRONTMATTER.Match(page.file.data) {
+    var read int = 4
+    var lines [][]byte = bytes.Split(page.file.data, []byte("\n"))
+    var frontmatter [][]byte
+    // strip leading ---
+    lines = lines[1:]
+    for _, line := range lines {
+      read += len(line) + 1
+      if FRONTMATTER_END.Match(line) {
+        break 
+      }
+      frontmatter = append(frontmatter, line)
+    }
+
+    if len(frontmatter) > 0 {
+      fm := bytes.Join(frontmatter, []byte("\n"))
+      err := yaml.Unmarshal(fm, &page.UserData)
+      if err != nil {
+        log.Fatal(err)
+      }
+
+      // strip frontmatter content from file data after parsing
+      page.file.data = page.file.data[read:]
+
+    }
+
+    return page.UserData
+  }
+
+  // external files
   dir, name := filepath.Split(page.file.Path)
   for _, dataType := range types {
     dataPath := TEMPLATE_FILE.ReplaceAllString(name, dataType)
@@ -90,8 +124,6 @@ func (app *Application) GetUserData(page *Page) map[string] interface{} {
       if err != nil {
         log.Fatal(err)
       }
-
-      page.UserData = make(map[string] interface{})
 
       if dataType == JSON {
         err = json.Unmarshal(contents, &page.UserData)
