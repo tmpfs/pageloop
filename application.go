@@ -3,13 +3,16 @@ package blocks
 import (
   "os"
   //"fmt"
+  "regexp"
   "path/filepath"
   "io/ioutil"
 )
 
+var templateFile = regexp.MustCompile(`\.html?$`)
+
 type File struct {
-  path string `json:"path"`
-  directory bool `json:"directory"`
+  Path string `json:"path"`
+  Directory bool `json:"directory"`
   info os.FileInfo
   data []byte
 }
@@ -41,15 +44,23 @@ func (app *Application) Load(path string) Application {
     var file File
 
     if mode.IsDir() {
-      file = File{path: path, directory: true, info: stat}
+      file = File{Path: path, Directory: true, info: stat}
     } else if mode.IsRegular() {
-      file = File{path: path, info: stat}
+      file = File{Path: path, info: stat}
       bytes, err := ioutil.ReadFile(path)
       if err != nil {
         return err
       }
       file.data = bytes
     }
+
+    if templateFile.MatchString(path) {
+      page := Page{file: file}
+      app.Pages = append(app.Pages, page)
+    } else {
+      app.Files = append(app.Files, file)
+    }
+
     return nil
   })
 

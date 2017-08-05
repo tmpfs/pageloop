@@ -12,6 +12,7 @@ type Page struct {
   DocType string `json:"doctype"`
   UserData map[string] interface{} `json:"data"`
   Blocks []Block  `json:"blocks"`
+  file File
 }
 
 type Block struct {

@@ -1,7 +1,7 @@
 package blocks
 
 import (
-  "os"
+  //"os"
   "testing"
   "encoding/json"
 )
@@ -63,7 +63,7 @@ func TestJson(t *testing.T) {
     t.Errorf("%s", err)
   }
 
-  os.Stdout.Write(append(b, 0x0A))
+  //os.Stdout.Write(append(b, 0x0A))
 
   expected := `{"doctype":"\u003c!doctype html\u003e","data":null,"blocks":[{"title":"Mock Title","content":"Mock Content"}]}`
 
