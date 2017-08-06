@@ -5,6 +5,9 @@
 package vdom
   
 import(
+  //"os"
+  "io"
+  "fmt"
   //"log"
   "bytes"
   "strconv"
@@ -52,10 +55,11 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
 // Insert a child node before another node.
 func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild * html.Node) error {
   var err error
-  _, id := vdom.GetAttr(oldChild, idAttribute)
-  vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id.Val})
+  //_, id := vdom.GetAttr(oldChild, idAttribute)
+  id := vdom.GetId(oldChild)
+  vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id})
   parent.InsertBefore(newChild, oldChild)
-  //vdom.Map[id] = newChild
+  vdom.Map[id] = newChild
   err = vdom.adjustSiblings(newChild, true)
   return err
 }
@@ -71,6 +75,44 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
   delete(vdom.Map, id)
   parent.RemoveChild(node)
   return err
+}
+
+// Diff / Patch functions
+
+type ByteWriter struct {
+  data []byte  
+}
+
+func (w *ByteWriter) Write(p []byte) (n int, err error) {
+  w.data = append(w.data, p...)
+  return len(p), nil
+}
+
+func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
+  err := vdom.AppendChild(parent, node)
+  if err != nil {
+    return nil, err
+  }
+  // TODO: get element data
+  var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
+  // write rendered data to buffer
+  var data []byte
+  fmt.Println("printing render data")
+  w := ByteWriter{}
+  err = html.Render(w, node)
+  if err != nil {
+    return nil, err
+  }
+
+  // err = html.Render(os.Stdout, node)
+
+  _, e := io.ReadFull(w, data)
+  if e != nil {
+    return nil, e
+  }
+  fmt.Println("len", len(data))
+  fmt.Println(data)
+  return &op, err
 }
 
 // Extensions to the basic API

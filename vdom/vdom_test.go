@@ -57,6 +57,12 @@ func TestVdom(t *testing.T) {
     t.Error(err)
   }
 
+  div := dom.CreateElement("div")
+  err = dom.InsertBefore(body, div, script)
+  if err != nil {
+    t.Error(err)
+  }
+
   err = html.Render(os.Stdout, dom.Document)
   if err != nil {
     t.Error(err)
@@ -80,10 +86,22 @@ func TestDiff(t *testing.T) {
   }
 
   head := dom.Document.FirstChild.NextSibling.FirstChild
+  body := head.NextSibling.NextSibling
+
+  div := dom.CreateElement("div")
+  diff, err := dom.AppendDiff(body, div)
+  if err != nil {
+    t.Error(err)
+  }
+
+  log.Println(diff)
+
+  /*
   d := Diff{
     Operation: APPEND_OP,
     Element: dom.GetId(head),
     Data: []byte(`<link />`)}
   log.Printf("%#v\n", d)
+  */
 }
 
