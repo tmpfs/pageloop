@@ -8,6 +8,7 @@ import (
   "golang.org/x/net/html"
 )
 
+
 func TestVdom(t *testing.T) {
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
@@ -61,3 +62,28 @@ func TestVdom(t *testing.T) {
     t.Error(err)
   }
 }
+
+func TestDiff(t *testing.T) {
+  file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
+  if err != nil {
+    log.Fatal(err)
+  }
+  log.Println(string(file))
+
+  dom, err := Parse(file)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  if dom == nil {
+    t.Errorf("Expected vdom, got nil")
+  }
+
+  head := dom.Document.FirstChild.NextSibling.FirstChild
+  d := Diff{
+    Operation: APPEND_OP,
+    Element: dom.GetId(head),
+    Data: []byte(`<link />`)}
+  log.Printf("%#v\n", d)
+}
+

@@ -12,7 +12,34 @@ const (
   APPEND_OP = iota
   INSERT_OP
   REMOVE_OP
+  ATTR_OP
+  TEXT_OP
 )
+
+// Diff is a list of operations on the virtual DOM.
+type Diff struct {
+  // Operation constant
+  Operation int
+
+  // Id of the primary target element.
+  // 
+  // For the append operation it is the parent to append to.
+  // For the insert operation it is the old child node (parent is inferred).
+  // For the remove operation it is the node to remove.
+  // For the attr operation it is the target node.
+  // For the text operation it is the parent element.
+  Element string
+
+  // HTML fragment data (append and insert only) or data for the text operation.
+  Data []byte
+
+  // For the text operation an index into the element's child nodes to use 
+  // to set the text.
+  Index int
+
+  // A key value pair when setting attributes.
+  Attr html.Attribute
+}
 
 type Vdom struct {
   Document *html.Node
@@ -101,8 +128,8 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
     return err
   }
 
-  _, id := vdom.GetAttr(node, idAttribute)
-  delete(vdom.Map, id.Val)
+  id := vdom.GetId(node)
+  delete(vdom.Map, id)
   parent.RemoveChild(node)
   return err
 }
@@ -139,11 +166,14 @@ func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
   }
 }
 
+func (vdom *Vdom) GetId(node *html.Node) string {
+  return vdom.GetAttrValue(node, idAttribute)
+}
+
 var idAttribute string  = "data-id"
 
 func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
-  _, attr := vdom.GetAttr(node, idAttribute)
-  id := attr.Val
+  id := vdom.GetId(node)
   return GetIntSlice(id)
 }
 
