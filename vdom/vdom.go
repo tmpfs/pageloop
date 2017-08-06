@@ -1,3 +1,7 @@
+// Virtual DOM implementation wrapping the parse tree 
+// returned from x/net/html.
+//
+// Able to diff and patch using a collection of diff operations.
 package vdom
   
 import(
@@ -17,6 +21,12 @@ const (
 )
 
 var idAttribute string  = "data-id"
+
+// The virtual DOM.
+type Vdom struct {
+  Document *html.Node
+  Map map[string] *html.Node
+}
 
 // Diff is a list of operations on the virtual DOM.
 type Diff struct {
@@ -46,12 +56,6 @@ type Diff struct {
 // Patch is a slice of diff operations.
 type Patch struct {
   Diffs []Diff
-}
-
-// The virtual DOM.
-type Vdom struct {
-  Document *html.Node
-  Map map[string] *html.Node
 }
 
 // Basic DOM API wrapper functions
