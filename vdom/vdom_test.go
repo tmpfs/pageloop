@@ -25,6 +25,7 @@ func TestVdom(t *testing.T) {
   }
 
   head := dom.Document.FirstChild.NextSibling.FirstChild
+  body := head.NextSibling.NextSibling
 
   l1 := dom.CreateElement("link")
   err = dom.AppendChild(head, l1)
@@ -49,15 +50,17 @@ func TestVdom(t *testing.T) {
   meta := dom.CreateElement("meta")
   dom.InsertBefore(head, meta, l2)
 
-  bar := dom.CreateElement("bar")
-  err = dom.AppendChild(meta, bar)
-  log.Println("after bar element", err)
+  script := dom.CreateElement("script")
+  err = dom.AppendChild(body, script)
   if err != nil {
     t.Error(err)
   }
 
   log.Println("rendering")
-  html.Render(os.Stdout, dom.Document)
+  err = html.Render(os.Stdout, dom.Document)
+  if err != nil {
+    t.Error(err)
+  }
 
   //log.Printf("%v", dom.Map)
 
