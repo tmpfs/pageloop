@@ -84,13 +84,13 @@ func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild 
   vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id.Val})
   parent.InsertBefore(newChild, oldChild)
   //vdom.Map[id] = newChild
-  err = vdom.AdjustSiblings(newChild, true)
+  err = vdom.adjustSiblings(newChild, true)
   return err
 }
 
 // Remove a node.
 func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
-  var err error = vdom.AdjustSiblings(node, false)
+  var err error = vdom.adjustSiblings(node, false)
   if err != nil {
     return err
   }
@@ -157,7 +157,7 @@ func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
 
 // Private vdom methods
 
-func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
+func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
     oldId := vdom.GetAttrValue(c, idAttribute)
     ids, err := vdom.FindId(c)
