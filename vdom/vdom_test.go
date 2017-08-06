@@ -56,11 +56,8 @@ func TestVdom(t *testing.T) {
     t.Error(err)
   }
 
-  log.Println("rendering")
   err = html.Render(os.Stdout, dom.Document)
   if err != nil {
     t.Error(err)
   }
-
-  //log.Printf("%v", dom.Map)
 }
