@@ -1,7 +1,7 @@
 package vdom
   
 import(
-  "log"
+  //"log"
   "bytes"
   "strconv"
   "strings"
@@ -32,13 +32,12 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
   if parent.LastChild != nil {
-    log.Println(parent.LastChild)
-    ids, err = FindId(FindLastChildElement(parent))
+    ids, err = vdom.FindId(FindLastChildElement(parent))
     // increment for the new id
     ids[len(ids) - 1]++
   } else {
     // TODO: test adding to empty parent
-    ids, err = FindId(parent)
+    ids, err = vdom.FindId(parent)
     // now the new first child
     ids = append(ids, 0)
   }
@@ -46,11 +45,26 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
     return err
   }
   id := GetIdentifier(ids)
-  log.Println("ID: ", id)
-  //node.Attr = append(node.Attr, html.Attribute{Key: idAttribute, Val: id})
   vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
-  log.Println(parent.LastChild)
+  vdom.Map[id] = node
+  return err
+}
+
+
+func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
+  var ids []int
+  var err error
+  for c := node.NextSibling; c != nil; c = c.NextSibling {
+    ids, err = vdom.FindId(c)
+    ids[len(ids) - 1]--
+    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: GetIdentifier(ids)})
+  }
+
+  _, id := vdom.GetAttr(node, idAttribute)
+  delete(vdom.Map, id.Val)
+
+  parent.RemoveChild(node)
   return err
 }
 
@@ -59,19 +73,20 @@ func (vdom *Vdom) CreateElement(tagName string) *html.Node {
   return &node
 }
 
-func (vdom *Vdom) GetAttr(node *html.Node, key string) *html.Attribute {
-  for _, attr := range node.Attr {
+func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
+  for index, attr := range node.Attr {
     if attr.Key == key {
-      return &attr
+      return index, &attr
     }
   }
-  return nil
+  return -1, nil
 }
 
 func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
-  existing := vdom.GetAttr(node, attr.Key)
+  index, existing := vdom.GetAttr(node, attr.Key)
   if existing != nil {
-    existing.Val = attr.Val 
+    existing.Val = attr.Val
+    node.Attr[index] = *existing
   } else {
     node.Attr = append(node.Attr, attr)
   }
@@ -79,15 +94,10 @@ func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
 
 var idAttribute string  = "data-id"
 
-func FindId(node *html.Node) ([]int, error) {
-  var id string
-  for _, attr := range node.Attr {
-    log.Println(attr)
-    if attr.Key == idAttribute {
-      id = attr.Val
-    }
-  }
-  log.Println("id: ", id)
+func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
+  _, attr := vdom.GetAttr(node, idAttribute)
+  id := attr.Val
+  //log.Println("id: ", id)
   return GetIntSlice(id)
 }
 
@@ -131,13 +141,6 @@ func Parse(b []byte) (*Vdom, error) {
       if c.Type == html.ElementNode {
         list := append(ids, i)
         id = GetIdentifier(list)
-        //log.Printf("id: %s", id)
-        mock, err := GetIntSlice(id)
-        if err != nil {
-          log.Fatal(err)
-        }
-        log.Println(mock)
-        log.Println(len(mock))
         dom.Map[id] = c
         attr := html.Attribute{Key: idAttribute, Val: id}
         c.Attr = append(c.Attr, attr)

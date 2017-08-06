@@ -30,10 +30,19 @@ func TestVdom(t *testing.T) {
 
   head := dom.Document.FirstChild.NextSibling.FirstChild
 
-  err = dom.AppendChild(head, dom.CreateElement("link"))
+  l1 := dom.CreateElement("link")
+  err = dom.AppendChild(head, l1)
   if err != nil {
     t.Error(err)
   }
+
+  l2 := dom.CreateElement("link")
+  err = dom.AppendChild(head, l2)
+  if err != nil {
+    t.Error(err)
+  }
+
+  dom.RemoveChild(head, l1)
 
   //log.Printf("%v", dom.Map)
 
