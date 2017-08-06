@@ -55,17 +55,6 @@ func FindLastChildElement(parent *html.Node) *html.Node {
   return nil
 }
 
-/*
-func FindPrevSiblingElement(parent *html.Node) *html.Node {
-  for c := parent.LastChild; c != nil; c = c.PrevSibling {
-    if c.Type == html.ElementNode {
-      return c
-    }
-  }
-  return nil
-}
-*/
-
 func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
