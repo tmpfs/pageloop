@@ -56,7 +56,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
   if parent.LastChild != nil {
-    ids, err = vdom.FindId(FindLastChildElement(parent))
+    ids, err = vdom.FindId(findLastChildElement(parent))
     if err != nil {
       return err
     }
@@ -71,7 +71,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   if err != nil {
     return err
   }
-  id := GetIdentifier(ids)
+  id := getIdentifier(ids)
   vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
   vdom.Map[id] = node
@@ -151,7 +151,7 @@ func (vdom *Vdom) GetId(node *html.Node) string {
 // Get the identifier for a node as a slice of integers.
 func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
   id := vdom.GetId(node)
-  return GetIntSlice(id)
+  return getIntSlice(id)
 }
 
 // Private vdom methods
@@ -171,7 +171,7 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
     } else {
       ids[len(ids) - 1]--
     }
-    newId := GetIdentifier(ids)
+    newId := getIdentifier(ids)
     vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
     delete(vdom.Map, oldId)
     vdom.Map[newId] = c
@@ -198,7 +198,7 @@ func Parse(b []byte) (*Vdom, error) {
     for c := n.FirstChild; c != nil; c = c.NextSibling {
       if c.Type == html.ElementNode {
         list := append(ids, i)
-        id = GetIdentifier(list)
+        id = getIdentifier(list)
         dom.Map[id] = c
         dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
         f(c, list)
@@ -213,7 +213,9 @@ func Parse(b []byte) (*Vdom, error) {
 }
 
 // Helper functions
-func GetIntSlice(id string) ([]int, error) {
+
+// Splits a string id to a slice of integers.
+func getIntSlice(id string) ([]int, error) {
   var out []int
   parts := strings.Split(id, ".")
   for _, num := range parts {
@@ -226,7 +228,8 @@ func GetIntSlice(id string) ([]int, error) {
   return out, nil
 }
 
-func GetIdentifier(ids []int) string {
+// Converts a slice of integers to a string.
+func getIdentifier(ids []int) string {
   id := ""
   for index, num := range ids {
     if index > 0 {
@@ -237,7 +240,9 @@ func GetIdentifier(ids []int) string {
   return id
 }
 
-func FindLastChildElement(parent *html.Node) *html.Node {
+// Find the previous sibling that is of type element 
+// starting with the last child of the parent.
+func findLastChildElement(parent *html.Node) *html.Node {
   for c := parent.LastChild; c != nil; c = c.PrevSibling {
     if c.Type == html.ElementNode {
       return c
