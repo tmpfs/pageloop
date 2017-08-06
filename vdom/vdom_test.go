@@ -9,7 +9,6 @@ import (
 )
 
 func TestVdom(t *testing.T) {
-  log.Println("testing")
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
     log.Fatal(err)
@@ -24,9 +23,6 @@ func TestVdom(t *testing.T) {
   if dom == nil {
     t.Errorf("Expected vdom, got nil")
   }
-
-  //log.Println(dom.Document.FirstChild)
-  //log.Println(dom.Document.FirstChild.NextSibling.FirstChild)
 
   head := dom.Document.FirstChild.NextSibling.FirstChild
 
@@ -48,19 +44,21 @@ func TestVdom(t *testing.T) {
     t.Error(err)
   }
 
-  /*
-  a := dom.CreateElement("a")
-  err = dom.AppendChild(l2, a)
+  dom.RemoveChild(head, l1)
+
+  meta := dom.CreateElement("meta")
+  dom.InsertBefore(head, meta, l2)
+
+  bar := dom.CreateElement("bar")
+  err = dom.AppendChild(meta, bar)
+  log.Println("after bar element", err)
   if err != nil {
     t.Error(err)
   }
-  */
 
-  dom.RemoveChild(head, l1)
-
-  dom.InsertBefore(head, dom.CreateElement("meta"), l2)
+  log.Println("rendering")
+  html.Render(os.Stdout, dom.Document)
 
   //log.Printf("%v", dom.Map)
 
-  html.Render(os.Stdout, dom.Document)
 }

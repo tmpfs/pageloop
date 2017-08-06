@@ -1,7 +1,7 @@
 package vdom
   
 import(
-  //"log"
+  "log"
   "bytes"
   "strconv"
   "strings"
@@ -40,8 +40,12 @@ func FindPrevSiblingElement(parent *html.Node) *html.Node {
 func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
+  log.Println("appending node", node.Data)
   if parent.LastChild != nil {
     ids, err = vdom.FindId(FindLastChildElement(parent))
+    if err != nil {
+      return err
+    }
     // increment for the new id
     ids[len(ids) - 1]++
   } else {
@@ -55,6 +59,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   }
   id := GetIdentifier(ids)
   vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
+  log.Println("appending to DOM")
   parent.AppendChild(node)
   vdom.Map[id] = node
   return err
