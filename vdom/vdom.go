@@ -71,7 +71,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   if err != nil {
     return err
   }
-  id := getIdentifier(ids)
+  id := intSliceToString(ids)
   vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
   vdom.Map[id] = node
@@ -151,7 +151,7 @@ func (vdom *Vdom) GetId(node *html.Node) string {
 // Get the identifier for a node as a slice of integers.
 func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
   id := vdom.GetId(node)
-  return getIntSlice(id)
+  return stringToIntSlice(id)
 }
 
 // Private vdom methods
@@ -171,7 +171,7 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
     } else {
       ids[len(ids) - 1]--
     }
-    newId := getIdentifier(ids)
+    newId := intSliceToString(ids)
     vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
     delete(vdom.Map, oldId)
     vdom.Map[newId] = c
@@ -198,7 +198,7 @@ func Parse(b []byte) (*Vdom, error) {
     for c := n.FirstChild; c != nil; c = c.NextSibling {
       if c.Type == html.ElementNode {
         list := append(ids, i)
-        id = getIdentifier(list)
+        id = intSliceToString(list)
         dom.Map[id] = c
         dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
         f(c, list)
@@ -215,7 +215,7 @@ func Parse(b []byte) (*Vdom, error) {
 // Helper functions
 
 // Splits a string id to a slice of integers.
-func getIntSlice(id string) ([]int, error) {
+func stringToIntSlice(id string) ([]int, error) {
   var out []int
   parts := strings.Split(id, ".")
   for _, num := range parts {
@@ -229,7 +229,7 @@ func getIntSlice(id string) ([]int, error) {
 }
 
 // Converts a slice of integers to a string.
-func getIdentifier(ids []int) string {
+func intSliceToString(ids []int) string {
   id := ""
   for index, num := range ids {
     if index > 0 {
