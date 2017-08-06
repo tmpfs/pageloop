@@ -88,6 +88,9 @@ func (p *Page) Parse() error {
 
   var addNode func (*html.Node)
   addNode = func(c *html.Node) {
+    if current.Fragment {
+      log.Println("adding fragment node", c.Data)
+    }
     current.Nodes = append(current.Nodes, c)
   }
 
@@ -102,6 +105,7 @@ func (p *Page) Parse() error {
   depth := 0
   f = func(n *html.Node) {
     for c := n.FirstChild; c != nil; c = c.NextSibling {
+      log.Println("depth", depth)
       if c.Type == html.DoctypeNode {
         p.DocType = c.Data
         addNode(c)
@@ -129,13 +133,16 @@ func (p *Page) Parse() error {
             // create a new fragment block
             current = Block{Fragment: true}
           default: 
+            log.Println(c.Data)
+            addNode(c)
             depth++
             f(c)
+            depth--
         }
       } else {
+        addNode(c)
       }
     }
-    depth--
   }
 
   f(doc)
@@ -146,7 +153,6 @@ func (p *Page) Parse() error {
     d := html.Node{Type: html.DocumentNode}
     fmt.Println("render block", block.Fragment)
     for _, c := range block.Nodes {
-
       c.Parent = nil
       c.NextSibling = nil
       c.PrevSibling = nil
