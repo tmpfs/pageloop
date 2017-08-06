@@ -16,6 +16,8 @@ const (
   TEXT_OP
 )
 
+var idAttribute string  = "data-id"
+
 // Diff is a list of operations on the virtual DOM.
 type Diff struct {
   // Operation constant
@@ -46,15 +48,9 @@ type Vdom struct {
   Map map[string] *html.Node
 }
 
-func FindLastChildElement(parent *html.Node) *html.Node {
-  for c := parent.LastChild; c != nil; c = c.PrevSibling {
-    if c.Type == html.ElementNode {
-      return c
-    }
-  }
-  return nil
-}
+// Basic DOM API wrapper functions
 
+// Append a child node.
 func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
@@ -81,6 +77,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   return err
 }
 
+// Insert a child node before another node.
 func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild * html.Node) error {
   var err error
   _, id := vdom.GetAttr(oldChild, idAttribute)
@@ -90,6 +87,75 @@ func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild 
   err = vdom.AdjustSiblings(newChild, true)
   return err
 }
+
+// Remove a node.
+func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
+  var err error = vdom.AdjustSiblings(node, false)
+  if err != nil {
+    return err
+  }
+
+  id := vdom.GetId(node)
+  delete(vdom.Map, id)
+  parent.RemoveChild(node)
+  return err
+}
+
+// Extensions to the basic API
+
+// Create a new element.
+func (vdom *Vdom) CreateElement(tagName string) *html.Node {
+  node := html.Node{Type: html.ElementNode, Data: tagName}
+  return &node
+}
+
+// Get an Attribute.
+//
+// Returns the index of the attribute and a pointer to 
+// the attribute.
+func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
+  for index, attr := range node.Attr {
+    if attr.Key == key {
+      return index, &attr
+    }
+  }
+  return -1, nil
+}
+
+// Get the value of an attribute, that is `html.Attribute.Val`.
+func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
+  _, attr := vdom.GetAttr(node, key)
+  if attr != nil {
+    return attr.Val
+  }
+  return ""
+}
+
+// Set an Attribute.
+func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
+  index, existing := vdom.GetAttr(node, attr.Key)
+  if existing != nil {
+    existing.Val = attr.Val
+    node.Attr[index] = *existing
+  } else {
+    node.Attr = append(node.Attr, attr)
+  }
+}
+
+// Get the vdom identifier for a node.
+//
+// Extracted from the `data-id` attribute.
+func (vdom *Vdom) GetId(node *html.Node) string {
+  return vdom.GetAttrValue(node, idAttribute)
+}
+
+// Get the identifier for a node as a slice of integers.
+func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
+  id := vdom.GetId(node)
+  return GetIntSlice(id)
+}
+
+// Private vdom methods
 
 func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
@@ -111,85 +177,10 @@ func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
   return nil
 }
 
-func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
-  var err error = vdom.AdjustSiblings(node, false)
-  if err != nil {
-    return err
-  }
 
-  id := vdom.GetId(node)
-  delete(vdom.Map, id)
-  parent.RemoveChild(node)
-  return err
-}
-
-func (vdom *Vdom) CreateElement(tagName string) *html.Node {
-  node := html.Node{Type: html.ElementNode, Data: tagName}
-  return &node
-}
-
-func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
-  _, attr := vdom.GetAttr(node, key)
-  if attr != nil {
-    return attr.Val
-  }
-  return ""
-}
-
-func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
-  for index, attr := range node.Attr {
-    if attr.Key == key {
-      return index, &attr
-    }
-  }
-  return -1, nil
-}
-
-func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
-  index, existing := vdom.GetAttr(node, attr.Key)
-  if existing != nil {
-    existing.Val = attr.Val
-    node.Attr[index] = *existing
-  } else {
-    node.Attr = append(node.Attr, attr)
-  }
-}
-
-func (vdom *Vdom) GetId(node *html.Node) string {
-  return vdom.GetAttrValue(node, idAttribute)
-}
-
-var idAttribute string  = "data-id"
-
-func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
-  id := vdom.GetId(node)
-  return GetIntSlice(id)
-}
-
-func GetIntSlice(id string) ([]int, error) {
-  var out []int
-  parts := strings.Split(id, ".")
-  for _, num := range parts {
-    s, err := strconv.Atoi(num)
-    if err != nil {
-      return nil, err
-    }
-    out = append(out, s)
-  }
-  return out, nil
-}
-
-func GetIdentifier(ids []int) string {
-  id := ""
-  for index, num := range ids {
-    if index > 0 {
-      id += "."
-    }
-    id += strconv.Itoa(num)
-  }
-  return id
-}
-
+// Parse an HTML document assigning virtual dom identifiers.
+// Assigns each node a `data-id` attribute and adds entries 
+// to the vdom `Map` for fast node lookup.
 func Parse(b []byte) (*Vdom, error) {
   r := bytes.NewBuffer(b)
   doc, err := html.Parse(r)
@@ -219,3 +210,38 @@ func Parse(b []byte) (*Vdom, error) {
   f(doc, ids)
   return &dom, nil
 }
+
+// Helper functions
+func GetIntSlice(id string) ([]int, error) {
+  var out []int
+  parts := strings.Split(id, ".")
+  for _, num := range parts {
+    s, err := strconv.Atoi(num)
+    if err != nil {
+      return nil, err
+    }
+    out = append(out, s)
+  }
+  return out, nil
+}
+
+func GetIdentifier(ids []int) string {
+  id := ""
+  for index, num := range ids {
+    if index > 0 {
+      id += "."
+    }
+    id += strconv.Itoa(num)
+  }
+  return id
+}
+
+func FindLastChildElement(parent *html.Node) *html.Node {
+  for c := parent.LastChild; c != nil; c = c.PrevSibling {
+    if c.Type == html.ElementNode {
+      return c
+    }
+  }
+  return nil
+}
+
