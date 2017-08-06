@@ -2,6 +2,7 @@ package blocks
 
 import (
   //"os"
+  "fmt"
   "log"
   "testing"
   //"encoding/json"
@@ -35,5 +36,7 @@ func TestApplication(t *testing.T) {
   log.Println(app.Pages[0].file.Path)
   log.Println(app.Pages[0].UserData)
 
+  fmt.Println("--- render result ---")
+  fmt.Println()
   app.Render(&app.Pages[0])
 }

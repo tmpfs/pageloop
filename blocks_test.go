@@ -26,12 +26,13 @@ func TestBlock(t *testing.T) {
     t.Errorf("Unexpected block length %d expected %d after add", p.Length(), 1)
   }
 
+  /*
   p.RemoveBlock(b)
 
   if p.Length() != 0 {
     t.Errorf("Unexpected block slice length after remove %d", p.Length())
   }
-
+*/
   b1 := Block{Title: "Mock 1"}
   b2 := Block{Title: "Mock 2"}
   b3 := Block{Title: "Mock 3"}
@@ -40,19 +41,19 @@ func TestBlock(t *testing.T) {
   p.AddBlock(b2)
   p.AddBlock(b3)
 
-  p.RemoveBlock(b2)
+  //p.RemoveBlock(b2)
 
-  if p.Length() != 2 {
-    t.Errorf("Unexpected block slice length after remove %d", p.Length())
-  }
+  //if p.Length() != 2 {
+    //t.Errorf("Unexpected block slice length after remove %d", p.Length())
+  //}
 
-  if p.Blocks[0] != b1 {
-    t.Errorf("Unexpected block %s at index 0", p.Blocks[0])
-  }
+  //if p.Blocks[0] != b1 {
+    //t.Errorf("Unexpected block %s at index 0", p.Blocks[0])
+  //}
 
-  if p.Blocks[1] != b3 {
-    t.Errorf("Unexpected block %s at index 1", p.Blocks[1])
-  }
+  //if p.Blocks[1] != b3 {
+    //t.Errorf("Unexpected block %s at index 1", p.Blocks[1])
+  //}
 }
 
 func TestJson(t *testing.T) {
