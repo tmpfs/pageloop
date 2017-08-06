@@ -43,6 +43,7 @@ type Diff struct {
   Attr html.Attribute
 }
 
+// The virtual DOM.
 type Vdom struct {
   Document *html.Node
   Map map[string] *html.Node
@@ -142,9 +143,7 @@ func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
   }
 }
 
-// Get the vdom identifier for a node.
-//
-// Extracted from the `data-id` attribute.
+// Get the vdom identifier for an element extracted from the `data-id` attribute.
 func (vdom *Vdom) GetId(node *html.Node) string {
   return vdom.GetAttrValue(node, idAttribute)
 }
@@ -157,6 +156,9 @@ func (vdom *Vdom) FindId(node *html.Node) ([]int, error) {
 
 // Private vdom methods
 
+// Increments or decrements the identifiers for siblings that appear
+// after the target node. Used when modifying the DOM to keep identifiers 
+// sequential.
 func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
     oldId := vdom.GetAttrValue(c, idAttribute)
@@ -179,7 +181,7 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
 
 
 // Parse an HTML document assigning virtual dom identifiers.
-// Assigns each node a `data-id` attribute and adds entries 
+// Assigns each element a `data-id` attribute and adds entries 
 // to the vdom `Map` for fast node lookup.
 func Parse(b []byte) (*Vdom, error) {
   r := bytes.NewBuffer(b)
@@ -198,8 +200,7 @@ func Parse(b []byte) (*Vdom, error) {
         list := append(ids, i)
         id = GetIdentifier(list)
         dom.Map[id] = c
-        attr := html.Attribute{Key: idAttribute, Val: id}
-        c.Attr = append(c.Attr, attr)
+        dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
         f(c, list)
         i++
       }
