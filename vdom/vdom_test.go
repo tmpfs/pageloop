@@ -25,7 +25,9 @@ func TestVdom(t *testing.T) {
     t.Errorf("Expected vdom, got nil")
   }
 
-  log.Printf("%v", dom.Map)
+  dom.AppendChild(dom.Document.FirstChild.FirstChild, dom.CreateElement("link"))
+
+  //log.Printf("%v", dom.Map)
 
   html.Render(os.Stdout, dom.Document)
 }
