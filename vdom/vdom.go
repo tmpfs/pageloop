@@ -6,7 +6,7 @@ package vdom
   
 import(
   //"os"
-  "io"
+  //"io"
   "fmt"
   //"log"
   "bytes"
@@ -80,12 +80,19 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 // Diff / Patch functions
 
 type ByteWriter struct {
-  data []byte  
+  data *[]byte  
 }
 
-func (w *ByteWriter) Write(p []byte) (n int, err error) {
-  w.data = append(w.data, p...)
+func (w ByteWriter) Write(p []byte) (n int, err error) {
+  fmt.Println("byte writer write called", string(p))
+  data := append(*w.data, p...)
+  w.data = &data
+  fmt.Println("byte writer write called", string(*w.data))
   return len(p), nil
+}
+
+func (w ByteWriter) ReadFull() *[]byte {
+  return w.data
 }
 
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
@@ -93,25 +100,20 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   if err != nil {
     return nil, err
   }
-  // TODO: get element data
+
   var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
+
   // write rendered data to buffer
   var data []byte
-  fmt.Println("printing render data")
-  w := ByteWriter{}
+  w := ByteWriter{data: &data}
+  //w := bytes.NewBuffer(data)
   err = html.Render(w, node)
   if err != nil {
     return nil, err
   }
 
-  // err = html.Render(os.Stdout, node)
-
-  _, e := io.ReadFull(w, data)
-  if e != nil {
-    return nil, e
-  }
   fmt.Println("len", len(data))
-  fmt.Println(data)
+  fmt.Println(w.ReadFull())
   return &op, err
 }
 
