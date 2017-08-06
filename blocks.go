@@ -61,13 +61,17 @@ type HtmlBlock struct {
 /*
   Parse blocks from the file data associated with this page.
 */
-func (p *Page) Parse() Page {
+func (p *Page) Parse() error {
   r := bytes.NewBuffer(p.file.data)
+
+  /*
   doc, err := html.Parse(r)
   if err != nil {
     log.Fatal(err)
   }
+  */
 
+  /*
   var f func(*html.Node)
   f = func(n *html.Node) {
     for c := n.FirstChild; c != nil; c = c.NextSibling {
@@ -86,8 +90,54 @@ func (p *Page) Parse() Page {
     }
   }
 
-  f(doc)
-  return *p
+  */
+
+  z := html.NewTokenizer(r)
+  depth := 0
+  doc := html.Node{Type: html.DocumentNode}
+
+  var parent html.Node  = doc
+  var current []html.Node
+  var node html.Node
+
+  // this way we get the doctype if we call Parse()
+  // the doctype is dropped during parsing and we only
+  // have the node parse tree
+  for {
+    tt := z.Next()
+    token := z.Token()
+    log.Printf("%#v", token)
+    log.Printf("depth %d", depth)
+    switch tt {
+      case html.ErrorToken:
+        return z.Err()
+      case html.DoctypeToken:
+        p.DocType = token.Data
+        log.Printf("doctype %s\n", p.DocType)
+      case html.TextToken:
+        if depth > 0 {
+          node = html.Node{Type: html.TextNode, Parent: &parent}
+        }
+      case html.StartTagToken, html.EndTagToken:
+        tn, _ := z.TagName()
+        if tt == html.StartTagToken {
+          node = html.Node{Type: html.ElementNode, Parent: &parent, Data: name}
+          current = append(current, node)
+          nextParent = node
+          depth++
+        } else {
+          depth--
+        }
+    }
+
+    parent = nextParent
+
+    log.Printf("%#v", node)
+  }
+
+  //f(doc)
+
+  return nil
 }
 
 func (p *Page) RemoveBlock(b Block) Page {

@@ -67,11 +67,10 @@ func (app *Application) Merge() Application {
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {
       app.GetUserData(&page)
-      app.Pages[index].Parse()
       app.Pages[index] = page
+      app.Pages[index].Parse()
     }
   }
-
   return *app
 }
 
@@ -99,12 +98,9 @@ func (app *Application) GetUserData(page *Page) map[string] interface{} {
       if err != nil {
         log.Fatal(err)
       }
-
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
-
     }
-
     return page.UserData
   }
 
