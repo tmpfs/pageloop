@@ -13,7 +13,7 @@ import(
 )
 
 const (
-  HTML5 = "<!doctype html>"
+  HTML5 = "html"
 )
 
 type Application struct {
@@ -51,31 +51,7 @@ type Block struct {
   Nodes []*html.Node
 }
 
-type BlockNode interface {
-  SetName(name string)
-}
-
-func (b *Block) SetName(name string) {
-  b.Name = name
-}
-
-/*
-type TextBlock struct {
-  Block
-}
-
-type MarkdownBlock struct {
-  Block
-}
-
-type HtmlBlock struct {
-  Block
-}
-*/
-
-/*
-  Parse blocks from the file data associated with this page.
-*/
+// Parse blocks from the file data associated with a page.
 func (p *Page) Parse() error {
   r := bytes.NewBuffer(p.file.data)
 
