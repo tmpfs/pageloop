@@ -70,12 +70,14 @@ func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild 
   _, id := vdom.GetAttr(oldChild, idAttribute)
   vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id.Val})
   parent.InsertBefore(newChild, oldChild)
+  //vdom.Map[id] = newChild
   err = vdom.AdjustSiblings(newChild, true)
   return err
 }
 
 func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
+    oldId := vdom.GetAttrValue(c, idAttribute)
     ids, err := vdom.FindId(c)
     if err != nil {
       return err
@@ -85,7 +87,10 @@ func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
     } else {
       ids[len(ids) - 1]--
     }
-    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: GetIdentifier(ids)})
+    newId := GetIdentifier(ids)
+    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
+    delete(vdom.Map, oldId)
+    vdom.Map[newId] = c
   }
   return nil
 }
@@ -98,7 +103,6 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
   _, id := vdom.GetAttr(node, idAttribute)
   delete(vdom.Map, id.Val)
-
   parent.RemoveChild(node)
   return err
 }
@@ -106,6 +110,14 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 func (vdom *Vdom) CreateElement(tagName string) *html.Node {
   node := html.Node{Type: html.ElementNode, Data: tagName}
   return &node
+}
+
+func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
+  _, attr := vdom.GetAttr(node, key)
+  if attr != nil {
+    return attr.Val
+  }
+  return ""
 }
 
 func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {

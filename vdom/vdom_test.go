@@ -63,5 +63,4 @@ func TestVdom(t *testing.T) {
   }
 
   //log.Printf("%v", dom.Map)
-
 }
