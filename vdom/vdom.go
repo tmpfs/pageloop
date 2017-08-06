@@ -19,8 +19,38 @@ type Vdom struct {
   Map map[string] *html.Node
 }
 
-func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) {
+func FindLastChildElement(parent *html.Node) *html.Node {
+  for c := parent.LastChild; c != nil; c = c.PrevSibling {
+    if c.Type == html.ElementNode {
+      return c
+    }
+  }
+  return nil
+}
+
+func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
+  var ids []int
+  var err error
+  if parent.LastChild != nil {
+    log.Println(parent.LastChild)
+    ids, err = FindId(FindLastChildElement(parent))
+    // increment for the new id
+    ids[len(ids) - 1]++
+  } else {
+    // TODO: test adding to empty parent
+    ids, err = FindId(parent)
+    // now the new first child
+    ids = append(ids, 0)
+  }
+  if err != nil {
+    return err
+  }
+  id := GetIdentifier(ids)
+  log.Println("ID: ", id)
+  node.Attr = append(node.Attr, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
+  log.Println(parent.LastChild)
+  return err
 }
 
 func (vdom *Vdom) CreateElement(tagName string) *html.Node {
@@ -36,12 +66,18 @@ func (vdom *Vdom) SetAttributes(t, attrs map[string] string) *html.Node {
 }
 */
 
-type Settings struct {
-  IdAttribute string 
-}
+var idAttribute string  = "data-id"
 
-func GetSettings() Settings {
-  return Settings{IdAttribute: "data-id"}
+func FindId(node *html.Node) ([]int, error) {
+  var id string
+  for _, attr := range node.Attr {
+    log.Println(attr)
+    if attr.Key == idAttribute {
+      id = attr.Val
+    }
+  }
+  log.Println("id: ", id)
+  return GetIntSlice(id)
 }
 
 func GetIntSlice(id string) ([]int, error) {
@@ -68,7 +104,7 @@ func GetIdentifier(ids []int) string {
   return id
 }
 
-func Parse(b []byte, settings Settings) (*Vdom, error) {
+func Parse(b []byte) (*Vdom, error) {
   r := bytes.NewBuffer(b)
   doc, err := html.Parse(r)
   if err != nil {
@@ -92,7 +128,7 @@ func Parse(b []byte, settings Settings) (*Vdom, error) {
         log.Println(mock)
         log.Println(len(mock))
         dom.Map[id] = c
-        attr := html.Attribute{Key: settings.IdAttribute, Val: id}
+        attr := html.Attribute{Key: idAttribute, Val: id}
         c.Attr = append(c.Attr, attr)
         f(c, list)
         i++

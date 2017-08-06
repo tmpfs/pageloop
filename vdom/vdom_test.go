@@ -16,7 +16,7 @@ func TestVdom(t *testing.T) {
   }
   log.Println(string(file))
 
-  dom, err := Parse(file, GetSettings())
+  dom, err := Parse(file)
   if err != nil {
     log.Fatal(err)
   }
@@ -25,7 +25,15 @@ func TestVdom(t *testing.T) {
     t.Errorf("Expected vdom, got nil")
   }
 
-  dom.AppendChild(dom.Document.FirstChild.FirstChild, dom.CreateElement("link"))
+  //log.Println(dom.Document.FirstChild)
+  //log.Println(dom.Document.FirstChild.NextSibling.FirstChild)
+
+  head := dom.Document.FirstChild.NextSibling.FirstChild
+
+  err = dom.AppendChild(head, dom.CreateElement("link"))
+  if err != nil {
+    t.Error(err)
+  }
 
   //log.Printf("%v", dom.Map)
 
