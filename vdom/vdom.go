@@ -9,9 +9,9 @@ import(
 )
 
 const (
-  ADD_OP = iota
+  APPEND_OP = iota
+  INSERT_OP
   REMOVE_OP
-  ATTR_OP
 )
 
 type Vdom struct {
@@ -20,6 +20,15 @@ type Vdom struct {
 }
 
 func FindLastChildElement(parent *html.Node) *html.Node {
+  for c := parent.LastChild; c != nil; c = c.PrevSibling {
+    if c.Type == html.ElementNode {
+      return c
+    }
+  }
+  return nil
+}
+
+func FindPrevSiblingElement(parent *html.Node) *html.Node {
   for c := parent.LastChild; c != nil; c = c.PrevSibling {
     if c.Type == html.ElementNode {
       return c
@@ -51,14 +60,35 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   return err
 }
 
+func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild * html.Node) error {
+  var err error
+  _, id := vdom.GetAttr(oldChild, idAttribute)
+  vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id.Val})
+  parent.InsertBefore(newChild, oldChild)
+  err = vdom.AdjustSiblings(newChild, true)
+  return err
+}
+
+func (vdom *Vdom) AdjustSiblings(node *html.Node, increment bool) error {
+  for c := node.NextSibling; c != nil; c = c.NextSibling {
+    ids, err := vdom.FindId(c)
+    if err != nil {
+      return err
+    }
+    if increment {
+      ids[len(ids) - 1]++
+    } else {
+      ids[len(ids) - 1]--
+    }
+    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: GetIdentifier(ids)})
+  }
+  return nil
+}
 
 func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
-  var ids []int
-  var err error
-  for c := node.NextSibling; c != nil; c = c.NextSibling {
-    ids, err = vdom.FindId(c)
-    ids[len(ids) - 1]--
-    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: GetIdentifier(ids)})
+  var err error = vdom.AdjustSiblings(node, false)
+  if err != nil {
+    return err
   }
 
   _, id := vdom.GetAttr(node, idAttribute)
