@@ -43,6 +43,11 @@ type Diff struct {
   Attr html.Attribute
 }
 
+// Patch is a slice of diff operations.
+type Patch struct {
+  Diffs []Diff
+}
+
 // The virtual DOM.
 type Vdom struct {
   Document *html.Node
