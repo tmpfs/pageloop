@@ -47,7 +47,8 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   }
   id := GetIdentifier(ids)
   log.Println("ID: ", id)
-  node.Attr = append(node.Attr, html.Attribute{Key: idAttribute, Val: id})
+  //node.Attr = append(node.Attr, html.Attribute{Key: idAttribute, Val: id})
+  vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
   log.Println(parent.LastChild)
   return err
@@ -58,13 +59,23 @@ func (vdom *Vdom) CreateElement(tagName string) *html.Node {
   return &node
 }
 
-
-/*
-func (vdom *Vdom) SetAttributes(t, attrs map[string] string) *html.Node {
-  node := html.Node{Type: html.ElementNode, Data: tagName}
-  return &node
+func (vdom *Vdom) GetAttr(node *html.Node, key string) *html.Attribute {
+  for _, attr := range node.Attr {
+    if attr.Key == key {
+      return &attr
+    }
+  }
+  return nil
 }
-*/
+
+func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
+  existing := vdom.GetAttr(node, attr.Key)
+  if existing != nil {
+    existing.Val = attr.Val 
+  } else {
+    node.Attr = append(node.Attr, attr)
+  }
+}
 
 var idAttribute string  = "data-id"
 
