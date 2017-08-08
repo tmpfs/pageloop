@@ -205,7 +205,7 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // apply the patch to perform the operations
-  err = dom.Apply(&p)
+  _, err = dom.Apply(&p)
   if err != nil {
     t.Error(err)
   }

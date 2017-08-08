@@ -5,9 +5,10 @@ import(
   "golang.org/x/net/html"
 )
 
-// Apply a patch to the DOM
-func (vdom *Vdom) Apply(patch *Patch) error {
+// Apply a patch to the DOM.
+func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
   var err error
+  var out = Patch{}
 
   // parse an HTML fragment from the diff data
   var getNodes func (diff *Diff) ([]*html.Node, error)
@@ -41,7 +42,7 @@ func (vdom *Vdom) Apply(patch *Patch) error {
       case APPEND:
         var parent *html.Node = vdom.Map[diff.Element]
         if parent == nil {
-          return errors.New("Missing parent node for append operation")
+          return out, errors.New("Missing parent node for append operation")
         }
 
         var nodes []*html.Node
@@ -49,24 +50,24 @@ func (vdom *Vdom) Apply(patch *Patch) error {
         
         nodes, err = getNodes(&diff)
         if err != nil {
-          return err
+          return out, err
         }
         for _, n := range nodes {
           err = vdom.AppendChild(parent, n)
           if err != nil {
-            return err
+            return out, err
           }
         }
       case INSERT:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
-          return errors.New("Missing target node for insert before operation")
+          return out, errors.New("Missing target node for insert before operation")
         }
 
         // infer the parent node
         var parent *html.Node = target.Parent
         if parent == nil {
-          return errors.New("Missing parent node for insert before operation (node may be detached)")
+          return out, errors.New("Missing parent node for insert before operation (node may be detached)")
         }
 
         var nodes []*html.Node
@@ -74,44 +75,44 @@ func (vdom *Vdom) Apply(patch *Patch) error {
         
         nodes, err = getNodes(&diff)
         if err != nil {
-          return err
+          return out, err
         }
         for _, n := range nodes {
           err = vdom.InsertBefore(parent, n, target)
           if err != nil {
-            return err
+            return out, err
           }
         }
       case REMOVE:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
-          return errors.New("Missing target node for remove operation")
+          return out, errors.New("Missing target node for remove operation")
         }
 
         // infer the parent node
         var parent *html.Node = target.Parent
         if parent == nil {
-          return errors.New("Missing parent node for remove operation (node may be detached)")
+          return out, errors.New("Missing parent node for remove operation (node may be detached)")
         }
 
         err = vdom.RemoveChild(parent, target)
         if err != nil {
-          return err
+          return out, err
         }
       case ATTR_SET:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
-          return errors.New("Missing target node for set attribute operation")
+          return out, errors.New("Missing target node for set attribute operation")
         }
         vdom.SetAttr(target, diff.Attr)
       case ATTR_DEL:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
-          return errors.New("Missing target node for delete attribute operation")
+          return out, errors.New("Missing target node for delete attribute operation")
         }
         vdom.DelAttr(target, diff.Attr)
     }
   }
 
-  return err
+  return out, nil
 }
