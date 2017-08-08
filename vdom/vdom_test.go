@@ -151,7 +151,7 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
-  diff, err = dom.SetAttrDiff(div, html.Attribute{Key: "data-foo", Val: "Bar"})
+  diff, err = dom.SetAttrDiff(div, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
   }
@@ -165,8 +165,13 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
+  expected = "<div data-id=\"0.1.0\" data-foo=\"bar\"></div>"
+  if expected != string(data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
+  }
+
   log.Println(string(data))
-  log.Printf("%#v\n", diff)
+  //log.Printf("%#v\n", diff)
 
   diff, err = dom.DelAttrDiff(div, html.Attribute{Key: "data-foo"})
   if err != nil {
@@ -182,8 +187,13 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
+  expected = "<div data-id=\"0.1.0\"></div>"
+  if expected != string(data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
+  }
+
   log.Println(string(data))
-  log.Printf("%#v\n", diff)
+  //log.Printf("%#v\n", diff)
 
   // debug
   err = html.Render(os.Stdout, dom.Document)
