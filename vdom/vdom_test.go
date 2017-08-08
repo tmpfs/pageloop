@@ -15,7 +15,8 @@ func TestVdom(t *testing.T) {
   }
   //log.Println(string(file))
 
-  dom, err := Parse(file)
+  dom := &Vdom{}
+  err = dom.Parse(file)
   if err != nil {
     log.Fatal(err)
   }
@@ -87,7 +88,8 @@ func TestDiff(t *testing.T) {
 
   //log.Println(string(file))
 
-  dom, err = Parse(file)
+  dom = &Vdom{}
+  err = dom.Parse(file)
   if err != nil {
     log.Fatal(err)
   }

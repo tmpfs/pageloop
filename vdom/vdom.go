@@ -26,14 +26,16 @@ type Vdom struct {
 // Parse an HTML document assigning virtual dom identifiers.
 // Assigns each element an identifier attribute and adds entries 
 // to the vdom Map for fast node lookup.
-func Parse(b []byte) (*Vdom, error) {
+func (vdom *Vdom) Parse(b []byte) error {
   r := bytes.NewBuffer(b)
   doc, err := html.Parse(r)
   if err != nil {
-    return nil, err
+    return err
   }
 
-  dom := Vdom{Document: doc, Map: make(map[string] *html.Node)}
+  //vdom := Vdom{Document: doc, Map: make(map[string] *html.Node)}
+  vdom.Document = doc
+  vdom.Map = make(map[string] *html.Node)
   var f func(n *html.Node, ids []int)
   f = func(n *html.Node, ids []int) {
     var id string
@@ -42,8 +44,8 @@ func Parse(b []byte) (*Vdom, error) {
       if c.Type == html.ElementNode {
         list := append(ids, i)
         id = intSliceToString(list)
-        dom.Map[id] = c
-        dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
+        vdom.Map[id] = c
+        vdom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
         f(c, list)
         i++
       }
@@ -52,7 +54,7 @@ func Parse(b []byte) (*Vdom, error) {
 
   var ids []int
   f(doc, ids)
-  return &dom, nil
+  return nil
 }
 
 // Basic DOM API wrapper functions

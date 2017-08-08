@@ -58,7 +58,7 @@ type Patch struct {
   Diffs []Diff
 }
 
-// Add a diff to the patch
+// Add a diff to the patch, returns the length of the diff slice.
 func (p *Patch) Add(diff *Diff) int {
   p.Diffs = append(p.Diffs, *diff)
   return len(p.Diffs)
