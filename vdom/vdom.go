@@ -242,19 +242,6 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
-
-  /*
-  if err != nil {
-    return nil, err
-  }
-
-  // append the child
-  err = vdom.AppendChild(parent, node)
-  if err != nil {
-    return nil, err
-  }
-  */
-
   return &op, err
 }
 
@@ -265,18 +252,6 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(newChild)
-
-  /*
-  if err != nil {
-    return nil, err
-  }
-
-  err = vdom.InsertBefore(parent, newChild, oldChild)
-  if err != nil {
-    return nil, err
-  }
-  */
-
   return &op, err
 }
 
@@ -287,28 +262,18 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
-
-  /*
-  err = vdom.RemoveChild(parent, node)
-  if err != nil {
-    return nil, err
-  }
-  */
-
   return &op, err
 }
 
 // Set an attribute and return a diff that represents the operation.
 func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
-  //vdom.SetAttr(node, attr)
   return &op, nil
 }
 
 // Delete an attribute and return a diff that represents the operation.
 func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
-  //vdom.DelAttr(node, attr)
   return &op, nil
 }
 
