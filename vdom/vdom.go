@@ -7,7 +7,7 @@ package vdom
 import(
   //"os"
   //"io"
-  "fmt"
+  //"fmt"
   //"log"
   "bytes"
   "strconv"
@@ -78,22 +78,6 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 }
 
 // Diff / Patch functions
-
-type ByteWriter struct {
-  data *[]byte  
-}
-
-func (w ByteWriter) Write(p []byte) (n int, err error) {
-  fmt.Println("byte writer write called", string(p))
-  data := append(*w.data, p...)
-  w.data = &data
-  fmt.Println("byte writer write called", string(*w.data))
-  return len(p), nil
-}
-
-func (w ByteWriter) ReadFull() *[]byte {
-  return w.data
-}
 
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   err := vdom.AppendChild(parent, node)
