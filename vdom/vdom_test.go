@@ -1,7 +1,7 @@
 package vdom
 
 import (
-  "os"
+  //"os"
   "log"
   "testing"
   "io/ioutil"
@@ -196,9 +196,11 @@ func TestDiff(t *testing.T) {
   //log.Printf("%#v\n", diff)
 
   // debug
+  /*
   err = html.Render(os.Stdout, dom.Document)
   if err != nil {
     t.Error(err)
   }
+  */
 }
 
