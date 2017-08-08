@@ -6,6 +6,13 @@ import(
 )
 
 // Apply a patch to the DOM.
+//
+// Returns a patch that reverses the operations. If an error occurs 
+// you should try to apply the returned patch to rollback to the previous
+// state. If no error is returned you can use the patch to undo the operation.
+//
+// For the memento undo pattern patches must be applied in the correct reverse 
+// order.
 func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
   var err error
   var out = Patch{}
@@ -127,6 +134,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         if err != nil {
           return out, err
         }
+      // TODO: transactions for attributes
       case ATTR_SET:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {

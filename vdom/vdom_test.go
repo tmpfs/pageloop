@@ -142,6 +142,10 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
+  json, err := diff.SerializeJson()
+
+  log.Println(string(json))
+
   p.Add(diff)
 
   // remove paragraph before the div
