@@ -1,7 +1,7 @@
 package vdom
   
 import(
-  //"log"
+  "log"
   "encoding/json"
   "golang.org/x/net/html"
 )
@@ -23,7 +23,7 @@ const (
 // that they may be applied and reverted.
 type Diff struct {
   // Operation constant
-  Operation int
+  Operation int  `json:"op"`
 
   // Id of the primary target element.
   // 
@@ -32,7 +32,7 @@ type Diff struct {
   // For the remove operation it is the node to remove.
   // For the attr operation it is the target node.
   // For the text operation it is the parent element.
-  Element string `json:"element"`
+  Element string `json:"id"`
 
   // A node type associated with the data.
   Type html.NodeType `json:"type"`
@@ -54,7 +54,7 @@ type Diff struct {
 }
 
 // Encode the diff to JSON.
-func (diff *Diff) SerializeJson() ([]byte, error) {
+func (diff Diff) MarshalJSON() ([]byte, error) {
   var o map[string] interface{} = make(map[string] interface{})
   o["op"] = diff.Operation
   o["id"] = diff.Element
@@ -76,6 +76,37 @@ func (diff *Diff) SerializeJson() ([]byte, error) {
     return nil, err
   }
   return json, nil
+}
+
+// Decode JSON into the diff.
+func (diff *Diff) UnmarshalJSON(b []byte) error {
+  //var temp *Diff
+  var temp map[string] interface{} = make(map[string] interface{})
+  if err := json.Unmarshal(b, &temp); err != nil {
+    return err
+  }
+
+  diff.Operation = int(temp["op"].(float64))
+  diff.Element = temp["id"].(string)
+  diff.Type = html.NodeType(temp["type"].(float64))
+  diff.Data = []byte(temp["data"].(string))
+
+  if temp["attr"] != nil {
+    log.Println("got attr")
+    var a map[string] interface{} = temp["attr"].(map[string] interface{})
+    attr := html.Attribute{}
+    attr.Key = a["key"].(string)
+    if a["ns"] != nil {
+      attr.Namespace = a["ns"].(string)
+    }
+    if a["val"] != nil {
+      attr.Val = a["val"].(string)
+    }
+
+    diff.Attr = attr
+  }
+
+  return nil
 }
 
 // Patch is a slice of diff operations.

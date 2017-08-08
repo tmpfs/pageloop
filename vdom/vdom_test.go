@@ -142,10 +142,6 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
-  json, err := diff.SerializeJson()
-
-  log.Println(string(json))
-
   p.Add(diff)
 
   // remove paragraph before the div
@@ -197,6 +193,17 @@ func TestDiff(t *testing.T) {
   }
 
   p.Add(diff)
+
+  ////
+  json, err := diff.MarshalJSON()
+  mock := Diff{}
+  err = mock.UnmarshalJSON(json)
+  if err != nil {
+    t.Error(err)
+  }
+  log.Println(string(json))
+  log.Println(mock)
+  ////
 
   // create new attribute for assertion after Apply() 
   diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-bar", Val: "baz"})
