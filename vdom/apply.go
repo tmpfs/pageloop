@@ -68,6 +68,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           }
           err = vdom.AppendChild(parent, n)
           tx.Id = vdom.GetId(n)
+          tx.Element = n
           out.Add(tx)
           if err != nil {
             return out, err
@@ -99,6 +100,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           }
           err = vdom.InsertBefore(parent, n, target)
           tx.Id = vdom.GetId(n)
+          tx.Element = n
           out.Add(tx)
           if err != nil {
             return out, err
@@ -128,10 +130,10 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           }
         }
 
-        tx.Id = vdom.GetId(parent)
-        out.Add(tx)
-
         err = vdom.RemoveChild(parent, target)
+        tx.Id = vdom.GetId(parent)
+        tx.Element = target
+        out.Add(tx)
         if err != nil {
           return out, err
         }
@@ -171,6 +173,13 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         vdom.DelAttr(target, diff.Attr)
     }
   }
+
+  var reverse []Diff
+  for i := len(out.Diffs) - 1; i >= 0; i-- {
+    txn := out.Diffs[i] 
+    reverse = append(reverse, txn)
+  }
+  out.Diffs = reverse
 
   return out, nil
 }
