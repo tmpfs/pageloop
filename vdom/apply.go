@@ -174,12 +174,15 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
     }
   }
 
-  var reverse []Diff
-  for i := len(out.Diffs) - 1; i >= 0; i-- {
-    txn := out.Diffs[i] 
-    reverse = append(reverse, txn)
+  /*
+  for _, txn := range out.Diffs {
+    txn.Id = vdom.GetId(txn.Element)
+    log.Println(txn)
+    if txn.Element.Parent == nil {
+      log.Println("got detached node", txn)
+    }
   }
-  out.Diffs = reverse
+  */
 
   return out, nil
 }
