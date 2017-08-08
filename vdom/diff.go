@@ -31,7 +31,10 @@ type Diff struct {
   // For the remove operation it is the node to remove.
   // For the attr operation it is the target node.
   // For the text operation it is the parent element.
-  Element string
+  Id string
+
+  // Pointer to the target element.
+  Element *html.Node
 
   // A node type associated with the data.
   Type html.NodeType
@@ -54,7 +57,7 @@ type Diff struct {
 func (diff Diff) MarshalJSON() ([]byte, error) {
   var o map[string] interface{} = make(map[string] interface{})
   o["op"] = diff.Operation
-  o["id"] = diff.Element
+  o["id"] = diff.Id
   o["type"] = diff.Type
   o["data"] = string(diff.Data)
   if diff.Attr.Key != "" {
@@ -84,7 +87,7 @@ func (diff *Diff) UnmarshalJSON(b []byte) error {
   }
 
   diff.Operation = int(temp["op"].(float64))
-  diff.Element = temp["id"].(string)
+  diff.Id = temp["id"].(string)
   diff.Type = html.NodeType(temp["type"].(float64))
   diff.Data = []byte(temp["data"].(string))
 

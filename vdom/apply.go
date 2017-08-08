@@ -49,7 +49,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
   for _, diff := range patch.Diffs {
     switch diff.Operation {
       case APPEND:
-        var parent *html.Node = vdom.Map[diff.Element]
+        var parent *html.Node = vdom.Map[diff.Id]
         if parent == nil {
           return out, errors.New("Missing parent node for append operation")
         }
@@ -67,14 +67,14 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
             return out, err
           }
           err = vdom.AppendChild(parent, n)
-          tx.Element = vdom.GetId(n)
+          tx.Id = vdom.GetId(n)
           out.Add(tx)
           if err != nil {
             return out, err
           }
         }
       case INSERT:
-        var target *html.Node = vdom.Map[diff.Element]
+        var target *html.Node = vdom.Map[diff.Id]
         if target == nil {
           return out, errors.New("Missing target node for insert before operation")
         }
@@ -98,14 +98,14 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
             return out, err
           }
           err = vdom.InsertBefore(parent, n, target)
-          tx.Element = vdom.GetId(n)
+          tx.Id = vdom.GetId(n)
           out.Add(tx)
           if err != nil {
             return out, err
           }
         }
       case REMOVE:
-        var target *html.Node = vdom.Map[diff.Element]
+        var target *html.Node = vdom.Map[diff.Id]
         if target == nil {
           return out, errors.New("Missing target node for remove operation")
         }
@@ -128,7 +128,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           }
         }
 
-        tx.Element = vdom.GetId(parent)
+        tx.Id = vdom.GetId(parent)
         out.Add(tx)
 
         err = vdom.RemoveChild(parent, target)
@@ -136,34 +136,34 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, err
         }
       case ATTR_SET:
-        var target *html.Node = vdom.Map[diff.Element]
+        var target *html.Node = vdom.Map[diff.Id]
         if target == nil {
           return out, errors.New("Missing target node for set attribute operation")
         }
         _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
         // revert to previous attribute value
         if att != nil {
-          tx = &Diff{Operation: ATTR_SET, Element: vdom.GetId(target), Attr: *att, Type: target.Type}
+          tx = &Diff{Operation: ATTR_SET, Id: vdom.GetId(target), Element: target, Attr: *att, Type: target.Type}
         // or delete if it didn't exist
         } else {
-          tx = &Diff{Operation: ATTR_DEL, Element: vdom.GetId(target), Attr: diff.Attr, Type: target.Type}
+          tx = &Diff{Operation: ATTR_DEL, Id: vdom.GetId(target), Element: target, Attr: diff.Attr, Type: target.Type}
         }
 
         out.Add(tx)
 
         vdom.SetAttr(target, diff.Attr)
       case ATTR_DEL:
-        var target *html.Node = vdom.Map[diff.Element]
+        var target *html.Node = vdom.Map[diff.Id]
         if target == nil {
           return out, errors.New("Missing target node for delete attribute operation")
         }
         _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
         // revert to previous attribute value
         if att != nil {
-          tx = &Diff{Operation: ATTR_SET, Element: vdom.GetId(target), Attr: *att, Type: target.Type}
+          tx = &Diff{Operation: ATTR_SET, Id: vdom.GetId(target), Element: target, Attr: *att, Type: target.Type}
         // or delete if it didn't exist
         } else {
-          tx = &Diff{Operation: ATTR_DEL, Element: vdom.GetId(target), Attr: diff.Attr, Type: target.Type}
+          tx = &Diff{Operation: ATTR_DEL, Id: vdom.GetId(target), Element: target, Attr: diff.Attr, Type: target.Type}
         }
 
         out.Add(tx)

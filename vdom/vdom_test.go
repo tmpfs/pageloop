@@ -130,7 +130,7 @@ func TestDiff(t *testing.T) {
   }
 
   // mock inserting before the div element
-  diff.Element = "0.1.0"
+  diff.Id = "0.1.0"
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -152,7 +152,7 @@ func TestDiff(t *testing.T) {
   }
 
   // mock removing the div element - incremented due to the insert before
-  diff.Element = "0.1.1"
+  diff.Id = "0.1.1"
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -173,7 +173,7 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  diff.Element = "0.1.0"
+  diff.Id = "0.1.0"
 
   if diff.Operation != ATTR_SET {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET, diff.Operation)
@@ -187,7 +187,7 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  diff.Element = "0.1.0"
+  diff.Id = "0.1.0"
 
   if diff.Operation != ATTR_DEL {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL, diff.Operation)
@@ -214,7 +214,7 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  diff.Element = "0.1.0"
+  diff.Id = "0.1.0"
 
   p.Add(diff)
 
