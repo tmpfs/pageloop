@@ -147,7 +147,7 @@ func TestDiff(t *testing.T) {
   }
 
   if diff.Operation != ATTR_SET_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diff.Operation)
+    t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET_OP, diff.Operation)
   }
 
   data, err = dom.RenderToBytes(div)
@@ -156,8 +156,24 @@ func TestDiff(t *testing.T) {
   }
 
   log.Println(string(data))
+  log.Printf("%#v\n", diff)
 
-  //log.Printf("%s\n", string(diff.Data))
+  diff, err = dom.DelAttrDiff(div, html.Attribute{Key: "data-foo"})
+  if err != nil {
+    t.Error(err)
+  }
+
+  if diff.Operation != ATTR_DEL_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL_OP, diff.Operation)
+  }
+
+  data, err = dom.RenderToBytes(div)
+  if err != nil {
+    t.Error(err)
+  }
+
+  log.Println(string(data))
+  log.Printf("%#v\n", diff)
 
   // debug
   err = html.Render(os.Stdout, dom.Document)

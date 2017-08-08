@@ -218,10 +218,16 @@ func (vdom *Vdom) DelAttr(node *html.Node, attr html.Attribute) {
     }
 
     if match {
+      //log.Println("got del attr match", attr.Key)
+      //log.Printf("attrs: %#v\n", node.Attr)
       before := node.Attr[0:index]
+      //log.Printf("before: %#v\n", before)
       after := node.Attr[index + 1:len(node.Attr)]
+      //log.Printf("after: %#v\n", after)
+      node.Attr = node.Attr[0:0]
       node.Attr = append(node.Attr, before...)
       node.Attr = append(node.Attr, after...)
+      //log.Printf("%#v\n", node.Attr)
       break
     }
   }
