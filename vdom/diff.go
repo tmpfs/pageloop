@@ -1,7 +1,6 @@
 package vdom
   
 import(
-  "log"
   "encoding/json"
   "golang.org/x/net/html"
 )
@@ -23,7 +22,7 @@ const (
 // that they may be applied and reverted.
 type Diff struct {
   // Operation constant
-  Operation int  `json:"op"`
+  Operation int
 
   // Id of the primary target element.
   // 
@@ -32,18 +31,16 @@ type Diff struct {
   // For the remove operation it is the node to remove.
   // For the attr operation it is the target node.
   // For the text operation it is the parent element.
-  Element string `json:"id"`
+  Element string
 
   // A node type associated with the data.
-  Type html.NodeType `json:"type"`
+  Type html.NodeType
 
   // HTML fragment data (append and insert only) or data for the text operation.
   //
   // The remove operation may propagate this with the node being removed so 
   // that the operation can be reversed.
-  Data []byte `json:"data"`
-
-  // TODO: custom marshal for attributes
+  Data []byte
 
   // A key value pair when setting attributes.
   Attr html.Attribute
@@ -92,7 +89,6 @@ func (diff *Diff) UnmarshalJSON(b []byte) error {
   diff.Data = []byte(temp["data"].(string))
 
   if temp["attr"] != nil {
-    log.Println("got attr")
     var a map[string] interface{} = temp["attr"].(map[string] interface{})
     attr := html.Attribute{}
     attr.Key = a["key"].(string)
@@ -118,4 +114,12 @@ type Patch struct {
 func (p *Patch) Add(diff *Diff) int {
   p.Diffs = append(p.Diffs, *diff)
   return len(p.Diffs)
+}
+
+func (p Patch) MarshalJSON() ([]byte, error) {
+  return json.Marshal(&p.Diffs)
+}
+
+func (p *Patch) UnmarshalJSON(b []byte) error {
+  return json.Unmarshal(b, &p.Diffs)
 }

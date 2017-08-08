@@ -1,6 +1,7 @@
 package vdom
 
 import(
+  //"log"
   "errors"
   "golang.org/x/net/html"
 )
@@ -65,9 +66,9 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           if err != nil {
             return out, err
           }
-          out.Add(tx)
           err = vdom.AppendChild(parent, n)
           tx.Element = vdom.GetId(n)
+          out.Add(tx)
           if err != nil {
             return out, err
           }
@@ -96,9 +97,9 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           if err != nil {
             return out, err
           }
-          out.Add(tx)
           err = vdom.InsertBefore(parent, n, target)
           tx.Element = vdom.GetId(n)
+          out.Add(tx)
           if err != nil {
             return out, err
           }
@@ -134,18 +135,39 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         if err != nil {
           return out, err
         }
-      // TODO: transactions for attributes
       case ATTR_SET:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return out, errors.New("Missing target node for set attribute operation")
         }
+        _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
+        // revert to previous attribute value
+        if att != nil {
+          tx = &Diff{Operation: ATTR_SET, Element: vdom.GetId(target), Attr: *att, Type: target.Type}
+        // or delete if it didn't exist
+        } else {
+          tx = &Diff{Operation: ATTR_DEL, Element: vdom.GetId(target), Attr: diff.Attr, Type: target.Type}
+        }
+
+        out.Add(tx)
+
         vdom.SetAttr(target, diff.Attr)
       case ATTR_DEL:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return out, errors.New("Missing target node for delete attribute operation")
         }
+        _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
+        // revert to previous attribute value
+        if att != nil {
+          tx = &Diff{Operation: ATTR_SET, Element: vdom.GetId(target), Attr: *att, Type: target.Type}
+        // or delete if it didn't exist
+        } else {
+          tx = &Diff{Operation: ATTR_DEL, Element: vdom.GetId(target), Attr: diff.Attr, Type: target.Type}
+        }
+
+        out.Add(tx)
+
         vdom.DelAttr(target, diff.Attr)
     }
   }

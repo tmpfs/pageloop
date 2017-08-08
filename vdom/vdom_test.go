@@ -3,6 +3,7 @@ package vdom
 import (
   "os"
   "log"
+  "fmt"
   "testing"
   "io/ioutil"
   "golang.org/x/net/html"
@@ -195,6 +196,7 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   ////
+  /*
   json, err := diff.MarshalJSON()
   mock := Diff{}
   err = mock.UnmarshalJSON(json)
@@ -203,6 +205,7 @@ func TestDiff(t *testing.T) {
   }
   log.Println(string(json))
   log.Println(mock)
+  */
   ////
 
   // create new attribute for assertion after Apply() 
@@ -215,11 +218,28 @@ func TestDiff(t *testing.T) {
 
   p.Add(diff)
 
-  // apply the patch to perform the operations
-  _, err = dom.Apply(&p)
+  fmt.Println("--- PATCH ---")
+  json, err := p.MarshalJSON()
+  log.Println(string(json))
+
+  /*
+  mock := Patch{}
+  err = mock.UnmarshalJSON(json)
   if err != nil {
     t.Error(err)
   }
+  */
+
+  // apply the patch to perform the operations
+  var rollback Patch
+  rollback, err = dom.Apply(&p)
+  if err != nil {
+    t.Error(err)
+  }
+
+  fmt.Println("--- REVERSE PATCH ---")
+  json, err = rollback.MarshalJSON()
+  log.Println(string(json))
 
   // attribute assertions after applying patch
   data, err = dom.RenderToBytes(dom.Map["0.1.0"])
@@ -230,6 +250,18 @@ func TestDiff(t *testing.T) {
   expected = "<p data-id=\"0.1.0\" data-bar=\"baz\"></p>"
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
+  }
+
+  // debug
+  err = html.Render(os.Stdout, dom.Document)
+  if err != nil {
+    t.Error(err)
+  }
+
+  // undo the patch
+  _, err = dom.Apply(&rollback)
+  if err != nil {
+    t.Error(err)
   }
 
   // debug

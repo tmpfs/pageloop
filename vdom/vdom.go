@@ -169,6 +169,15 @@ func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
   return -1, nil
 }
 
+func (vdom *Vdom) GetAttrNs(node *html.Node, key string, ns string) (int, *html.Attribute) {
+  for index, attr := range node.Attr {
+    if attr.Key == key && attr.Namespace == ns {
+      return index, &attr
+    }
+  }
+  return -1, nil
+}
+
 // Get the value of an attribute, that is `html.Attribute.Val`.
 func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
   _, attr := vdom.GetAttr(node, key)
