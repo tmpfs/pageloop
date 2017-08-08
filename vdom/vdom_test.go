@@ -71,6 +71,14 @@ func TestVdom(t *testing.T) {
 }
 
 func TestDiff(t *testing.T) {
+
+  var diff *Diff
+  var err error
+  var data []byte
+  var expected string
+  var dom *Vdom
+
+
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
     log.Fatal(err)
@@ -78,7 +86,7 @@ func TestDiff(t *testing.T) {
 
   //log.Println(string(file))
 
-  dom, err := Parse(file)
+  dom, err = Parse(file)
   if err != nil {
     log.Fatal(err)
   }
@@ -92,44 +100,64 @@ func TestDiff(t *testing.T) {
 
   // append a div
   div := dom.CreateElement("div")
-  diffa, err := dom.AppendDiff(body, div)
+  diff, err = dom.AppendDiff(body, div)
   if err != nil {
     t.Error(err)
   }
 
-  if diffa.Operation != APPEND_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diffa.Operation)
+  if diff.Operation != APPEND_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diff.Operation)
   }
 
-  log.Printf("%s\n", string(diffa.Data))
-  log.Printf("%#v\n", diffa)
+  expected = "<div></div>"
+  if expected != string(diff.Data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
+  }
+
+  log.Printf("%s\n", string(diff.Data))
 
   // insert paragraph before the div
   para := dom.CreateElement("p")
-  diffi, err := dom.InsertDiff(body, para, div)
+  diff, err = dom.InsertDiff(body, para, div)
   if err != nil {
     t.Error(err)
   }
 
-  log.Printf("%s\n", string(diffi.Data))
-  log.Printf("%#v\n", diffi)
+  log.Printf("%s\n", string(diff.Data))
 
-  if diffi.Operation != INSERT_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", INSERT_OP, diffi.Operation)
+  if diff.Operation != INSERT_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", INSERT_OP, diff.Operation)
   }
 
   // remove paragraph before the div
-  diffr, err := dom.RemoveDiff(body, para)
+  diff, err = dom.RemoveDiff(body, para)
   if err != nil {
     t.Error(err)
   }
 
-  log.Printf("%s\n", string(diffr.Data))
-  log.Printf("%#v\n", diffr)
+  log.Printf("%s\n", string(diff.Data))
 
-  if diffr.Operation != REMOVE_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diffr.Operation)
+  if diff.Operation != REMOVE_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diff.Operation)
   }
+
+  diff, err = dom.SetAttrDiff(div, html.Attribute{Key: "data-foo", Val: "Bar"})
+  if err != nil {
+    t.Error(err)
+  }
+
+  if diff.Operation != ATTR_SET_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diff.Operation)
+  }
+
+  data, err = dom.RenderToBytes(div)
+  if err != nil {
+    t.Error(err)
+  }
+
+  log.Println(string(data))
+
+  //log.Printf("%s\n", string(diff.Data))
 
   // debug
   err = html.Render(os.Stdout, dom.Document)

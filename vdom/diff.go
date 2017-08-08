@@ -13,9 +13,9 @@ const (
   APPEND_OP = iota
   INSERT_OP
   REMOVE_OP
-  ATT_SET_OP
-  ATT_DEL_OP
   TEXT_OP
+  ATTR_SET_OP
+  ATTR_DEL_OP
 )
 
 // Diff is an operation on the virtual DOM that results 

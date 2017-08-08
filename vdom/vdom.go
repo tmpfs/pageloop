@@ -91,13 +91,25 @@ func (vdom *Vdom) TextDiff(parent *html.Node) {
 }
 */
 
+func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr}
+  vdom.SetAttr(node, attr)
+  return &op, nil
+}
+
+func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr}
+  vdom.DelAttr(node, attr)
+  return &op, nil
+}
+
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
   var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
 
   // convert to byte slice
-  op.Data, err = renderToBytes(node)
+  op.Data, err = vdom.RenderToBytes(node)
   if err != nil {
     return nil, err
   }
@@ -117,7 +129,7 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
   var op Diff = Diff{Operation: INSERT_OP, Element: vdom.GetId(oldChild)}
 
   // convert to byte slice
-  op.Data, err = renderToBytes(newChild)
+  op.Data, err = vdom.RenderToBytes(newChild)
   if err != nil {
     return nil, err
   }
@@ -136,7 +148,7 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   var op Diff = Diff{Operation: REMOVE_OP, Element: vdom.GetId(node)}
 
   // convert to byte slice
-  op.Data, err = renderToBytes(node)
+  op.Data, err = vdom.RenderToBytes(node)
 
   err = vdom.RemoveChild(parent, node)
   if err != nil {
@@ -146,7 +158,8 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   return &op, err
 }
 
-func renderToBytes(node *html.Node) ([]byte, error) {
+// Render a node to a byte slice, typically for debugging.
+func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
   w := new(bytes.Buffer)
   err := html.Render(w, node)
   if err != nil {
@@ -193,6 +206,24 @@ func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
     node.Attr[index] = *existing
   } else {
     node.Attr = append(node.Attr, attr)
+  }
+}
+
+// Remove an attribute
+func (vdom *Vdom) DelAttr(node *html.Node, attr html.Attribute) {
+  for index, a := range node.Attr {
+    var match bool = a.Key == attr.Key
+    if a.Namespace != "" && attr.Namespace != "" {
+      match = a.Namespace == attr.Namespace
+    }
+
+    if match {
+      before := node.Attr[0:index]
+      after := node.Attr[index + 1:len(node.Attr)]
+      node.Attr = append(node.Attr, before...)
+      node.Attr = append(node.Attr, after...)
+      break
+    }
   }
 }
 
