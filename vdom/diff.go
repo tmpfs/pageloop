@@ -13,7 +13,8 @@ const (
   APPEND_OP = iota
   INSERT_OP
   REMOVE_OP
-  ATTR_OP
+  ATT_SET_OP
+  ATT_DEL_OP
   TEXT_OP
 )
 

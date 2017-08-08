@@ -77,7 +77,19 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
   return err
 }
 
+/*
+// Set the text for a node.
+func (vdom *Vdom) Text(parent *html.Node, node *html.Node, text []byte) error {
+  node.Data = text
+  return nil
+}
+
 // Diff / Patch functions
+
+func (vdom *Vdom) TextDiff(parent *html.Node) {
+
+}
+*/
 
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
