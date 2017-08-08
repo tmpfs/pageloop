@@ -114,6 +114,15 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
+  // create and apply the patch, we need div on the DOM for the insert before
+  var p Patch = Patch{}
+  p.Add(diff)
+
+  err = dom.Apply(&p)
+  if err != nil {
+    t.Error(err)
+  }
+
   log.Printf("%s\n", string(diff.Data))
 
   // insert paragraph before the div
@@ -146,7 +155,7 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diff.Operation)
   }
 
-  expected = "<p data-id=\"0.1.0\"></p>"
+  expected = "<p></p>"
   if expected != string(diff.Data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
@@ -165,7 +174,7 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  expected = "<div data-id=\"0.1.0\" data-foo=\"bar\"></div>"
+  expected = "<div data-foo=\"bar\"></div>"
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }
@@ -187,7 +196,7 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  expected = "<div data-id=\"0.1.0\"></div>"
+  expected = "<div></div>"
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }

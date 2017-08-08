@@ -36,6 +36,9 @@ type Diff struct {
   // For the text operation it is the parent element.
   Element string
 
+  // A node type associated with the data
+  Type html.NodeType
+
   // HTML fragment data (append and insert only) or data for the text operation.
   //
   // The remove operation may propagate this with the node being removed so 
@@ -53,4 +56,10 @@ type Diff struct {
 // Patch is a slice of diff operations.
 type Patch struct {
   Diffs []Diff
+}
+
+// Add a diff to the patch
+func (p *Patch) Add(diff *Diff) int {
+  p.Diffs = append(p.Diffs, *diff)
+  return len(p.Diffs)
 }

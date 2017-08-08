@@ -1,7 +1,5 @@
-// Virtual DOM implementation wrapping the parse tree 
-// returned from x/net/html.
-//
-// Able to diff and patch using a collection of diff operations.
+// Virtual DOM implementation backed by the parse tree 
+// returned from golang.org/x/net/html.
 package vdom
   
 import(
@@ -10,9 +8,11 @@ import(
   //"fmt"
   //"log"
   "bytes"
+  "errors"
   "strconv"
   "strings"
   "golang.org/x/net/html"
+  "golang.org/x/net/html/atom"
 )
 
 var idAttribute string  = "data-id"
@@ -21,6 +21,38 @@ var idAttribute string  = "data-id"
 type Vdom struct {
   Document *html.Node
   Map map[string] *html.Node
+}
+
+// Parse an HTML document assigning virtual dom identifiers.
+// Assigns each element an identifier attribute and adds entries 
+// to the vdom Map for fast node lookup.
+func Parse(b []byte) (*Vdom, error) {
+  r := bytes.NewBuffer(b)
+  doc, err := html.Parse(r)
+  if err != nil {
+    return nil, err
+  }
+
+  dom := Vdom{Document: doc, Map: make(map[string] *html.Node)}
+  var f func(n *html.Node, ids []int)
+  f = func(n *html.Node, ids []int) {
+    var id string
+    var i int = 0
+    for c := n.FirstChild; c != nil; c = c.NextSibling {
+      if c.Type == html.ElementNode {
+        list := append(ids, i)
+        id = intSliceToString(list)
+        dom.Map[id] = c
+        dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
+        f(c, list)
+        i++
+      }
+    }
+  }
+
+  var ids []int
+  f(doc, ids)
+  return &dom, nil
 }
 
 // Basic DOM API wrapper functions
@@ -88,6 +120,20 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
 // Extensions to the basic API
 
+// Parse an HTML fragment and return the list of parsed nodes.
+func (vdom *Vdom) ParseFragment(b []byte, context *html.Node) ([]*html.Node, error) {
+  if context == nil {
+    context = &html.Node{Type: html.ElementNode, Data: "body", DataAtom:atom.Body}
+  }
+  r := bytes.NewBuffer(b)
+  nodes, err := html.ParseFragment(r, context)
+  if err != nil {
+    return nil, err
+  }
+
+  return nodes, err
+}
+
 // Create a new element.
 func (vdom *Vdom) CreateElement(tagName string) *html.Node {
   node := html.Node{Type: html.ElementNode, Data: tagName}
@@ -95,8 +141,20 @@ func (vdom *Vdom) CreateElement(tagName string) *html.Node {
 }
 
 // Create a text node.
-func (vdom *Vdom) CreateTextNode(data string) *html.Node {
-  node := html.Node{Type: html.TextNode, Data: data}
+func (vdom *Vdom) CreateTextNode(text string) *html.Node {
+  node := html.Node{Type: html.TextNode, Data: text}
+  return &node
+}
+
+// Create a comment node.
+func (vdom *Vdom) CreateCommentNode(comment string) *html.Node {
+  node := html.Node{Type: html.CommentNode, Data: comment}
+  return &node
+}
+
+// Create a doctype node.
+func (vdom *Vdom) CreateDoctypeNode(doctype string) *html.Node {
+  node := html.Node{Type: html.DoctypeNode, Data: doctype}
   return &node
 }
 
@@ -185,13 +243,56 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 
 // Diff / Patch functions
 
+// Apply a patch to the DOM
+func (vdom *Vdom) Apply(patch *Patch) error {
+  var err error
+  for _, diff := range patch.Diffs {
+    switch diff.Operation {
+      case APPEND_OP:
+        // lookup the parent by id
+        var parent *html.Node = vdom.Map[diff.Element]
+        if parent == nil {
+          return errors.New("Missing parent node for append operation")
+        }
+
+        // TODO: allow appending to document node
+
+        switch diff.Type {
+          case html.ElementNode:
+            // parse the node data
+            var nodes []*html.Node
+            nodes, err := vdom.ParseFragment(diff.Data, nil)
+            if err != nil {
+              return err
+            }
+            for _, n := range nodes {
+              vdom.AppendChild(parent, n)
+            }
+          case html.DoctypeNode:
+            fallthrough
+          case html.TextNode:
+            fallthrough
+          case html.CommentNode:
+            fallthrough
+          default:
+            var node *html.Node = &html.Node{Type: diff.Type, Data: string(diff.Data)}
+            vdom.AppendChild(parent, node)
+        }
+    }
+  }
+
+  return err
+}
+
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
+  var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent), Type: node.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
+
+  /*
   if err != nil {
     return nil, err
   }
@@ -201,6 +302,7 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   if err != nil {
     return nil, err
   }
+  */
 
   return &op, err
 }
@@ -208,10 +310,12 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 // Insert a child node before another node and return a diff that represents the operation.
 func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: INSERT_OP, Element: vdom.GetId(oldChild)}
+  var op Diff = Diff{Operation: INSERT_OP, Element: vdom.GetId(oldChild), Type: newChild.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(newChild)
+
+  /*
   if err != nil {
     return nil, err
   }
@@ -220,6 +324,7 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
   if err != nil {
     return nil, err
   }
+  */
 
   return &op, err
 }
@@ -227,29 +332,31 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
 // Remove a node and return a diff that represents the operation.
 func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: REMOVE_OP, Element: vdom.GetId(node)}
+  var op Diff = Diff{Operation: REMOVE_OP, Element: vdom.GetId(node), Type: node.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
 
+  /*
   err = vdom.RemoveChild(parent, node)
   if err != nil {
     return nil, err
   }
+  */
 
   return &op, err
 }
 
 // Set an attribute and return a diff that represents the operation.
 func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr}
+  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
   vdom.SetAttr(node, attr)
   return &op, nil
 }
 
 // Delete an attribute and return a diff that represents the operation.
 func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr}
+  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
   vdom.DelAttr(node, attr)
   return &op, nil
 }
@@ -292,39 +399,6 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
     vdom.Map[newId] = c
   }
   return nil
-}
-
-
-// Parse an HTML document assigning virtual dom identifiers.
-// Assigns each element a `data-id` attribute and adds entries 
-// to the vdom `Map` for fast node lookup.
-func Parse(b []byte) (*Vdom, error) {
-  r := bytes.NewBuffer(b)
-  doc, err := html.Parse(r)
-  if err != nil {
-    return nil, err
-  }
-
-  dom := Vdom{Document: doc, Map: make(map[string] *html.Node)}
-  var f func(n *html.Node, ids []int)
-  f = func(n *html.Node, ids []int) {
-    var id string
-    var i int = 0
-    for c := n.FirstChild; c != nil; c = c.NextSibling {
-      if c.Type == html.ElementNode {
-        list := append(ids, i)
-        id = intSliceToString(list)
-        dom.Map[id] = c
-        dom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
-        f(c, list)
-        i++
-      }
-    }
-  }
-
-  var ids []int
-  f(doc, ids)
-  return &dom, nil
 }
 
 // Helper functions
