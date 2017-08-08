@@ -3,9 +3,6 @@
 package vdom
   
 import(
-  //"os"
-  //"io"
-  //"fmt"
   //"log"
   "bytes"
   "strconv"

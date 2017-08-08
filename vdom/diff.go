@@ -1,10 +1,6 @@
 package vdom
   
 import(
-  //"log"
-  //"bytes"
-  //"strconv"
-  //"strings"
   "golang.org/x/net/html"
 )
 
@@ -36,7 +32,7 @@ type Diff struct {
   // For the text operation it is the parent element.
   Element string
 
-  // A node type associated with the data
+  // A node type associated with the data.
   Type html.NodeType
 
   // HTML fragment data (append and insert only) or data for the text operation.
