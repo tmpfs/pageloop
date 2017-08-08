@@ -104,16 +104,16 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
 
   // write rendered data to buffer
-  var data []byte
-  w := ByteWriter{data: &data}
-  //w := bytes.NewBuffer(data)
+  w := new(bytes.Buffer)
   err = html.Render(w, node)
   if err != nil {
     return nil, err
   }
 
-  fmt.Println("len", len(data))
-  fmt.Println(w.ReadFull())
+  // convert to byte slice
+  op.Data = w.Bytes()
+
+  //fmt.Println("markup: ", string(op.Data))
   return &op, err
 }
 
