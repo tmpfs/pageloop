@@ -1,4 +1,3 @@
-// Diff and patch for the virtual DOM. 
 package vdom
   
 import(

@@ -13,7 +13,7 @@ func TestVdom(t *testing.T) {
   if err != nil {
     log.Fatal(err)
   }
-  log.Println(string(file))
+  //log.Println(string(file))
 
   dom, err := Parse(file)
   if err != nil {
@@ -129,6 +129,11 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected operation, expected %d got %d", INSERT_OP, diff.Operation)
   }
 
+  expected = "<p></p>"
+  if expected != string(diff.Data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
+  }
+
   // remove paragraph before the div
   diff, err = dom.RemoveDiff(body, para)
   if err != nil {
@@ -139,6 +144,11 @@ func TestDiff(t *testing.T) {
 
   if diff.Operation != REMOVE_OP {
     t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diff.Operation)
+  }
+
+  expected = "<p data-id=\"0.1.0\"></p>"
+  if expected != string(diff.Data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
   diff, err = dom.SetAttrDiff(div, html.Attribute{Key: "data-foo", Val: "Bar"})
