@@ -239,7 +239,6 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
   var op Diff = Diff{Operation: APPEND, Element: vdom.GetId(parent), Type: node.Type}
-
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
   return &op, err

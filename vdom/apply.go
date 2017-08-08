@@ -9,6 +9,7 @@ import(
 func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
   var err error
   var out = Patch{}
+  var tx *Diff
 
   // parse an HTML fragment from the diff data
   var getNodes func (diff *Diff) ([]*html.Node, error)
@@ -53,7 +54,13 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, err
         }
         for _, n := range nodes {
+          tx, err = vdom.RemoveDiff(parent, n)
+          if err != nil {
+            return out, err
+          }
+          out.Add(tx)
           err = vdom.AppendChild(parent, n)
+          tx.Element = vdom.GetId(n)
           if err != nil {
             return out, err
           }
@@ -78,7 +85,13 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, err
         }
         for _, n := range nodes {
+          tx, err = vdom.RemoveDiff(parent, n)
+          if err != nil {
+            return out, err
+          }
+          out.Add(tx)
           err = vdom.InsertBefore(parent, n, target)
+          tx.Element = vdom.GetId(n)
           if err != nil {
             return out, err
           }
@@ -94,6 +107,21 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         if parent == nil {
           return out, errors.New("Missing parent node for remove operation (node may be detached)")
         }
+
+        if target.NextSibling == nil {
+          tx, err = vdom.AppendDiff(parent, target)
+          if err != nil {
+            return out, err
+          }
+        } else {
+          tx, err = vdom.InsertDiff(parent, target, target.NextSibling)
+          if err != nil {
+            return out, err
+          }
+        }
+
+        tx.Element = vdom.GetId(parent)
+        out.Add(tx)
 
         err = vdom.RemoveChild(parent, target)
         if err != nil {
