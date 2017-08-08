@@ -8,7 +8,6 @@ import (
   "golang.org/x/net/html"
 )
 
-
 func TestVdom(t *testing.T) {
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
@@ -63,10 +62,12 @@ func TestVdom(t *testing.T) {
     t.Error(err)
   }
 
+  /*
   err = html.Render(os.Stdout, dom.Document)
   if err != nil {
     t.Error(err)
   }
+  */
 }
 
 func TestDiff(t *testing.T) {
@@ -74,7 +75,8 @@ func TestDiff(t *testing.T) {
   if err != nil {
     log.Fatal(err)
   }
-  log.Println(string(file))
+
+  //log.Println(string(file))
 
   dom, err := Parse(file)
   if err != nil {
@@ -88,20 +90,51 @@ func TestDiff(t *testing.T) {
   head := dom.Document.FirstChild.NextSibling.FirstChild
   body := head.NextSibling.NextSibling
 
+  // append a div
   div := dom.CreateElement("div")
-  diff, err := dom.AppendDiff(body, div)
+  diffa, err := dom.AppendDiff(body, div)
   if err != nil {
     t.Error(err)
   }
 
-  log.Println(diff)
+  if diffa.Operation != APPEND_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diffa.Operation)
+  }
 
-  /*
-  d := Diff{
-    Operation: APPEND_OP,
-    Element: dom.GetId(head),
-    Data: []byte(`<link />`)}
-  log.Printf("%#v\n", d)
-  */
+  log.Printf("%s\n", string(diffa.Data))
+  log.Printf("%#v\n", diffa)
+
+  // insert paragraph before the div
+  para := dom.CreateElement("p")
+  diffi, err := dom.InsertDiff(body, para, div)
+  if err != nil {
+    t.Error(err)
+  }
+
+  log.Printf("%s\n", string(diffi.Data))
+  log.Printf("%#v\n", diffi)
+
+  if diffi.Operation != INSERT_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", INSERT_OP, diffi.Operation)
+  }
+
+  // remove paragraph before the div
+  diffr, err := dom.RemoveDiff(body, para)
+  if err != nil {
+    t.Error(err)
+  }
+
+  log.Printf("%s\n", string(diffr.Data))
+  log.Printf("%#v\n", diffr)
+
+  if diffr.Operation != REMOVE_OP {
+    t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diffr.Operation)
+  }
+
+  // debug
+  err = html.Render(os.Stdout, dom.Document)
+  if err != nil {
+    t.Error(err)
+  }
 }
 

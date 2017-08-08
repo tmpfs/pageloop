@@ -37,6 +37,9 @@ type Diff struct {
   Element string
 
   // HTML fragment data (append and insert only) or data for the text operation.
+  //
+  // The remove operation may propagate this with the node being removed so 
+  // that the operation can be reversed.
   Data []byte
 
   // For the text operation an index into the element's child nodes to use 

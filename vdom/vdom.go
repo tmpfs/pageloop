@@ -79,26 +79,68 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
 // Diff / Patch functions
 
+// Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
-  err := vdom.AppendChild(parent, node)
-  if err != nil {
-    return nil, err
-  }
-
+  var err error
   var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent)}
 
-  // write rendered data to buffer
-  w := new(bytes.Buffer)
-  err = html.Render(w, node)
+  // convert to byte slice
+  op.Data, err = renderToBytes(node)
   if err != nil {
     return nil, err
   }
 
-  // convert to byte slice
-  op.Data = w.Bytes()
+  // append the child
+  err = vdom.AppendChild(parent, node)
+  if err != nil {
+    return nil, err
+  }
 
-  //fmt.Println("markup: ", string(op.Data))
   return &op, err
+}
+
+// Insert a child node before another node and return a diff that represents the operation.
+func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *html.Node) (*Diff, error) {
+  var err error
+  var op Diff = Diff{Operation: INSERT_OP, Element: vdom.GetId(oldChild)}
+
+  // convert to byte slice
+  op.Data, err = renderToBytes(newChild)
+  if err != nil {
+    return nil, err
+  }
+
+  err = vdom.InsertBefore(parent, newChild, oldChild)
+  if err != nil {
+    return nil, err
+  }
+
+  return &op, err
+}
+
+// Remove a node and return a diff that represents the operation.
+func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) {
+  var err error
+  var op Diff = Diff{Operation: REMOVE_OP, Element: vdom.GetId(node)}
+
+  // convert to byte slice
+  op.Data, err = renderToBytes(node)
+
+  err = vdom.RemoveChild(parent, node)
+  if err != nil {
+    return nil, err
+  }
+
+  return &op, err
+}
+
+func renderToBytes(node *html.Node) ([]byte, error) {
+  w := new(bytes.Buffer)
+  err := html.Render(w, node)
+  if err != nil {
+    return nil, err
+  }
+  return w.Bytes(), nil
 }
 
 // Extensions to the basic API
