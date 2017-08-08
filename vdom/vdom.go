@@ -77,31 +77,7 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
   return err
 }
 
-/*
-// Set the text for a node.
-func (vdom *Vdom) Text(parent *html.Node, node *html.Node, text []byte) error {
-  node.Data = text
-  return nil
-}
-
 // Diff / Patch functions
-
-func (vdom *Vdom) TextDiff(parent *html.Node) {
-
-}
-*/
-
-func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr}
-  vdom.SetAttr(node, attr)
-  return &op, nil
-}
-
-func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr}
-  vdom.DelAttr(node, attr)
-  return &op, nil
-}
 
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
@@ -168,11 +144,43 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
   return w.Bytes(), nil
 }
 
+func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr}
+  vdom.SetAttr(node, attr)
+  return &op, nil
+}
+
+func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr}
+  vdom.DelAttr(node, attr)
+  return &op, nil
+}
+
+/*
+// Set the text for a node.
+func (vdom *Vdom) Text(parent *html.Node, node *html.Node, text []byte) error {
+  node.Data = text
+  return nil
+}
+*/
+
+/*
+func (vdom *Vdom) TextDiff(parent *html.Node) {
+
+}
+*/
+
 // Extensions to the basic API
 
 // Create a new element.
 func (vdom *Vdom) CreateElement(tagName string) *html.Node {
   node := html.Node{Type: html.ElementNode, Data: tagName}
+  return &node
+}
+
+// Create a text node.
+func (vdom *Vdom) CreateTextNode(data string) *html.Node {
+  node := html.Node{Type: html.TextNode, Data: data}
   return &node
 }
 
