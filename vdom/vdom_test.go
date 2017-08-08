@@ -108,8 +108,8 @@ func TestDiff(t *testing.T) {
     t.Error(err)
   }
 
-  if diff.Operation != APPEND_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", APPEND_OP, diff.Operation)
+  if diff.Operation != APPEND {
+    t.Errorf("Unexpected operation, expected %d got %d", APPEND, diff.Operation)
   }
 
   expected = "<div></div>"
@@ -133,8 +133,8 @@ func TestDiff(t *testing.T) {
 
   log.Printf("%s\n", string(diff.Data))
 
-  if diff.Operation != INSERT_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", INSERT_OP, diff.Operation)
+  if diff.Operation != INSERT {
+    t.Errorf("Unexpected operation, expected %d got %d", INSERT, diff.Operation)
   }
 
   expected = "<p></p>"
@@ -155,8 +155,8 @@ func TestDiff(t *testing.T) {
 
   log.Printf("%s\n", string(diff.Data))
 
-  if diff.Operation != REMOVE_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diff.Operation)
+  if diff.Operation != REMOVE {
+    t.Errorf("Unexpected operation, expected %d got %d", REMOVE, diff.Operation)
   }
 
   expected = "<div></div>"
@@ -174,8 +174,8 @@ func TestDiff(t *testing.T) {
 
   diff.Element = "0.1.0"
 
-  if diff.Operation != ATTR_SET_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET_OP, diff.Operation)
+  if diff.Operation != ATTR_SET {
+    t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET, diff.Operation)
   }
 
   p.Add(diff)
@@ -188,8 +188,8 @@ func TestDiff(t *testing.T) {
 
   diff.Element = "0.1.0"
 
-  if diff.Operation != ATTR_DEL_OP {
-    t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL_OP, diff.Operation)
+  if diff.Operation != ATTR_DEL {
+    t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL, diff.Operation)
   }
 
   p.Add(diff)

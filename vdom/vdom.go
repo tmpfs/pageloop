@@ -238,7 +238,7 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: APPEND_OP, Element: vdom.GetId(parent), Type: node.Type}
+  var op Diff = Diff{Operation: APPEND, Element: vdom.GetId(parent), Type: node.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
@@ -248,7 +248,7 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 // Insert a child node before another node and return a diff that represents the operation.
 func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: INSERT_OP, Element: vdom.GetId(oldChild), Type: newChild.Type}
+  var op Diff = Diff{Operation: INSERT, Element: vdom.GetId(oldChild), Type: newChild.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(newChild)
@@ -258,7 +258,7 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
 // Remove a node and return a diff that represents the operation.
 func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
-  var op Diff = Diff{Operation: REMOVE_OP, Element: vdom.GetId(node), Type: node.Type}
+  var op Diff = Diff{Operation: REMOVE, Element: vdom.GetId(node), Type: node.Type}
 
   // convert to byte slice
   op.Data, err = vdom.RenderToBytes(node)
@@ -267,13 +267,13 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 
 // Set an attribute and return a diff that represents the operation.
 func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
+  var op Diff = Diff{Operation: ATTR_SET, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
   return &op, nil
 }
 
 // Delete an attribute and return a diff that represents the operation.
 func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
-  var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
+  var op Diff = Diff{Operation: ATTR_DEL, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
   return &op, nil
 }
 

@@ -5,12 +5,12 @@ import(
 )
 
 const (
-  APPEND_OP = iota
-  INSERT_OP
-  REMOVE_OP
-  ATTR_SET_OP
-  ATTR_DEL_OP
-  TEXT_OP
+  APPEND = iota
+  INSERT
+  REMOVE
+  ATTR_SET
+  ATTR_DEL
+  TEXT
 )
 
 // Diff is an operation on the virtual DOM that results 

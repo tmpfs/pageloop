@@ -38,7 +38,7 @@ func (vdom *Vdom) Apply(patch *Patch) error {
   // iterate and attempt to apply operations
   for _, diff := range patch.Diffs {
     switch diff.Operation {
-      case APPEND_OP:
+      case APPEND:
         var parent *html.Node = vdom.Map[diff.Element]
         if parent == nil {
           return errors.New("Missing parent node for append operation")
@@ -57,7 +57,7 @@ func (vdom *Vdom) Apply(patch *Patch) error {
             return err
           }
         }
-      case INSERT_OP:
+      case INSERT:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return errors.New("Missing target node for insert before operation")
@@ -82,7 +82,7 @@ func (vdom *Vdom) Apply(patch *Patch) error {
             return err
           }
         }
-      case REMOVE_OP:
+      case REMOVE:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return errors.New("Missing target node for remove operation")
@@ -98,13 +98,13 @@ func (vdom *Vdom) Apply(patch *Patch) error {
         if err != nil {
           return err
         }
-      case ATTR_SET_OP:
+      case ATTR_SET:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return errors.New("Missing target node for set attribute operation")
         }
         vdom.SetAttr(target, diff.Attr)
-      case ATTR_DEL_OP:
+      case ATTR_DEL:
         var target *html.Node = vdom.Map[diff.Element]
         if target == nil {
           return errors.New("Missing target node for delete attribute operation")
