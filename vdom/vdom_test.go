@@ -117,9 +117,7 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
-  // div must be on the DOM for the insert before next
-  // so we create it and omit it from the patch
-  dom.AppendChild(body, div)
+  p.Add(diff)
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -129,6 +127,9 @@ func TestDiff(t *testing.T) {
   if err != nil {
     t.Error(err)
   }
+
+  // mock inserting before the div element
+  diff.Element = "0.1.0"
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -144,10 +145,13 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // remove paragraph before the div
-  diff, err = dom.RemoveDiff(body, para)
+  diff, err = dom.RemoveDiff(body, div)
   if err != nil {
     t.Error(err)
   }
+
+  // mock removing the div element - incremented due to the insert before
+  diff.Element = "0.1.1"
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -155,64 +159,66 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected operation, expected %d got %d", REMOVE_OP, diff.Operation)
   }
 
-  expected = "<p></p>"
+  expected = "<div></div>"
   if expected != string(diff.Data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
   p.Add(diff)
 
+  // set attr on paragraph
   diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
   }
 
+  diff.Element = "0.1.0"
+
   if diff.Operation != ATTR_SET_OP {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET_OP, diff.Operation)
   }
 
-  data, err = dom.RenderToBytes(para)
-  if err != nil {
-    t.Error(err)
-  }
-
-  expected = "<p data-foo=\"bar\"></p>"
-  if expected != string(data) {
-    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
-  }
-
   p.Add(diff)
 
-  log.Println(string(data))
-  //log.Printf("%#v\n", diff)
-
+  // remove attr from paragraph
   diff, err = dom.DelAttrDiff(para, html.Attribute{Key: "data-foo"})
   if err != nil {
     t.Error(err)
   }
 
+  diff.Element = "0.1.0"
+
   if diff.Operation != ATTR_DEL_OP {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL_OP, diff.Operation)
   }
 
-  data, err = dom.RenderToBytes(para)
+  p.Add(diff)
+
+  // create new attribute for assertion after Apply() 
+  diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-bar", Val: "baz"})
   if err != nil {
     t.Error(err)
   }
 
-  expected = "<p></p>"
-  if expected != string(data) {
-    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
-  }
+  diff.Element = "0.1.0"
 
   p.Add(diff)
-
-  log.Println(string(data))
 
   // apply the patch to perform the operations
   err = dom.Apply(&p)
   if err != nil {
     t.Error(err)
+  }
+
+  // attribute assertions after applying patch
+  data, err = dom.RenderToBytes(dom.Map["0.1.0"])
+  if err != nil {
+    t.Error(err)
+  }
+
+  expected = "<p data-id=\"0.1.0\" data-bar=\"baz\"></p>"
+  if expected != string(data) {
+    t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }
 
   // debug

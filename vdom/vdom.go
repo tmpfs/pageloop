@@ -6,9 +6,8 @@ import(
   //"os"
   //"io"
   //"fmt"
-  "log"
+  //"log"
   "bytes"
-  "errors"
   "strconv"
   "strings"
   "golang.org/x/net/html"
@@ -165,7 +164,6 @@ func (vdom *Vdom) CreateDoctypeNode(doctype string) *html.Node {
 // Returns the index of the attribute and a pointer to 
 // the attribute.
 func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
-  //log.Println("get attr", node)
   for index, attr := range node.Attr {
     if attr.Key == key {
       return index, &attr
@@ -205,16 +203,11 @@ func (vdom *Vdom) DelAttr(node *html.Node, attr html.Attribute) {
     }
 
     if match {
-      //log.Println("got del attr match", attr.Key)
-      //log.Printf("attrs: %#v\n", node.Attr)
       before := node.Attr[0:index]
-      //log.Printf("before: %#v\n", before)
       after := node.Attr[index + 1:len(node.Attr)]
-      //log.Printf("after: %#v\n", after)
       node.Attr = node.Attr[0:0]
       node.Attr = append(node.Attr, before...)
       node.Attr = append(node.Attr, after...)
-      //log.Printf("%#v\n", node.Attr)
       break
     }
   }
@@ -244,91 +237,6 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 }
 
 // Diff / Patch functions
-
-// Apply a patch to the DOM
-func (vdom *Vdom) Apply(patch *Patch) error {
-  var err error
-
-  var getNodes func (diff *Diff) ([]*html.Node, error)
-  getNodes = func(diff *Diff) ([]*html.Node, error) {
-    var nodes []*html.Node
-    var err error
-    switch diff.Type {
-      case html.ElementNode:
-        // parse the node data
-        nodes, err = vdom.ParseFragment(diff.Data, nil)
-        if err != nil {
-          return nodes, err
-        }
-      case html.DoctypeNode:
-        fallthrough
-      case html.TextNode:
-        fallthrough
-      case html.CommentNode:
-        fallthrough
-      default:
-        var node *html.Node = &html.Node{Type: diff.Type, Data: string(diff.Data)}
-        nodes = append(nodes, node)
-    }
-
-    return nodes, err
-  }
-
-  for _, diff := range patch.Diffs {
-    switch diff.Operation {
-      case APPEND_OP:
-
-        log.Println(diff.Element)
-
-        // lookup the parent by id
-        var parent *html.Node = vdom.Map[diff.Element]
-        if parent == nil {
-          return errors.New("Missing parent node for append operation")
-        }
-
-        var nodes []*html.Node
-        var err error
-        
-        nodes, err = getNodes(&diff)
-        if err != nil {
-          return err
-        }
-        for _, n := range nodes {
-          log.Println("appending child")
-          vdom.AppendChild(parent, n)
-        }
-
-      case INSERT_OP:
-
-        log.Println(diff.Element)
-
-        // lookup the target node
-        var target *html.Node = vdom.Map[diff.Element]
-        if target == nil {
-          return errors.New("Missing target node for insert before operation")
-        }
-
-        // infer the parent node
-        var parent *html.Node = target.Parent
-        if parent == nil {
-          return errors.New("Missing parent node for insert before operation (node may be detached)")
-        }
-
-        var nodes []*html.Node
-        var err error
-        
-        nodes, err = getNodes(&diff)
-        if err != nil {
-          return err
-        }
-        for _, n := range nodes {
-          vdom.InsertBefore(parent, n, target)
-        }
-    }
-  }
-
-  return err
-}
 
 // Append a child node and return a diff that represents the operation.
 func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
@@ -396,14 +304,14 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
 // Set an attribute and return a diff that represents the operation.
 func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_SET_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
-  vdom.SetAttr(node, attr)
+  //vdom.SetAttr(node, attr)
   return &op, nil
 }
 
 // Delete an attribute and return a diff that represents the operation.
 func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_DEL_OP, Element: vdom.GetId(node), Attr: attr, Type: node.Type}
-  vdom.DelAttr(node, attr)
+  //vdom.DelAttr(node, attr)
   return &op, nil
 }
 
@@ -429,7 +337,7 @@ func (vdom *Vdom) TextDiff(parent *html.Node) {
 // sequential.
 func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
-    oldId := vdom.GetAttrValue(c, idAttribute)
+    //oldId := vdom.GetAttrValue(c, idAttribute)
     ids, err := vdom.FindId(c)
     if err != nil {
       return err
@@ -441,7 +349,7 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
     }
     newId := intSliceToString(ids)
     vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
-    delete(vdom.Map, oldId)
+    //delete(vdom.Map, oldId)
     vdom.Map[newId] = c
   }
   return nil
