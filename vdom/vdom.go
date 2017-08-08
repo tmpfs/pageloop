@@ -29,6 +29,7 @@ type Vdom struct {
 func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
   var ids []int
   var err error
+  // get identifier from last child element node
   if parent.LastChild != nil {
     ids, err = vdom.FindId(findLastChildElement(parent))
     if err != nil {
@@ -36,8 +37,8 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
     }
     // increment for the new id
     ids[len(ids) - 1]++
+  // get identifiers from parent
   } else {
-    // TODO: test adding to empty parent
     ids, err = vdom.FindId(parent)
     // now the new first child
     ids = append(ids, 0)
@@ -55,7 +56,6 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
 // Insert a child node before another node.
 func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild * html.Node) error {
   var err error
-  //_, id := vdom.GetAttr(oldChild, idAttribute)
   id := vdom.GetId(oldChild)
   vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id})
   parent.InsertBefore(newChild, oldChild)
