@@ -6,7 +6,7 @@ import(
   //"os"
   //"io"
   //"fmt"
-  //"log"
+  "log"
   "bytes"
   "errors"
   "strconv"
@@ -246,37 +246,81 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 // Apply a patch to the DOM
 func (vdom *Vdom) Apply(patch *Patch) error {
   var err error
+
+  var getNodes func (diff *Diff) ([]*html.Node, error)
+  getNodes = func(diff *Diff) ([]*html.Node, error) {
+    var nodes []*html.Node
+    var err error
+    switch diff.Type {
+      case html.ElementNode:
+        // parse the node data
+        nodes, err = vdom.ParseFragment(diff.Data, nil)
+        if err != nil {
+          return nodes, err
+        }
+      case html.DoctypeNode:
+        fallthrough
+      case html.TextNode:
+        fallthrough
+      case html.CommentNode:
+        fallthrough
+      default:
+        var node *html.Node = &html.Node{Type: diff.Type, Data: string(diff.Data)}
+        nodes = append(nodes, node)
+    }
+
+    return nodes, err
+  }
+
   for _, diff := range patch.Diffs {
     switch diff.Operation {
       case APPEND_OP:
+
+        log.Println(diff.Element)
+
         // lookup the parent by id
         var parent *html.Node = vdom.Map[diff.Element]
         if parent == nil {
           return errors.New("Missing parent node for append operation")
         }
 
-        // TODO: allow appending to document node
+        var nodes []*html.Node
+        var err error
+        
+        nodes, err = getNodes(&diff)
+        if err != nil {
+          return err
+        }
+        for _, n := range nodes {
+          log.Println("appending child")
+          vdom.AppendChild(parent, n)
+        }
 
-        switch diff.Type {
-          case html.ElementNode:
-            // parse the node data
-            var nodes []*html.Node
-            nodes, err := vdom.ParseFragment(diff.Data, nil)
-            if err != nil {
-              return err
-            }
-            for _, n := range nodes {
-              vdom.AppendChild(parent, n)
-            }
-          case html.DoctypeNode:
-            fallthrough
-          case html.TextNode:
-            fallthrough
-          case html.CommentNode:
-            fallthrough
-          default:
-            var node *html.Node = &html.Node{Type: diff.Type, Data: string(diff.Data)}
-            vdom.AppendChild(parent, node)
+      case INSERT_OP:
+
+        log.Println(diff.Element)
+
+        // lookup the target node
+        var target *html.Node = vdom.Map[diff.Element]
+        if target == nil {
+          return errors.New("Missing target node for insert before operation")
+        }
+
+        // infer the parent node
+        var parent *html.Node = target.Parent
+        if parent == nil {
+          return errors.New("Missing parent node for insert before operation (node may be detached)")
+        }
+
+        var nodes []*html.Node
+        var err error
+        
+        nodes, err = getNodes(&diff)
+        if err != nil {
+          return err
+        }
+        for _, n := range nodes {
+          vdom.InsertBefore(parent, n, target)
         }
     }
   }

@@ -1,7 +1,7 @@
 package vdom
 
 import (
-  //"os"
+  "os"
   "log"
   "testing"
   "io/ioutil"
@@ -77,6 +77,7 @@ func TestDiff(t *testing.T) {
   var data []byte
   var expected string
   var dom *Vdom
+  var p Patch = Patch{}
 
 
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
@@ -114,14 +115,9 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
-  // create and apply the patch, we need div on the DOM for the insert before
-  var p Patch = Patch{}
-  p.Add(diff)
-
-  err = dom.Apply(&p)
-  if err != nil {
-    t.Error(err)
-  }
+  // div must be on the DOM for the insert before next
+  // so we create it and omit it from the patch
+  dom.AppendChild(body, div)
 
   log.Printf("%s\n", string(diff.Data))
 
@@ -143,6 +139,8 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
+  p.Add(diff)
+
   // remove paragraph before the div
   diff, err = dom.RemoveDiff(body, para)
   if err != nil {
@@ -160,7 +158,9 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(diff.Data))
   }
 
-  diff, err = dom.SetAttrDiff(div, html.Attribute{Key: "data-foo", Val: "bar"})
+  p.Add(diff)
+
+  diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
   }
@@ -169,20 +169,22 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_SET_OP, diff.Operation)
   }
 
-  data, err = dom.RenderToBytes(div)
+  data, err = dom.RenderToBytes(para)
   if err != nil {
     t.Error(err)
   }
 
-  expected = "<div data-foo=\"bar\"></div>"
+  expected = "<p data-foo=\"bar\"></p>"
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }
 
+  p.Add(diff)
+
   log.Println(string(data))
   //log.Printf("%#v\n", diff)
 
-  diff, err = dom.DelAttrDiff(div, html.Attribute{Key: "data-foo"})
+  diff, err = dom.DelAttrDiff(para, html.Attribute{Key: "data-foo"})
   if err != nil {
     t.Error(err)
   }
@@ -191,25 +193,30 @@ func TestDiff(t *testing.T) {
     t.Errorf("Unexpected operation, expected %d got %d", ATTR_DEL_OP, diff.Operation)
   }
 
-  data, err = dom.RenderToBytes(div)
+  data, err = dom.RenderToBytes(para)
   if err != nil {
     t.Error(err)
   }
 
-  expected = "<div></div>"
+  expected = "<p></p>"
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }
 
+  p.Add(diff)
+
   log.Println(string(data))
-  //log.Printf("%#v\n", diff)
+
+  // apply the patch to perform the operations
+  err = dom.Apply(&p)
+  if err != nil {
+    t.Error(err)
+  }
 
   // debug
-  /*
   err = html.Render(os.Stdout, dom.Document)
   if err != nil {
     t.Error(err)
   }
-  */
 }
 
