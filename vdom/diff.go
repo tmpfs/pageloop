@@ -17,7 +17,12 @@ const (
   TEXT_OP
 )
 
-// Diff is a list of operations on the virtual DOM.
+// Diff is an operation on the virtual DOM that results 
+// in a change to the DOM.
+//
+// Whilst it represents a difference in the DOM this is 
+// essentially the memento pattern, storing changes so 
+// that they may be applied and reverted.
 type Diff struct {
   // Operation constant
   Operation int
@@ -46,4 +51,3 @@ type Diff struct {
 type Patch struct {
   Diffs []Diff
 }
-
