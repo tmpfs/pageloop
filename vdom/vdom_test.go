@@ -107,7 +107,7 @@ func TestDiff(t *testing.T) {
   // set attr on paragraph
 
   /*
-  diff, err = dom.DiffSetAttr(para, html.Attribute{Key: "data-foo", Val: "bar"})
+  diff, err = dom.DiffAttrSet(para, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
   }
@@ -121,7 +121,7 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // remove attr from paragraph
-  diff, err = dom.DiffDelAttr(para, html.Attribute{Key: "data-foo"})
+  diff, err = dom.DiffAttrDel(para, html.Attribute{Key: "data-foo"})
   if err != nil {
     t.Error(err)
   }
@@ -150,7 +150,7 @@ func TestDiff(t *testing.T) {
 
   // create new attribute for assertion after Apply() 
   /*
-  diff, err = dom.DiffSetAttr(para, html.Attribute{Key: "data-bar", Val: "baz"})
+  diff, err = dom.DiffAttrSet(para, html.Attribute{Key: "data-bar", Val: "baz"})
   if err != nil {
     t.Error(err)
   }

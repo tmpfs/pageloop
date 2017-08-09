@@ -42,7 +42,7 @@ func (vdom *Vdom) Parse(b []byte) error {
         list := append(ids, i)
         id = intSliceToString(list)
         vdom.Map[id] = c
-        vdom.SetAttr(c, html.Attribute{Key: idAttribute, Val: id})
+        vdom.AttrSet(c, html.Attribute{Key: idAttribute, Val: id})
         f(c, list)
         i++
       }
@@ -87,7 +87,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
     }
   }
   id := intSliceToString(ids)
-  vdom.SetAttr(node, html.Attribute{Key: idAttribute, Val: id})
+  vdom.AttrSet(node, html.Attribute{Key: idAttribute, Val: id})
   parent.AppendChild(node)
   vdom.Map[id] = node
   return err
@@ -97,7 +97,7 @@ func (vdom *Vdom) AppendChild(parent *html.Node, node *html.Node) error {
 func (vdom *Vdom) InsertBefore(parent *html.Node, newChild *html.Node, oldChild * html.Node) error {
   var err error
   id := vdom.GetId(oldChild)
-  vdom.SetAttr(newChild, html.Attribute{Key: idAttribute, Val: id})
+  vdom.AttrSet(newChild, html.Attribute{Key: idAttribute, Val: id})
   parent.InsertBefore(newChild, oldChild)
   vdom.Map[id] = newChild
   err = vdom.adjustSiblings(newChild, true)
@@ -161,7 +161,7 @@ func (vdom *Vdom) CreateDoctypeNode(doctype string) *html.Node {
 //
 // Returns the index of the attribute and a pointer to 
 // the attribute.
-func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
+func (vdom *Vdom) AttrGet(node *html.Node, key string) (int, *html.Attribute) {
   for index, attr := range node.Attr {
     if attr.Key == key {
       return index, &attr
@@ -170,7 +170,7 @@ func (vdom *Vdom) GetAttr(node *html.Node, key string) (int, *html.Attribute) {
   return -1, nil
 }
 
-func (vdom *Vdom) GetAttrNs(node *html.Node, key string, ns string) (int, *html.Attribute) {
+func (vdom *Vdom) AttrGetNs(node *html.Node, key string, ns string) (int, *html.Attribute) {
   for index, attr := range node.Attr {
     if attr.Key == key && attr.Namespace == ns {
       return index, &attr
@@ -180,8 +180,8 @@ func (vdom *Vdom) GetAttrNs(node *html.Node, key string, ns string) (int, *html.
 }
 
 // Get the value of an attribute.
-func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
-  _, attr := vdom.GetAttr(node, key)
+func (vdom *Vdom) AttrGetValue(node *html.Node, key string) string {
+  _, attr := vdom.AttrGet(node, key)
   if attr != nil {
     return attr.Val
   }
@@ -191,8 +191,8 @@ func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
 // Set an Attribute.
 //
 // If the attribute exists it is overwritten otherwise it is created.
-func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
-  index, existing := vdom.GetAttr(node, attr.Key)
+func (vdom *Vdom) AttrSet(node *html.Node, attr html.Attribute) {
+  index, existing := vdom.AttrGet(node, attr.Key)
   if existing != nil {
     existing.Val = attr.Val
     node.Attr[index] = *existing
@@ -202,7 +202,7 @@ func (vdom *Vdom) SetAttr(node *html.Node, attr html.Attribute) {
 }
 
 // Remove an attribute
-func (vdom *Vdom) DelAttr(node *html.Node, attr html.Attribute) {
+func (vdom *Vdom) AttrDel(node *html.Node, attr html.Attribute) {
   for index, a := range node.Attr {
     var match bool = a.Key == attr.Key
     if a.Namespace != "" && attr.Namespace != "" {
@@ -224,7 +224,7 @@ func (vdom *Vdom) DelAttr(node *html.Node, attr html.Attribute) {
 
 // Get the unique vdom identifier for an element extracted from the identifier attribute.
 func (vdom *Vdom) GetId(node *html.Node) string {
-  return vdom.GetAttrValue(node, idAttribute)
+  return vdom.AttrGetValue(node, idAttribute)
 }
 
 // Get the identifier for a node as a slice of integers.
@@ -303,13 +303,13 @@ func (vdom *Vdom) DiffRemove(parent *html.Node, node *html.Node) (*Diff, error) 
 }
 
 // Get a diff that represents the set attribute operation.
-func (vdom *Vdom) DiffSetAttr(node *html.Node, attr html.Attribute) (*Diff, error) {
+func (vdom *Vdom) DiffAttrSet(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_SET, Id: vdom.GetId(node), Element: node, Attr: attr, Type: node.Type}
   return &op, nil
 }
 
 // Get a diff that represents the delete attribute operation.
-func (vdom *Vdom) DiffDelAttr(node *html.Node, attr html.Attribute) (*Diff, error) {
+func (vdom *Vdom) DiffAttrDel(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_DEL, Id: vdom.GetId(node), Element: node, Attr: attr, Type: node.Type}
   return &op, nil
 }
@@ -346,7 +346,7 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
       ids[len(ids) - 1]--
     }
     newId := intSliceToString(ids)
-    vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
+    vdom.AttrSet(c, html.Attribute{Key:idAttribute, Val: newId})
     vdom.Map[newId] = c
   }
   return nil

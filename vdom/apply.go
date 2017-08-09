@@ -150,7 +150,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         if target == nil {
           return out, errors.New("Missing target node for set attribute operation")
         }
-        _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
+        _, att := vdom.AttrGetNs(target, diff.Attr.Key, diff.Attr.Namespace)
         // revert to previous attribute value
         if att != nil {
           tx = &Diff{Operation: ATTR_SET, Id: vdom.GetId(target), Element: target, Attr: *att, Type: target.Type}
@@ -161,13 +161,13 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
 
         out.Add(tx)
 
-        vdom.SetAttr(target, diff.Attr)
+        vdom.AttrSet(target, diff.Attr)
       case ATTR_DEL:
         var target *html.Node = vdom.Map[diff.Id]
         if target == nil {
           return out, errors.New("Missing target node for delete attribute operation")
         }
-        _, att := vdom.GetAttrNs(target, diff.Attr.Key, diff.Attr.Namespace)
+        _, att := vdom.AttrGetNs(target, diff.Attr.Key, diff.Attr.Namespace)
         // revert to previous attribute value
         if att != nil {
           tx = &Diff{Operation: ATTR_SET, Id: vdom.GetId(target), Element: target, Attr: *att, Type: target.Type}
@@ -177,7 +177,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         }
 
         out.Add(tx)
-        vdom.DelAttr(target, diff.Attr)
+        vdom.AttrDel(target, diff.Attr)
     }
   }
 
