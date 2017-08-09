@@ -179,7 +179,7 @@ func (vdom *Vdom) GetAttrNs(node *html.Node, key string, ns string) (int, *html.
   return -1, nil
 }
 
-// Get the value of an attribute, that is `html.Attribute.Val`.
+// Get the value of an attribute.
 func (vdom *Vdom) GetAttrValue(node *html.Node, key string) string {
   _, attr := vdom.GetAttr(node, key)
   if attr != nil {
@@ -336,7 +336,6 @@ func (vdom *Vdom) TextDiff(parent *html.Node) {
 // sequential.
 func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
-    //oldId := vdom.GetAttrValue(c, idAttribute)
     ids, err := vdom.FindId(c)
     if err != nil {
       return err
@@ -348,7 +347,6 @@ func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
     }
     newId := intSliceToString(ids)
     vdom.SetAttr(c, html.Attribute{Key:idAttribute, Val: newId})
-    //delete(vdom.Map, oldId)
     vdom.Map[newId] = c
   }
   return nil
