@@ -191,6 +191,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
     }
   }
 
+  // sync identifiers
   for index, txn := range out.Diffs {
     log.Println("got txn Op", txn.Operation)
     log.Println("got txn Id", txn.Id)
@@ -207,6 +208,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
     out.Diffs[index] = txn
   }
 
+  // reverse operations
   var reverse []Diff
   for i := len(out.Diffs) - 1;i >= 0;i-- {
     reverse = append(reverse, out.Diffs[i]) 
