@@ -6,8 +6,9 @@ import(
   //"io"
   //"fmt"
   //"log"
-  "bytes"
+  //"bytes"
   "golang.org/x/net/html"
+  "github.com/tmpfs/pageloop/vdom"
 )
 
 const (
@@ -38,6 +39,7 @@ type Page struct {
   DocType string `json:"doctype"`
   UserData map[string] interface{} `json:"data"`
   Blocks []Block  `json:"blocks"`
+  Dom *vdom.Vdom
   file File
 }
 
@@ -49,16 +51,18 @@ type Block struct {
   Nodes []*html.Node
 }
 
-// Parse blocks from the file data associated with a page.
-func (p *Page) Parse() error {
-  r := bytes.NewBuffer(p.file.data)
-
-  _, err := html.Parse(r)
+// Parse the file data into the virtual DOM of this page.
+func (p *Page) Parse() (*vdom.Vdom, error) {
+  var err error
+  var dom = vdom.Vdom{}
+  err = dom.Parse(p.file.data)
   if err != nil {
-    return err
+    return nil, err
   }
 
-  return err
+  p.Dom = &dom
+
+  return p.Dom, nil
 }
 
 /*
