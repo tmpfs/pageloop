@@ -12,6 +12,7 @@ import (
 )
 
 const (
+  // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"
 )
@@ -30,17 +31,40 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
     return err
   }
   app.Urls = make(map[string] File)
-  app.SetComputedFields(path)
-  app.Merge()
+  app.setComputedFields(path)
+  app.merge()
   return err
 }
 
+
+/*
+  Determine a URL from a relative path.
+*/
+func (app *Application) UrlFromPath(path string) string {
+  var url string = strings.Join(strings.Split(path, string(os.PathSeparator)), "/")
+  return url
+}
+
+// Private methods
+
+// Merge user data with page structs loading user data from a JSON 
+// file with the same name of the HTML file that created the page.
+func (app *Application) merge() Application {
+  for index, page := range app.Pages {
+    if TEMPLATE_FILE.MatchString(page.file.Path) {
+      app.getPageData(&page)
+      app.Pages[index] = page
+      app.Pages[index].Parse()
+    }
+  }
+  return *app
+}
 
 // Set initial relative computed path and URL path.
 //
 // Also indicate whether a file is an index file and build the 
 // map of URLs to files.
-func (app *Application) SetComputedFields(path string) Application {
+func (app *Application) setComputedFields(path string) Application {
   for _, file := range app.Files {
     // includes the leading slash
     file.Relative = strings.TrimPrefix(file.Path, path)
@@ -58,20 +82,14 @@ func (app *Application) SetComputedFields(path string) Application {
   return *app
 }
 
-// Merge user data with page structs loading user data from a JSON 
-// file with the same name of the HTML file that created the page.
-func (app *Application) Merge() Application {
-  for index, page := range app.Pages {
-    if TEMPLATE_FILE.MatchString(page.file.Path) {
-      app.GetUserData(&page)
-      app.Pages[index] = page
-      app.Pages[index].Parse()
-    }
-  }
-  return *app
-}
-
-func (app *Application) GetUserData(page *Page) map[string] interface{} {
+// Attempt to find user page data by first attempting to 
+// parse embedded frontmatter YAML.
+// 
+// If there is no frontmatter data it attempts to 
+// load data from a corresponding file with a .yml extension.
+//
+// Finally if a .json file exists it is parsed.
+func (app *Application) getPageData(page *Page) map[string] interface{} {
   page.UserData = make(map[string] interface{})
 
   // frontmatter
@@ -136,10 +154,3 @@ func (app *Application) GetUserData(page *Page) map[string] interface{} {
   return page.UserData
 }
 
-/*
-  Determine a URL from a relative path.
-*/
-func (app *Application) UrlFromPath(path string) string {
-  var url string = strings.Join(strings.Split(path, string(os.PathSeparator)), "/")
-  return url
-}

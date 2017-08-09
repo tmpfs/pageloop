@@ -13,6 +13,7 @@ import(
 )
 
 const (
+  // Default doctype.
   HTML5 = "html"
 )
 
