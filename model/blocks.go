@@ -7,6 +7,7 @@ import(
   //"fmt"
   //"log"
   //"bytes"
+  "html/template"
   "golang.org/x/net/html"
   "github.com/tmpfs/pageloop/vdom"
 )
@@ -63,6 +64,22 @@ func (p *Page) Parse() (*vdom.Vdom, error) {
   p.Dom = &dom
 
   return p.Dom, nil
+}
+
+func (p *Page) Render() error {
+  //fmt.Println("--- render function ---")
+  //fmt.Println()
+
+  data := p.file.data
+  tpl := template.New(p.file.Relative)
+  tpl, err := tpl.Parse(string(data))
+  if err != nil {
+    return err
+  }
+  //log.Println(app.Pages[0].UserData)
+  tpl.Execute(os.Stdout, p.UserData)
+
+  return nil
 }
 
 /*

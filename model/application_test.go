@@ -38,5 +38,5 @@ func TestApplication(t *testing.T) {
 
   fmt.Println("--- render result ---")
   fmt.Println()
-  app.Render(&app.Pages[0])
+  //app.Render(&app.Pages[0])
 }
