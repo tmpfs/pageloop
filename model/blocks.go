@@ -1,7 +1,5 @@
-/*
-  Data model for HTML pages written as template blocks.
-*/
-package blocks
+// Data model for HTML pages written as template blocks.
+package model
 
 import(
   "os"

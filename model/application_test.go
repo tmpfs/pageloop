@@ -1,4 +1,4 @@
-package blocks
+package model
 
 import (
   //"os"
@@ -17,7 +17,7 @@ func TestApplication(t *testing.T) {
 
   // app.Base = "test/fixtures/mock-app"
 
-  app.Load("test/fixtures/mock-app", nil)
+  app.Load("../test/fixtures/mock-app", nil)
 
   expected := 5
   if len(app.Files) != expected {
