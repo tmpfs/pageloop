@@ -5,6 +5,7 @@ package vdom
 import(
   //"log"
   "bytes"
+  "regexp"
   "strconv"
   "strings"
   "golang.org/x/net/html"
@@ -240,6 +241,33 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
     return nil, err
   }
   return w.Bytes(), nil
+}
+
+// Compacts a DOM tree by removing text nodes between 
+// element nodes that consist solely of whitespace.
+//
+// Removes whitespace from descendants of the target node 
+// and returns the target node with in place modifications 
+// if you need to keep the original you should copy it first.
+// 
+// The text nodes are preserved in the tree - their data is 
+// set to the empty string.
+func (vdom *Vdom) Compact(node *html.Node) *html.Node {
+  var whitespace = regexp.MustCompile(`^\s+$`)
+  for c := node.FirstChild; c != nil; c = c.NextSibling {
+    var next *html.Node = c.NextSibling
+    var prev *html.Node = c.PrevSibling
+    if (c.Type == html.TextNode && whitespace.MatchString(c.Data)) {
+      var removes bool = (next == nil || next.Type == html.ElementNode) && (prev == nil || prev.Type == html.ElementNode)
+      if removes {
+        c.Data = ""
+      }
+    }
+    if (c.Type == html.ElementNode) {
+      vdom.Compact(c) 
+    }
+  }
+  return node
 }
 
 // Diff / Patch functions

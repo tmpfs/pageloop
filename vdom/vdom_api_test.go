@@ -10,19 +10,20 @@ import (
 // Tests the ability to use the the basic DOM API wrapper 
 // functions, AppendChild, InsertBefore and RemoveChild.
 func TestVdom(t *testing.T) {
-  file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
+  var err error
+  var file []byte
+  var dom *Vdom
+  var expected string
+
+  file, err = ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
     log.Fatal(err)
   }
 
-  dom := &Vdom{}
+  dom = &Vdom{}
   err = dom.Parse(file)
   if err != nil {
     log.Fatal(err)
-  }
-
-  if dom == nil {
-    t.Errorf("Expected vdom, got nil")
   }
 
   head := dom.Document.FirstChild.NextSibling.FirstChild
@@ -61,6 +62,17 @@ func TestVdom(t *testing.T) {
   err = dom.InsertBefore(body, div, script)
   if err != nil {
     t.Error(err)
+  }
+
+  data, err := dom.RenderToBytes(dom.Compact(dom.Document))
+  if err != nil {
+    t.Error(err)
+  }
+
+  expected = `<!DOCTYPE html><html data-id="0"><head data-id="0.0"><title data-id="0.0.0">Vdom Fixture</title><meta data-id="0.0.1"/><link data-id="0.0.2"/></head><body data-id="0.1"><div data-id="0.1.0"></div><script data-id="0.1.1"></script></body></html>`
+
+  if string(data) != expected {
+    t.Errorf("Unexpected markup, expected %s got %s", expected, string(data))
   }
 
   /*
