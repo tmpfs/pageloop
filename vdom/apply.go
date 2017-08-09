@@ -120,10 +120,10 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, errors.New("Missing parent node for remove operation (node may be detached)")
         }
 
-        log.Println("Remove with id", diff.Id)
+        //log.Println("Remove with id", diff.Id)
 
         if target.NextSibling == nil {
-          log.Println("CREATING APPEND DIFF FOR REMOVE CHILD")
+          //log.Println("CREATING APPEND DIFF FOR REMOVE CHILD")
           tx, err = vdom.AppendDiff(parent, target)
           if err != nil {
             return out, err
@@ -131,7 +131,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           tx.Id = vdom.GetId(parent)
           tx.Element = parent
         } else {
-          log.Println("CREATING INSERT DIFF FOR REMOVE CHILD", target.NextSibling)
+          //log.Println("CREATING INSERT DIFF FOR REMOVE CHILD", target.NextSibling)
           tx, err = vdom.InsertDiff(parent, target, target.NextSibling)
           tx.Id = vdom.GetId(target.NextSibling)
           tx.Element = target.NextSibling
@@ -141,15 +141,6 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         }
 
         err = vdom.RemoveChild(parent, target)
-        /*
-        if tx.Operation == APPEND {
-          tx.Id = vdom.GetId(parent)
-          tx.Element = parent
-        } else {
-          tx.Id = vdom.GetId(target.NextSibling)
-          tx.Element = target.NextSibling
-        }
-        */
         out.Add(tx)
         if err != nil {
           return out, err
@@ -186,16 +177,17 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
         }
 
         out.Add(tx)
-
         vdom.DelAttr(target, diff.Attr)
     }
   }
 
   // sync identifiers
   for index, txn := range out.Diffs {
+    /*
     log.Println("got txn Op", txn.Operation)
     log.Println("got txn Id", txn.Id)
     log.Println("got txn Element Id", vdom.GetId(txn.Element))
+    */
     txn.Id = vdom.GetId(txn.Element)
     log.Println(txn)
 
