@@ -9,6 +9,7 @@ import (
 )
 
 func TestApplication(t *testing.T) {
+  var err error
   app := Application{Title: "Mock Application"}
 
   if app.Title == "" {
@@ -17,7 +18,10 @@ func TestApplication(t *testing.T) {
 
   // app.Base = "test/fixtures/mock-app"
 
-  app.Load("../test/fixtures/mock-app", nil)
+  err = app.Load("../test/fixtures/mock-app", nil)
+  if err != nil {
+    t.Error(err)
+  }
 
   expected := 5
   if len(app.Files) != expected {

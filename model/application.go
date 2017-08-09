@@ -20,15 +20,19 @@ var types = []string{YAML, JSON}
 
 // Load an application using the given loader implementation, 
 // if a nil loader is given the default file system loader is used.
-func (app *Application) Load(path string, loader ApplicationLoader) *Application {
+func (app *Application) Load(path string, loader ApplicationLoader) error {
+  var err error
   if loader == nil {
     loader = FileSystemLoader{}
   }
-  loader.LoadApplication(path, app)
+  err = loader.LoadApplication(path, app)
+  if err != nil {
+    return err
+  }
   app.Urls = make(map[string] File)
   app.SetComputedFields(path)
   app.Merge()
-  return app
+  return err
 }
 
 

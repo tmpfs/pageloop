@@ -10,20 +10,18 @@ import(
   . "github.com/tmpfs/pageloop/model"
 )
 
-func LoadApplication(path string, app *Application) *Application {
-  
-}
+// Create an application and load from the given path using 
+// the specified loader, if a nil loader is given files are 
+// loaded using a file system loader in which case path 
+// should be a directory.
 
-// Load an application using the given loader implementation, 
-// if a nil loader is given the default file system loader is used.
-func (app *Application) Load(path string, loader ApplicationLoader) Application {
-  if loader == nil {
-    loader = FileSystemLoader{}
+/*
+func Load(path string, loader ApplicationLoader) (*Application, error) {
+  app := Application{}
+  err := app.Load(path, loader)
+  if err != nil {
+    return nil, err
   }
-  loader.LoadApplication(path, app)
-  app.Urls = make(map[string] File)
-  app.SetComputedFields(path)
-  app.Merge()
-  return *app
+  return &app, nil
 }
-
+*/
