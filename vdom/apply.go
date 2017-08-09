@@ -64,7 +64,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, err
         }
         for _, n := range nodes {
-          tx, err = vdom.RemoveDiff(parent, n)
+          tx, err = vdom.DiffRemove(parent, n)
           if err != nil {
             return out, err
           }
@@ -96,7 +96,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, err
         }
         for _, n := range nodes {
-          tx, err = vdom.RemoveDiff(parent, n)
+          tx, err = vdom.DiffRemove(parent, n)
           if err != nil {
             return out, err
           }
@@ -124,7 +124,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
 
         if target.NextSibling == nil {
           //log.Println("CREATING APPEND DIFF FOR REMOVE CHILD")
-          tx, err = vdom.AppendDiff(parent, target)
+          tx, err = vdom.DiffAppend(parent, target)
           if err != nil {
             return out, err
           }
@@ -132,7 +132,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           tx.Element = parent
         } else {
           //log.Println("CREATING INSERT DIFF FOR REMOVE CHILD", target.NextSibling)
-          tx, err = vdom.InsertDiff(parent, target, target.NextSibling)
+          tx, err = vdom.DiffInsert(parent, target, target.NextSibling)
           tx.Id = vdom.GetId(target.NextSibling)
           tx.Element = target.NextSibling
           if err != nil {

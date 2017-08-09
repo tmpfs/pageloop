@@ -65,6 +65,7 @@ func TestVdom(t *testing.T) {
   }
 
   data, err := dom.RenderToBytes(dom.Compact(dom.Document))
+  //data, err := dom.RenderToBytes(dom.Document)
   if err != nil {
     t.Error(err)
   }

@@ -41,7 +41,7 @@ func TestDiff(t *testing.T) {
 
   // append a div
   div := dom.CreateElement("div")
-  diff, err = dom.AppendDiff(body, div)
+  diff, err = dom.DiffAppend(body, div)
   if err != nil {
     t.Error(err)
   }
@@ -61,7 +61,7 @@ func TestDiff(t *testing.T) {
 
   // insert paragraph before the div
   para := dom.CreateElement("p")
-  diff, err = dom.InsertDiff(body, para, div)
+  diff, err = dom.DiffInsert(body, para, div)
   if err != nil {
     t.Error(err)
   }
@@ -83,7 +83,7 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // remove paragraph before the div
-  diff, err = dom.RemoveDiff(body, div)
+  diff, err = dom.DiffRemove(body, div)
   if err != nil {
     t.Error(err)
   }
@@ -107,7 +107,7 @@ func TestDiff(t *testing.T) {
   // set attr on paragraph
 
   /*
-  diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-foo", Val: "bar"})
+  diff, err = dom.DiffSetAttr(para, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
   }
@@ -121,7 +121,7 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // remove attr from paragraph
-  diff, err = dom.DelAttrDiff(para, html.Attribute{Key: "data-foo"})
+  diff, err = dom.DiffDelAttr(para, html.Attribute{Key: "data-foo"})
   if err != nil {
     t.Error(err)
   }
@@ -150,7 +150,7 @@ func TestDiff(t *testing.T) {
 
   // create new attribute for assertion after Apply() 
   /*
-  diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-bar", Val: "baz"})
+  diff, err = dom.DiffSetAttr(para, html.Attribute{Key: "data-bar", Val: "baz"})
   if err != nil {
     t.Error(err)
   }

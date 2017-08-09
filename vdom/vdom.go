@@ -250,7 +250,7 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
 // and returns the target node with in place modifications 
 // if you need to keep the original you should copy it first.
 // 
-// The text nodes are preserved in the tree - their data is 
+// The text nodes are preserved in the tree; their Data is 
 // set to the empty string.
 func (vdom *Vdom) Compact(node *html.Node) *html.Node {
   var whitespace = regexp.MustCompile(`^\s+$`)
@@ -261,6 +261,7 @@ func (vdom *Vdom) Compact(node *html.Node) *html.Node {
       var removes bool = (next == nil || next.Type == html.ElementNode) && (prev == nil || prev.Type == html.ElementNode)
       if removes {
         c.Data = ""
+        //node.RemoveChild(c)
       }
     }
     if (c.Type == html.ElementNode) {
@@ -272,8 +273,8 @@ func (vdom *Vdom) Compact(node *html.Node) *html.Node {
 
 // Diff / Patch functions
 
-// Append a child node and return a diff that represents the operation.
-func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) {
+// Get a diff that represents the append child operation.
+func (vdom *Vdom) DiffAppend(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
   var op Diff = Diff{Operation: APPEND, Id: vdom.GetId(parent), Element: parent, Type: node.Type}
   // convert to byte slice
@@ -281,8 +282,8 @@ func (vdom *Vdom) AppendDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   return &op, err
 }
 
-// Insert a child node before another node and return a diff that represents the operation.
-func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *html.Node) (*Diff, error) {
+// Get a diff that represents the insert before operation.
+func (vdom *Vdom) DiffInsert(parent *html.Node, newChild *html.Node, oldChild *html.Node) (*Diff, error) {
   var err error
   var op Diff = Diff{Operation: INSERT, Id: vdom.GetId(oldChild), Element: oldChild, Type: newChild.Type}
 
@@ -291,8 +292,8 @@ func (vdom *Vdom) InsertDiff(parent *html.Node, newChild *html.Node, oldChild *h
   return &op, err
 }
 
-// Remove a node and return a diff that represents the operation.
-func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) {
+// Get a diff that represents the remove child operation.
+func (vdom *Vdom) DiffRemove(parent *html.Node, node *html.Node) (*Diff, error) {
   var err error
   var op Diff = Diff{Operation: REMOVE, Id: vdom.GetId(node), Element: node, Type: node.Type}
 
@@ -301,14 +302,14 @@ func (vdom *Vdom) RemoveDiff(parent *html.Node, node *html.Node) (*Diff, error) 
   return &op, err
 }
 
-// Set an attribute and return a diff that represents the operation.
-func (vdom *Vdom) SetAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+// Get a diff that represents the set attribute operation.
+func (vdom *Vdom) DiffSetAttr(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_SET, Id: vdom.GetId(node), Element: node, Attr: attr, Type: node.Type}
   return &op, nil
 }
 
-// Delete an attribute and return a diff that represents the operation.
-func (vdom *Vdom) DelAttrDiff(node *html.Node, attr html.Attribute) (*Diff, error) {
+// Get a diff that represents the delete attribute operation.
+func (vdom *Vdom) DiffDelAttr(node *html.Node, attr html.Attribute) (*Diff, error) {
   var op Diff = Diff{Operation: ATTR_DEL, Id: vdom.GetId(node), Element: node, Attr: attr, Type: node.Type}
   return &op, nil
 }
