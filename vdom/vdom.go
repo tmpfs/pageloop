@@ -1,5 +1,15 @@
 // Virtual DOM implementation backed by the parse tree 
 // returned from golang.org/x/net/html.
+//
+// When a document is parsed each element node is given a 
+// unique identifier in the form 0.1.2 where each integer 
+// represents the child index. Typically the html element 
+// will be index 0.
+//
+// So that identifiers may be kept in sync you should call 
+// the wrapper API methods AppendChild, InsertBefore and 
+// RemoveChild. They each require an additional first 
+// argument which is the parent node to change.
 package vdom
   
 import(

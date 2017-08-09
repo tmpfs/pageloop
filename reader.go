@@ -6,16 +6,16 @@ import (
   "io/ioutil"
 )
 
-type Reader interface {
-  Read(path string, app *Application) Application
+// Abstract type to load files into an application.
+type ApplicationLoader interface {
+  LoadApplication(path string, app *Application) Application
 }
 
-type FileSystemReader struct {}
+// Default implementation loads from the filesystem.
+type FileSystemLoader struct {}
 
-/*
-  Reads an application's assets from a filesystem directory path.
-*/
-func (r FileSystemReader) Read(path string, app *Application) Application {
+// Loads the application assets from a filesystem directory path.
+func (r FileSystemLoader) LoadApplication(path string, app *Application) Application {
   filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
     if err != nil {
       return err

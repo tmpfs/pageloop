@@ -18,16 +18,13 @@ const (
 
 var types = []string{YAML, JSON}
 
-/*
-  Load an application using the given Reader implementation.
-
-  If a nil reader is given the default file system reader is used.
-*/
-func (app *Application) Load(path string, reader Reader) Application {
-  if reader == nil {
-    reader = FileSystemReader{}
+// Load an application using the given loader implementation, 
+// if a nil loader is given the default file system loader is used.
+func (app *Application) Load(path string, loader ApplicationLoader) Application {
+  if loader == nil {
+    loader = FileSystemLoader{}
   }
-  reader.Read(path, app)
+  loader.LoadApplication(path, app)
   app.Urls = make(map[string] File)
   app.SetComputedFields(path)
   app.Merge()
