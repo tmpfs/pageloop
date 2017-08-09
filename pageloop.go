@@ -6,9 +6,11 @@
 // page loaded in an iframe.
 package pageloop
 
+/*
 import(
   . "github.com/tmpfs/pageloop/model"
 )
+*/
 
 // Create an application and load from the given path using 
 // the specified loader, if a nil loader is given files are 
