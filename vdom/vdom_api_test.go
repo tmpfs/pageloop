@@ -8,7 +8,7 @@ import (
 )
 
 // Tests the ability to use the the basic DOM API wrapper 
-// functions.
+// functions, AppendChild, InsertBefore and RemoveChild.
 func TestVdom(t *testing.T) {
   file, err := ioutil.ReadFile("../test/fixtures/vdom.html")
   if err != nil {
