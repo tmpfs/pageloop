@@ -76,7 +76,7 @@ func TestDiff(t *testing.T) {
 
   var diff *Diff
   var err error
-  var data []byte
+  //var data []byte
   var expected string
   var dom *Vdom
   var p Patch = Patch{}
@@ -168,6 +168,8 @@ func TestDiff(t *testing.T) {
   p.Add(diff)
 
   // set attr on paragraph
+
+  /*
   diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-foo", Val: "bar"})
   if err != nil {
     t.Error(err)
@@ -194,6 +196,7 @@ func TestDiff(t *testing.T) {
   }
 
   p.Add(diff)
+  */
 
   ////
   /*
@@ -209,6 +212,7 @@ func TestDiff(t *testing.T) {
   ////
 
   // create new attribute for assertion after Apply() 
+  /*
   diff, err = dom.SetAttrDiff(para, html.Attribute{Key: "data-bar", Val: "baz"})
   if err != nil {
     t.Error(err)
@@ -217,6 +221,7 @@ func TestDiff(t *testing.T) {
   diff.Id = "0.1.0"
 
   p.Add(diff)
+  */
 
   fmt.Println("--- PATCH ---")
   json, err := p.MarshalJSON()
@@ -242,6 +247,7 @@ func TestDiff(t *testing.T) {
   log.Println(string(json))
 
   // attribute assertions after applying patch
+  /*
   data, err = dom.RenderToBytes(dom.Map["0.1.0"])
   if err != nil {
     t.Error(err)
@@ -251,6 +257,7 @@ func TestDiff(t *testing.T) {
   if expected != string(data) {
     t.Errorf("Unexpected diff data, expected %s got %s", expected, string(data))
   }
+  */
 
   // debug
   err = html.Render(os.Stdout, dom.Document)
