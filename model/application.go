@@ -20,7 +20,7 @@ var types = []string{YAML, JSON}
 
 // Load an application using the given loader implementation, 
 // if a nil loader is given the default file system loader is used.
-func (app *Application) Load(path string, loader ApplicationLoader) Application {
+func (app *Application) Load(path string, loader ApplicationLoader) *Application {
   if loader == nil {
     loader = FileSystemLoader{}
   }
@@ -28,16 +28,14 @@ func (app *Application) Load(path string, loader ApplicationLoader) Application 
   app.Urls = make(map[string] File)
   app.SetComputedFields(path)
   app.Merge()
-  return *app
+  return app
 }
 
 
-/*
-  Set initial relative computed path and URL path.
-
-  Also indicate whether a file is an index file and build the 
-  map of URLs to files.
-*/
+// Set initial relative computed path and URL path.
+//
+// Also indicate whether a file is an index file and build the 
+// map of URLs to files.
 func (app *Application) SetComputedFields(path string) Application {
   for _, file := range app.Files {
     // includes the leading slash
@@ -56,10 +54,8 @@ func (app *Application) SetComputedFields(path string) Application {
   return *app
 }
 
-/*
-  Merge user data with page structs loading user data from a JSON
-  file with the same name of the HTML file that created the page.
-*/
+// Merge user data with page structs loading user data from a JSON 
+// file with the same name of the HTML file that created the page.
 func (app *Application) Merge() Application {
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {

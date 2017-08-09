@@ -8,15 +8,16 @@ import (
 
 // Abstract type to load files into an application.
 type ApplicationLoader interface {
-  LoadApplication(path string, app *Application) Application
+  LoadApplication(path string, app *Application) (*Application, error)
 }
 
 // Default implementation loads from the filesystem.
 type FileSystemLoader struct {}
 
 // Loads the application assets from a filesystem directory path.
-func (r FileSystemLoader) LoadApplication(path string, app *Application) Application {
-  filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+func (r FileSystemLoader) LoadApplication(path string, app *Application) (*Application, error) {
+  var err error
+  err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
     if err != nil {
       return err
     }
@@ -55,6 +56,6 @@ func (r FileSystemLoader) LoadApplication(path string, app *Application) Applica
 
     return nil
   })
-  return *app
+  return app, err
 }
 
