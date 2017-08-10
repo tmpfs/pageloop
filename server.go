@@ -35,19 +35,6 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) error {
   // Initialize server mux
   mux = http.NewServeMux()
 
-  //mux.Handle("/api/", apiHandler{})
-  /*
-  mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
-    // The "/" pattern matches everything, so we need to check
-    // that we're at the root here.
-    if req.URL.Path != "/" {
-      http.NotFound(res, req)
-      return
-    }
-    //fmt.Fprintf(res, "Welcome to the home page!")
-  })
-  */
-
   if err = l.LoadApps(config); err != nil {
     return err
   }
@@ -74,7 +61,6 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
       return err
     }
     name := filepath.Base(path)
-    url := "/apps/" + name + "/"
 
     app := model.Application{}
 
@@ -89,8 +75,20 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     }
 
     // Serve the static build files.
-    log.Printf("Serving '%s' from %s", url, app.Public)
+    url := "/apps/" + name + "/"
+    log.Printf("Serving %s from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
+
+		//mux.Handle("/api/", apiHandler{})
+    url = "/editor/apps/" + name + "/"
+    log.Printf("Serving %s from %s", url, p)
+		sourceFileServer := http.FileServer(http.Dir(p))
+		mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
+			log.Println("got editor request")
+			log.Printf("%#v\n", req)
+			log.Printf("%#v\n", req.URL)
+			sourceFileServer.ServeHTTP(res, req)
+		})
 
 		if config.Dev {
 			mux.Handle("/", http.FileServer(http.Dir("data")))
