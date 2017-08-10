@@ -151,6 +151,8 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
 // Extensions to the basic API
 
+// Clone a node, if the deep option is given all descendants are 
+// also cloned.
 func (vdom *Vdom) CloneNode(node *html.Node, deep bool) *html.Node {
   if node == nil {
     node = vdom.Document
