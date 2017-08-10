@@ -2,7 +2,6 @@ package model
 
 import (
   "os"
-  "log"
   "bytes"
   "strings"
   "path/filepath"
@@ -32,8 +31,10 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   }
   app.Urls = make(map[string] File)
   app.setComputedFields(path)
-  app.merge()
-  return err
+  if err = app.merge(); err != nil {
+    return err
+  }
+  return nil
 }
 
 
@@ -49,15 +50,18 @@ func (app *Application) UrlFromPath(path string) string {
 
 // Merge user data with page structs loading user data from a JSON 
 // file with the same name of the HTML file that created the page.
-func (app *Application) merge() Application {
+func (app *Application) merge() error {
+  var err error
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {
-      app.getPageData(&page)
+      if _, err = app.getPageData(&page); err != nil {
+        return err
+      }
       app.Pages[index] = page
       app.Pages[index].Parse()
     }
   }
-  return *app
+  return nil
 }
 
 // Set initial relative computed path and URL path.
@@ -89,7 +93,7 @@ func (app *Application) setComputedFields(path string) Application {
 // load data from a corresponding file with a .yml extension.
 //
 // Finally if a .json file exists it is parsed.
-func (app *Application) getPageData(page *Page) map[string] interface{} {
+func (app *Application) getPageData(page *Page) (map[string] interface{}, error) {
   page.UserData = make(map[string] interface{})
 
   // frontmatter
@@ -111,12 +115,12 @@ func (app *Application) getPageData(page *Page) map[string] interface{} {
       fm := bytes.Join(frontmatter, []byte("\n"))
       err := yaml.Unmarshal(fm, &page.UserData)
       if err != nil {
-        log.Fatal(err)
+        return nil, err
       }
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
     }
-    return page.UserData
+    return page.UserData, nil
   }
 
   // external files
@@ -127,30 +131,30 @@ func (app *Application) getPageData(page *Page) map[string] interface{} {
     fh, err := os.Open(dataPath)
     if err != nil {
       if !os.IsNotExist(err) {
-        log.Fatal(err)
+        return nil, err
       }
     }
     if fh != nil {
       defer fh.Close()
       contents, err := ioutil.ReadFile(dataPath)
       if err != nil {
-        log.Fatal(err)
+        return nil, err
       }
 
       if dataType == JSON {
         err = json.Unmarshal(contents, &page.UserData)
         if err != nil {
-          log.Fatal(err)
+          return nil, err
         }
       } else if dataType == YAML {
         err = yaml.Unmarshal(contents, &page.UserData)
         if err != nil {
-          log.Fatal(err)
+          return nil, err
         }
       }
       break
     }
   }
-  return page.UserData
+  return page.UserData, nil
 }
 

@@ -36,7 +36,6 @@ func (r FileSystemLoader) LoadApplication(path string, app *Application) error {
     mode := stat.Mode()
 
     var file File
-
     if mode.IsDir() {
       file = File{Path: path, Directory: true, info: stat}
     } else if mode.IsRegular() {
@@ -57,7 +56,5 @@ func (r FileSystemLoader) LoadApplication(path string, app *Application) error {
 
     return nil
   })
-  println(err)
   return err
 }
-
