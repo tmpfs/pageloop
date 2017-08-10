@@ -15,6 +15,7 @@ var mux *http.ServeMux
 type PageLoop struct {}
 
 type ServerConfig struct {
+	Addr string
   AppPaths []string
 }
 
@@ -49,7 +50,7 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) error {
   }
 
   s := &http.Server{
-    Addr:           ":3577",
+    Addr:           config.Addr,
     Handler:        ServerHandler{},
     ReadTimeout:    10 * time.Second,
     WriteTimeout:   10 * time.Second,
