@@ -8,15 +8,55 @@ import (
   "io/ioutil"
   "encoding/json"
   "gopkg.in/yaml.v2"
+  "github.com/tmpfs/pageloop/vdom"
 )
 
 const (
+  // Default doctype.
+  HTML5 = "html"
+
   // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"
+
+  // Page data types.
+  DATA_NONE = iota
+  DATA_YAML
+  DATA_YAML_FILE
+  DATA_JSON_FILE
 )
 
 var types = []string{YAML, JSON}
+
+type Application struct {
+  Path string `json: "path"`
+  Name string `json: "name"`
+  Title string `json:"title"`
+  Pages []Page `json:"pages"`
+  Files []File `json:"files"`
+  Base string `json:"base"`
+  Urls map [string] File
+}
+
+type File struct {
+  Path string `json:"path"`
+  Directory bool `json:"directory"`
+  Relative string `json:"relative"`
+  Url string `json:"url"` 
+  Index bool `json:"index"`
+  info os.FileInfo
+  data []byte
+}
+
+type Page struct {
+  File
+  DocType string `json:"doctype"`
+  UserData map[string] interface{} `json:"data"`
+  UserDataType int
+  Blocks []Block  `json:"blocks"`
+  Dom *vdom.Vdom
+  file File
+}
 
 // Load an application using the given loader implementation, 
 // if a nil loader is given the default file system loader is used.
@@ -29,6 +69,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   if err != nil {
     return err
   }
+  app.Path = path
   app.Urls = make(map[string] File)
   app.setComputedFields(path)
   if err = app.merge(); err != nil {
@@ -37,10 +78,34 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   return nil
 }
 
+// Publish files using the given publisher implementation, if a nil 
+// publisher is givem the default file system publisher is used.
+func (app *Application) Publish(publisher ApplicationPublisher) error {
+  var err error
+  if publisher == nil {
+    publisher = FileSystemPublisher{}
+  }
 
-/*
-  Determine a URL from a relative path.
-*/
+  var data []byte
+
+  // Render pages to the file data bytes.
+  for _, page := range app.Pages {
+    if data, err = page.Render(); err != nil {
+      return err
+    }
+
+    println(string(data))
+    page.file.data = data
+  }
+
+  if err = publisher.PublishApplication(app); err != nil {
+    return err
+  }
+
+  return nil
+}
+
+// Determine a URL from a relative path.
 func (app *Application) UrlFromPath(path string) string {
   var url string = strings.Join(strings.Split(path, string(os.PathSeparator)), "/")
   return url
@@ -95,6 +160,7 @@ func (app *Application) setComputedFields(path string) Application {
 // Finally if a .json file exists it is parsed.
 func (app *Application) getPageData(page *Page) (map[string] interface{}, error) {
   page.UserData = make(map[string] interface{})
+  page.UserDataType = DATA_NONE
 
   // frontmatter
   if FRONTMATTER.Match(page.file.data) {
@@ -119,6 +185,8 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
       }
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
+
+      page.UserDataType = DATA_YAML
     }
     return page.UserData, nil
   }
@@ -146,11 +214,13 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
         if err != nil {
           return nil, err
         }
+        page.UserDataType = DATA_JSON_FILE
       } else if dataType == YAML {
         err = yaml.Unmarshal(contents, &page.UserData)
         if err != nil {
           return nil, err
         }
+        page.UserDataType = DATA_YAML_FILE
       }
       break
     }

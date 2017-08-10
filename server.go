@@ -77,6 +77,11 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
       return err
     }
 
+    // Publish the application files to a build directory
+    if err = app.Publish(nil); err != nil {
+      return err
+    }
+
     log.Printf("Serving '%s' from %s", name, p)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(p))))
   }
