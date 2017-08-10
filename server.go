@@ -17,6 +17,9 @@ type PageLoop struct {}
 type ServerConfig struct {
 	Addr string
   AppPaths []string
+	// Load system assets from the file system, don't use 
+	// the embedded assets
+	Dev bool
 }
 
 type ServerHandler struct {}
@@ -89,9 +92,13 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     log.Printf("Serving '%s' from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
 
-    mux.Handle("/",
-      http.FileServer(
-        &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: "data"}))
+		if config.Dev {
+			mux.Handle("/", http.FileServer(http.Dir("data")))
+		} else {
+			mux.Handle("/",
+				http.FileServer(
+					&assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: "data"}))
+		}
   }
 
   return nil
