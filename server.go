@@ -6,6 +6,7 @@ import (
   "path/filepath"
   "time"
   "github.com/tmpfs/pageloop/model"
+  "github.com/elazarl/go-bindata-assetfs"
 )
 
 var config ServerConfig
@@ -31,6 +32,7 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) error {
   mux = http.NewServeMux()
 
   //mux.Handle("/api/", apiHandler{})
+  /*
   mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
     // The "/" pattern matches everything, so we need to check
     // that we're at the root here.
@@ -40,6 +42,7 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) error {
     }
     //fmt.Fprintf(res, "Welcome to the home page!")
   })
+  */
 
   if err = l.LoadApps(config); err != nil {
     return err
@@ -61,7 +64,6 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
   var err error
   // iterate apps and configure paths
   for _, path := range config.AppPaths {
-
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
@@ -85,6 +87,10 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     // Serve the static build files.
     log.Printf("Serving '%s' from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
+
+    mux.Handle("/",
+      http.FileServer(
+        &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: "data"}))
   }
 
   return nil
