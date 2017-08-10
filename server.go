@@ -72,6 +72,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 
     app := model.Application{}
 
+    // Load the application files into memory
     if err = app.Load(p, nil); err != nil {
       return err
     }
