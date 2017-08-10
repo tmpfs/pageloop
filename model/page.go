@@ -37,11 +37,18 @@ func (p *Page) Parse() (*vdom.Vdom, error) {
 // HTML template passing the page data to the template.
 //
 // Use this for the static rendered HTML for a page.
-func (p *Page) Render() ([]byte, error) {
+func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   var err error
   var data []byte
+  if vdom == nil {
+    vdom = p.Dom
+  }
+
+  if node == nil {
+    node = vdom.Document
+  }
   
-  if data, err = p.Dom.RenderToBytes(p.Dom.Document); err != nil {
+  if data, err = vdom.RenderToBytes(node); err != nil {
     return nil, err
   }
 

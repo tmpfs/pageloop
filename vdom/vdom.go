@@ -64,6 +64,28 @@ func (vdom *Vdom) Parse(b []byte) error {
   return nil
 }
 
+// Clones a node and removes any attributes associated with 
+// the virtual DOM from elements in the tree.
+//
+// If the given node is nil then the document node is used.
+func (vdom *Vdom) Clean(node *html.Node) *html.Node {
+  if node == nil {
+    node = vdom.Document
+  }
+  node = vdom.CloneNode(node, true)
+  var f func(n *html.Node)
+  f = func(n *html.Node) {
+    for c := n.FirstChild; c != nil; c = c.NextSibling {
+      if c.Type == html.ElementNode {
+        vdom.AttrDel(c, html.Attribute{Key: idAttribute})
+        f(c)
+      }
+    }
+  }
+  f(node)
+  return node
+}
+
 // Basic DOM API wrapper functions
 
 // Append a child node.
@@ -129,6 +151,34 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
 // Extensions to the basic API
 
+func (vdom *Vdom) CloneNode(node *html.Node, deep bool) *html.Node {
+  if node == nil {
+    node = vdom.Document
+  }
+
+  var clone func(n *html.Node) *html.Node
+  clone = func(n *html.Node) *html.Node {
+    var out = &html.Node{Type: n.Type, Data: n.Data[0:], DataAtom: n.DataAtom, Namespace: n.Namespace}
+    for _, att := range n.Attr {
+      out.Attr = append(out.Attr, html.Attribute{Key: att.Key, Val: att.Val, Namespace: att.Namespace})
+    }
+    return out
+  }
+  out := clone(node)
+  var f func(n *html.Node, p *html.Node)
+  f = func(n *html.Node, p *html.Node) {
+    for c := n.FirstChild; c != nil; c = c.NextSibling {
+      copy := clone(c)
+      p.AppendChild(copy)
+      if deep {
+        f(c, copy)
+      }
+    }
+  }
+  f(node, out)
+  return out
+}
+
 // Parse an HTML fragment and return the list of parsed nodes.
 func (vdom *Vdom) ParseFragment(b []byte, context *html.Node) ([]*html.Node, error) {
   if context == nil {
@@ -139,7 +189,6 @@ func (vdom *Vdom) ParseFragment(b []byte, context *html.Node) ([]*html.Node, err
   if err != nil {
     return nil, err
   }
-
   return nodes, err
 }
 

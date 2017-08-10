@@ -94,10 +94,10 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 
   // Render pages to the file data bytes.
   for _, page := range app.Pages {
-    if data, err = page.Render(); err != nil {
+    node := page.Dom.Clean(nil)
+    if data, err = page.Render(page.Dom, node); err != nil {
       return err
     }
-
     page.file.data = data
   }
 
