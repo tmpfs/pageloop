@@ -1,10 +1,13 @@
 package model
 
 import (
-  //"os"
-  //"path/filepath"
+  "os"
+  "path/filepath"
   //"io/ioutil"
 )
+
+// Build directory.
+var build string = ".build"
 
 // Abstract type to load files into an application.
 type ApplicationPublisher interface {
@@ -19,5 +22,21 @@ type FileSystemPublisher struct {}
 func (p FileSystemPublisher) PublishApplication(app *Application) error {
   var err error
   println("publishing app", app.Path)
+  dir := filepath.Join(app.Path, build)
+  fh, err := os.Open(dir)
+  if err != nil {
+    if !os.IsNotExist(err) {
+      return err
+    // Try to make the directory.
+    } else {
+      if err = os.Mkdir(dir, os.ModeDir); err != nil {
+        return err
+      }
+    }
+  }
+  defer fh.Close()
+
+  println(dir)
+
   return err
 }
