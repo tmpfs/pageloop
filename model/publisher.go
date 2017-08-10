@@ -29,7 +29,7 @@ func (p FileSystemPublisher) PublishApplication(app *Application) error {
       return err
     // Try to make the directory.
     } else {
-      if err = os.Mkdir(dir, os.ModeDir); err != nil {
+      if err = os.Mkdir(dir, os.ModeDir | 0755); err != nil {
         return err
       }
     }
@@ -37,6 +37,8 @@ func (p FileSystemPublisher) PublishApplication(app *Application) error {
   defer fh.Close()
 
   println(dir)
+
+  //for 
 
   return err
 }
