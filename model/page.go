@@ -35,6 +35,8 @@ func (p *Page) Parse() (*vdom.Vdom, error) {
 // Render the current version of the virtual DOM to a byte 
 // array. If page data is available parse the file as an 
 // HTML template passing the page data to the template.
+//
+// Use this for the static rendered HTML for a page.
 func (p *Page) Render() ([]byte, error) {
   var err error
   var data []byte
@@ -59,6 +61,7 @@ func (p *Page) Render() ([]byte, error) {
     data = w.Bytes()
 
     // Prepend frontmatter to the output.
+    /*
     if p.UserDataType == DATA_YAML {
       var fm []byte
       if fm, err = p.MarshalPageData(); err != nil {
@@ -73,6 +76,7 @@ func (p *Page) Render() ([]byte, error) {
       // Prepend to the DOM bytes.
       data = append(fm, data...)
     }
+    */
   } 
   return data, nil
 }

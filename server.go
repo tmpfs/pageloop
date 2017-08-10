@@ -82,8 +82,8 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
       return err
     }
 
-    log.Printf("Serving '%s' from %s", name, p)
-    mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(p))))
+    log.Printf("Serving '%s' from %s", url, app.Public)
+    mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
   }
 
   return nil

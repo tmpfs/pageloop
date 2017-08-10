@@ -48,11 +48,11 @@ func (r FileSystemLoader) LoadApplication(path string, app *Application) error {
     }
 
     if TEMPLATE_FILE.MatchString(path) {
-      page := Page{file: file}
-      app.Pages = append(app.Pages, page)
+      page := Page{file: &file, Path: path}
+      app.Pages = append(app.Pages, &page)
     }
 
-    app.Files = append(app.Files, file)
+    app.Files = append(app.Files, &file)
 
     return nil
   })

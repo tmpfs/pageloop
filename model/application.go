@@ -30,12 +30,16 @@ var types = []string{YAML, JSON}
 
 type Application struct {
   Path string `json: "path"`
+
+  // The public file system path for the HTTP server.
+  Public string `json: "public"`
+
   Name string `json: "name"`
   Title string `json:"title"`
-  Pages []Page `json:"pages"`
-  Files []File `json:"files"`
+  Pages []*Page `json:"pages"`
+  Files []*File `json:"files"`
   Base string `json:"base"`
-  Urls map [string] File
+  Urls map[string] *File
 }
 
 type File struct {
@@ -49,13 +53,13 @@ type File struct {
 }
 
 type Page struct {
-  File
+  Path string `json: "path"`
   DocType string `json:"doctype"`
   UserData map[string] interface{} `json:"data"`
   UserDataType int
   Blocks []Block  `json:"blocks"`
   Dom *vdom.Vdom
-  file File
+  file *File
 }
 
 // Load an application using the given loader implementation, 
@@ -70,7 +74,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
     return err
   }
   app.Path = path
-  app.Urls = make(map[string] File)
+  app.Urls = make(map[string] *File)
   app.setComputedFields(path)
   if err = app.merge(); err != nil {
     return err
@@ -94,11 +98,11 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
       return err
     }
 
-    println(string(data))
     page.file.data = data
   }
 
-  if err = publisher.PublishApplication(app); err != nil {
+  // TODO: allow setting base path for publish
+  if err = publisher.PublishApplication(app, ""); err != nil {
     return err
   }
 
@@ -119,7 +123,7 @@ func (app *Application) merge() error {
   var err error
   for index, page := range app.Pages {
     if TEMPLATE_FILE.MatchString(page.file.Path) {
-      if _, err = app.getPageData(&page); err != nil {
+      if _, err = app.getPageData(page); err != nil {
         return err
       }
       app.Pages[index] = page

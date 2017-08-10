@@ -1,19 +1,18 @@
 package model
 
 import (
-  "fmt"
+  //"fmt"
   "os"
   "path/filepath"
   "io/ioutil"
 )
 
 // Build directory.
-var build string = "build"
-var current string = "current"
+var public string = "public"
 
 // Abstract type to load files into an application.
 type ApplicationPublisher interface {
-  PublishApplication(app *Application) error
+  PublishApplication(app *Application, base string) error
 }
 
 // Default implementation loads from the filesystem.
@@ -21,14 +20,20 @@ type FileSystemPublisher struct {}
 
 // Loads the application assets from a filesystem directory path and 
 // populate the given application with files and HTML pages.
-func (p FileSystemPublisher) PublishApplication(app *Application) error {
+//
+// Use base as the output directory, if base is the empty string a 
+// public directory relative to the current working directory 
+// is used.
+func (p FileSystemPublisher) PublishApplication(app *Application, base string) error {
   var err error
-  var base string
-  if base, err = os.Getwd(); err != nil {
+  var cwd string
+  if cwd, err = os.Getwd(); err != nil {
     return err
   }
-  dir := filepath.Join(base, build)
-  dir = filepath.Join(dir, current)
+  if base == "" {
+    base = filepath.Join(cwd, public)
+  }
+  dir := filepath.Join(base, filepath.Base(app.Path))
   fh, err := os.Open(dir)
   if err != nil {
     if !os.IsNotExist(err) {
@@ -42,32 +47,24 @@ func (p FileSystemPublisher) PublishApplication(app *Application) error {
   }
   defer fh.Close()
 
-  println("publishing app", app.Path)
-  println(dir)
+  app.Public = dir
 
-  fmt.Printf("files: %#v\n", app.Files)
+  //fmt.Printf("files: %#v\n", app.Files)
 
   for _, f := range app.Files {
+    // Ignore the build directory
     if f.Path == app.Path {
       continue
     }
-    fmt.Printf("%#v\n", f)
     var rel string
-    println(f.Path)
     rel, err = filepath.Rel(app.Path, f.Path)
     if err != nil {
       return err
     }
 
-    println(app.Path)
-    println(f.Path)
-    println("relative path")
-    fmt.Println(rel)
-
     // Set output path and create parent directories
     out := filepath.Join(dir, rel)
     parent := filepath.Dir(out)
-    println(parent)
     if f.info.Mode().IsDir() {
       if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
         return err
