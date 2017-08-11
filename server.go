@@ -12,7 +12,9 @@ import (
 var config ServerConfig
 var mux *http.ServeMux
 
-type PageLoop struct {}
+type PageLoop struct {
+	Server *http.Server
+}
 
 type ServerConfig struct {
 	Addr string
@@ -24,19 +26,21 @@ type ServerConfig struct {
 
 type ServerHandler struct {}
 
+// The default server handler, defers to a multiplexer.
 func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   handler, _ := mux.Handler(req)
   handler.ServeHTTP(res, req)
 }
 
-func (l *PageLoop) ServeHTTP(config ServerConfig) error {
+// Starts an HTTP server listening.
+func (l *PageLoop) ServeHTTP(config ServerConfig) (*http.Server, error) {
   var err error
 
   // Initialize server mux
   mux = http.NewServeMux()
 
   if err = l.LoadApps(config); err != nil {
-    return err
+    return nil, err
   }
 
   s := &http.Server{
@@ -47,8 +51,13 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) error {
     MaxHeaderBytes: 1 << 20,
   }
 
-  err = s.ListenAndServe()
-  return err
+  if err = s.ListenAndServe(); err != nil {
+		return nil, err
+	}
+
+	l.Server = s
+
+  return s, nil
 }
 
 func (l *PageLoop) LoadApps(config ServerConfig) error {
