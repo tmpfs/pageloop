@@ -93,14 +93,14 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     }
 
     // Serve the static build files.
-    url := "/apps/" + name + "/"
+    url := "/apps/" + name + "/versions/current/"
     log.Printf("Serving %s from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
 
 		//mux.Handle("/api/", apiHandler{})
-    url = "/editor/apps/" + name + "/"
+    url = "/apps/" + name + "/source/"
     log.Printf("Serving %s from %s", url, p)
-		sourceFileServer := http.FileServer(http.Dir(p))
+		sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(p)))
 		mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
 			log.Println("got editor request")
 			log.Printf("%#v\n", req)
