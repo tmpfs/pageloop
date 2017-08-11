@@ -131,17 +131,17 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
       return err
     }
 
-    // Serve the static build files.
+    // Serve the static build files from the mountpoint path.
     url := urlPath
     log.Printf("Serving app %s from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
 
 		// Serve the raw source files.
-    url = urlPath + "source/"
-    log.Printf("Serving app source %s from %s", url, p)
+    url = urlPath + "-/source/"
+    log.Printf("Serving source %s from %s", url, p)
 		sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(p)))
 		mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
-			//log.Println("got editor request")
+			//log.Println("got source req")
 			//log.Printf("%#v\n", req)
 			//log.Printf("%#v\n", req.URL)
 			// TODO: serve in-memory versions
