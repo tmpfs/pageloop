@@ -32,7 +32,7 @@ type PageLoop struct {
 	Server *http.Server `json:"-"`
 
 	// All application mountpoints.
-  Mountpoints []Mountpoint `json:"mountpoints"`
+  Mountpoints []Mountpoint `json:"-"`
 
 	// All mounted applications.
 	Apps []*model.Application `json:"apps"`
