@@ -45,9 +45,9 @@ type Application struct {
 type File struct {
   Path string `json:"-"`
   Url string `json:"url"` 
-  Directory bool `json:"directory"`
-  Relative string `json:"relative"`
-  Index bool `json:"index"`
+  Directory bool `json:"dir"`
+  Relative string `json:"-"`
+  //Index bool `json:"index"`
   info os.FileInfo
   data []byte
 }
@@ -147,9 +147,11 @@ func (app *Application) setComputedFields(path string) Application {
     }
     file.Url = app.UrlFromPath(file.Relative)
 
+		/*
     if INDEX_FILE.MatchString(file.Path) {
       file.Index = true
     }
+		*/
 
     app.Urls[file.Url] = file
   }

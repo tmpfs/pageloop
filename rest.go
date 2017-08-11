@@ -48,7 +48,6 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			// Api root (/)
 			if path == "" {
 				if data, err = json.Marshal(h.Loop); err == nil {
-					println(string(data))
 					write(http.StatusOK, data)
 					return
 				}
