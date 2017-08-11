@@ -117,6 +117,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 
 		// Load from bundled assets
 		if dataScheme && !config.Dev {
+			// TODO: implement asset loader logic
 			loader = model.AssetLoader{}
 		}
 
@@ -146,6 +147,8 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 			// TODO: serve in-memory versions
 			sourceFileServer.ServeHTTP(res, req)
 		})
+
+		// TODO: serve app editor application from /editor
 
 		/*
 		if config.Dev {
