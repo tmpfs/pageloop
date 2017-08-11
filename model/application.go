@@ -57,6 +57,8 @@ type Application struct {
   Name string `json:"name"`
   Pages []*Page `json:"-"`
   Files []*File `json:"-"`
+	// The root file node, not included in the files slice.
+	Root *File `json:"root"`
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
 }

@@ -17,7 +17,7 @@ func TestApplication(t *testing.T) {
     t.Error(err)
   }
 
-  expected := 5
+  expected := 4
   if len(app.Files) != expected {
     t.Errorf("Unexpected number of files %d", len(app.Files))  
   }
