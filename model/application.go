@@ -43,20 +43,21 @@ type Application struct {
 }
 
 type File struct {
-  Path string `json:"path"`
+  Path string `json:"-"`
+  Url string `json:"url"` 
   Directory bool `json:"directory"`
   Relative string `json:"relative"`
-  Url string `json:"url"` 
   Index bool `json:"index"`
   info os.FileInfo
   data []byte
 }
 
 type Page struct {
-  Path string `json:"path"`
+  Path string `json:"-"`
+  Url string `json:"url"` 
   DocType string `json:"doctype"`
   PageData map[string] interface{} `json:"data"`
-  PageDataType int
+	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`
   Dom *vdom.Vdom `json:"-"`
   file *File 
