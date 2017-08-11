@@ -109,33 +109,37 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 		case http.MethodGet:
 			if path == "" {
-				if data, err = json.Marshal(h.Root.Container.Apps); err == nil {
-					ok(res, data)
-					return
-				}
+				data, err = json.Marshal(h.Root.Container.Apps)
 			} else {
 				if app != nil {
 					if action == "" {
-						if data, err = json.Marshal(app); err == nil {
-							ok(res, data)
-							return
-						}
+						data, err = json.Marshal(app)
 					} else {
 						switch action {
 							case FILES:
-								if data, err = json.Marshal(app.Files); err == nil {
-									ok(res, data)
-									return
-								}
+								data, err = json.Marshal(app.Files)
 							case PAGES:
-								if data, err = json.Marshal(app.Pages); err == nil {
-									ok(res, data)
-									return
-								}
+								data, err = json.Marshal(app.Pages)
+							default:
+								ex(res, http.StatusNotFound, nil)
+								return
 						}
 					}
+
 				}
 			}
+	}
+
+
+	if err != nil {
+		//log.Printf("Internal server error: %s", err.Error())
+		ex(res, http.StatusInternalServerError, nil)
+		return
+	}
+
+	if data != nil {
+		ok(res, data)
+		return
 	}
 
 	ex(res, http.StatusNotFound, nil)
@@ -169,6 +173,7 @@ func write(res http.ResponseWriter, code int, data []byte) (int, error) {
 	return res.Write(data)
 }
 
+// Determine is a method exists in a list of allowed methods.
 func isMethodAllowed(method string, methods []string) bool {
 	for _, m := range methods {
 		if m == method {
