@@ -1,27 +1,26 @@
 package pageloop
 
 import (
-	"net/http"
+	//"net/http"
   "testing"
 )
 
-func TestServer(t *testing.T) {
-	/*
-  var err error
-	var server *http.Server
-
+func Start(t *testing.T) *PageLoop {
+	var err error
   var apps []string
   apps = append(apps, "test/fixtures/mock-app")
-
   loop := &PageLoop{}
 	conf := ServerConfig{AppPaths: apps, Addr: ":3577", Dev: true}
-  server, err = loop.ServeHTTP(conf)
-  if err != nil {
-    t.Fatal(err)
-  }
-
-	if err = server.Close(); err != nil {
-		t.Fatal(err)
+	if _, err = loop.NewServer(conf); err != nil {
+		t.Error(err)
 	}
-	*/
+	go loop.Listen()
+	return loop
+}
+
+func TestServer(t *testing.T) {
+	loop := Start(t)
+	if loop == nil {
+		t.Error("Failed to acquire pageloop entry")
+	}
 }

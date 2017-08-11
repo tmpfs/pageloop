@@ -2,6 +2,7 @@ package pageloop
 
 import (
   "log"
+	"errors"
   "net/http"
   "path/filepath"
   "time"
@@ -33,7 +34,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Starts an HTTP server listening.
-func (l *PageLoop) ServeHTTP(config ServerConfig) (*http.Server, error) {
+func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   var err error
 
   // Initialize server mux
@@ -51,13 +52,21 @@ func (l *PageLoop) ServeHTTP(config ServerConfig) (*http.Server, error) {
     MaxHeaderBytes: 1 << 20,
   }
 
-  if err = s.ListenAndServe(); err != nil {
-		return nil, err
-	}
-
 	l.Server = s
 
   return s, nil
+}
+
+func (l *PageLoop) Listen() error {
+	var err error
+	s := l.Server
+	if s == nil {
+		return errors.New("Cannot listen without a server, call NewServer().")
+	}
+  if err = s.ListenAndServe(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (l *PageLoop) LoadApps(config ServerConfig) error {
