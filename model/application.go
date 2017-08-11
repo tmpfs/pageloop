@@ -34,8 +34,19 @@ type Container struct {
 	Apps []*Application `json:"apps"`
 }
 
+// Add an application to the container.
 func (c *Container) Add(app *Application) {
 	c.Apps = append(c.Apps, app)
+}
+
+// Get an application by name.
+func (c *Container) GetByName(name string) *Application {
+	for _, app := range c.Apps {
+		if app.Name == name {
+			return app
+		}
+	}
+	return nil
 }
 
 type Application struct {
@@ -46,7 +57,7 @@ type Application struct {
 
   Name string `json:"name"`
   Pages []*Page `json:"-"`
-  Files []*File `json:"files"`
+  Files []*File `json:"-"`
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
 }

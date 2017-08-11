@@ -9,12 +9,16 @@ import (
 	"strings"
 	"net/http"
 	"encoding/json"
+  "github.com/tmpfs/pageloop/model"
 )
 
 const(
 	JSON_MIME = "application/json"
 	HTML_MIME = "text/html"
 
+	// App actions
+	FILES = "files"
+	PAGES = "pages"
 )
 
 var (
@@ -79,6 +83,7 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var data []byte
 	var name string
 	var action string
+	var app *model.Application
 	var methods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
 
 	if !isMethodAllowed(req.Method, methods) {
@@ -89,6 +94,21 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	url := req.URL
 	path := url.Path
 
+
+	if path != "" {
+		parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
+		name = parts[0]
+		if len(parts) > 1 {
+			action = parts[1]	
+		}
+		app = h.Root.Container.GetByName(name)
+		// Application must exist
+		if app == nil {
+			Error(res, http.StatusNotFound, nil)
+			return
+		}
+	}
+
 	switch req.Method {
 		case http.MethodGet:
 			if path == "" {
@@ -97,14 +117,27 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 			} else {
-				parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
-				name = parts[0]
-				if len(parts) > 1 {
-					action = parts[1]	
+				if app != nil {
+					if action == "" {
+						if data, err = json.Marshal(app); err == nil {
+							Ok(res, data)
+							return
+						}
+					} else {
+						switch action {
+							case FILES:
+								if data, err = json.Marshal(app.Files); err == nil {
+									Ok(res, data)
+									return
+								}
+							case PAGES:
+								if data, err = json.Marshal(app.Pages); err == nil {
+									Ok(res, data)
+									return
+								}
+						}
+					}
 				}
-
-				log.Printf("%#v\n", name)
-				log.Printf("%#v\n", action)
 			}
 	}
 
