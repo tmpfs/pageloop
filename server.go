@@ -28,11 +28,13 @@ type Mountpoint struct {
 }
 
 type PageLoop struct {
+	// Underlying HTTP server.
 	Server *http.Server `json:"-"`
+
 	// All application mountpoints.
   Mountpoints []Mountpoint `json:"mountpoints"`
 
-	// All mounted applications
+	// All mounted applications.
 	Apps []*model.Application `json:"apps"`
 }
 

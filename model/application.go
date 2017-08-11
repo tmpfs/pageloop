@@ -29,10 +29,10 @@ const (
 var types = []string{YAML, JSON}
 
 type Application struct {
-  Path string `json:"path"`
+  Path string `json:"-"`
 
   // The public file system path for the HTTP server.
-  Public string `json:"public"`
+  Public string `json:"-"`
 
   Name string `json:"name"`
   Pages []*Page `json:"pages"`
