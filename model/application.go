@@ -35,7 +35,6 @@ type Application struct {
   Public string `json:"public"`
 
   Name string `json:"name"`
-  Title string `json:"title"`
   Pages []*Page `json:"pages"`
   Files []*File `json:"files"`
   Base string `json:"base"`
