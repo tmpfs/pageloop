@@ -34,7 +34,7 @@ func (r *RestService) Multiplex(mux *http.ServeMux) {
 	url= "/api/"
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: r.Root}))
 
-	url = "/api/app/"
+	url = "/api/apps/"
 	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: r.Root}))
 }
 
