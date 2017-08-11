@@ -105,10 +105,9 @@ func (l *PageLoop) Listen() error {
 func (l *PageLoop) LoadApps(config ServerConfig) error {
   var err error
 
-	// Global endpoints
-	rest := RestHandler{Loop: l}
-	api := "/api/"
-	mux.Handle(api, http.StripPrefix(api, rest))
+	// REST API Global endpoint
+	rest := RestService{Root: l}
+	rest.Multiplex(mux)
 
 	// Application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
