@@ -10,13 +10,7 @@ import (
 
 func TestApplication(t *testing.T) {
   var err error
-  app := Application{Title: "Mock Application"}
-
-  if app.Title == "" {
-    t.Errorf("Unexpected empty application title")
-  }
-
-  // app.Base = "test/fixtures/mock-app"
+  app := Application{}
 
   err = app.Load("../test/fixtures/mock-app", nil)
   if err != nil {

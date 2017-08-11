@@ -4,7 +4,6 @@ import (
   "os"
   "bytes"
   "strings"
-	//"net/http"
   "path/filepath"
   "io/ioutil"
   "encoding/json"
@@ -132,6 +131,28 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
   }
 
   return nil
+}
+
+// Get a file pointer by URL.
+func (app *Application) GetFileByUrl(url string) *File {
+	for _, file := range app.Files {
+		u := file.Url
+		u = strings.TrimSuffix(u, "/")
+		if u == url {
+			return file
+		}
+	}
+	return nil
+}
+
+// Get a page pointer by URL.
+func (app *Application) GetPageByUrl(url string) *Page {
+	for _, page := range app.Pages {
+		if page.Url == url {
+			return page
+		}
+	}
+	return nil
 }
 
 // Determine a URL from a relative path.

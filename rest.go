@@ -80,6 +80,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var data []byte
 	var name string
 	var action string
+	// File or Page
+	var item string
 	var app *model.Application
 	var methods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
 
@@ -97,6 +99,10 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		name = parts[0]
 		if len(parts) > 1 {
 			action = parts[1]	
+		}
+		if len(parts) > 2 {
+			//item = parts[2]
+			item = "/" + strings.Join(parts[2:], "/")
 		}
 		app = h.Root.Container.GetByName(name)
 		// Application must exist
@@ -117,15 +123,23 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					} else {
 						switch action {
 							case FILES:
-								data, err = json.Marshal(app.Files)
+								if item == "" {
+									data, err = json.Marshal(app.Files)
+								} else {
+									println(item)
+									data, err = json.Marshal(app.GetFileByUrl(item))
+								}
 							case PAGES:
-								data, err = json.Marshal(app.Pages)
+								if item == "" {
+									data, err = json.Marshal(app.Pages)
+								} else {
+									data, err = json.Marshal(app.GetPageByUrl(item))
+								}
 							default:
 								ex(res, http.StatusNotFound, nil)
 								return
 						}
 					}
-
 				}
 			}
 	}
