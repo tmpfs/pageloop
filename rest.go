@@ -6,6 +6,7 @@ import (
 	//"fmt"
 	"log"
 	//"errors"
+	"strings"
 	"net/http"
 	"encoding/json"
 )
@@ -72,9 +73,42 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	Error(res, http.StatusNotFound, nil)
 }
 
-// Shows application information (files, pages etc.)
+// Handles application information (files, pages etc.)
 func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-		
+	var err error
+	var data []byte
+	var name string
+	var action string
+	var methods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
+
+	if !isMethodAllowed(req.Method, methods) {
+		Error(res, http.StatusMethodNotAllowed, nil)
+		return
+	}
+
+	url := req.URL
+	path := url.Path
+
+	switch req.Method {
+		case http.MethodGet:
+			if path == "" {
+				if data, err = json.Marshal(h.Root.Container.Apps); err == nil {
+					Ok(res, data)
+					return
+				}
+			} else {
+				parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
+				name = parts[0]
+				if len(parts) > 1 {
+					action = parts[1]	
+				}
+
+				log.Printf("%#v\n", name)
+				log.Printf("%#v\n", action)
+			}
+	}
+
+	Error(res, http.StatusNotFound, nil)
 }
 
 // Send an error response to the client.
@@ -96,9 +130,20 @@ func Ok(res http.ResponseWriter, data []byte) (int, error) {
 	return Write(res, http.StatusOK, data)
 }
 
-// Write to the HTTP response, setting common headers.
+// Write to the HTTP response and set common headers.
 func Write(res http.ResponseWriter, code int, data []byte) (int, error) {
 	res.Header().Set("Content-Type", JSON_MIME)
 	res.WriteHeader(code)
 	return res.Write(data)
+}
+
+// Private helper functions.
+
+func isMethodAllowed(method string, methods []string) bool {
+	for _, m := range methods {
+		if m == method {
+			return true
+		}
+	}	
+	return false
 }
