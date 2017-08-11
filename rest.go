@@ -52,7 +52,7 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var data []byte
 
 	if req.Method != http.MethodGet {
-		Error(res, http.StatusMethodNotAllowed, nil)
+		ex(res, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
@@ -62,19 +62,19 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	// Api root (/api/)
 	if path == "" {
 		if data, err = json.Marshal(h.Root.Container); err == nil {
-			Ok(res, data)
+			ok(res, data)
 			return
 		}
 	}
 
 	if err != nil {
 		log.Printf("Internal server error: %s", err.Error())
-		Error(res, http.StatusInternalServerError, nil)
+		ex(res, http.StatusInternalServerError, nil)
 		return
 	}
 
 	// TODO: log the error from (int, error) return value
-	Error(res, http.StatusNotFound, nil)
+	ex(res, http.StatusNotFound, nil)
 }
 
 // Handles application information (files, pages etc.)
@@ -87,7 +87,7 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var methods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
 
 	if !isMethodAllowed(req.Method, methods) {
-		Error(res, http.StatusMethodNotAllowed, nil)
+		ex(res, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		app = h.Root.Container.GetByName(name)
 		// Application must exist
 		if app == nil {
-			Error(res, http.StatusNotFound, nil)
+			ex(res, http.StatusNotFound, nil)
 			return
 		}
 	}
@@ -113,26 +113,26 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		case http.MethodGet:
 			if path == "" {
 				if data, err = json.Marshal(h.Root.Container.Apps); err == nil {
-					Ok(res, data)
+					ok(res, data)
 					return
 				}
 			} else {
 				if app != nil {
 					if action == "" {
 						if data, err = json.Marshal(app); err == nil {
-							Ok(res, data)
+							ok(res, data)
 							return
 						}
 					} else {
 						switch action {
 							case FILES:
 								if data, err = json.Marshal(app.Files); err == nil {
-									Ok(res, data)
+									ok(res, data)
 									return
 								}
 							case PAGES:
 								if data, err = json.Marshal(app.Pages); err == nil {
-									Ok(res, data)
+									ok(res, data)
 									return
 								}
 						}
@@ -141,11 +141,11 @@ func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			}
 	}
 
-	Error(res, http.StatusNotFound, nil)
+	ex(res, http.StatusNotFound, nil)
 }
 
 // Send an error response to the client.
-func Error(res http.ResponseWriter, code int, data []byte) (int, error) {
+func ex(res http.ResponseWriter, code int, data []byte) (int, error) {
 	var err error
 	if data == nil {
 		var m map[string] interface{} = make(map[string] interface{})
@@ -155,22 +155,22 @@ func Error(res http.ResponseWriter, code int, data []byte) (int, error) {
 			return 0, err
 		}
 	}
-	return Write(res, code, data)
+	return write(res, code, data)
 }
 
+// Private helper functions.
+
 // Send an OK response to the client.
-func Ok(res http.ResponseWriter, data []byte) (int, error) {
-	return Write(res, http.StatusOK, data)
+func ok(res http.ResponseWriter, data []byte) (int, error) {
+	return write(res, http.StatusOK, data)
 }
 
 // Write to the HTTP response and set common headers.
-func Write(res http.ResponseWriter, code int, data []byte) (int, error) {
+func write(res http.ResponseWriter, code int, data []byte) (int, error) {
 	res.Header().Set("Content-Type", JSON_MIME)
 	res.WriteHeader(code)
 	return res.Write(data)
 }
-
-// Private helper functions.
 
 func isMethodAllowed(method string, methods []string) bool {
 	for _, m := range methods {
