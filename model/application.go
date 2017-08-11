@@ -45,7 +45,7 @@ type Application struct {
   Public string `json:"-"`
 
   Name string `json:"name"`
-  Pages []*Page `json:"pages"`
+  Pages []*Page `json:"-"`
   Files []*File `json:"files"`
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
