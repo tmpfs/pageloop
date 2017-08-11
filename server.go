@@ -22,18 +22,18 @@ var mux *http.ServeMux
 
 type Mountpoint struct {
 	// The URL path component.
-	UrlPath string
+	UrlPath string `json:"url"`
 	// The path to pass to the loader.
-	Path string	
+	Path string	`json:"path"`
 }
 
 type PageLoop struct {
 	Server *http.Server `json:"-"`
 	// All application mountpoints.
-  Mountpoints []Mountpoint
+  Mountpoints []Mountpoint `json:"mountpoints"`
 
 	// All mounted applications
-	Apps []*model.Application
+	Apps []*model.Application `json:"apps"`
 }
 
 type ServerConfig struct {

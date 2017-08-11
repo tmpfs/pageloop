@@ -29,12 +29,12 @@ const (
 var types = []string{YAML, JSON}
 
 type Application struct {
-  Path string `json: "path"`
+  Path string `json:"path"`
 
   // The public file system path for the HTTP server.
-  Public string `json: "public"`
+  Public string `json:"public"`
 
-  Name string `json: "name"`
+  Name string `json:"name"`
   Title string `json:"title"`
   Pages []*Page `json:"pages"`
   Files []*File `json:"files"`
@@ -53,13 +53,13 @@ type File struct {
 }
 
 type Page struct {
-  Path string `json: "path"`
+  Path string `json:"path"`
   DocType string `json:"doctype"`
   UserData map[string] interface{} `json:"data"`
   UserDataType int
   Blocks []Block  `json:"blocks"`
-  Dom *vdom.Vdom
-  file *File `json:"-"`
+  Dom *vdom.Vdom `json:"-"`
+  file *File 
 }
 
 // Load an application using the given loader implementation, 
