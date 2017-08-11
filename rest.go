@@ -3,14 +3,11 @@
 package pageloop
 
 import (
-	"fmt"
-	//"log"
+	//"fmt"
+	"log"
 	//"errors"
 	"net/http"
-  //"path/filepath"
-	//"regexp"
-  //"time"
-  //"github.com/tmpfs/pageloop/model"
+	"encoding/json"
 )
 
 const(
@@ -20,8 +17,7 @@ const(
 )
 
 var (
-	JSON_404 []byte = []byte(`{status: 404}`)
-	JSON_API []byte = []byte(`{version: "1.0"}`)
+	JSON_404 []byte = []byte(`{status:404}`)
 )
 
 type RestHandler struct {
@@ -31,6 +27,8 @@ type RestHandler struct {
 
 // The default server handler, defers to a multiplexer.
 func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	var err error
+	var data []byte
 
 	var write func(code int, data []byte) (int, error)
 	write = func(code int, data []byte) (int, error) {
@@ -42,19 +40,19 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	path := url.Path
 	res.Header().Set("Content-Type", JSON_MIME)
 
-	fmt.Printf("%#v\n", req)
-	fmt.Printf("%#v\n", path)
+	//fmt.Printf("%#v\n", req)
+	//fmt.Printf("%#v\n", path)
 
-	println(req.Method)
-
-	// Api root (/)
 	switch req.Method {
 		case http.MethodGet:
+			// Api root (/)
 			if path == "" {
-				println("writing home")
-				write(http.StatusOK, JSON_API)
-				return
-			} else if path == "apps" {
+				if data, err = json.Marshal(h.Loop); err == nil {
+					println(string(data))
+					write(http.StatusOK, data)
+					return
+				}
+			//} else if path == "apps" {
 			
 			}
 		default:
@@ -62,6 +60,13 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 	}
 
+	if err != nil {
+		log.Println(err)
+		// TODO: 500 internal error
+		//write(http.StatusInternalServerError, byte[](`{error: "` + string(err) + `"}`))
+		return
+	}
+
 	// TODO: log the error from (int, error) return value
-	write(404, JSON_404)
+	write(http.StatusNotFound, JSON_404)
 }

@@ -39,7 +39,7 @@ type Application struct {
   Pages []*Page `json:"pages"`
   Files []*File `json:"files"`
   Base string `json:"base"`
-  Urls map[string] *File
+  Urls map[string] *File `json:"-"`
 }
 
 type File struct {
@@ -59,7 +59,7 @@ type Page struct {
   UserDataType int
   Blocks []Block  `json:"blocks"`
   Dom *vdom.Vdom
-  file *File
+  file *File `json:"-"`
 }
 
 // Load an application using the given loader implementation, 
