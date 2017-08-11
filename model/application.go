@@ -77,6 +77,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   if err != nil {
     return err
   }
+	app.Name = filepath.Base(path)
   app.Path = path
   app.Urls = make(map[string] *File)
   app.setComputedFields(path)
