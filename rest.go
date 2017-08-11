@@ -4,7 +4,7 @@ package pageloop
 
 import (
 	//"fmt"
-	//"log"
+	"log"
 	//"errors"
 	"strings"
 	"net/http"
@@ -132,7 +132,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 
 	if err != nil {
-		//log.Printf("Internal server error: %s", err.Error())
+		log.Printf("Internal server error: %s", err.Error())
 		ex(res, http.StatusInternalServerError, nil)
 		return
 	}
