@@ -33,12 +33,12 @@ func TestApplication(t *testing.T) {
     t.Errorf("Unexpected number of pages %d", len(app.Pages))  
   }
 
-  if len(app.Pages[0].UserData) == 0 {
+  if len(app.Pages[0].PageData) == 0 {
     t.Errorf("Unexpected empty user data for %s", app.Pages[0].file.Path)  
   }
 
   log.Println(app.Pages[0].file.Path)
-  log.Println(app.Pages[0].UserData)
+  log.Println(app.Pages[0].PageData)
 
   fmt.Println("--- render result ---")
   fmt.Println()

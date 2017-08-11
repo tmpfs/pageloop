@@ -54,7 +54,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 
   // Parse the file as a go HTML template if we have some 
   // page data.
-  if p.UserDataType != DATA_NONE {
+  if p.PageDataType != DATA_NONE {
     tpl := template.New(p.file.Relative)
     tpl, err = tpl.Parse(string(data))
     if err != nil {
@@ -62,14 +62,14 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
     }
 
     w := new(bytes.Buffer)
-    tpl.Execute(w, p.UserData)
+    tpl.Execute(w, p.PageData)
 
     // Overwrite data with the parsed template.
     data = w.Bytes()
 
     // Prepend frontmatter to the output.
     /*
-    if p.UserDataType == DATA_YAML {
+    if p.PageDataType == DATA_YAML {
       var fm []byte
       if fm, err = p.MarshalPageData(); err != nil {
         return nil, err
@@ -89,10 +89,10 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 }
 
 func (p *Page) MarshalPageData() ([]byte, error) {
-  if p.UserDataType == DATA_YAML || p.UserDataType == DATA_YAML_FILE {
-    return yaml.Marshal(&p.UserData)
-  } else if(p.UserDataType == DATA_JSON_FILE) {
-    return json.Marshal(&p.UserData)
+  if p.PageDataType == DATA_YAML || p.PageDataType == DATA_YAML_FILE {
+    return yaml.Marshal(&p.PageData)
+  } else if(p.PageDataType == DATA_JSON_FILE) {
+    return json.Marshal(&p.PageData)
   }
   return nil, nil
 }

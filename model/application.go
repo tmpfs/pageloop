@@ -55,8 +55,8 @@ type File struct {
 type Page struct {
   Path string `json:"path"`
   DocType string `json:"doctype"`
-  UserData map[string] interface{} `json:"data"`
-  UserDataType int
+  PageData map[string] interface{} `json:"data"`
+  PageDataType int
   Blocks []Block  `json:"blocks"`
   Dom *vdom.Vdom `json:"-"`
   file *File 
@@ -163,8 +163,8 @@ func (app *Application) setComputedFields(path string) Application {
 //
 // Finally if a .json file exists it is parsed.
 func (app *Application) getPageData(page *Page) (map[string] interface{}, error) {
-  page.UserData = make(map[string] interface{})
-  page.UserDataType = DATA_NONE
+  page.PageData = make(map[string] interface{})
+  page.PageDataType = DATA_NONE
 
   // frontmatter
   if FRONTMATTER.Match(page.file.data) {
@@ -183,16 +183,16 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 
     if len(frontmatter) > 0 {
       fm := bytes.Join(frontmatter, []byte("\n"))
-      err := yaml.Unmarshal(fm, &page.UserData)
+      err := yaml.Unmarshal(fm, &page.PageData)
       if err != nil {
         return nil, err
       }
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
 
-      page.UserDataType = DATA_YAML
+      page.PageDataType = DATA_YAML
     }
-    return page.UserData, nil
+    return page.PageData, nil
   }
 
   // external files
@@ -214,21 +214,21 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
       }
 
       if dataType == JSON {
-        err = json.Unmarshal(contents, &page.UserData)
+        err = json.Unmarshal(contents, &page.PageData)
         if err != nil {
           return nil, err
         }
-        page.UserDataType = DATA_JSON_FILE
+        page.PageDataType = DATA_JSON_FILE
       } else if dataType == YAML {
-        err = yaml.Unmarshal(contents, &page.UserData)
+        err = yaml.Unmarshal(contents, &page.PageData)
         if err != nil {
           return nil, err
         }
-        page.UserDataType = DATA_YAML_FILE
+        page.PageDataType = DATA_YAML_FILE
       }
       break
     }
   }
-  return page.UserData, nil
+  return page.PageData, nil
 }
 
