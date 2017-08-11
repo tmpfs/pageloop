@@ -32,22 +32,22 @@ type RestService struct {
 func (r *RestService) Multiplex(mux *http.ServeMux) {
 	var url string
 	url= "/api/"
-	mux.Handle(url, http.StripPrefix(url, RootHandler{Root: r.Root}))
+	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: r.Root}))
 
 	url = "/api/app/"
-	mux.Handle(url, http.StripPrefix(url, AppHandler{Root: r.Root}))
+	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: r.Root}))
 }
 
-type RootHandler struct {
+type RestRootHandler struct {
 	Root *PageLoop
 }
 
-type AppHandler struct {
+type RestAppHandler struct {
 	Root *PageLoop
 }
 
 // Gets the list of applications.
-func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 
@@ -78,7 +78,7 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Handles application information (files, pages etc.)
-func (h AppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 	var name string
