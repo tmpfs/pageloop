@@ -121,21 +121,11 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		}
 
     // Load the application files into memory
-		println("Load apps")
-		println(p)
 		if err = app.Load(p, loader); err != nil {
 			return err
 		}
 
-		/*
-		} else {
-			// Load from the bundled binary assets (data://)
-			println("load bundled data://")
-		}
-		*/
-
     // Publish the application files to a build directory
-		println("Publish apps")
     if err = app.Publish(nil); err != nil {
       return err
     }
