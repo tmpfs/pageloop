@@ -117,6 +117,9 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 func (app *Application) UrlFromPath(file *File) string {
 	var rel string = file.Relative
   var url string = strings.Join(strings.Split(rel, string(os.PathSeparator)), "/")
+	if file.info.IsDir() && !strings.HasSuffix(url, "/") {
+		url += "/"
+	}
   return url
 }
 
