@@ -1,10 +1,10 @@
-// Handler for the REST API.
+// Exposes a REST API to the application model.
 
 package pageloop
 
 import (
 	//"fmt"
-	"log"
+	//"log"
 	//"errors"
 	"strings"
 	"net/http"
@@ -14,21 +14,17 @@ import (
 
 const(
 	JSON_MIME = "application/json"
-	HTML_MIME = "text/html"
 
 	// App actions
 	FILES = "files"
 	PAGES = "pages"
 )
 
-var (
-	JSON_404 []byte = []byte(`{status:404}`)
-)
-
 type RestService struct {
 	Root *PageLoop
 }
 
+// Configures the REST API handlers.
 func (r *RestService) Multiplex(mux *http.ServeMux) {
 	var url string
 	url= "/api/"
@@ -38,15 +34,17 @@ func (r *RestService) Multiplex(mux *http.ServeMux) {
 	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: r.Root}))
 }
 
+// Handles requests to the API root.
 type RestRootHandler struct {
 	Root *PageLoop
 }
 
+// Handles requests for application data.
 type RestAppHandler struct {
 	Root *PageLoop
 }
 
-// Gets the list of applications.
+// Gets the list of applications for the API root (/api/).
 func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
@@ -59,7 +57,6 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	url := req.URL
 	path := url.Path
 
-	// Api root (/api/)
 	if path == "" {
 		if data, err = json.Marshal(h.Root.Container); err == nil {
 			ok(res, data)
@@ -68,7 +65,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-		log.Printf("Internal server error: %s", err.Error())
+		//log.Printf("Internal server error: %s", err.Error())
 		ex(res, http.StatusInternalServerError, nil)
 		return
 	}
