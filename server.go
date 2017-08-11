@@ -59,8 +59,6 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// Add user applications.
 	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
 
-	println(len(l.Mountpoints))
-
   if err = l.LoadApps(config); err != nil {
     return nil, err
   }
@@ -100,7 +98,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		path := mt.Path
 		if dataPattern.MatchString(path) {
 			dataScheme = true
-			path = dataPattern.ReplaceAllString(path, "")
+			path = dataPattern.ReplaceAllString(path, "data/")
 		}
     var p string
     p, err = filepath.Abs(path)
@@ -117,15 +115,17 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 
 		var loader model.ApplicationLoader = model.FileSystemLoader{}
 
-		if dataScheme {
+		// Load from bundled assets
+		if dataScheme && !config.Dev {
 			loader = model.AssetLoader{}
 		}
 
     // Load the application files into memory
-			// Load from the file system
-			if err = app.Load(p, loader); err != nil {
-				return err
-			}
+		println("Load apps")
+		println(p)
+		if err = app.Load(p, loader); err != nil {
+			return err
+		}
 
 		/*
 		} else {
@@ -135,12 +135,13 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		*/
 
     // Publish the application files to a build directory
+		println("Publish apps")
     if err = app.Publish(nil); err != nil {
       return err
     }
 
     // Serve the static build files.
-    url := urlPath + "versions/current/"
+    url := urlPath
     log.Printf("Serving app %s from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
 

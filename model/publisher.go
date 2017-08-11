@@ -1,7 +1,7 @@
 package model
 
 import (
-  //"fmt"
+	"fmt"
   "os"
   "path/filepath"
   "io/ioutil"
@@ -50,12 +50,17 @@ func (p FileSystemPublisher) PublishApplication(app *Application, base string) e
   app.Public = dir
 
   //fmt.Printf("files: %#v\n", app.Files)
+	fmt.Printf("files: %#v\n", app.Public)
 
   for _, f := range app.Files {
     // Ignore the build directory
     if f.Path == app.Path {
       continue
     }
+
+		println("Write path: " + f.Path)
+		fmt.Println("Write path: ",f.info.Mode().IsDir())
+
     var rel string
     rel, err = filepath.Rel(app.Path, f.Path)
     if err != nil {
@@ -64,16 +69,19 @@ func (p FileSystemPublisher) PublishApplication(app *Application, base string) e
 
     // Set output path and create parent directories
     out := filepath.Join(dir, rel)
+		fmt.Println("Publish output", out)
     parent := filepath.Dir(out)
     if f.info.Mode().IsDir() {
       if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
         return err
       }
+			continue
     } 
 
     // Write out the file data
     mode := f.info.Mode()
     if err = ioutil.WriteFile(out, f.data, mode); err != nil {
+			println("Writing file...")
       return err
     }
   }
