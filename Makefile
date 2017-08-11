@@ -6,4 +6,11 @@ bindata:
 test:
 	@go test $(PACKAGES) 
 
+cover:
+	@go test -cover $(PACKAGES) 
+
+coverage:
+	#@go test -coverprofile=coverage.out $(PACKAGES) 
+	#@go tool cover -func=coverage.out
+
 .PHONY: bindata test
