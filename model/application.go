@@ -4,6 +4,7 @@ import (
   "os"
   "bytes"
   "strings"
+	//"net/http"
   "path/filepath"
   "io/ioutil"
   "encoding/json"
@@ -43,9 +44,12 @@ type Application struct {
 
 type File struct {
   Path string `json:"-"`
+  Name string `json:"name"` 
+  Size int64 `json:"size,omitempty"` 
   Url string `json:"url"` 
-  Directory bool `json:"dir"`
+  Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
+	//Mime string `json:"mime,omitempty"`
   //Index bool `json:"index"`
   info os.FileInfo
   data []byte
@@ -110,8 +114,9 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 }
 
 // Determine a URL from a relative path.
-func (app *Application) UrlFromPath(path string) string {
-  var url string = strings.Join(strings.Split(path, string(os.PathSeparator)), "/")
+func (app *Application) UrlFromPath(file *File) string {
+	var rel string = file.Relative
+  var url string = strings.Join(strings.Split(rel, string(os.PathSeparator)), "/")
   return url
 }
 
@@ -139,12 +144,19 @@ func (app *Application) merge() error {
 // map of URLs to files.
 func (app *Application) setComputedFields(path string) Application {
   for _, file := range app.Files {
+		file.Name = file.info.Name()
+		if !file.info.IsDir() {
+			file.Size = file.info.Size()
+			//println(string(file.data))
+			//file.Mime = http.DetectContentType(file.data)
+		}
+
     // includes the leading slash
     file.Relative = strings.TrimPrefix(file.Path, path)
     if app.Name != "" {
       file.Relative = "/" + app.Name + file.Relative
     }
-    file.Url = app.UrlFromPath(file.Relative)
+    file.Url = app.UrlFromPath(file)
 
 		/*
     if INDEX_FILE.MatchString(file.Path) {
