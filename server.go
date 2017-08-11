@@ -5,21 +5,34 @@ import (
 	"errors"
   "net/http"
   "path/filepath"
+	"regexp"
   "time"
   "github.com/tmpfs/pageloop/model"
-  "github.com/elazarl/go-bindata-assetfs"
+  //"github.com/elazarl/go-bindata-assetfs"
 )
 
 var config ServerConfig
 var mux *http.ServeMux
 
+type Mountpoint struct {
+	// The URL path component.
+	UrlPath string
+	// The path to pass to the loader.
+	Path string	
+}
+
 type PageLoop struct {
 	Server *http.Server
+	// All application mountpoints.
+  Mountpoints []Mountpoint
 }
 
 type ServerConfig struct {
 	Addr string
-  AppPaths []string
+
+	// List of user application mountpoints.
+  Mountpoints []Mountpoint
+
 	// Load system assets from the file system, don't use 
 	// the embedded assets
 	Dev bool
@@ -39,6 +52,14 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
   // Initialize server mux
   mux = http.NewServeMux()
+
+	// System applications to mount.
+	l.Mountpoints = append(l.Mountpoints, Mountpoint{UrlPath: "/", Path: "data://app/home"})
+
+	// Add user applications.
+	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
+
+	println(len(l.Mountpoints))
 
   if err = l.LoadApps(config); err != nil {
     return nil, err
@@ -71,21 +92,47 @@ func (l *PageLoop) Listen() error {
 
 func (l *PageLoop) LoadApps(config ServerConfig) error {
   var err error
+	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
-  for _, path := range config.AppPaths {
+  for _, mt := range l.Mountpoints {
+		var dataScheme bool
+		urlPath := mt.UrlPath
+		path := mt.Path
+		if dataPattern.MatchString(path) {
+			dataScheme = true
+			path = dataPattern.ReplaceAllString(path, "")
+		}
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
       return err
     }
-    name := filepath.Base(path)
+		name := filepath.Base(path)
+
+		if urlPath == "" {
+			urlPath = "/app/" + name + "/"
+		}
 
     app := model.Application{}
 
+		var loader model.ApplicationLoader = model.FileSystemLoader{}
+
+		if dataScheme {
+			loader = model.AssetLoader{}
+		}
+
     // Load the application files into memory
-    if err = app.Load(p, nil); err != nil {
-      return err
-    }
+			// Load from the file system
+			if err = app.Load(p, loader); err != nil {
+				return err
+			}
+
+		/*
+		} else {
+			// Load from the bundled binary assets (data://)
+			println("load bundled data://")
+		}
+		*/
 
     // Publish the application files to a build directory
     if err = app.Publish(nil); err != nil {
@@ -93,28 +140,31 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     }
 
     // Serve the static build files.
-    url := "/apps/" + name + "/versions/current/"
-    log.Printf("Serving %s from %s", url, app.Public)
+    url := urlPath + "versions/current/"
+    log.Printf("Serving app %s from %s", url, app.Public)
     mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
 
-		//mux.Handle("/api/", apiHandler{})
-    url = "/apps/" + name + "/source/"
-    log.Printf("Serving %s from %s", url, p)
+		// Serve the raw source files.
+    url = urlPath + "source/"
+    log.Printf("Serving app source %s from %s", url, p)
 		sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(p)))
 		mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
-			log.Println("got editor request")
-			log.Printf("%#v\n", req)
-			log.Printf("%#v\n", req.URL)
+			//log.Println("got editor request")
+			//log.Printf("%#v\n", req)
+			//log.Printf("%#v\n", req.URL)
+			// TODO: serve in-memory versions
 			sourceFileServer.ServeHTTP(res, req)
 		})
 
+		/*
 		if config.Dev {
-			mux.Handle("/", http.FileServer(http.Dir("data")))
+			//mux.Handle("/", http.FileServer(http.Dir("data")))
 		} else {
 			mux.Handle("/",
 				http.FileServer(
 					&assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: "data"}))
 		}
+		*/
   }
 
   return nil
