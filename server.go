@@ -25,6 +25,9 @@ type PageLoop struct {
 	Server *http.Server
 	// All application mountpoints.
   Mountpoints []Mountpoint
+
+	// All mounted applications
+	Apps []*model.Application
 }
 
 type ServerConfig struct {
@@ -34,7 +37,7 @@ type ServerConfig struct {
   Mountpoints []Mountpoint
 
 	// Load system assets from the file system, don't use 
-	// the embedded assets
+	// the embedded assets.
 	Dev bool
 }
 
@@ -59,7 +62,8 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// Add user applications.
 	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
 
-  if err = l.LoadApps(config); err != nil {
+	var apps []*model.Application
+  if apps, err = l.LoadApps(config); err != nil {
     return nil, err
   }
 
@@ -72,6 +76,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   }
 
 	l.Server = s
+	l.Apps = apps
 
   return s, nil
 }
@@ -88,8 +93,16 @@ func (l *PageLoop) Listen() error {
 	return nil
 }
 
-func (l *PageLoop) LoadApps(config ServerConfig) error {
+func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
   var err error
+
+	// Global endpoints
+	rest := RestHandler{Loop: l}
+	api := "/api/"
+	mux.Handle(api, http.StripPrefix(api, rest))
+
+	// Application endpoints
+	var apps []*model.Application
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
   for _, mt := range l.Mountpoints {
@@ -103,7 +116,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
-      return err
+      return nil, err
     }
 		name := filepath.Base(path)
 
@@ -112,6 +125,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		}
 
     app := model.Application{}
+		apps = append(apps, &app)
 
 		var loader model.ApplicationLoader = model.FileSystemLoader{}
 
@@ -123,12 +137,12 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 
     // Load the application files into memory
 		if err = app.Load(p, loader); err != nil {
-			return err
+			return nil, err
 		}
 
     // Publish the application files to a build directory
     if err = app.Publish(nil); err != nil {
-      return err
+      return nil, err
     }
 
     // Serve the static build files from the mountpoint path.
@@ -161,5 +175,5 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		*/
   }
 
-  return nil
+  return apps, nil
 }
