@@ -29,6 +29,15 @@ const (
 
 var types = []string{YAML, JSON}
 
+// Represents a collection of applications.
+type Container struct {
+	Apps []*Application `json:"apps"`
+}
+
+func (c *Container) Add(app *Application) {
+	c.Apps = append(c.Apps, app)
+}
+
 type Application struct {
   Path string `json:"-"`
 

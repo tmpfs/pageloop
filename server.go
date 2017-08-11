@@ -34,8 +34,8 @@ type PageLoop struct {
 	// All application mountpoints.
   Mountpoints []Mountpoint `json:"-"`
 
-	// All mounted applications.
-	Apps []*model.Application `json:"apps"`
+	// Application container
+	Container *model.Container
 }
 
 type ServerConfig struct {
@@ -61,6 +61,9 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   var err error
 
+	// Configure application container.
+	l.Container = &model.Container{}
+
   // Initialize server mux
   mux = http.NewServeMux()
 
@@ -70,8 +73,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// Add user applications.
 	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
 
-	var apps []*model.Application
-  if apps, err = l.LoadApps(config); err != nil {
+  if err = l.LoadApps(config); err != nil {
     return nil, err
   }
 
@@ -84,7 +86,6 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   }
 
 	l.Server = s
-	l.Apps = apps
 
   return s, nil
 }
@@ -101,7 +102,7 @@ func (l *PageLoop) Listen() error {
 	return nil
 }
 
-func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
+func (l *PageLoop) LoadApps(config ServerConfig) error {
   var err error
 
 	// Global endpoints
@@ -110,7 +111,6 @@ func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
 	mux.Handle(api, http.StripPrefix(api, rest))
 
 	// Application endpoints
-	var apps []*model.Application
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
   for _, mt := range l.Mountpoints {
@@ -124,7 +124,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
-      return nil, err
+      return err
     }
 		name := filepath.Base(path)
 
@@ -133,7 +133,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
 		}
 
     app := model.Application{}
-		apps = append(apps, &app)
+		l.Container.Add(&app)
 
 		var loader model.ApplicationLoader = model.FileSystemLoader{}
 
@@ -145,12 +145,12 @@ func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
 
     // Load the application files into memory
 		if err = app.Load(p, loader); err != nil {
-			return nil, err
+			return err
 		}
 
     // Publish the application files to a build directory
     if err = app.Publish(nil); err != nil {
-      return nil, err
+      return err
     }
 
     // Serve the static build files from the mountpoint path.
@@ -183,5 +183,5 @@ func (l *PageLoop) LoadApps(config ServerConfig) ([]*model.Application, error) {
 		*/
   }
 
-  return apps, nil
+  return nil
 }
