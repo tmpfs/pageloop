@@ -63,16 +63,3 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
   })
   return err
 }
-
-// Default implementation loads from the filesystem.
-type AssetLoader struct {
-	//Asset func(name string) ([]byte error)
-}
-
-// Loads the application assets from a filesystem directory path and 
-// populate the given application with files and HTML pages.
-func (a AssetLoader) LoadApplication(path string, app *Application) error {
-	println("asset loader load application")
-	println(path)
-	return nil
-}

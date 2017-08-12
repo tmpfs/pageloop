@@ -144,7 +144,7 @@ func (l *PageLoop) loadApps(config ServerConfig) error {
 		// Load from bundled assets
 		if dataScheme && !config.Dev {
 			// TODO: implement asset loader logic
-			loader = model.AssetLoader{}
+			//loader = model.AssetLoader{}
 		}
 
     // Load the application files into memory

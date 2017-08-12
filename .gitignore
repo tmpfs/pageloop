@@ -3,3 +3,4 @@ assets.go
 *.bak
 *.log
 *.pid
+*.out

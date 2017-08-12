@@ -1,20 +1,21 @@
 package pageloop
 
 import (
-	//"net/http"
+	"net/http"
   "testing"
 )
 
 func Start(t *testing.T) *PageLoop {
 	var err error
+	var server *http.Server
   var apps []Mountpoint
 	apps = append(apps, Mountpoint{UrlPath: "/app/mock-app/", Path: "test/fixtures/mock-app"})
   loop := &PageLoop{}
 	conf := ServerConfig{Mountpoints: apps, Addr: ":3577", Dev: true}
-	if _, err = loop.NewServer(conf); err != nil {
+	if server, err = loop.NewServer(conf); err != nil {
 		t.Error(err)
 	}
-	go loop.Listen()
+	go loop.Listen(server)
 	return loop
 }
 

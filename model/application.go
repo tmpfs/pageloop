@@ -145,7 +145,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
 }
 
 // Publish files using the given publisher implementation, if a nil 
-// publisher is givem the default file system publisher is used.
+// publisher is given the default file system publisher is used.
 func (app *Application) Publish(publisher ApplicationPublisher) error {
   var err error
   if publisher == nil {
