@@ -250,12 +250,19 @@ func TestRestService(t *testing.T) {
 	////
 
 
-	// POST /api/
+	// POST /api/ - Method Not Allowed
 	doc := []byte(`{}`)
-	if resp, body, err = post(api + "/", "application/json", doc); err != nil {
+	if resp, body, err = post(api + "/", JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
+
+	// PUT /api/ (malformed json) - Bad Request
+	doc = []byte(`{`)
+	if resp, body, err = put(api + "/apps/", http.MethodPut, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusBadRequest)
 }
 
 // Private helpers
@@ -288,6 +295,26 @@ func post(url string, contentType string, body []byte) (*http.Response, []byte, 
 	return resp, resbody, nil
 }
 
+func put(uri string, method string, body []byte) (*http.Response, []byte, error) {
+	var err error
+	var buf = new(bytes.Buffer)
+	buf.Write(body)
+	var req *http.Request
+	if req, err = http.NewRequest(method, uri, buf); err != nil {
+		return nil, nil, err	
+	}
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+	resbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	return resp, resbody, nil
+}
 
 func assertContentType(resp *http.Response, t *testing.T, mime string) {
 	ct := resp.Header.Get("Content-Type")
