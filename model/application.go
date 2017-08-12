@@ -1,7 +1,6 @@
 package model
 
 import (
-	"log"
   "os"
   "bytes"
   "strings"
@@ -136,8 +135,6 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 
 // Get a file pointer by URL.
 func (app *Application) GetFileByUrl(url string) *File {
-	println(url)
-	log.Printf("URLS %#v\n", app.Urls)
 	return app.Urls[url]
 }
 
