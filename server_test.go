@@ -55,6 +55,23 @@ func TestMainPages(t *testing.T) {
 	assertHeaders(resp, t, http.StatusOK)
 }
 
+// Test GET for 404 responses
+func TestNotFound(t *testing.T) {
+	var err error
+	var resp *http.Response
+	// GET /not-found/
+	if resp, _, err = get(url + "/not-found/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusNotFound)
+
+	// GET /api/not-found/
+	if resp, _, err = get(api + "/not-found/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusNotFound)
+}
+
 // Test REST API endpoints
 func TestRestService(t *testing.T) {
 	var err error
