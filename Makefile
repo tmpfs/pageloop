@@ -13,7 +13,8 @@ cover:
 	@go test -cover $(PACKAGES) 
 
 coverage:
-	#@go test -coverprofile=coverage.out $(PACKAGES) 
-	#@go tool cover -func=coverage.out
+	# TODO: run over all packages
+	@go test -coverprofile=coverage.out
+	@go tool cover -html=coverage.out
 
 .PHONY: bindata test
