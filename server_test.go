@@ -39,7 +39,10 @@ func get(url string) (*http.Response, []byte, error) {
 	return resp, body, nil
 }
 
-func assertHeaders(resp *http.Response, t *testing.T) {
+func assertHeaders(resp *http.Response, t *testing.T, code int) {
+	if resp.StatusCode != code {
+		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
+	}
 	if resp.Header.Get("Content-Type") != JSON_MIME {
 		t.Error("Unexpected response content type")
 	}
@@ -48,25 +51,28 @@ func assertHeaders(resp *http.Response, t *testing.T) {
 func TestRestService(t *testing.T) {
 	Start(t)
 
-	//sleep(1)
-
 	var err error
 	var resp *http.Response
 	var body []byte
+
+	var res map[string] interface{} = make(map[string] interface{})
+	var apps []interface{}
+	var list []interface{}
+	var app map [string] interface{}
+	var page map [string] interface{}
+	var name string
+	var ok bool
+
 
 	// GET /api/
 	if resp, body, err = get(api); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t)
+	assertHeaders(resp, t, http.StatusOK)
 
-	var res map[string] interface{} = make(map[string] interface{})
-	err = json.Unmarshal(body, &res)
-
-	var apps []interface{}
-	var app map [string] interface{}
-	var name string
-	var ok bool
+	if err = json.Unmarshal(body, &res); err != nil {
+		t.Fatal(err)
+	}
 
 	if apps, ok = res["apps"].([]interface{}); !ok {
 		t.Error("Unexpected type for apps list")
@@ -84,10 +90,11 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s", api, "apps/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t)
+	assertHeaders(resp, t, http.StatusOK)
 
-	var list []interface{}
-	err = json.Unmarshal(body, &list)
+	if err = json.Unmarshal(body, &list); err != nil {
+		t.Fatal(err)
+	}
 
 	if app, ok = list[0].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for app")
@@ -101,12 +108,45 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "apps/", name + "/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t)
+	assertHeaders(resp, t, http.StatusOK)
 
 	app = make(map[string] interface{})
-	err = json.Unmarshal(body, &app)
+	if err = json.Unmarshal(body, &app); err != nil {
+		t.Fatal(err)
+	}
 
 	if _, ok = app["name"].(string); !ok {
 		t.Error("Unexpected type for name")
 	}
+
+	// GET /api/apps/{name}/pages/
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "apps/", name, "/pages/")); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
+
+	//println(string(body))
+
+	list = make([]interface{}, 128)
+	if err = json.Unmarshal(body, &list); err != nil {
+		t.Fatal(err)
+	}
+
+	if page, ok = list[0].(map [string] interface{}); !ok {
+		t.Error("Unexpected type for page")
+	}
+
+	if _, ok = page["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+	if _, ok = page["url"].(string); !ok {
+		t.Error("Unexpected type for url")
+	}
+
+	/*
+	if _, ok = page["size"].(int); !ok {
+		t.Error("Unexpected type for size")
+	}
+	*/
 }
