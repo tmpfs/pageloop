@@ -1,7 +1,7 @@
 package vdom
 
 import(
-  "log"
+  //"log"
   "errors"
   "golang.org/x/net/html"
 )
@@ -47,8 +47,8 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
 
   // iterate and attempt to apply operations
   for _, diff := range patch.Diffs {
-    log.Printf("Applying patch diff, op: %d", diff.Operation)
-    log.Printf("Applying patch diff, id: %s", diff.Id)
+    //log.Printf("Applying patch diff, op: %d", diff.Operation)
+    //log.Printf("Applying patch diff, id: %s", diff.Id)
     switch diff.Operation {
       case APPEND:
         var parent *html.Node = vdom.Map[diff.Id]
@@ -120,10 +120,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           return out, errors.New("Missing parent node for remove operation (node may be detached)")
         }
 
-        //log.Println("Remove with id", diff.Id)
-
         if target.NextSibling == nil {
-          //log.Println("CREATING APPEND DIFF FOR REMOVE CHILD")
           tx, err = vdom.DiffAppend(parent, target)
           if err != nil {
             return out, err
@@ -131,7 +128,6 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
           tx.Id = vdom.GetId(parent)
           tx.Element = parent
         } else {
-          //log.Println("CREATING INSERT DIFF FOR REMOVE CHILD", target.NextSibling)
           tx, err = vdom.DiffInsert(parent, target, target.NextSibling)
           tx.Id = vdom.GetId(target.NextSibling)
           tx.Element = target.NextSibling
@@ -183,20 +179,7 @@ func (vdom *Vdom) Apply(patch *Patch) (Patch, error) {
 
   // sync identifiers
   for index, txn := range out.Diffs {
-    /*
-    log.Println("got txn Op", txn.Operation)
-    log.Println("got txn Id", txn.Id)
-    log.Println("got txn Element Id", vdom.GetId(txn.Element))
-    */
     txn.Id = vdom.GetId(txn.Element)
-    log.Println(txn)
-
-    /*
-    if txn.Element.Parent == nil {
-      log.Println("got detached node", txn)
-    }
-    */
-
     out.Diffs[index] = txn
   }
 
