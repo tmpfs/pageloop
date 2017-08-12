@@ -146,7 +146,9 @@ func (app *Application) GetFileByUrl(url string) *File {
 // Get a page pointer by URL.
 func (app *Application) GetPageByUrl(url string) *Page {
 	for _, page := range app.Pages {
-		if page.Url == url {
+		u := file.Url
+		u = strings.TrimSuffix(u, "/")
+		if u == url {
 			return page
 		}
 	}
@@ -190,8 +192,6 @@ func (app *Application) setComputedFields(path string) Application {
 		file.Name = file.info.Name()
 		if !file.info.IsDir() {
 			file.Size = file.info.Size()
-			//println(string(file.data))
-			//file.Mime = http.DetectContentType(file.data)
 		}
 
     // includes the leading slash
@@ -200,13 +200,6 @@ func (app *Application) setComputedFields(path string) Application {
       file.Relative = "/" + app.Name + file.Relative
     }
     file.Url = app.UrlFromPath(file)
-
-		/*
-    if INDEX_FILE.MatchString(file.Path) {
-      file.Index = true
-    }
-		*/
-
     app.Urls[file.Url] = file
   }
   return *app
