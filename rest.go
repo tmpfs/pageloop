@@ -3,7 +3,7 @@
 package pageloop
 
 import (
-	"fmt"
+	//"fmt"
 	//"log"
 	"errors"
 	"io/ioutil"
@@ -20,8 +20,12 @@ const(
 	// App actions
 	FILES = "files"
 	PAGES = "pages"
+)
 
-	SchemaAppCreate = `{"properties": {"name": {"type": "string"}}, "required": ["name"], "additionalProperties": false}`
+var(
+	OK = []byte(`{"ok": true}`)
+
+	SchemaAppCreate = []byte(`{"properties": {"name": {"type": "string"}}, "required": ["name"], "additionalProperties": false}`)
 )
 
 type RestService struct {
@@ -167,25 +171,19 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			} else {
 				defer req.Body.Close()
 				body, err = ioutil.ReadAll(req.Body)
-				//body = req.Body.Read()
-				println("put to app " + string(body))
-
-				schemaLoader := gojsonschema.NewStringLoader(SchemaAppCreate)
-				documentLoader := gojsonschema.NewBytesLoader(body)
-
 				var result *gojsonschema.Result
-				if result, err = gojsonschema.Validate(schemaLoader, documentLoader); result != nil {
+				if result, err = validate(SchemaAppCreate, body); result != nil {
 					if result.Valid() {
-						fmt.Printf("The document is valid\n")
+
+						//
+						// TODO: create new app!
+						//
+						created(res, OK)
+						return
 					} else {
 						errorList := result.Errors()
 						ex(res, http.StatusBadRequest, nil, errors.New(errorList[0].String()))
 						return
-						/*
-						for _, desc := range result.Errors() {
-							fmt.Printf("- %s\n", desc)
-						}
-						*/
 					}
 				}	
 			}
@@ -224,9 +222,21 @@ func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, e
 
 // Private helper functions.
 
+// Validate a client request body.
+func validate(schema []byte, body []byte) (*gojsonschema.Result, error) {
+	schemaLoader := gojsonschema.NewBytesLoader(SchemaAppCreate)
+	documentLoader := gojsonschema.NewBytesLoader(body)
+	return gojsonschema.Validate(schemaLoader, documentLoader)
+}
+
 // Send an OK response to the client.
 func ok(res http.ResponseWriter, data []byte) (int, error) {
 	return write(res, http.StatusOK, data)
+}
+
+// Send a created response to the client, typically in reply to a PUT.
+func created(res http.ResponseWriter, data []byte) (int, error) {
+	return write(res, http.StatusCreated, data)
 }
 
 // Write to the HTTP response and set common headers.
