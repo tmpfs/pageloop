@@ -17,8 +17,9 @@ type ApplicationPublisher interface {
 // Default implementation loads from the filesystem.
 type FileSystemPublisher struct {}
 
-// Loads the application assets from a filesystem directory path and 
-// populate the given application with files and HTML pages.
+// Publishes the application to a directory.
+//
+// Writes all application files using the current data bytes.
 //
 // Use base as the output directory, if base is the empty string a 
 // public directory relative to the current working directory 
