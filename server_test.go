@@ -174,6 +174,26 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for url")
 	}
 
+	// GET /api/apps/{name}/files/{url}/
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/index.html")); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+
+	file = make(map [string]interface{})
+	if err = json.Unmarshal(body, &file); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok = file["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+	if _, ok = file["url"].(string); !ok {
+		t.Error("Unexpected type for url")
+	}
+
 	// GET /api/apps/{name}/pages/
 	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/")); err != nil {
 		t.Fatal(err)
@@ -188,6 +208,26 @@ func TestRestService(t *testing.T) {
 
 	if page, ok = list[0].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for page")
+	}
+
+	if _, ok = page["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+	if _, ok = page["url"].(string); !ok {
+		t.Error("Unexpected type for url")
+	}
+
+	// GET /api/apps/{name}/pages/{url}
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/index.html")); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+
+	page = make(map [string]interface{})
+	if err = json.Unmarshal(body, &page); err != nil {
+		t.Fatal(err)
 	}
 
 	if _, ok = page["name"].(string); !ok {
@@ -231,10 +271,4 @@ func assertStatus(resp *http.Response, t *testing.T, code int) {
 	if resp.StatusCode != code {
 		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
 	}
-	/*
-	if resp.Header.Get("Content-Type") != JSON_MIME {
-		t.Error("Unexpected response content type")
-	}
-	*/
 }
-
