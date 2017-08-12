@@ -75,7 +75,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// Add user applications.
 	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
 
-  if err = l.LoadApps(config); err != nil {
+  if err = l.loadApps(config); err != nil {
     return nil, err
   }
 
@@ -102,7 +102,8 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	return nil
 }
 
-func (l *PageLoop) LoadApps(config ServerConfig) error {
+// Load application mountpoints.
+func (l *PageLoop) loadApps(config ServerConfig) error {
   var err error
 
 	// REST API global endpoint
