@@ -57,7 +57,7 @@ func TestRestService(t *testing.T) {
 
 	var apps []interface{}
 	var app map [string] interface{}
-	var name string
+	//var name string
 	var ok bool
 
 	if apps, ok = res["apps"].([]interface{}); !ok {
@@ -68,13 +68,28 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for app")
 	}
 
-	if name , ok = app["name"].(string); !ok {
+	if _, ok = app["name"].(string); !ok {
 		t.Error("Unexpected type for name")
 	}
 
+	// GET /api/apps/
+	if resp, body, err = get("http://localhost:3579/api/apps/"); err != nil {
+		t.Error(err)
+	}
 
-	println(name)
+	if resp.Header.Get("Content-Type") != JSON_MIME {
+		t.Error("Unexpected response content type")
+	}
 
-	//println(ok)
-	//fmt.Printf("%#v\n", res)
+	var list []interface{}
+	err = json.Unmarshal(body, &list)
+
+	if app, ok = list[0].(map [string] interface{}); !ok {
+		t.Error("Unexpected type for app")
+	}
+
+	if _, ok = app["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
 }
