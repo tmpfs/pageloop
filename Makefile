@@ -3,6 +3,9 @@ PACKAGES = github.com/tmpfs/pageloop github.com/tmpfs/pageloop/model github.com/
 bindata:
 	@go-bindata -pkg pageloop -prefix data -o assets.go $(shell find ./data -type d)
 
+dev: bindata
+	@go run bin/main.go
+
 test:
 	@go test $(PACKAGES) 
 

@@ -123,6 +123,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		case http.MethodGet:
 			// List applications
 			if path == "" {
+				fmt.Printf("%#v\n", h.Root.Container.Apps)
 				data, err = json.Marshal(h.Root.Container.Apps)
 			// Operate on an app
 			} else {
@@ -167,10 +168,10 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			} else {
-				var input map[string] interface{}
 				var result *gojsonschema.Result
+				var input *model.Application = &model.Application{}
 
-				result, input, err = validateRequest(SchemaAppNew, req)
+				result, err = validateRequest(SchemaAppNew, input, req)
 				if err != nil {
 					ex(res, http.StatusBadRequest, nil, err)
 					return
@@ -178,6 +179,9 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 				fmt.Printf("PUT input: %#v\n", input)
 				fmt.Printf("PUT result: %#v\n", result)
+
+				// Add the application to the container.
+				h.Root.Container.Add(input)
 
 				//
 				// TODO: create new app!
@@ -223,34 +227,34 @@ func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, e
 //
 // Reads in the request body data, unmarshals to JSON and 
 // validates the result against the given schema.
-func validateRequest(schema []byte, req *http.Request) (*gojsonschema.Result, map[string] interface{}, error) {
+func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojsonschema.Result, error) {
 	var err error
 	var body []byte
-				var result *gojsonschema.Result
+	var result *gojsonschema.Result
 	defer req.Body.Close()
 	body, err = ioutil.ReadAll(req.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	var input map[string] interface{} = make(map[string] interface{})
+	//var input map[string] interface{} = make(map[string] interface{})
 	if err = json.Unmarshal(body, &input); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	if result, err = validate(schema, input); result != nil {
+	if result, err = validate(schema, body); result != nil {
 		if !result.Valid() {
-			return nil, nil, errors.New(result.Errors()[0].String())
+			return nil, errors.New(result.Errors()[0].String())
 		}
 	}
 
-	return result, input, nil
+	return result, nil
 }
 
 // Validate client request data.
-func validate(schema []byte, input map[string] interface{}) (*gojsonschema.Result, error) {
+func validate(schema []byte, input []byte) (*gojsonschema.Result, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schema)
-	documentLoader := gojsonschema.NewGoLoader(input)
+	documentLoader := gojsonschema.NewBytesLoader(input)
 	return gojsonschema.Validate(schemaLoader, documentLoader)
 }
 
