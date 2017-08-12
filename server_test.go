@@ -22,7 +22,7 @@ func Start(t *testing.T) *PageLoop {
 	return loop
 }
 
-func TestServer(t *testing.T) {
+func TestRestService(t *testing.T) {
 	Start(t)
 
 	// GET /api/
