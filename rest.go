@@ -24,8 +24,7 @@ const(
 
 var(
 	OK = []byte(`{"ok": true}`)
-
-	SchemaAppCreate = []byte(`{"properties": {"name": {"type": "string"}}, "required": ["name"], "additionalProperties": false}`)
+	SchemaAppNew = MustAsset("schema/app-new.json")
 )
 
 type RestService struct {
@@ -171,7 +170,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				var input map[string] interface{}
 				var result *gojsonschema.Result
 
-				result, input, err = validateRequest(SchemaAppCreate, req)
+				result, input, err = validateRequest(SchemaAppNew, req)
 				if err != nil {
 					ex(res, http.StatusBadRequest, nil, err)
 					return
