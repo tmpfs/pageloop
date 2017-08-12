@@ -3,8 +3,6 @@
 package pageloop
 
 import (
-	"fmt"
-	//"log"
 	"errors"
 	"io/ioutil"
 	"strings"
@@ -101,6 +99,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	path := url.Path
 
 
+	// Check if an app exists when referenced as /api/apps/{name}
+	// and extract path parts.
 	if path != "" {
 		parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
 		name = parts[0]
@@ -121,21 +121,22 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	switch req.Method {
 		case http.MethodGet:
-			// List applications
 			if path == "" {
-				fmt.Printf("%#v\n", h.Root.Container.Apps)
+				// GET /api/apps/
 				data, err = json.Marshal(h.Root.Container.Apps)
-			// Operate on an app
 			} else {
 				if app != nil {
 					if action == "" {
+						// GET /api/apps/{name}
 						data, err = json.Marshal(app)
 					} else {
 						switch action {
 							case FILES:
 								if item == "" {
+									// GET /api/apps/{name}/files
 									data, err = json.Marshal(app.Files)
 								} else {
+									// GET /api/apps/{name}/files/{url}
 									file := app.GetFileByUrl(item)
 									// Data is nil so we send a 404
 									if file == nil {
@@ -145,8 +146,10 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 								}
 							case PAGES:
 								if item == "" {
+									// GET /api/apps/{name}/pages
 									data, err = json.Marshal(app.Pages)
 								} else {
+									// GET /api/apps/{name}/pages/{url}
 									page := app.GetPageByUrl(item)
 									// Data is nil so we send a 404
 									if page == nil {
@@ -161,24 +164,34 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					}
 				}
 			}
+		// DELETE /api/apps/{name}
+		case http.MethodDelete:
+			if name != "" && action == "" {
+				h.Root.Container.Del(app)
 
+				// TODO: rewrite mountpoints
+
+				ok(res, OK)
+				return
+			} else {
+				ex(res, http.StatusMethodNotAllowed, nil, nil)
+				return
+			}
 		case http.MethodPut:
 			// Only allow PUT at /api/apps/
 			if path != "" {
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			} else {
-				var result *gojsonschema.Result
 				var input *model.Application = &model.Application{}
-
-				result, err = validateRequest(SchemaAppNew, input, req)
+				_, err = validateRequest(SchemaAppNew, input, req)
 				if err != nil {
 					ex(res, http.StatusBadRequest, nil, err)
 					return
 				}
 
-				fmt.Printf("PUT input: %#v\n", input)
-				fmt.Printf("PUT result: %#v\n", result)
+				//fmt.Printf("PUT input: %#v\n", input)
+				//fmt.Printf("PUT result: %#v\n", result)
 
 				// Add the application to the container.
 				if err = h.Root.Container.Add(input); err != nil {

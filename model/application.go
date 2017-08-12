@@ -61,6 +61,18 @@ func (c *Container) Add(app *Application) error {
 	return nil
 }
 
+// Remove an application from the container.
+func (c *Container) Del(app *Application) error {
+	for i, a := range c.Apps {
+		if app == a {
+      before := c.Apps[0:i]
+			after := c.Apps[i+1:]
+			c.Apps = append(before, after...)
+		}
+	}
+	return nil
+}
+
 // Get an application by name.
 func (c *Container) GetByName(name string) *Application {
 	for _, app := range c.Apps {
