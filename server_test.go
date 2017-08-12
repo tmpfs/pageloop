@@ -1,12 +1,15 @@
 package pageloop
 
 import (
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"encoding/json"
   "testing"
 )
+
+var url string = "http://localhost:3579"
+var api string = url + "/api/"
 
 func Start(t *testing.T) *PageLoop {
 	var err error
@@ -36,28 +39,33 @@ func get(url string) (*http.Response, []byte, error) {
 	return resp, body, nil
 }
 
+func assertHeaders(resp *http.Response, t *testing.T) {
+	if resp.Header.Get("Content-Type") != JSON_MIME {
+		t.Error("Unexpected response content type")
+	}
+}
+
 func TestRestService(t *testing.T) {
 	Start(t)
+
+	//sleep(1)
 
 	var err error
 	var resp *http.Response
 	var body []byte
 
 	// GET /api/
-	if resp, body, err = get("http://localhost:3579/api/"); err != nil {
-		t.Error(err)
+	if resp, body, err = get(api); err != nil {
+		t.Fatal(err)
 	}
-
-	if resp.Header.Get("Content-Type") != JSON_MIME {
-		t.Error("Unexpected response content type")
-	}
+	assertHeaders(resp, t)
 
 	var res map[string] interface{} = make(map[string] interface{})
 	err = json.Unmarshal(body, &res)
 
 	var apps []interface{}
 	var app map [string] interface{}
-	//var name string
+	var name string
 	var ok bool
 
 	if apps, ok = res["apps"].([]interface{}); !ok {
@@ -73,13 +81,10 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/
-	if resp, body, err = get("http://localhost:3579/api/apps/"); err != nil {
-		t.Error(err)
+	if resp, body, err = get(fmt.Sprintf("%s%s", api, "apps/")); err != nil {
+		t.Fatal(err)
 	}
-
-	if resp.Header.Get("Content-Type") != JSON_MIME {
-		t.Error("Unexpected response content type")
-	}
+	assertHeaders(resp, t)
 
 	var list []interface{}
 	err = json.Unmarshal(body, &list)
@@ -88,8 +93,20 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for app")
 	}
 
-	if _, ok = app["name"].(string); !ok {
+	if name, ok = app["name"].(string); !ok {
 		t.Error("Unexpected type for name")
 	}
 
+	// GET /api/apps/{name}/
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "apps/", name + "/")); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t)
+
+	app = make(map[string] interface{})
+	err = json.Unmarshal(body, &app)
+
+	if _, ok = app["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
 }
