@@ -2,6 +2,7 @@ package pageloop
 
 import (
 	"fmt"
+	"bytes"
 	"io/ioutil"
 	"net/http"
 	"encoding/json"
@@ -243,6 +244,18 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 	*/
+
+	////
+	//
+	////
+
+
+	// POST /api/
+	doc := []byte(`{}`)
+	if resp, body, err = post(api, "application/json", doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusMethodNotAllowed)
 }
 
 // Private helpers
@@ -259,6 +272,22 @@ func get(url string) (*http.Response, []byte, error) {
 	}
 	return resp, body, nil
 }
+
+func post(url string, contentType string, body []byte) (*http.Response, []byte, error) {
+	var buf = new(bytes.Buffer)
+	buf.Write(body)
+	resp, err := http.Post(url, contentType, buf)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+	resbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	return resp, resbody, nil
+}
+
 
 func assertContentType(resp *http.Response, t *testing.T, mime string) {
 	ct := resp.Header.Get("Content-Type")
