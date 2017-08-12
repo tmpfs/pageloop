@@ -14,7 +14,7 @@ func Start(t *testing.T) *PageLoop {
   var apps []Mountpoint
 	apps = append(apps, Mountpoint{UrlPath: "/app/mock-app/", Path: "test/fixtures/mock-app"})
   loop := &PageLoop{}
-	conf := ServerConfig{Mountpoints: apps, Addr: ":3577", Dev: true}
+	conf := ServerConfig{Mountpoints: apps, Addr: ":3579", Dev: true}
 	if server, err = loop.NewServer(conf); err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestServer(t *testing.T) {
 	Start(t)
 
 	// GET /api/
-	resp, err := http.Get("http://localhost:3577/api/")
+	resp, err := http.Get("http://localhost:3579/api/")
 	if err != nil {
 		t.Error(err)
 	}
@@ -60,7 +60,6 @@ func TestServer(t *testing.T) {
 
 
 	println(name)
-
 
 	//println(ok)
 	//fmt.Printf("%#v\n", res)
