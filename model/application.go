@@ -5,6 +5,7 @@ import (
 	"fmt"
   "bytes"
 	"errors"
+	"regexp"
   "strings"
   "path/filepath"
   "io/ioutil"
@@ -25,7 +26,11 @@ const (
   DATA_JSON_FILE
 )
 
-var types = []string{YAML, JSON}
+var(
+	types = []string{YAML, JSON}
+	ptn string = `^[a-zA-Z0-9]+[a-zA-Z0-9-]*`
+	re = regexp.MustCompile(ptn)
+)
 
 // Represents a collection of applications.
 type Container struct {
@@ -35,14 +40,23 @@ type Container struct {
 // Add an application to the container, the application must 
 // have the Name field set and it must not already exist in 
 // the container list.
+//
+// Application names may only contain lowercase, uppercase, hyphens 
+// and digits. They may not begin with a hyphen.
 func (c *Container) Add(app *Application) error {
 	if app.Name == "" {
 		return errors.New("Application name is required to add to container")
 	}
+
+	if !re.MatchString(app.Name) {
+		return errors.New(fmt.Sprintf("Application name must match pattern %s", ptn))
+	}
+
 	var exists *Application = c.GetByName(app.Name)
 	if exists != nil {
 		return errors.New(fmt.Sprintf("Application exists with name %s", app.Name))
 	}
+
 	c.Apps = append(c.Apps, app)
 
 	return nil

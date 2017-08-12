@@ -187,7 +187,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				}
 
 				// TODO: check name is valid pattern
-				// TODO: create application source file directory
+				// TODO: create application source file directory - template??
 				// TODO: persist application mountpoints
 
 				created(res, OK)
