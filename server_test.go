@@ -22,22 +22,38 @@ func Start(t *testing.T) *PageLoop {
 	return loop
 }
 
-func TestRestService(t *testing.T) {
-	Start(t)
-
-	// GET /api/
-	resp, err := http.Get("http://localhost:3579/api/")
+func get(url string) (*http.Response, []byte, error) {
+	resp, err := http.Get(url)
 	if err != nil {
-		t.Error(err)
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		return nil, nil, err
+	}
+
+	return resp, body, nil
+}
+
+func TestRestService(t *testing.T) {
+	Start(t)
+
+	var err error
+	var resp *http.Response
+	var body []byte
+
+	// GET /api/
+	if resp, body, err = get("http://localhost:3579/api/"); err != nil {
 		t.Error(err)
 	}
 
+	if resp.Header.Get("Content-Type") != JSON_MIME {
+		t.Error("Unexpected response content type")
+	}
+
 	var res map[string] interface{} = make(map[string] interface{})
-	json.Unmarshal(body, &res)
+	err = json.Unmarshal(body, &res)
 
 	var apps []interface{}
 	var app map [string] interface{}
@@ -47,8 +63,6 @@ func TestRestService(t *testing.T) {
 	if apps, ok = res["apps"].([]interface{}); !ok {
 		t.Error("Unexpected type for apps list")
 	}
-
-	//println(apps[0])
 
 	if app, ok = apps[0].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for app")
