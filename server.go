@@ -59,7 +59,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   handler.ServeHTTP(res, req)
 }
 
-// Starts an HTTP server listening.
+// Creates an HTTP server.
 func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   var err error
 
@@ -87,18 +87,16 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
     MaxHeaderBytes: 1 << 20,
   }
 
-	l.Server = s
-
   return s, nil
 }
 
-func (l *PageLoop) Listen() error {
+// Start the HTTP server listening.
+func (l *PageLoop) Listen(server *http.Server) error {
 	var err error
-	s := l.Server
-	if s == nil {
+	if server == nil {
 		return errors.New("Cannot listen without a server, call NewServer().")
 	}
-  if err = s.ListenAndServe(); err != nil {
+  if err = server.ListenAndServe(); err != nil {
 		return err
 	}
 	return nil
