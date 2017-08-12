@@ -12,9 +12,6 @@ import (
 )
 
 const (
-  // Default doctype.
-  HTML5 = "html"
-
   // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"
@@ -79,7 +76,6 @@ type File struct {
 type Page struct {
   Path string `json:"-"`
   Url string `json:"url"` 
-  DocType string `json:"doctype"`
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`

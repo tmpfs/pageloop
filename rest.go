@@ -114,8 +114,10 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	switch req.Method {
 		case http.MethodGet:
+			// List applications
 			if path == "" {
 				data, err = json.Marshal(h.Root.Container.Apps)
+			// Operate on an app
 			} else {
 				if app != nil {
 					if action == "" {
@@ -142,6 +144,9 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					}
 				}
 			}
+
+		case http.MethodPut:
+			println("put to app " + name)
 	}
 
 

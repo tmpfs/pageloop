@@ -19,7 +19,7 @@ func TestBlock(t *testing.T) {
     t.Error("Unexpected empty content")
   }
 
-  p := Page{DocType: HTML5}
+  p := Page{}
   p.AddBlock(b)
 
   if p.Length() != 1 {
@@ -57,7 +57,7 @@ func TestBlock(t *testing.T) {
 }
 
 func TestJson(t *testing.T) {
-  p := Page{DocType: HTML5}
+  p := Page{}
   p.AddBlock(Block{Title: "Mock Title", Content: "Mock Content"})
   _, err := json.Marshal(p)
   if err != nil {
