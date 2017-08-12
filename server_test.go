@@ -82,6 +82,7 @@ func TestRestService(t *testing.T) {
 	var apps []interface{}
 	var list []interface{}
 	var app map [string] interface{}
+	var file map [string] interface{}
 	var page map [string] interface{}
 	var name string
 	var ok bool
@@ -140,6 +141,29 @@ func TestRestService(t *testing.T) {
 
 	if _, ok = app["name"].(string); !ok {
 		t.Error("Unexpected type for name")
+	}
+
+	// GET /api/apps/{name}/files/
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/")); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
+
+	list = make([]interface{}, 128)
+	if err = json.Unmarshal(body, &list); err != nil {
+		t.Fatal(err)
+	}
+
+	if file, ok = list[0].(map [string] interface{}); !ok {
+		t.Error("Unexpected type for file")
+	}
+
+	if _, ok = file["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+	if _, ok = file["url"].(string); !ok {
+		t.Error("Unexpected type for url")
 	}
 
 	// GET /api/apps/{name}/pages/
