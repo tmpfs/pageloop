@@ -1,7 +1,10 @@
 package pageloop
 
 import (
+	//"fmt"
+	"io/ioutil"
 	"net/http"
+	"encoding/json"
   "testing"
 )
 
@@ -13,15 +16,52 @@ func Start(t *testing.T) *PageLoop {
   loop := &PageLoop{}
 	conf := ServerConfig{Mountpoints: apps, Addr: ":3577", Dev: true}
 	if server, err = loop.NewServer(conf); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	go loop.Listen(server)
 	return loop
 }
 
 func TestServer(t *testing.T) {
-	loop := Start(t)
-	if loop == nil {
-		t.Error("Failed to acquire pageloop entry")
+	Start(t)
+
+	// GET /api/
+	resp, err := http.Get("http://localhost:3577/api/")
+	if err != nil {
+		t.Error(err)
 	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var res map[string] interface{} = make(map[string] interface{})
+	json.Unmarshal(body, &res)
+
+	var apps []interface{}
+	var app map [string] interface{}
+	var name string
+	var ok bool
+
+	if apps, ok = res["apps"].([]interface{}); !ok {
+		t.Error("Unexpected type for apps list")
+	}
+
+	//println(apps[0])
+
+	if app, ok = apps[0].(map [string] interface{}); !ok {
+		t.Error("Unexpected type for app")
+	}
+
+	if name , ok = app["name"].(string); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+
+	println(name)
+
+
+	//println(ok)
+	//fmt.Printf("%#v\n", res)
 }
