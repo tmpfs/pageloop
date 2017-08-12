@@ -252,7 +252,7 @@ func TestRestService(t *testing.T) {
 
 	// POST /api/
 	doc := []byte(`{}`)
-	if resp, body, err = post(api, "application/json", doc); err != nil {
+	if resp, body, err = post(api + "/", "application/json", doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
