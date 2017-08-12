@@ -58,7 +58,6 @@ func (c *Container) Add(app *Application) error {
 	}
 
 	c.Apps = append(c.Apps, app)
-
 	return nil
 }
 
