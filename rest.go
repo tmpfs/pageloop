@@ -255,7 +255,6 @@ func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojs
 		return nil, err
 	}
 
-	//var input map[string] interface{} = make(map[string] interface{})
 	if err = json.Unmarshal(body, &input); err != nil {
 		return nil, err
 	}
