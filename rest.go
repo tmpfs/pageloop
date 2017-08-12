@@ -3,13 +3,15 @@
 package pageloop
 
 import (
-	//"fmt"
-	"log"
-	//"errors"
+	"fmt"
+	//"log"
+	"errors"
+	"io/ioutil"
 	"strings"
 	"net/http"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 const(
@@ -18,6 +20,8 @@ const(
 	// App actions
 	FILES = "files"
 	PAGES = "pages"
+
+	SchemaAppCreate = `{"properties": {"name": {"type": "string"}}, "required": ["name"], "additionalProperties": false}`
 )
 
 type RestService struct {
@@ -50,7 +54,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var data []byte
 
 	if req.Method != http.MethodGet {
-		ex(res, http.StatusMethodNotAllowed, nil)
+		ex(res, http.StatusMethodNotAllowed, nil, nil)
 		return
 	}
 
@@ -66,18 +70,19 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		//log.Printf("Internal server error: %s", err.Error())
-		ex(res, http.StatusInternalServerError, nil)
+		ex(res, http.StatusInternalServerError, nil, nil)
 		return
 	}
 
 	// TODO: log the error from (int, error) return value
-	ex(res, http.StatusNotFound, nil)
+	ex(res, http.StatusNotFound, nil, nil)
 }
 
 // Handles application information (files, pages etc.)
 func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
+	var body []byte
 	var name string
 	var action string
 	// File or Page
@@ -86,7 +91,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var methods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
 
 	if !isMethodAllowed(req.Method, methods) {
-		ex(res, http.StatusMethodNotAllowed, nil)
+		ex(res, http.StatusMethodNotAllowed, nil, nil)
 		return
 	}
 
@@ -107,7 +112,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		app = h.Root.Container.GetByName(name)
 		// Application must exist
 		if app == nil {
-			ex(res, http.StatusNotFound, nil)
+			ex(res, http.StatusNotFound, nil, nil)
 			return
 		}
 	}
@@ -147,7 +152,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 									data, err = json.Marshal(page)
 								}
 							default:
-								ex(res, http.StatusNotFound, nil)
+								ex(res, http.StatusNotFound, nil, nil)
 								return
 						}
 					}
@@ -155,13 +160,40 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			}
 
 		case http.MethodPut:
-			println("put to app " + name)
-	}
+			// Only allow PUT at /api/apps/
+			if path != "" {
+				ex(res, http.StatusMethodNotAllowed, nil, nil)
+				return
+			} else {
+				defer req.Body.Close()
+				body, err = ioutil.ReadAll(req.Body)
+				//body = req.Body.Read()
+				println("put to app " + string(body))
 
+				schemaLoader := gojsonschema.NewStringLoader(SchemaAppCreate)
+				documentLoader := gojsonschema.NewBytesLoader(body)
+
+				var result *gojsonschema.Result
+				if result, err = gojsonschema.Validate(schemaLoader, documentLoader); result != nil {
+					if result.Valid() {
+						fmt.Printf("The document is valid\n")
+					} else {
+						errorList := result.Errors()
+						ex(res, http.StatusBadRequest, nil, errors.New(errorList[0].String()))
+						return
+						/*
+						for _, desc := range result.Errors() {
+							fmt.Printf("- %s\n", desc)
+						}
+						*/
+					}
+				}	
+			}
+		}
 
 	if err != nil {
-		log.Printf("Internal server error: %s", err.Error())
-		ex(res, http.StatusInternalServerError, nil)
+		//log.Printf("Internal server error: %s", err.Error())
+		ex(res, http.StatusInternalServerError, nil, err)
 		return
 	}
 
@@ -170,16 +202,19 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ex(res, http.StatusNotFound, nil)
+	ex(res, http.StatusNotFound, nil, nil)
 }
 
 // Send an error response to the client.
-func ex(res http.ResponseWriter, code int, data []byte) (int, error) {
+func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, error) {
 	var err error
 	if data == nil {
 		var m map[string] interface{} = make(map[string] interface{})
 		m["code"] = code
 		m["message"] = http.StatusText(code)
+		if exception != nil {
+			m["error"] = exception.Error()
+		}
 		if data, err = json.Marshal(m); err != nil {
 			return 0, err
 		}
