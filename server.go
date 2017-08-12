@@ -19,6 +19,10 @@ import (
   //"github.com/elazarl/go-bindata-assetfs"
 )
 
+const(
+	HTML_MIME = "text/html; charset=utf-8"
+)
+
 var config ServerConfig
 var mux *http.ServeMux
 

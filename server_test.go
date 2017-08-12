@@ -34,25 +34,29 @@ func TestMainPages(t *testing.T) {
 	if resp, _, err = get(url + "/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, HTML_MIME)
 
 	// GET /-/source/
 	if resp, _, err = get(url + "/-/source/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, HTML_MIME)
 
 	// GET /app/mock-app/
 	if resp, _, err = get(app + "/mock-app/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, HTML_MIME)
 
 	// GET /app/mock-app/-/source/
 	if resp, _, err = get(app + "/mock-app/-/source/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, HTML_MIME)
 }
 
 // Test GET for 404 responses
@@ -63,13 +67,13 @@ func TestNotFound(t *testing.T) {
 	if resp, _, err = get(url + "/not-found/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusNotFound)
+	assertStatus(resp, t, http.StatusNotFound)
 
 	// GET /api/not-found/
 	if resp, _, err = get(api + "/not-found/"); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusNotFound)
+	assertStatus(resp, t, http.StatusNotFound)
 }
 
 // Test REST API endpoints
@@ -92,7 +96,8 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(api); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
 
 	if err = json.Unmarshal(body, &res); err != nil {
 		t.Fatal(err)
@@ -114,7 +119,8 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s", api, "/apps/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
 
 	if err = json.Unmarshal(body, &list); err != nil {
 		t.Fatal(err)
@@ -132,7 +138,8 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "/apps/", name + "/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
 
 	app = make(map[string] interface{})
 	if err = json.Unmarshal(body, &app); err != nil {
@@ -147,7 +154,8 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
 
 	list = make([]interface{}, 128)
 	if err = json.Unmarshal(body, &list); err != nil {
@@ -170,7 +178,8 @@ func TestRestService(t *testing.T) {
 	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/")); err != nil {
 		t.Fatal(err)
 	}
-	assertHeaders(resp, t, http.StatusOK)
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
 
 	list = make([]interface{}, 128)
 	if err = json.Unmarshal(body, &list); err != nil {
@@ -211,7 +220,14 @@ func get(url string) (*http.Response, []byte, error) {
 	return resp, body, nil
 }
 
-func assertHeaders(resp *http.Response, t *testing.T, code int) {
+func assertContentType(resp *http.Response, t *testing.T, mime string) {
+	ct := resp.Header.Get("Content-Type")
+	if ct != mime {
+		t.Errorf("Unexpected response content type %s", ct)
+	}
+}
+
+func assertStatus(resp *http.Response, t *testing.T, code int) {
 	if resp.StatusCode != code {
 		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
 	}
