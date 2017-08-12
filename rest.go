@@ -293,7 +293,7 @@ func write(res http.ResponseWriter, code int, data []byte) (int, error) {
 	return res.Write(data)
 }
 
-// Determine is a method exists in a list of allowed methods.
+// Determine if a method exists in a list of allowed methods.
 func isMethodAllowed(method string, methods []string) bool {
 	for _, m := range methods {
 		if m == method {
