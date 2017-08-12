@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
   "os"
   "bytes"
   "strings"
@@ -135,6 +136,8 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 
 // Get a file pointer by URL.
 func (app *Application) GetFileByUrl(url string) *File {
+	println(url)
+	log.Printf("URLS %#v\n", app.Urls)
 	return app.Urls[url]
 }
 
@@ -190,6 +193,10 @@ func (app *Application) setFileFields(file *File, base string) {
 	name, relative, url := app.getFileFields(file, base)
 	file.Name = name
 	file.Relative = relative
+	// Normalize directories for URLs without the /
+	if strings.HasSuffix(url, "/") {
+		url = strings.TrimSuffix(url, "/")
+	}
 	file.Url = url
 	if !file.info.IsDir() {
 		file.Size = file.info.Size()

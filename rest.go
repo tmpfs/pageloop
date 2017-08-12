@@ -73,7 +73,6 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-		//log.Printf("Internal server error: %s", err.Error())
 		ex(res, http.StatusInternalServerError, nil, nil)
 		return
 	}
@@ -178,8 +177,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				fmt.Printf("%#v\n", input)
-				fmt.Printf("%#v\n", result)
+				fmt.Printf("PUT input: %#v\n", input)
+				fmt.Printf("PUT result: %#v\n", result)
 
 				//
 				// TODO: create new app!
