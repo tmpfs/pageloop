@@ -189,7 +189,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 
 	if err != nil {
-		//log.Printf("Internal server error: %s", err.Error())
 		ex(res, http.StatusInternalServerError, nil, err)
 		return
 	}
@@ -249,7 +248,7 @@ func validateRequest(schema []byte, req *http.Request) (*gojsonschema.Result, ma
 	return result, input, nil
 }
 
-// Validate a client request body.
+// Validate client request data.
 func validate(schema []byte, input map[string] interface{}) (*gojsonschema.Result, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schema)
 	documentLoader := gojsonschema.NewGoLoader(input)

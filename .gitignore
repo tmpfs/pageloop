@@ -1,5 +1,5 @@
 public
-bindata.go
+assets.go
 *.bak
 *.log
 *.pid
