@@ -128,14 +128,23 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 								if item == "" {
 									data, err = json.Marshal(app.Files)
 								} else {
-									println(item)
-									data, err = json.Marshal(app.GetFileByUrl(item))
+									file := app.GetFileByUrl(item)
+									// Data is nil so we send a 404
+									if file == nil {
+										break
+									}
+									data, err = json.Marshal(file)
 								}
 							case PAGES:
 								if item == "" {
 									data, err = json.Marshal(app.Pages)
 								} else {
-									data, err = json.Marshal(app.GetPageByUrl(item))
+									page := app.GetPageByUrl(item)
+									// Data is nil so we send a 404
+									if page == nil {
+										break
+									}
+									data, err = json.Marshal(page)
 								}
 							default:
 								ex(res, http.StatusNotFound, nil)

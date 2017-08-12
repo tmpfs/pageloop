@@ -75,7 +75,9 @@ type File struct {
 
 type Page struct {
   Path string `json:"-"`
+  Name string `json:"name"` 
   Url string `json:"url"` 
+  Size int64 `json:"size,omitempty"` 
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`
@@ -133,20 +135,13 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
 
 // Get a file pointer by URL.
 func (app *Application) GetFileByUrl(url string) *File {
-	for _, file := range app.Files {
-		u := file.Url
-		u = strings.TrimSuffix(u, "/")
-		if u == url {
-			return file
-		}
-	}
-	return nil
+	return app.Urls[url]
 }
 
 // Get a page pointer by URL.
 func (app *Application) GetPageByUrl(url string) *Page {
 	for _, page := range app.Pages {
-		u := file.Url
+		u := page.Url
 		u = strings.TrimSuffix(u, "/")
 		if u == url {
 			return page
@@ -155,17 +150,16 @@ func (app *Application) GetPageByUrl(url string) *Page {
 	return nil
 }
 
+// Private methods
+
 // Determine a URL from a relative path.
-func (app *Application) UrlFromPath(file *File) string {
-	var rel string = file.Relative
-  var url string = strings.Join(strings.Split(rel, string(os.PathSeparator)), "/")
+func (app *Application) getUrlFromPath(file *File, relative string) string {
+  var url string = strings.Join(strings.Split(relative, string(os.PathSeparator)), "/")
 	if file.info.IsDir() && !strings.HasSuffix(url, "/") {
 		url += "/"
 	}
   return url
 }
-
-// Private methods
 
 // Merge user data with page structs loading user data from a JSON 
 // file with the same name of the HTML file that created the page.
@@ -183,26 +177,39 @@ func (app *Application) merge() error {
   return nil
 }
 
-// Set initial relative computed path and URL path.
-//
-// Also indicate whether a file is an index file and build the 
-// map of URLs to files.
-func (app *Application) setComputedFields(path string) Application {
-  for _, file := range app.Files {
-		file.Name = file.info.Name()
-		if !file.info.IsDir() {
-			file.Size = file.info.Size()
-		}
+// Extract a name, relative path and URL for a file.
+func (app *Application) getFileFields(file *File, base string) (string, string, string) {
+	name := file.info.Name()
+	relative := strings.TrimPrefix(file.Path, base)
+  url := app.getUrlFromPath(file, relative)
+	return name, relative, url
+}
 
-    // includes the leading slash
-    file.Relative = strings.TrimPrefix(file.Path, path)
-    if app.Name != "" {
-      file.Relative = "/" + app.Name + file.Relative
-    }
-    file.Url = app.UrlFromPath(file)
+// Set computed fields on a file.
+func (app *Application) setFileFields(file *File, base string) {
+	name, relative, url := app.getFileFields(file, base)
+	file.Name = name
+	file.Relative = relative
+	file.Url = url
+	if !file.info.IsDir() {
+		file.Size = file.info.Size()
+	}
+}
+
+// Set computed fields.
+//
+func (app *Application) setComputedFields(path string) {
+  for _, file := range app.Files {
+		app.setFileFields(file, path)
     app.Urls[file.Url] = file
-  }
-  return *app
+	}
+
+  for _, page := range app.Pages {
+		file := page.file
+		page.Name = file.Name
+		page.Url = file.Url
+		page.Size = file.info.Size()
+	}
 }
 
 // Attempt to find user page data by first attempting to 
