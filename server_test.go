@@ -9,9 +9,10 @@ import (
 )
 
 var url string = "http://localhost:3579"
-var api string = url + "/api/"
+var api string = url + "/api"
+var app string = url + "/app"
 
-func Start(t *testing.T) *PageLoop {
+func TestStartServer(t *testing.T) {
 	var err error
 	var server *http.Server
   var apps []Mountpoint
@@ -22,35 +23,40 @@ func Start(t *testing.T) *PageLoop {
 		t.Fatal(err)
 	}
 	go loop.Listen(server)
-	return loop
 }
 
-func get(url string) (*http.Response, []byte, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, nil, err
-	}
+// Test GET to the home application
+func TestMainPages(t *testing.T) {
+	var err error
+	var resp *http.Response
 
-	return resp, body, nil
+	// GET /
+	if resp, _, err = get(url + "/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
+
+	// GET /-/source/
+	if resp, _, err = get(url + "/-/source/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
+
+	// GET /app/mock-app/
+	if resp, _, err = get(app + "/mock-app/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
+
+	// GET /app/mock-app/-/source/
+	if resp, _, err = get(app + "/mock-app/-/source/"); err != nil {
+		t.Fatal(err)
+	}
+	assertHeaders(resp, t, http.StatusOK)
 }
 
-func assertHeaders(resp *http.Response, t *testing.T, code int) {
-	if resp.StatusCode != code {
-		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
-	}
-	if resp.Header.Get("Content-Type") != JSON_MIME {
-		t.Error("Unexpected response content type")
-	}
-}
-
+// Test REST API endpoints
 func TestRestService(t *testing.T) {
-	Start(t)
-
 	var err error
 	var resp *http.Response
 	var body []byte
@@ -87,7 +93,7 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/
-	if resp, body, err = get(fmt.Sprintf("%s%s", api, "apps/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s", api, "/apps/")); err != nil {
 		t.Fatal(err)
 	}
 	assertHeaders(resp, t, http.StatusOK)
@@ -105,7 +111,7 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/{name}/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "apps/", name + "/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "/apps/", name + "/")); err != nil {
 		t.Fatal(err)
 	}
 	assertHeaders(resp, t, http.StatusOK)
@@ -120,12 +126,10 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/{name}/pages/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "apps/", name, "/pages/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/")); err != nil {
 		t.Fatal(err)
 	}
 	assertHeaders(resp, t, http.StatusOK)
-
-	//println(string(body))
 
 	list = make([]interface{}, 128)
 	if err = json.Unmarshal(body, &list); err != nil {
@@ -150,3 +154,30 @@ func TestRestService(t *testing.T) {
 	}
 	*/
 }
+
+// Private helpers
+
+func get(url string) (*http.Response, []byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	return resp, body, nil
+}
+
+func assertHeaders(resp *http.Response, t *testing.T, code int) {
+	if resp.StatusCode != code {
+		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
+	}
+	/*
+	if resp.Header.Get("Content-Type") != JSON_MIME {
+		t.Error("Unexpected response content type")
+	}
+	*/
+}
+
