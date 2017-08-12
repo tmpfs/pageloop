@@ -113,7 +113,7 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 
 	// RPC global endpoint
 	endpoint := rpc.NewServer()
-	endpoint.RegisterCodec(json.NewCodec(), "applicaion/json")
+	endpoint.RegisterCodec(json.NewCodec(), "application/json")
 	mux.Handle("/rpc/", endpoint)
 
 	// Application endpoints
@@ -139,7 +139,6 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
 		}
 
     app := model.Application{}
-		l.Container.Add(&app)
 
 		var loader model.ApplicationLoader = model.FileSystemLoader{}
 
@@ -158,6 +157,11 @@ func (l *PageLoop) LoadApps(config ServerConfig) error {
     if err = app.Publish(nil); err != nil {
       return err
     }
+
+		// Add to the container
+		if err = l.Container.Add(&app); err != nil {
+			return err
+		}
 
     // Serve the static build files from the mountpoint path.
     url := urlPath

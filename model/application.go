@@ -2,7 +2,9 @@ package model
 
 import (
   "os"
+	"fmt"
   "bytes"
+	"errors"
   "strings"
   "path/filepath"
   "io/ioutil"
@@ -30,9 +32,20 @@ type Container struct {
 	Apps []*Application `json:"apps"`
 }
 
-// Add an application to the container.
-func (c *Container) Add(app *Application) {
+// Add an application to the container, the application must 
+// have the Name field set and it must not already exist in 
+// the container list.
+func (c *Container) Add(app *Application) error {
+	if app.Name == "" {
+		return errors.New("Application name is required to add to container")
+	}
+	var exists *Application = c.GetByName(app.Name)
+	if exists != nil {
+		return errors.New(fmt.Sprintf("Application exists with name %s", app.Name))
+	}
 	c.Apps = append(c.Apps, app)
+
+	return nil
 }
 
 // Get an application by name.

@@ -181,11 +181,15 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				fmt.Printf("PUT result: %#v\n", result)
 
 				// Add the application to the container.
-				h.Root.Container.Add(input)
+				if err = h.Root.Container.Add(input); err != nil {
+					ex(res, http.StatusPreconditionFailed, nil, err)
+					return
+				}
 
-				//
-				// TODO: create new app!
-				//
+				// TODO: check name is valid pattern
+				// TODO: create application source file directory
+				// TODO: persist application mountpoints
+
 				created(res, OK)
 				return
 			}
