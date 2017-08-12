@@ -14,6 +14,8 @@ import (
 	"regexp"
   "time"
   "github.com/tmpfs/pageloop/model"
+	"github.com/gorilla/rpc"
+	"github.com/gorilla/rpc/json"
   //"github.com/elazarl/go-bindata-assetfs"
 )
 
@@ -105,9 +107,14 @@ func (l *PageLoop) Listen() error {
 func (l *PageLoop) LoadApps(config ServerConfig) error {
   var err error
 
-	// REST API Global endpoint
+	// REST API global endpoint
 	rest := RestService{Root: l}
 	rest.Multiplex(mux)
+
+	// RPC global endpoint
+	endpoint := rpc.NewServer()
+	endpoint.RegisterCodec(json.NewCodec(), "applicaion/json")
+	mux.Handle("/rpc/", endpoint)
 
 	// Application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
