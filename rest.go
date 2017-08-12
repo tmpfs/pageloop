@@ -170,6 +170,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				h.Root.Container.Del(app)
 
 				// TODO: rewrite mountpoints
+				// TODO: persist application mountpoints
 
 				ok(res, OK)
 				return
@@ -178,11 +179,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 		case http.MethodPut:
-			// Only allow PUT at /api/apps/
-			if path != "" {
-				ex(res, http.StatusMethodNotAllowed, nil, nil)
-				return
-			} else {
+			// PUT at /api/apps/
+			if path == "" {
 				var input *model.Application = &model.Application{}
 				_, err = validateRequest(SchemaAppNew, input, req)
 				if err != nil {
@@ -200,9 +198,13 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				}
 
 				// TODO: create application source file directory - template??
+				// TODO: rewrite mountpoints
 				// TODO: persist application mountpoints
 
 				created(res, OK)
+				return
+			} else {
+				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			}
 		}
