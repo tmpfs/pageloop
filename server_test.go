@@ -315,6 +315,31 @@ func TestRestService(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusPreconditionFailed)
+
+	// PUT /api/ (invalid app name) - Precondition Failed
+	doc = []byte(`{"name": "-app"}`)
+	if resp, body, err = put(api + "/apps/", doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusPreconditionFailed)
+
+	// GET /api/apps/{name}/invalid-action/ (invalid action) - Not Found
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/invalid-action/")); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusNotFound)
+
+	// GET /api/apps/{name}/files/not-found/ (missing file) - Not Found
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/not-found/")); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusNotFound)
+
+	// GET /api/apps/{name}/pages/not-found/ (missing page) - Not Found
+	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/not-found/")); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusNotFound)
 }
 
 // Private helpers
