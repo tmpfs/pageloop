@@ -281,6 +281,13 @@ func TestRestService(t *testing.T) {
 	// Error conditions
 	////
 
+	// TRACE /api/ - Method Not Allowed
+	doc = []byte(`{`)
+	if resp, body, err = do(api + "/apps/", http.MethodTrace, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusMethodNotAllowed)
+
 	// POST /api/ - Method Not Allowed
 	doc = []byte(`{}`)
 	if resp, body, err = post(api + "/", JSON_MIME, doc); err != nil {
@@ -294,6 +301,20 @@ func TestRestService(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusBadRequest)
+
+	// PUT /api/ (schema validation fail) - Bad Request
+	doc = []byte(`{}`)
+	if resp, body, err = put(api + "/apps/", doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusBadRequest)
+
+	// PUT /api/ (app exists) - Precondition Failed
+	doc = []byte(`{"name": "mock-app"}`)
+	if resp, body, err = put(api + "/apps/", doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusPreconditionFailed)
 }
 
 // Private helpers
