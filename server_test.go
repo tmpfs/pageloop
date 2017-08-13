@@ -116,8 +116,23 @@ func TestRpcService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	println(string(body))
-	println(resp)
+	//print(string(body))
+
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+	assertBody(body, t)
+
+	doc = []byte(`{"id": 1, "method": "app.Get", "params": [{"name": "mock-app"}]}`)
+	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	//print(string(body))
+
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+	assertBody(body, t)
+
 }
 
 // Test REST API endpoints
@@ -473,5 +488,11 @@ func assertContentType(resp *http.Response, t *testing.T, mime string) {
 func assertStatus(resp *http.Response, t *testing.T, code int) {
 	if resp.StatusCode != code {
 		t.Errorf("Unexpected status code %d wanted %d", resp.StatusCode, code)
+	}
+}
+
+func assertBody(body []byte, t *testing.T) {
+	if len(body) == 0 {
+		t.Error("Expecting non-zero length body")
 	}
 }

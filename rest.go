@@ -13,7 +13,8 @@ import (
 )
 
 const(
-	JSON_MIME = "application/json"
+	JSON_MIME = "application/json; charset=utf-8"
+	//JSON_MIME_UTF8 = "application/json; charset=utf-8"
 
 	// App actions
 	FILES = "files"
