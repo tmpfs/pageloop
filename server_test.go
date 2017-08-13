@@ -104,12 +104,19 @@ func TestNotFound(t *testing.T) {
 	assertStatus(resp, t, http.StatusNotFound)
 }
 
+type RpcResponse struct {
+	Result interface{}
+	Error string
+	Id int
+}
+
 // Test RPC server 
 func TestRpcService(t *testing.T) {
 	var err error
 	var resp *http.Response
 	var body []byte
 	var doc []byte
+	var res *RpcResponse
 
 	doc = []byte(`{"id": 0, "method": "app.List", "params": [{"gid": "user", "index": 0}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
@@ -128,6 +135,22 @@ func TestRpcService(t *testing.T) {
 	}
 
 	//print(string(body))
+
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+	assertBody(body, t)
+
+	doc = []byte(`{"id": 2, "method": "app.Get", "params": [{"gid": "missing-container","name": "mock-app"}]}`)
+	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &RpcResponse{}
+	if err = json.Unmarshal(body, &res); err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Printf("%#v\n", res)
 
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)

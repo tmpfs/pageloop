@@ -15,7 +15,6 @@ import (
 const(
 	API_URL = "/api/"
 	JSON_MIME = "application/json; charset=utf-8"
-	//JSON_MIME_UTF8 = "application/json; charset=utf-8"
 
 	// App actions
 	FILES = "files"
@@ -36,7 +35,6 @@ func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
 
 	var url string
 	url= API_URL
-	//println("new rest service")
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
 
 	for key, c := range root.Host.Containers {

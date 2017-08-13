@@ -57,7 +57,7 @@ type AppListReply struct {
 func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListReply) error {
 	var container *model.Container
 	if container = h.Root.Host.Get(args.GroupId); container == nil {
-		return errors.New(fmt.Sprint("No container found for %s", args.GroupId))
+		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	if args.Len == 0 {
 		args.Len = len(container.Apps) - args.Index
@@ -79,7 +79,7 @@ type AppGetReply struct {
 func (h *AppService) Get(r *http.Request, args *AppGetArgs, reply *AppGetReply) error {
 	var container *model.Container
 	if container = h.Root.Host.Get(args.GroupId); container == nil {
-		return errors.New(fmt.Sprint("No container found for %s", args.GroupId))
+		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	reply.App = container.GetByName(args.Name)
 	return nil
