@@ -11,6 +11,7 @@ import (
 
 var url string = "http://localhost:3579"
 var api string = url + "/api"
+var rpcUrl string = url + "/rpc/"
 var appApi string = api + "/apps"
 
 var server *http.Server
@@ -105,7 +106,19 @@ func TestNotFound(t *testing.T) {
 
 // Test RPC server 
 func TestRpcService(t *testing.T) {
+	var err error
+	var resp *http.Response
+	var body []byte
+	var doc []byte
 
+	doc = []byte(`{"id": 0, "method": "hello.Say", "params": [{"Who": "Dr Who"}]}`)
+
+	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	println(string(body))
+	println(resp)
 }
 
 // Test REST API endpoints
