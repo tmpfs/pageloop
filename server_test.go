@@ -11,7 +11,7 @@ import (
 
 var url string = "http://localhost:3579"
 var api string = url + "/api"
-var app string = url + "/app"
+var appApi string = api + "/apps"
 
 func TestStartServer(t *testing.T) {
 	var err error
@@ -46,14 +46,14 @@ func TestMainPages(t *testing.T) {
 	assertContentType(resp, t, HTML_MIME)
 
 	// GET /app/mock-app/
-	if resp, _, err = get(app + "/mock-app/"); err != nil {
+	if resp, _, err = get(url + "/app/mock-app/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, HTML_MIME)
 
 	// GET /app/mock-app/-/source/
-	if resp, _, err = get(app + "/mock-app/-/source/"); err != nil {
+	if resp, _, err = get(url + "/app/mock-app/-/source/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -282,8 +282,8 @@ func TestRestService(t *testing.T) {
 	////
 
 	// TRACE /api/ - Method Not Allowed
-	doc = []byte(`{`)
-	if resp, body, err = do(api + "/apps/", http.MethodTrace, doc); err != nil {
+	doc = []byte(``)
+	if resp, body, err = do(appApi + "/", http.MethodTrace, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
@@ -291,6 +291,20 @@ func TestRestService(t *testing.T) {
 	// POST /api/ - Method Not Allowed
 	doc = []byte(`{}`)
 	if resp, body, err = post(api + "/", JSON_MIME, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusMethodNotAllowed)
+
+	// DELETE /api/apps/ - Method Not Allowed
+	doc = []byte(`{}`)
+	if resp, body, err = del(appApi + "/", nil); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusMethodNotAllowed)
+
+	// PUT /api/mock-app/ - Method Not Allowed
+	doc = []byte(`{}`)
+	if resp, body, err = put(appApi + "/mock-app/", doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
