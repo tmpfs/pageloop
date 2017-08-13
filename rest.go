@@ -164,7 +164,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					}
 				}
 			}
-		// DELETE /api/apps/{name}
+		// DELETE /api/apps/{name}/
 		case http.MethodDelete:
 			if name != "" && action == "" {
 				h.Root.Container.Del(app)
@@ -178,8 +178,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			}
+		// PUT /api/apps/
 		case http.MethodPut:
-			// PUT at /api/apps/
 			if path == "" {
 				var input *model.Application = &model.Application{}
 				_, err = validateRequest(SchemaAppNew, input, req)

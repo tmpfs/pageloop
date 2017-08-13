@@ -82,6 +82,7 @@ func TestRestService(t *testing.T) {
 	var err error
 	var resp *http.Response
 	var body []byte
+	var doc []byte
 
 	var res map[string] interface{} = make(map[string] interface{})
 	var apps []interface{}
@@ -157,8 +158,6 @@ func TestRestService(t *testing.T) {
 	}
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
-
-	println(string(body))
 
 	list = make([]interface{}, 128)
 	if err = json.Unmarshal(body, &list); err != nil {
@@ -253,12 +252,37 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
+	// PUT /api/apps/ - Created
+	doc = []byte(`{"name": "test-app"}`)
+	if resp, body, err = put(api + "/apps/", doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusCreated)
+
+	// GET /api/apps/test-app/ - OK
+	if resp, body, err = get(api + "/apps/test-app/"); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusOK)
+
+	// DELETE /api/apps/test-app/ - OK
+	if resp, body, err = del(api + "/apps/test-app/", nil); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusOK)
+
+	// GET /api/apps/test-app/ - Not Found
+	if resp, body, err = get(api + "/apps/test-app/"); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusNotFound)
+
 	////
 	// Error conditions
 	////
 
 	// POST /api/ - Method Not Allowed
-	doc := []byte(`{}`)
+	doc = []byte(`{}`)
 	if resp, body, err = post(api + "/", JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -266,7 +290,7 @@ func TestRestService(t *testing.T) {
 
 	// PUT /api/ (malformed json) - Bad Request
 	doc = []byte(`{`)
-	if resp, body, err = put(api + "/apps/", http.MethodPut, doc); err != nil {
+	if resp, body, err = put(api + "/apps/", doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusBadRequest)
@@ -287,6 +311,14 @@ func get(url string) (*http.Response, []byte, error) {
 	return resp, body, nil
 }
 
+
+func del(url string, data []byte) (*http.Response, []byte, error) {
+	if data == nil {
+		data = make([]byte, 0)
+	}
+	return do(url, http.MethodDelete, data)
+}
+
 func post(url string, contentType string, body []byte) (*http.Response, []byte, error) {
 	var buf = new(bytes.Buffer)
 	buf.Write(body)
@@ -302,7 +334,11 @@ func post(url string, contentType string, body []byte) (*http.Response, []byte, 
 	return resp, resbody, nil
 }
 
-func put(uri string, method string, body []byte) (*http.Response, []byte, error) {
+func put(url string, body []byte) (*http.Response, []byte, error) {
+	return do(url, http.MethodPut, body)
+}
+
+func do(uri string, method string, body []byte) (*http.Response, []byte, error) {
 	var err error
 	var buf = new(bytes.Buffer)
 	buf.Write(body)
@@ -310,6 +346,7 @@ func put(uri string, method string, body []byte) (*http.Response, []byte, error)
 	if req, err = http.NewRequest(method, uri, buf); err != nil {
 		return nil, nil, err	
 	}
+	req.Header.Set("Content-Type", JSON_MIME)
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
