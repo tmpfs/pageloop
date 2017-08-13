@@ -36,6 +36,18 @@ var(
 	re = regexp.MustCompile(ptn)
 )
 
+// Contains a slice of containers.
+type Host struct {
+	Containers []*Container
+}
+
+// Contains a slice of applications.
+type Container struct {
+	Apps []*Application `json:"apps"`
+	id string
+}
+
+// Create a new container and assign a random hex encoded identifier.
 func NewContainer() *Container {
 	var err error
 	b := make([]byte, 512)
@@ -48,12 +60,6 @@ func NewContainer() *Container {
 	c := &Container{id: id}
 	//fmt.Printf("%#v\n", c)
 	return c
-}
-
-// Represents a collection of applications.
-type Container struct {
-	Apps []*Application `json:"apps"`
-	id string
 }
 
 // Add an application to the container, the application must 
