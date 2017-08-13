@@ -37,10 +37,12 @@ func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
 	url= API_URL
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
 
+	/*
 	for key, c := range root.Host.Containers {
-		url = API_URL + key + "/apps/"
+		url = API_URL + key + "/"
 		mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: root, Container: c}))
 	}
+	*/
 
 	return rest
 }
@@ -61,20 +63,42 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var err error
 	var data []byte
 
-	if req.Method != http.MethodGet {
-		ex(res, http.StatusMethodNotAllowed, nil, nil)
-		return
-	}
-
 	url := req.URL
 	path := url.Path
 
+	// List host containers
 	if path == "" {
+		if req.Method != http.MethodGet {
+			ex(res, http.StatusMethodNotAllowed, nil, nil)
+			return
+		}
+
 		if data, err = json.Marshal(h.Root.Host); err == nil {
 			ok(res, data)
 			return
 		}
 	}
+
+	path = strings.Trim(path, "/")
+	parts := strings.Split(path, "/")
+	if len(parts) > 0 {
+		var c *model.Container = h.Root.Host.Get(parts[0])
+		if c == nil {
+			// Container not found	
+			ex(res, http.StatusNotFound, nil, nil)
+			return
+		}
+
+		// Proxy to the app handler
+
+		// Using http.StripPrefix() here does not invoke
+		// the underlying handler???
+		handler := RestAppHandler{Root: h.Root, Container: c}
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
+		handler.ServeHTTP(res, req)
+		return
+	}	
 
 	if err != nil {
 		ex(res, http.StatusInternalServerError, nil, nil)
@@ -87,6 +111,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Handles application information (files, pages etc.)
 func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+
 	var err error
 	var data []byte
 	//var body []byte

@@ -13,7 +13,7 @@ import (
 var url string = "http://localhost:3579"
 var api string = url + "/api"
 var rpcUrl string = url + "/rpc/"
-var appUrl string = api + "/user/apps/"
+var appUrl string = api + "/user/"
 
 var server *http.Server
 
