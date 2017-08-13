@@ -82,7 +82,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	path = strings.Trim(path, "/")
 	parts := strings.Split(path, "/")
 	if len(parts) > 0 {
-		var c *model.Container = h.Root.Host.Get(parts[0])
+		var c *model.Container = h.Root.Host.GetByName(parts[0])
 		if c == nil {
 			// Container not found	
 			ex(res, http.StatusNotFound, nil, nil)

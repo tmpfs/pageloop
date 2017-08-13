@@ -46,10 +46,13 @@ type HostService struct {
 	Root *PageLoop
 }
 
-type HostListArgs struct {}
+type HostListArgs struct {
+	Index int `json:"index"`
+	Len int `json:="length"`
+}
 
 type HostListReply struct {
-	Hosts []*model.Container `json:"containers"`
+	Containers []*model.Container `json:"containers"`
 }
 
 // Get a slice of the host container list.
@@ -57,11 +60,12 @@ type HostListReply struct {
 // If length is zero it is set to the number of applications so 
 // pass index zero without a length to list all applications.
 func (h *HostService) List(r *http.Request, args *HostListArgs, reply *HostListReply) error {
-	var list []*model.Container
-	for _, v := range h.Root.Host.Containers {
-		list = append(list, v)
+	var host *model.Host = h.Root.Host
+	if args.Len == 0 {
+		args.Len = len(host.Containers) - args.Index
 	}
-	reply.Hosts = list
+	reply.Containers = host.Containers[args.Index:args.Len]
+
 	return nil
 }
 
@@ -85,7 +89,7 @@ type AppService struct {
 // pass index zero without a length to list all applications.
 func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListReply) error {
 	var container *model.Container
-	if container = h.Root.Host.Get(args.GroupId); container == nil {
+	if container = h.Root.Host.GetByName(args.GroupId); container == nil {
 		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	if args.Len == 0 {
@@ -107,7 +111,7 @@ type AppGetReply struct {
 // Get an application by name.
 func (h *AppService) Get(r *http.Request, args *AppGetArgs, reply *AppGetReply) error {
 	var container *model.Container
-	if container = h.Root.Host.Get(args.GroupId); container == nil {
+	if container = h.Root.Host.GetByName(args.GroupId); container == nil {
 		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	reply.App = container.GetByName(args.Name)

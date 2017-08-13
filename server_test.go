@@ -191,7 +191,7 @@ func TestRestService(t *testing.T) {
 	var res map[string] interface{} = make(map[string] interface{})
 	var apps []interface{}
 	var list []interface{}
-	var containers map [string] interface{}
+	var containers [] interface{}
 	var container map [string] interface{}
 	var app map [string] interface{}
 	var file map [string] interface{}
@@ -210,11 +210,13 @@ func TestRestService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if containers, ok = res["containers"].(map[string] interface{}); !ok {
+	println(string(body))
+
+	if containers, ok = res["containers"].([]interface{}); !ok {
 		t.Error("Unexpected type for containers")
 	}
 
-	if container, ok = containers["user"].(map [string] interface{}); !ok {
+	if container, ok = containers[1].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for app")
 	}
 

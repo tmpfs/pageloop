@@ -34,29 +34,29 @@ var(
 
 // Contains a slice of containers.
 type Host struct {
-	Containers map[string] *Container `json:"containers"`
+	Containers []*Container `json:"containers"`
 }
 
 // Create a new host.
 func NewHost() *Host {
 	h := new(Host)
-	h.Containers = make(map[string] *Container)
+	//h.Containers = make([] *Container)
 	return h
 }
 
-// Add a container by key.
-func (h *Host) Add(key string, c *Container) error {
-	if e := h.Get(key); e != nil {
-		return errors.New(fmt.Sprintf("Container with key %s already exists", key))	
-	}
-	c.Name = key
-	h.Containers[key] = c
-	return nil
+// Add a container.
+func (h *Host) Add(c *Container) {
+	h.Containers = append(h.Containers, c)
 }
 
-// Get a container by key.
-func (h *Host) Get(key string) *Container {
-	return h.Containers[key]
+// Get a container by name.
+func (h *Host) GetByName(name string) *Container {
+	for _, container := range h.Containers {
+		if container.Name == name {
+			return container
+		}
+	}
+	return nil
 }
 
 // Contains a slice of applications.
@@ -67,8 +67,8 @@ type Container struct {
 }
 
 // Create a new container.
-func NewContainer(description string) *Container {
-	return &Container{Description: description}
+func NewContainer(name string, description string) *Container {
+	return &Container{Name: name, Description: description}
 }
 
 // Add an application to the container, the application must 
