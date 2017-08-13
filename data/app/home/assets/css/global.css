@@ -73,7 +73,7 @@ h4, h5, h6 {
 
 ul {
   list-style-type: none;
-  margin: 0 0 0 1rem;
+  margin: 0;
   padding: 0;
 }
 

@@ -31,7 +31,12 @@ function containers (parent, doc) {
   let html = ''
   for (i = 0; i < doc.containers.length; i++) {
     item = doc.containers[i]
-    html += `<li><h4>${item.name}</h4><p>${item.description}</p>`
+    html += `<li>`
+    html += `<h4>${item.name}</h4>`
+    html += `<span class="label">Container</span>`
+    if (item.description) {
+      html += `<p>${item.description}</p>`
+    }
     html += `<a class="api-link" href="#" data-renderer="applications" data-method="get", data-url="${API}${item.name}/">GET ${API}${item.name}/</a>`
     // html += `<nav><a href="#raw">Raw</a></nav>`
     // html += `<pre>${JSON.stringify(item, undefined, 2)}</pre>`
@@ -51,7 +56,12 @@ function applications (parent, url, doc) {
   let html = ''
   for (i = 0; i < doc.length; i++) {
     item = doc[i]
-    html += `<li><h4>${item.name}</h4><p>${item.description}</p>`
+    html += `<li>`
+    html += `<h4>${item.name}</h4>`
+    html += `<span class="label">Application</span>`
+    if (item.description) {
+      html += `<p>${item.description}</p>`
+    }
     html += `<a class="api-link" href="#" data-renderer="application" data-method="get", data-url="${url}${item.name}/files/">GET ${url}${item.name}/files/</a>`
     // html += `<nav><a href="#raw">Raw</a></nav>`
     // html += `<pre>${JSON.stringify(item, undefined, 2)}</pre>`
@@ -72,7 +82,9 @@ function application (parent, url, doc) {
   for (i = 0; i < doc.length; i++) {
     item = doc[i]
     next = url.replace(/\/$/, '') + item.url
-    html += `<li><h4>${item.name} (${item.dir ? 'dir' : item.size + ' bytes'})</h4>`
+    html += `<li>`
+    html += `<h4>${item.name} ${item.dir ? '' : '(' + item.size + ' bytes)'}</h4>`
+    html += `<span class="label">${item.dir ? 'Dir' : 'File'}</span>`
     html += `<a class="api-link" href="#" data-renderer="files" data-method="get", data-url="${next}">GET ${next}</a>`
     // html += `<nav><a href="#raw">Raw</a></nav>`
     // html += `<pre>${JSON.stringify(item, undefined, 2)}</pre>`

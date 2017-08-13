@@ -1,4 +1,26 @@
+ul {
+  border-left: 1px solid black;
+  padding-left: 1rem;
+}
+
+li {
+  position: relative;
+}
+
 .api-link {
   font-family: monospace
   color: blue
+}
+
+.label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2rem;
+  line-height: 1rem;
+  text-transform: uppercase;
+  background: black;
+  color: white;
+  padding: .5rem .5rem .3rem .5rem;
+  border-radius: 2px;
 }
