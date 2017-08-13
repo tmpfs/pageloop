@@ -46,10 +46,7 @@ type HostService struct {
 	Root *PageLoop
 }
 
-type HostListArgs struct {
-	Index int `json:"index"`
-	Len int `json:="length"`
-}
+type HostListArgs struct {}
 
 type HostListReply struct {
 	Hosts map[string] *model.Container `json:"containers"`

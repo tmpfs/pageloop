@@ -119,7 +119,7 @@ func TestRpcService(t *testing.T) {
 	var doc []byte
 	var res *RpcResponse
 
-	doc = []byte(`{"id": 0, "method": "host.List", "params": [{"index": 0}]}`)
+	doc = []byte(`{"id": 0, "method": "host.List", "params": [{}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
