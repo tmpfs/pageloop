@@ -93,6 +93,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// System applications to mount.
 	var system []Mountpoint
 	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home"})
+	system = append(system, Mountpoint{UrlPath: "/api/browse/", Path: "data://app/api"})
   if err = l.loadApps(system, sys); err != nil {
     return nil, err
   }
@@ -137,11 +138,11 @@ func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
   for _, mt := range mountpoints {
-		var dataScheme bool
+		//var dataScheme bool
 		urlPath := mt.UrlPath
 		path := mt.Path
 		if dataPattern.MatchString(path) {
-			dataScheme = true
+			//dataScheme = true
 			path = dataPattern.ReplaceAllString(path, "data/")
 		}
     var p string
@@ -157,16 +158,8 @@ func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container
 
     app := model.Application{}
 
-		var loader model.ApplicationLoader = model.FileSystemLoader{}
-
-		// Load from bundled assets
-		if dataScheme && !config.Dev {
-			// TODO: implement asset loader logic
-			//loader = model.AssetLoader{}
-		}
-
     // Load the application files into memory
-		if err = app.Load(p, loader); err != nil {
+		if err = app.Load(p, nil); err != nil {
 			return err
 		}
 
