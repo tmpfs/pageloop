@@ -1,8 +1,8 @@
 // System for hyperfast HTML document editing.
 //
-// Stores HTML documents on the server as in-memory DOM 
-// documents that can be modified on the client. The client 
-// provides an editor view and a preview of the rendered 
+// Stores HTML documents on the server as in-memory DOM
+// documents that can be modified on the client. The client
+// provides an editor view and a preview of the rendered
 // page loaded in an iframe.
 package pageloop
 
@@ -51,7 +51,7 @@ type ServerConfig struct {
 	// List of user application mountpoints.
   Mountpoints []Mountpoint
 
-	// Load system assets from the file system, don't use 
+	// Load system assets from the file system, don't use
 	// the embedded assets.
 	Dev bool
 }
@@ -93,7 +93,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// System applications to mount.
 	var system []Mountpoint
 	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home"})
-	system = append(system, Mountpoint{UrlPath: "/api/browse/", Path: "data://app/api"})
+	system = append(system, Mountpoint{UrlPath: "/api/browser/", Path: "data://app/api"})
   if err = l.loadApps(system, sys); err != nil {
     return nil, err
   }
