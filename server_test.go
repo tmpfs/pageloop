@@ -103,6 +103,11 @@ func TestNotFound(t *testing.T) {
 	assertStatus(resp, t, http.StatusNotFound)
 }
 
+// Test RPC server 
+func TestRpcService(t *testing.T) {
+
+}
+
 // Test REST API endpoints
 func TestRestService(t *testing.T) {
 	var err error

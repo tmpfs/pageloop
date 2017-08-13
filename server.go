@@ -14,8 +14,8 @@ import (
 	"regexp"
   "time"
   "github.com/tmpfs/pageloop/model"
-	"github.com/gorilla/rpc"
-	"github.com/gorilla/rpc/json"
+	//"github.com/gorilla/rpc"
+	//"github.com/gorilla/rpc/json"
   //"github.com/elazarl/go-bindata-assetfs"
 )
 
@@ -101,11 +101,11 @@ func (l *PageLoop) Listen(server *http.Server) error {
 		return errors.New("Cannot listen without a server, call NewServer().")
 	}
 
+	log.Printf("Listen %s", server.Addr)
+
   if err = server.ListenAndServe(); err != nil {
 		return err
 	}
-
-	log.Printf("Listen %s", server.Addr)
 
 	return nil
 }
@@ -114,14 +114,11 @@ func (l *PageLoop) Listen(server *http.Server) error {
 func (l *PageLoop) loadApps(config ServerConfig) error {
   var err error
 
-	// REST API global endpoint
-	rest := RestService{Root: l}
-	rest.Multiplex(mux)
+	// REST API global endpoint (/api/)
+	NewRestService(l, mux)
 
-	// RPC global endpoint
-	endpoint := rpc.NewServer()
-	endpoint.RegisterCodec(json.NewCodec(), "application/json")
-	mux.Handle("/rpc/", endpoint)
+	// RPC global endpoint (/rpc/)
+	NewRpcService(l, mux)
 
 	// Application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)

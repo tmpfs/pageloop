@@ -29,15 +29,22 @@ type RestService struct {
 	Root *PageLoop
 }
 
-// Configures the REST API handlers.
-func (r *RestService) Multiplex(mux *http.ServeMux) {
+func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
+	var rest *RestService = &RestService{Root: root}
+
 	var url string
 	url= "/api/"
-	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: r.Root}))
+	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
 
 	url = "/api/apps/"
-	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: r.Root}))
+	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: root}))
+
+	return rest
 }
+
+// Configures the REST API handlers.
+//func (r *RestService) Multiplex(mux *http.ServeMux) {
+//}
 
 // Handles requests to the API root.
 type RestRootHandler struct {
