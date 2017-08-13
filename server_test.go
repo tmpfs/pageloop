@@ -124,6 +124,8 @@ func TestRpcService(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	print(string(body))
+
 	res = &RpcResponse{}
 	if err = json.Unmarshal(body, &res); err != nil {
 		t.Fatal(err)

@@ -73,8 +73,8 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// Configure application container.
 	//l.Container = model.NewContainer()
 
-	sys := model.NewContainer("System applications", "")
-	usr := model.NewContainer("User applications", "")
+	sys := model.NewContainer("System applications")
+	usr := model.NewContainer("User applications")
 
 	l.Host.Add("system", sys)
 	l.Host.Add("user", usr)

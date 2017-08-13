@@ -49,6 +49,7 @@ func (h *Host) Add(key string, c *Container) error {
 	if e := h.Get(key); e != nil {
 		return errors.New(fmt.Sprintf("Container with key %s already exists", key))	
 	}
+	c.Name = key
 	h.Containers[key] = c
 	return nil
 }
@@ -66,8 +67,8 @@ type Container struct {
 }
 
 // Create a new container.
-func NewContainer(name string, description string) *Container {
-	return &Container{Name: name, Description: description}
+func NewContainer(description string) *Container {
+	return &Container{Description: description}
 }
 
 // Add an application to the container, the application must 

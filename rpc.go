@@ -49,7 +49,7 @@ type HostService struct {
 type HostListArgs struct {}
 
 type HostListReply struct {
-	Hosts map[string] *model.Container `json:"containers"`
+	Hosts []*model.Container `json:"containers"`
 }
 
 // Get a slice of the host container list.
@@ -57,7 +57,11 @@ type HostListReply struct {
 // If length is zero it is set to the number of applications so 
 // pass index zero without a length to list all applications.
 func (h *HostService) List(r *http.Request, args *HostListArgs, reply *HostListReply) error {
-	reply.Hosts = h.Root.Host.Containers
+	var list []*model.Container
+	for _, v := range h.Root.Host.Containers {
+		list = append(list, v)
+	}
+	reply.Hosts = list
 	return nil
 }
 
