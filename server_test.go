@@ -158,6 +158,8 @@ func TestRestService(t *testing.T) {
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
 
+	println(string(body))
+
 	list = make([]interface{}, 128)
 	if err = json.Unmarshal(body, &list); err != nil {
 		t.Fatal(err)
@@ -195,6 +197,10 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for url")
 	}
 
+	if _, ok = file["size"].(float64); !ok {
+		t.Error("Unexpected type for size")
+	}
+
 	// GET /api/apps/{name}/pages/
 	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/")); err != nil {
 		t.Fatal(err)
@@ -219,6 +225,10 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for url")
 	}
 
+	if _, ok = page["size"].(float64); !ok {
+		t.Error("Unexpected type for size")
+	}
+
 	// GET /api/apps/{name}/pages/{url}
 	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/index.html")); err != nil {
 		t.Fatal(err)
@@ -239,16 +249,13 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for url")
 	}
 
-	/*
-	if _, ok = page["size"].(int); !ok {
+	if _, ok = page["size"].(float64); !ok {
 		t.Error("Unexpected type for size")
 	}
-	*/
 
 	////
-	//
+	// Error conditions
 	////
-
 
 	// POST /api/ - Method Not Allowed
 	doc := []byte(`{}`)
