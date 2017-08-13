@@ -106,7 +106,7 @@ func TestNotFound(t *testing.T) {
 }
 
 type RpcResponse struct {
-	Result interface{}
+	Result map[string] interface{}
 	Error string
 	Id int
 }
@@ -119,7 +119,24 @@ func TestRpcService(t *testing.T) {
 	var doc []byte
 	var res *RpcResponse
 
-	doc = []byte(`{"id": 0, "method": "app.List", "params": [{"gid": "user", "index": 0}]}`)
+	doc = []byte(`{"id": 0, "method": "host.List", "params": [{"index": 0}]}`)
+	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &RpcResponse{}
+	if err = json.Unmarshal(body, &res); err != nil {
+		t.Fatal(err)
+	}
+
+	if containers := res.Result["containers"]; containers == nil {
+		t.Error("Containers map expected")	
+	}
+	assertStatus(resp, t, http.StatusOK)
+	assertContentType(resp, t, JSON_MIME)
+	assertBody(body, t)
+
+	doc = []byte(`{"id": 1, "method": "app.List", "params": [{"gid": "user", "index": 0}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +147,7 @@ func TestRpcService(t *testing.T) {
 	assertContentType(resp, t, JSON_MIME)
 	assertBody(body, t)
 
-	doc = []byte(`{"id": 1, "method": "app.Get", "params": [{"gid": "user","name": "mock-app"}]}`)
+	doc = []byte(`{"id": 2, "method": "app.Get", "params": [{"gid": "user","name": "mock-app"}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +158,7 @@ func TestRpcService(t *testing.T) {
 	assertContentType(resp, t, JSON_MIME)
 	assertBody(body, t)
 
-	doc = []byte(`{"id": 2, "method": "app.Get", "params": [{"gid": "missing-container","name": "mock-app"}]}`)
+	doc = []byte(`{"id": 3, "method": "app.Get", "params": [{"gid": "missing-container","name": "mock-app"}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -152,8 +169,6 @@ func TestRpcService(t *testing.T) {
 	}
 
 	errorMessage := res.Error
-
-	//fmt.Printf("%#v\n", res)
 
 	if !strings.HasPrefix(errorMessage, "No container found") {
 		t.Error("Unexpected error message for request to missing container")	

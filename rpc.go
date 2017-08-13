@@ -26,18 +26,42 @@ func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
 	// Do not specify charset on MIME type here
 	endpoint.RegisterCodec(json.NewCodec(), "application/json")
 
+	host := new(HostService)
+	host.Root = root
+
+	endpoint.RegisterService(host, "host")
+
 	app := new(AppService)
 	app.Root = root
 
 	endpoint.RegisterService(app, "app")
+
 
 	mux.Handle(RPC_URL, endpoint)
 
 	return service
 }
 
-type AppService struct {
+type HostService struct {
 	Root *PageLoop
+}
+
+type HostListArgs struct {
+	Index int `json:"index"`
+	Len int `json:="length"`
+}
+
+type HostListReply struct {
+	Hosts map[string] *model.Container `json:"containers"`
+}
+
+// Get a slice of the host container list.
+//
+// If length is zero it is set to the number of applications so 
+// pass index zero without a length to list all applications.
+func (h *HostService) List(r *http.Request, args *HostListArgs, reply *HostListReply) error {
+	reply.Hosts = h.Root.Host.Containers
+	return nil
 }
 
 type AppListArgs struct {
@@ -48,6 +72,10 @@ type AppListArgs struct {
 
 type AppListReply struct {
 	Apps []*model.Application `json:"apps"`
+}
+
+type AppService struct {
+	Root *PageLoop
 }
 
 // Get a slice of the application list for a container.
