@@ -100,9 +100,13 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	if server == nil {
 		return errors.New("Cannot listen without a server, call NewServer().")
 	}
+
   if err = server.ListenAndServe(); err != nil {
 		return err
 	}
+
+	log.Printf("Listen %s", server.Addr)
+
 	return nil
 }
 

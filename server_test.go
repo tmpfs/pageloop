@@ -13,9 +13,35 @@ var url string = "http://localhost:3579"
 var api string = url + "/api"
 var appApi string = api + "/apps"
 
+var server *http.Server
+
+// Test call to listen without a server
+func TestListenError(t *testing.T) {
+	var err error
+  loop := &PageLoop{}
+	err = loop.Listen(nil)
+	if err == nil {
+		t.Fatal("Expected error response from call to listen without server")
+	}
+
+	conf := ServerConfig{Addr: ":443", Dev: true}
+	if server, err = loop.NewServer(conf); err != nil {
+		t.Fatal(err)
+	}
+
+	defer server.Close()
+
+	var c chan error = make(chan error)
+	go func(ch chan<- error) { err = loop.Listen(server); if err != nil {ch <-err}; close(ch)} (c)
+	err = <-c
+
+	if err == nil {
+		t.Fatal("Expected error response from call to listen with port under 1024")
+	}
+}
+
 func TestStartServer(t *testing.T) {
 	var err error
-	var server *http.Server
   var apps []Mountpoint
 	apps = append(apps, Mountpoint{UrlPath: "/app/mock-app/", Path: "test/fixtures/mock-app"})
   loop := &PageLoop{}
