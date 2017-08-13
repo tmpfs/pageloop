@@ -3,6 +3,7 @@ package pageloop
 import (
 	"fmt"
 	"bytes"
+	"strings"
 	"io/ioutil"
 	"net/http"
 	"encoding/json"
@@ -150,7 +151,13 @@ func TestRpcService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Printf("%#v\n", res)
+	errorMessage := res.Error
+
+	//fmt.Printf("%#v\n", res)
+
+	if !strings.HasPrefix(errorMessage, "No container found") {
+		t.Error("Unexpected error message for request to missing container")	
+	}
 
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
