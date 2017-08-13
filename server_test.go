@@ -34,12 +34,12 @@ func TestListenError(t *testing.T) {
 	var c chan error = make(chan error)
 	go func(ch chan<- error) { err = loop.Listen(server); if err != nil {ch <-err}; close(ch)} (c)
 	err = <-c
-
 	if err == nil {
 		t.Fatal("Expected error response from call to listen with port under 1024")
 	}
 }
 
+// Start a mock server running for subsequent tests.
 func TestStartServer(t *testing.T) {
 	var err error
   var apps []Mountpoint
