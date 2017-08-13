@@ -68,7 +68,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   var err error
 
 	// Configure application container.
-	l.Container = &model.Container{}
+	l.Container = model.NewContainer()
 
   // Initialize server mux
   mux = http.NewServeMux()

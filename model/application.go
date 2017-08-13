@@ -4,12 +4,16 @@ import (
   "os"
 	"fmt"
   "bytes"
+	//"hash"
 	"errors"
 	"regexp"
   "strings"
+	"crypto/rand"
+	"crypto/sha512"
   "path/filepath"
   "io/ioutil"
   "encoding/json"
+	"encoding/hex"
   "gopkg.in/yaml.v2"
   "github.com/tmpfs/pageloop/vdom"
 )
@@ -32,9 +36,24 @@ var(
 	re = regexp.MustCompile(ptn)
 )
 
+func NewContainer() *Container {
+	var err error
+	b := make([]byte, 512)
+	_, err = rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	var res [sha512.Size]byte = sha512.Sum512(b)
+	var id string = hex.EncodeToString(res[0:16])
+	c := &Container{id: id}
+	//fmt.Printf("%#v\n", c)
+	return c
+}
+
 // Represents a collection of applications.
 type Container struct {
 	Apps []*Application `json:"apps"`
+	id string
 }
 
 // Add an application to the container, the application must 
