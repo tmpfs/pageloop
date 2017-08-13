@@ -2,14 +2,16 @@ package pageloop
 
 import (
   //"log"
-	//"errors"
+	"fmt"
+	"errors"
 	"net/http"
-  //"path/filepath"
-	//"regexp"
-  //"time"
 	"github.com/tmpfs/pageloop/model"
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
+)
+
+const(
+	RPC_URL = "/rpc/"
 )
 
 type RpcService struct {
@@ -29,7 +31,7 @@ func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
 
 	endpoint.RegisterService(app, "app")
 
-	mux.Handle("/rpc/", endpoint)
+	mux.Handle(RPC_URL, endpoint)
 
 	return service
 }
@@ -39,6 +41,7 @@ type AppService struct {
 }
 
 type AppListArgs struct {
+	GroupId string `json:"gid"`
 	Index int `json:"index"`
 	Len int `json:="length"`
 }
@@ -52,7 +55,10 @@ type AppListReply struct {
 // If length is zero it is set to the number of applications so 
 // pass index zero without a length to list all applications.
 func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListReply) error {
-	var container *model.Container = h.Root.Container
+	var container *model.Container
+	if container = h.Root.Host.Get(args.GroupId); container == nil {
+		return errors.New(fmt.Sprint("No container found for %s", args.GroupId))
+	}
 	if args.Len == 0 {
 		args.Len = len(container.Apps) - args.Index
 	}
@@ -61,6 +67,7 @@ func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListRepl
 }
 
 type AppGetArgs struct {
+	GroupId string `json:"gid"`
 	Name string `json:"name"`
 }
 
@@ -70,7 +77,10 @@ type AppGetReply struct {
 
 // Get an application by name.
 func (h *AppService) Get(r *http.Request, args *AppGetArgs, reply *AppGetReply) error {
-	var container *model.Container = h.Root.Container
+	var container *model.Container
+	if container = h.Root.Host.Get(args.GroupId); container == nil {
+		return errors.New(fmt.Sprint("No container found for %s", args.GroupId))
+	}
 	reply.App = container.GetByName(args.Name)
 	return nil
 }

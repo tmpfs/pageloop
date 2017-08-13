@@ -8,12 +8,9 @@ import (
 	"errors"
 	"regexp"
   "strings"
-	"crypto/rand"
-	"crypto/sha512"
   "path/filepath"
   "io/ioutil"
   "encoding/json"
-	"encoding/hex"
   "gopkg.in/yaml.v2"
   "github.com/tmpfs/pageloop/vdom"
 )
@@ -22,7 +19,6 @@ const (
   // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"
-
   // Page data types.
   DATA_NONE = iota
   DATA_YAML
@@ -38,28 +34,40 @@ var(
 
 // Contains a slice of containers.
 type Host struct {
-	Containers []*Container
+	Containers map[string] *Container `json:"containers"`
+}
+
+// Create a new host.
+func NewHost() *Host {
+	h := new(Host)
+	h.Containers = make(map[string] *Container)
+	return h
+}
+
+// Add a container by key.
+func (h *Host) Add(key string, c *Container) error {
+	if e := h.Get(key); e != nil {
+		return errors.New(fmt.Sprintf("Container with key %s already exists", key))	
+	}
+	h.Containers[key] = c
+	return nil
+}
+
+// Get a container by key.
+func (h *Host) Get(key string) *Container {
+	return h.Containers[key]
 }
 
 // Contains a slice of applications.
 type Container struct {
+	Name string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
 	Apps []*Application `json:"apps"`
-	id string
 }
 
-// Create a new container and assign a random hex encoded identifier.
-func NewContainer() *Container {
-	var err error
-	b := make([]byte, 512)
-	_, err = rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	var res [sha512.Size]byte = sha512.Sum512(b)
-	var id string = hex.EncodeToString(res[0:16])
-	c := &Container{id: id}
-	//fmt.Printf("%#v\n", c)
-	return c
+// Create a new container.
+func NewContainer(name string, description string) *Container {
+	return &Container{Name: name, Description: description}
 }
 
 // Add an application to the container, the application must 

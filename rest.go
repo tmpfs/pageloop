@@ -13,6 +13,7 @@ import (
 )
 
 const(
+	API_URL = "/api/"
 	JSON_MIME = "application/json; charset=utf-8"
 	//JSON_MIME_UTF8 = "application/json; charset=utf-8"
 
@@ -34,18 +35,17 @@ func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
 	var rest *RestService = &RestService{Root: root}
 
 	var url string
-	url= "/api/"
+	url= API_URL
+	//println("new rest service")
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
 
-	url = "/api/apps/"
-	mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: root}))
+	for key, c := range root.Host.Containers {
+		url = API_URL + key + "/apps/"
+		mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: root, Container: c}))
+	}
 
 	return rest
 }
-
-// Configures the REST API handlers.
-//func (r *RestService) Multiplex(mux *http.ServeMux) {
-//}
 
 // Handles requests to the API root.
 type RestRootHandler struct {
@@ -55,6 +55,7 @@ type RestRootHandler struct {
 // Handles requests for application data.
 type RestAppHandler struct {
 	Root *PageLoop
+	Container *model.Container
 }
 
 // Gets the list of applications for the API root (/api/).
@@ -71,7 +72,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	path := url.Path
 
 	if path == "" {
-		if data, err = json.Marshal(h.Root.Container); err == nil {
+		if data, err = json.Marshal(h.Root.Host); err == nil {
 			ok(res, data)
 			return
 		}
@@ -106,7 +107,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	url := req.URL
 	path := url.Path
 
-
 	// Check if an app exists when referenced as /api/apps/{name}
 	// and extract path parts.
 	if path != "" {
@@ -119,7 +119,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			//item = parts[2]
 			item = "/" + strings.Join(parts[2:], "/")
 		}
-		app = h.Root.Container.GetByName(name)
+		app = h.Container.GetByName(name)
 		// Application must exist
 		if app == nil {
 			ex(res, http.StatusNotFound, nil, nil)
@@ -131,7 +131,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		case http.MethodGet:
 			if path == "" {
 				// GET /api/apps/
-				data, err = json.Marshal(h.Root.Container.Apps)
+				data, err = json.Marshal(h.Container.Apps)
 			} else {
 				if app != nil {
 					if action == "" {
@@ -175,7 +175,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		// DELETE /api/apps/{name}/
 		case http.MethodDelete:
 			if name != "" && action == "" {
-				h.Root.Container.Del(app)
+				h.Container.Del(app)
 
 				// TODO: rewrite mountpoints
 				// TODO: persist application mountpoints
@@ -200,7 +200,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				//fmt.Printf("PUT result: %#v\n", result)
 
 				// Add the application to the container.
-				if err = h.Root.Container.Add(input); err != nil {
+				if err = h.Container.Add(input); err != nil {
 					ex(res, http.StatusPreconditionFailed, nil, err)
 					return
 				}

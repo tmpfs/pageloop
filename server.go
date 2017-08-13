@@ -40,8 +40,9 @@ type PageLoop struct {
 	// All application mountpoints.
   Mountpoints []Mountpoint `json:"-"`
 
-	// Application container
-	Container *model.Container
+	// Application host
+	Host *model.Host
+	//Container *model.Container
 }
 
 type ServerConfig struct {
@@ -67,19 +68,37 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   var err error
 
+	l.Host = model.NewHost()
+
 	// Configure application container.
-	l.Container = model.NewContainer()
+	//l.Container = model.NewContainer()
+
+	sys := model.NewContainer("System applications", "")
+	usr := model.NewContainer("User applications", "")
+
+	l.Host.Add("system", sys)
+	l.Host.Add("user", usr)
 
   // Initialize server mux
   mux = http.NewServeMux()
 
+	// RPC global endpoint (/rpc/)
+	NewRpcService(l, mux)
+	log.Printf("Serving rpc service from %s", RPC_URL)
+
+	// REST API global endpoint (/api/)
+	NewRestService(l, mux)
+	log.Printf("Serving rest service from %s", API_URL)
+
 	// System applications to mount.
-	l.Mountpoints = append(l.Mountpoints, Mountpoint{UrlPath: "/", Path: "data://app/home"})
+	var system []Mountpoint
+	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home"})
+  if err = l.loadApps(system, sys); err != nil {
+    return nil, err
+  }
 
-	// Add user applications.
-	l.Mountpoints = append(l.Mountpoints, config.Mountpoints...)
-
-  if err = l.loadApps(config); err != nil {
+	// Add user applications from configuration mountpoints.
+  if err = l.loadApps(config.Mountpoints, usr); err != nil {
     return nil, err
   }
 
@@ -111,19 +130,13 @@ func (l *PageLoop) Listen(server *http.Server) error {
 }
 
 // Load application mountpoints.
-func (l *PageLoop) loadApps(config ServerConfig) error {
+func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container) error {
   var err error
-
-	// REST API global endpoint (/api/)
-	NewRestService(l, mux)
-
-	// RPC global endpoint (/rpc/)
-	NewRpcService(l, mux)
 
 	// Application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
-  for _, mt := range l.Mountpoints {
+  for _, mt := range mountpoints {
 		var dataScheme bool
 		urlPath := mt.UrlPath
 		path := mt.Path
@@ -163,7 +176,7 @@ func (l *PageLoop) loadApps(config ServerConfig) error {
     }
 
 		// Add to the container
-		if err = l.Container.Add(&app); err != nil {
+		if err = container.Add(&app); err != nil {
 			return err
 		}
 

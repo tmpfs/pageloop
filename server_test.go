@@ -12,7 +12,7 @@ import (
 var url string = "http://localhost:3579"
 var api string = url + "/api"
 var rpcUrl string = url + "/rpc/"
-var appApi string = api + "/apps"
+var appUrl string = api + "/user/apps/"
 
 var server *http.Server
 
@@ -111,7 +111,7 @@ func TestRpcService(t *testing.T) {
 	var body []byte
 	var doc []byte
 
-	doc = []byte(`{"id": 0, "method": "app.List", "params": [{"index": 0}]}`)
+	doc = []byte(`{"id": 0, "method": "app.List", "params": [{"gid": "user", "index": 0}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func TestRpcService(t *testing.T) {
 	assertContentType(resp, t, JSON_MIME)
 	assertBody(body, t)
 
-	doc = []byte(`{"id": 1, "method": "app.Get", "params": [{"name": "mock-app"}]}`)
+	doc = []byte(`{"id": 1, "method": "app.Get", "params": [{"gid": "user","name": "mock-app"}]}`)
 	if resp, body, err = post(rpcUrl, JSON_MIME, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,6 @@ func TestRpcService(t *testing.T) {
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
 	assertBody(body, t)
-
 }
 
 // Test REST API endpoints
@@ -145,12 +144,13 @@ func TestRestService(t *testing.T) {
 	var res map[string] interface{} = make(map[string] interface{})
 	var apps []interface{}
 	var list []interface{}
+	var containers map [string] interface{}
+	var container map [string] interface{}
 	var app map [string] interface{}
 	var file map [string] interface{}
 	var page map [string] interface{}
 	var name string
 	var ok bool
-
 
 	// GET /api/
 	if resp, body, err = get(api); err != nil {
@@ -163,20 +163,28 @@ func TestRestService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if apps, ok = res["apps"].([]interface{}); !ok {
-		t.Error("Unexpected type for apps list")
+	if containers, ok = res["containers"].(map[string] interface{}); !ok {
+		t.Error("Unexpected type for containers")
 	}
 
-	if app, ok = apps[0].(map [string] interface{}); !ok {
+	if container, ok = containers["user"].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for app")
 	}
 
-	if _, ok = app["name"].(string); !ok {
-		t.Error("Unexpected type for name")
+	if apps, ok = container["apps"].([]interface{}); !ok {
+		t.Error("Unexpected type for container apps")
 	}
 
-	// GET /api/apps/
-	if resp, body, err = get(fmt.Sprintf("%s%s", api, "/apps/")); err != nil {
+	if app, ok = apps[0].(map[string] interface{}); !ok {
+		t.Error("Unexpected type for container app")
+	}
+
+	if app["name"] != "mock-app" {
+		t.Error("Unexpected name for mock application")
+	}
+
+	// GET /api/{container}/apps/
+	if resp, body, err = get(appUrl); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -194,8 +202,8 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for name")
 	}
 
-	// GET /api/apps/{name}/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s", api, "/apps/", name + "/")); err != nil {
+	// GET /api/{container}/apps/{name}/
+	if resp, body, err = get(fmt.Sprintf("%s%s", appUrl, name + "/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -210,8 +218,8 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for name")
 	}
 
-	// GET /api/apps/{name}/files/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/")); err != nil {
+	// GET /api/{container}/apps/{name}/files/
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/files/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -235,7 +243,7 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/{name}/files/{url}/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/index.html")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/files/index.html")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -259,7 +267,7 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/{name}/pages/
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/pages/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -287,7 +295,7 @@ func TestRestService(t *testing.T) {
 	}
 
 	// GET /api/apps/{name}/pages/{url}
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/index.html")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/pages/index.html")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -312,25 +320,25 @@ func TestRestService(t *testing.T) {
 
 	// PUT /api/apps/ - Created
 	doc = []byte(`{"name": "test-app"}`)
-	if resp, body, err = put(api + "/apps/", doc); err != nil {
+	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusCreated)
 
 	// GET /api/apps/test-app/ - OK
-	if resp, body, err = get(api + "/apps/test-app/"); err != nil {
+	if resp, body, err = get(appUrl + "test-app/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 
 	// DELETE /api/apps/test-app/ - OK
-	if resp, body, err = del(api + "/apps/test-app/", nil); err != nil {
+	if resp, body, err = del(appUrl + "test-app/", nil); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 
 	// GET /api/apps/test-app/ - Not Found
-	if resp, body, err = get(api + "/apps/test-app/"); err != nil {
+	if resp, body, err = get(appUrl + "test-app/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusNotFound)
@@ -341,7 +349,7 @@ func TestRestService(t *testing.T) {
 
 	// TRACE /api/ - Method Not Allowed
 	doc = []byte(``)
-	if resp, body, err = do(appApi + "/", http.MethodTrace, doc); err != nil {
+	if resp, body, err = do(appUrl, http.MethodTrace, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
@@ -355,60 +363,60 @@ func TestRestService(t *testing.T) {
 
 	// DELETE /api/apps/ - Method Not Allowed
 	doc = []byte(`{}`)
-	if resp, body, err = del(appApi + "/", nil); err != nil {
+	if resp, body, err = del(appUrl, nil); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
 
 	// PUT /api/mock-app/ - Method Not Allowed
 	doc = []byte(`{}`)
-	if resp, body, err = put(appApi + "/mock-app/", doc); err != nil {
+	if resp, body, err = put(appUrl + "mock-app/", doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
 
 	// PUT /api/ (malformed json) - Bad Request
 	doc = []byte(`{`)
-	if resp, body, err = put(api + "/apps/", doc); err != nil {
+	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusBadRequest)
 
 	// PUT /api/ (schema validation fail) - Bad Request
 	doc = []byte(`{}`)
-	if resp, body, err = put(api + "/apps/", doc); err != nil {
+	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusBadRequest)
 
 	// PUT /api/ (app exists) - Precondition Failed
 	doc = []byte(`{"name": "mock-app"}`)
-	if resp, body, err = put(api + "/apps/", doc); err != nil {
+	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusPreconditionFailed)
 
 	// PUT /api/ (invalid app name) - Precondition Failed
 	doc = []byte(`{"name": "-app"}`)
-	if resp, body, err = put(api + "/apps/", doc); err != nil {
+	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusPreconditionFailed)
 
 	// GET /api/apps/{name}/invalid-action/ (invalid action) - Not Found
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/invalid-action/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/invalid-action/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusNotFound)
 
 	// GET /api/apps/{name}/files/not-found/ (missing file) - Not Found
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/files/not-found/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/files/not-found/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusNotFound)
 
 	// GET /api/apps/{name}/pages/not-found/ (missing page) - Not Found
-	if resp, body, err = get(fmt.Sprintf("%s%s%s%s", api, "/apps/", name, "/pages/not-found/")); err != nil {
+	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/pages/not-found/")); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusNotFound)
