@@ -7,7 +7,7 @@ import (
   //"path/filepath"
 	//"regexp"
   //"time"
-  //"github.com/tmpfs/pageloop/model"
+	"github.com/tmpfs/pageloop/model"
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
 )
@@ -23,23 +23,33 @@ func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
 	endpoint := rpc.NewServer()
 	endpoint.RegisterCodec(json.NewCodec(), JSON_MIME)
 
-	endpoint.RegisterService(new(HelloService), "hello")
+	app := new(AppService)
+	app.Root = root
+
+	endpoint.RegisterService(app, "app")
 
 	mux.Handle("/rpc/", endpoint)
 
 	return service
 }
-type HelloArgs struct {
-	Who string
+
+type AppService struct {
+	Root *PageLoop
 }
 
-type HelloReply struct {
-	Message string
+type AppListArgs struct {
+	Index int `json:"index"`
+	Len int `json:="length"`
 }
 
-type HelloService struct {}
+type AppListReply struct {
+	Apps []*model.Application `json:"apps"`
+}
 
-func (h *HelloService) Say(r *http.Request, args *HelloArgs, reply *HelloReply) error {
-	reply.Message = "Hello, " + args.Who + "!"
+func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListReply) error {
+	if args.Len == 0 {
+		args.Len = len(h.Root.Container.Apps) - args.Index
+	}
+	reply.Apps = h.Root.Container.Apps[args.Index:args.Len]
 	return nil
 }
