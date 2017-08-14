@@ -18,6 +18,9 @@ const(
 	PageNone = iota
 	PageHtml
 	PageMarkdown
+
+	Layout = "layout.html"
+	Content = "content"
 )
 
 type Block struct {
@@ -60,19 +63,18 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
 // and walks the parent paths until it hits the application 
 // root searching for a layout file.
 func (p *Page) FindLayout() *Page {
-	var layout string = "layout.html"
 	var path string = p.Path
 	var dir string = filepath.Dir(path)
 	var appRoot string = strings.TrimSuffix(p.owner.Root.Path, "/")
 
 	// Do not process layout files
-	if p.Name == layout {
+	if p.Name == Layout {
 		return nil
 	}
 
 	var search func(dir string) *Page
 	search = func(dir string) *Page {
-		var target string = filepath.Join(dir, layout)
+		var target string = filepath.Join(dir, Layout)
 		for _, p := range p.owner.Pages {
 			if p.file.Path == target {
 				return p
@@ -127,44 +129,44 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
     return nil, err
   }
 
-  // Parse the file as a go HTML template if we have some 
-  // page data.
-  //if p.PageDataType != DATA_NONE {
-
-	if p.Name == "layout.html" {
+	// Do not handle layout files
+	if p.Name == Layout {
 		return nil, nil	
 	}
 
+	// Create and parse the primary template
 	tpl, err = p.ParseTemplate(p.file.Path, p.file.Source(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// see if we need to render as part of a layout
+	// See if we can find a layout
 	layout := p.FindLayout()
 	if layout != nil {
+
+		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
 		if lyt, err = p.ParseTemplate(file.Path, file.Source(), nil); err != nil {
 			return nil, err
 		}
 
-		//println(tpl.DefinedTemplates())
-
+		// Add the content template
 		for _, t := range tpl.Templates() {
-			if t.Name() == "content" {
-				if _, err = lyt.AddParseTree("content", t.Tree); err != nil {
+			if t.Name() == Content {
+				if _, err = lyt.AddParseTree(Content, t.Tree); err != nil {
 					return nil, err
 				}
 				break
 			}
 		}
 
+		// Execute the outer layout template
 		if result, err = p.ExecuteTemplate(lyt, p.PageData); err != nil {
 			return nil, err
 		}
 		data = result
-	// Template without layout
+	// Template without layout, execute directly
 	} else {
 		if result, err = p.ExecuteTemplate(tpl, p.PageData); err != nil {
 			return nil, err
