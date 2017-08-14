@@ -67,9 +67,14 @@ input {
   font-family: 'SourceSans';
 }
 
-input[type="text"] {
+input[type="text"], textarea {
+  width: 100%;
   padding: .5rem;
   border-radius: 4px;
+}
+
+textarea {
+  min-height: 8rem;
 }
 
 h3 {

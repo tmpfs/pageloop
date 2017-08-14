@@ -1,57 +1,72 @@
 /* globals document fetch */
 
-function send (url, options, cb) {
-  return fetch(url, options)
-    .then((res) => res.json().then((doc) => cb(null, res, doc)))
-    .catch((err) => cb(err))
-}
+(function () {
+  const PUT = 'PUT'
+  const POST = 'POST'
 
-/*
-var link = document.querySelector('.api-link')
-
-link.addEventListener('click', (e) => {
-  e.preventDefault()
-  get(API, {}, renderers.containers.bind(null, ROOT))
-})
-*/
-
-function onSubmit (e) {
-  e.preventDefault()
-  var form = e.currentTarget
-  console.log(e)
-  var url = document.getElementById('url').value
-  var group = form.querySelectorAll('input[type="radio"]')
-  var radio
-  for (let i = 0; i < group.length; i++) {
-    if (group[i].checked) {
-      radio = group[i]
-      break
-    }
+  function send (url, req, cb) {
+    req.url = url
+    return fetch(url, req)
+      .then((res) => res.json().then((doc) => cb(null, req, res, doc)))
+      .catch((err) => cb(err))
   }
-  var method = radio.value
-  var options = {method: method}
 
-  console.log(options)
+  function log (o) {
+    let s = o.toString()
+    let logger = document.getElementById('log')
+    logger.innerText += s
+  }
 
-  send(url, options, (err, res, doc) => {
-    if (err) {
-      return console.error(err)
+  function onSubmit (e) {
+    e.preventDefault()
+    let form = e.currentTarget
+    let url = document.getElementById('url').value
+    let group = form.querySelectorAll('input[type="radio"]')
+    let radio
+    for (let i = 0; i < group.length; i++) {
+      if (group[i].checked) {
+        radio = group[i]
+        break
+      }
+    }
+    let method = radio.value
+    let options = {method: method}
+
+    let data = document.getElementById('data').value
+    if ((method === PUT || method === POST) && data !== '') {
+      try {
+        // check JSON is valid before sending
+        data = JSON.parse(data)
+        data = JSON.stringify(data)
+      } catch (e) {
+        return log(e)
+      }
+
+      options.body = data
     }
 
-    console.log(res)
+    log(`${options.method} ${url}\n`)
 
-    var response = document.getElementById('response')
-    response.classList.remove('hidden')
-    var pre = response.querySelector('pre')
-    var status = response.querySelector('.status')
-    status.innerText = res.status
+    send(url, options, (err, req, res, doc) => {
+      if (err) {
+        return console.error(err)
+      }
 
-    //console.log(doc)
+      console.log(res)
 
-    var str = JSON.stringify(doc, undefined, 2)
-    pre.innerText = str
-  })
-}
+      log(`${res.status} ${req.url}\n`)
 
-var form = document.getElementById('debug')
-form.addEventListener('submit', onSubmit)
+      let response = document.getElementById('response')
+      response.classList.remove('hidden')
+      let pre = response.querySelector('pre')
+      let status = response.querySelector('.status')
+      status.innerText = res.status
+
+      let str = JSON.stringify(doc, undefined, 2)
+      pre.innerText = str
+    })
+  }
+
+  let form = document.getElementById('debug')
+  form.addEventListener('submit', onSubmit)
+})()
