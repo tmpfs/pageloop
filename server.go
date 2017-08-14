@@ -75,9 +75,13 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	sys := model.NewContainer("system", "System applications")
 	usr := model.NewContainer("user", "User applications")
+	tpl := model.NewContainer("template", "Application templates")
+	snx := model.NewContainer("sandbox", "Playground")
 
 	l.Host.Add(sys)
 	l.Host.Add(usr)
+	l.Host.Add(tpl)
+	l.Host.Add(snx)
 
   // Initialize server mux
   mux = http.NewServeMux()
