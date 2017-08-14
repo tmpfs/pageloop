@@ -9,19 +9,23 @@
 		<main>
 			<h3>API Documentation</h3>
       <p>To make requests use your favourite command line program or the <a href="/api/probe/" title="API Probe">probe</a> tool. You can also <a href="/api/browser/" title="API Browser">browse</a> the GET requests.</p>
-      <p>All requests should have an <code>application/json</code> content type header. URLs are shown relative to the base <code>/api/</code> path.
+      <p>All requests should have an <code>application/json</code> content type header. URLs are shown relative to the base <code>/api/</code> path.</p>
+        <p>Containers and applications are referenced by name which may only contain alphanumeric digits and the hyphen, they may not begin with a hyphen.</p>
       <div class="request">
         <h4>GET /</h4>
         <p>Get the list of containers.</p>
-        <p>A container is a collection of web applications, each application contains a set of source files that are published to a public location.</p>
+        <p>A container is a collection of web applications.</p>
       </div>
       <div class="request">
         <h4>GET /{container}/</h4>
         <p>Get the list of applications in a container.</p>
+        <p>An application contains a set of source files that are published to a public location.</p>
       </div>
       <div class="request">
         <h4>PUT /{container}/</h4>
         <p>Create a new application.</p>
+        <p>To create a new application you must give it at least a valid name so the request body should be valid JSON such as:</p>
+        <pre>{"name": "application-name"}
       </div>
       <div class="request">
         <h4>GET /{container}/{application}/</h4>
