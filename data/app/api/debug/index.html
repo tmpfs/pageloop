@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>API Debug</title>
+		<link rel="stylesheet" href="/assets/css/global.css" />
+		<link rel="stylesheet" href="api-debug.css" />
+  </head>
+  <body>
+		<main>
+			<h3>API Debug</h3>
+
+      <div id="request">
+        <h4>Request</h4>
+        <form id="debug">
+          <div>
+            <input type="radio" name="method" value="GET" checked>GET</input>
+            <input type="radio" name="method" value="PUT">PUT</input>
+            <input type="radio" name="method" value="POST">POST</input>
+            <input type="radio" name="method" value="DELETE">DELETE</input>
+          </div>
+          <div>
+            <label for="url">URL</label>
+            <input type="text" id="url" name="url" value="/api/" />
+          </div>
+          <div>
+            <input type="submit" name="submit" value="Send" />
+          </div>
+        </form>
+      </div>
+
+      <div id="response" class="hidden">
+        <h4>Response (<span class="status"></span>)</h4>
+        <pre><pre>
+      </div>
+			<script src="api-debug.js" async></script>
+		</main>
+  </body>
+</html>
