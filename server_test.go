@@ -111,7 +111,7 @@ type RpcResponse struct {
 	Id int
 }
 
-// Test RPC server 
+// Test RPC server
 func TestRpcService(t *testing.T) {
 	var err error
 	var resp *http.Response
@@ -132,7 +132,7 @@ func TestRpcService(t *testing.T) {
 	}
 
 	if containers := res.Result["containers"]; containers == nil {
-		t.Error("Containers map expected")	
+		t.Error("Containers map expected")
 	}
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
@@ -173,7 +173,7 @@ func TestRpcService(t *testing.T) {
 	errorMessage := res.Error
 
 	if !strings.HasPrefix(errorMessage, "No container found") {
-		t.Error("Unexpected error message for request to missing container")	
+		t.Error("Unexpected error message for request to missing container")
 	}
 
 	assertStatus(resp, t, http.StatusOK)
@@ -188,7 +188,7 @@ func TestRestService(t *testing.T) {
 	var body []byte
 	var doc []byte
 
-	var res map[string] interface{} = make(map[string] interface{})
+	//var res map[string] interface{} = make(map[string] interface{})
 	var apps []interface{}
 	var list []interface{}
 	var containers [] interface{}
@@ -206,18 +206,14 @@ func TestRestService(t *testing.T) {
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
 
-	if err = json.Unmarshal(body, &res); err != nil {
+	if err = json.Unmarshal(body, &containers); err != nil {
 		t.Fatal(err)
 	}
 
 	println(string(body))
 
-	if containers, ok = res["containers"].([]interface{}); !ok {
-		t.Error("Unexpected type for containers")
-	}
-
 	if container, ok = containers[1].(map [string] interface{}); !ok {
-		t.Error("Unexpected type for app")
+		t.Error("Unexpected type for container")
 	}
 
 	if apps, ok = container["apps"].([]interface{}); !ok {
@@ -519,7 +515,7 @@ func do(uri string, method string, body []byte) (*http.Response, []byte, error) 
 	buf.Write(body)
 	var req *http.Request
 	if req, err = http.NewRequest(method, uri, buf); err != nil {
-		return nil, nil, err	
+		return nil, nil, err
 	}
 	req.Header.Set("Content-Type", JSON_MIME)
 	client := http.Client{}
