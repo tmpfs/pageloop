@@ -87,35 +87,23 @@ func (p *Page) FindLayout() *Page {
 	return search(dir)
 }
 
-// Parse a template file and execute it with the given data.
-func (p *Page) ParseTemplate(path string, source[]byte, data map[string] interface{}/* , funcs template.FuncMap */) ([]byte, error) {
-  var err error
+func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap) (*template.Template, error) {
 	tpl := template.New(path)
-	/*
 	if funcs != nil {
-		println("setting func map")
 		tpl.Funcs(funcs)
 	}
-	*/
-	tpl, err = tpl.Parse(string(source))
-	if err != nil {
+	return tpl.Parse(string(source))
+}
+
+// Parse a template file and execute it with the given data.
+func (p *Page) ExecuteTemplate(tpl *template.Template, data map[string] interface{}) ([]byte, error) {
+	var err error
+	w := new(bytes.Buffer)
+	if err = tpl.Execute(w, data); err != nil {
 		return nil, err
 	}
-
-	w := new(bytes.Buffer)
-	tpl.Execute(w, data)
 	return w.Bytes(), nil
 }
-
-/*
-func (p *Page) getMarkupMap(markup string) template.FuncMap {
-	var m template.FuncMap = make(template.FuncMap)
-	m["markup"] = func() string {
-		return "<foobar>"
-	}
-	return m
-}
-*/
 
 // Render the current version of the virtual DOM to a byte 
 // array. If page data is available parse the file as an 
@@ -126,6 +114,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   var err error
   var data []byte
   var result []byte
+	var tpl *template.Template
   if vdom == nil {
     vdom = p.Dom
   }
@@ -140,44 +129,47 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 
   // Parse the file as a go HTML template if we have some 
   // page data.
-  if p.PageDataType != DATA_NONE {
-		result, err = p.ParseTemplate(p.file.Relative, data, p.PageData)
-		if err != nil {
-			return nil, err
-		}
-		data = result
+  //if p.PageDataType != DATA_NONE {
 
-    // Prepend frontmatter to the output.
-    /*
-    if p.PageDataType == DATA_YAML {
-      var fm []byte
-      if fm, err = p.MarshalPageData(); err != nil {
-        return nil, err
-      }
+	if p.Name == "layout.html" {
+		return nil, nil	
+	}
 
-      // Add document --- dashes.
-      var delimiter []byte = []byte("---\n")
-      fm = append(delimiter, fm...)
-      fm = append(fm, delimiter...)
+	tpl, err = p.ParseTemplate(p.file.Path, p.file.Source(), nil)
+	if err != nil {
+		return nil, err
+	}
 
-      // Prepend to the DOM bytes.
-      data = append(fm, data...)
-    }
-    */
-  }
-
-	//println("searching for layout file")
+	// see if we need to render as part of a layout
 	layout := p.FindLayout()
 	if layout != nil {
 		file := layout.file
-		//p.PageData["markup"] = string(data)
-		//funcs := p.getMarkupMap(string(data))
-		result, err = p.ParseTemplate(file.Relative, file.Source(), p.PageData/*, funcs */)
-		if err != nil {
+		var lyt *template.Template
+		if lyt, err = p.ParseTemplate(file.Path, file.Source(), nil); err != nil {
+			return nil, err
+		}
+
+		//println(tpl.DefinedTemplates())
+
+		for _, t := range tpl.Templates() {
+			if t.Name() == "content" {
+				if _, err = lyt.AddParseTree("content", t.Tree); err != nil {
+					return nil, err
+				}
+				break
+			}
+		}
+
+		if result, err = p.ExecuteTemplate(lyt, p.PageData); err != nil {
 			return nil, err
 		}
 		data = result
-		println("found layout: " + string(data))
+	// Template without layout
+	} else {
+		if result, err = p.ExecuteTemplate(tpl, p.PageData); err != nil {
+			return nil, err
+		}
+		data = result
 	}
 
   return data, nil

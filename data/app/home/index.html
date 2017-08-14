@@ -1,31 +1,25 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Pageloop</title>
-		<link rel="stylesheet" href="assets/css/global.css" />
-		<link rel="stylesheet" href="assets/css/home.css" />
-  </head>
-  <body>
-		<main>
-			<header>
-				<h3><a href="/" title="Home">Ꝏ</a> Pageloop</h3>
-				<p>Web based document editor designed for rapid editing and publishing of static websites.</p>
-			</header>
-			<h4>RPC</h4>
-			<p>The RPC service provides a transport independent API.</p>
-			<h4>API</h4>
-			<p>The REST API allows access to the system data representing the containers and applications that are being served.</p>
-			<ul>
-				<li>
-					<a href="/docs/api/" title="API Documentation">Documentation</a>
-				</li>
-				<li>
-					<a href="/tools/api/browser/" title="API Browser">Browser Tool</a>
-				</li>
-				<li>
-					<a href="/tools/api/probe/" title="API Probe">Probe Tool</a>
-				</li>
-			</ul>
-		</main>
-  </body>
-</html>
+---
+title: Pageloop
+lang: en
+---
+{{define "content"}}
+<header>
+	<h3><a href="/" title="Home">Ꝏ</a> Pageloop</h3>
+	<p>Web based document editor designed for rapid editing and publishing of static websites.</p>
+</header>
+<h4>RPC</h4>
+<p>The RPC service provides a transport independent API.</p>
+<h4>API</h4>
+<p>The REST API allows access to the system data representing the containers and applications that are being served.</p>
+<ul>
+	<li>
+		<a href="/docs/api/" title="API Documentation">Documentation</a>
+	</li>
+	<li>
+		<a href="/tools/api/browser/" title="API Browser">Browser Tool</a>
+	</li>
+	<li>
+		<a href="/tools/api/probe/" title="API Probe">Probe Tool</a>
+	</li>
+</ul>
+{{end}}
