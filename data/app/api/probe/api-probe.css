@@ -19,8 +19,3 @@ input[type="radio"] + label {
   overflow-y: auto;
   overflow-x: none;
 }
-
-h4 {
-  display: inline-block;
-  border-bottom: 1px solid black;
-}
