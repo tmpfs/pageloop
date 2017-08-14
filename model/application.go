@@ -150,8 +150,6 @@ type File struct {
   Url string `json:"url"` 
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
-	//Mime string `json:"mime,omitempty"`
-  //Index bool `json:"index"`
   info os.FileInfo
 
 	// Raw source data.
