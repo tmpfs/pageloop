@@ -64,11 +64,14 @@ type Container struct {
 	Name string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Apps []*Application `json:"apps"`
+
+	// A protected container makes all it's applications protected
+	Protected bool `json:"protected,omitempty"`
 }
 
 // Create a new container.
-func NewContainer(name string, description string) *Container {
-	return &Container{Name: name, Description: description}
+func NewContainer(name string, description string, protected bool) *Container {
+	return &Container{Name: name, Description: description, Protected: protected}
 }
 
 // Add an application to the container, the application must 
@@ -90,6 +93,8 @@ func (c *Container) Add(app *Application) error {
 	if exists != nil {
 		return errors.New(fmt.Sprintf("Application exists with name %s", app.Name))
 	}
+
+	app.Protected = c.Protected
 
 	c.Apps = append(c.Apps, app)
 	return nil
@@ -133,6 +138,9 @@ type Application struct {
 	Root *File `json:"-"`
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
+
+	// A protected application cannot be deleted.
+	Protected bool `json:"protected,omitempty"`
 }
 
 type File struct {

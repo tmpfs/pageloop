@@ -196,9 +196,14 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					}
 				}
 			}
-		// DELETE /api/apps/{name}/
+		// DELETE /api/{container}/{name}/
 		case http.MethodDelete:
 			if name != "" && action == "" {
+				if app.Protected {
+					ex(res, http.StatusForbidden, nil, errors.New("Cannot delete protected application"))
+					return
+				}
+
 				h.Container.Del(app)
 
 				// TODO: rewrite mountpoints
@@ -210,7 +215,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			}
-		// PUT /api/apps/
+		// PUT /api/{container}/
 		case http.MethodPut:
 			if path == "" {
 				var input *model.Application = &model.Application{}
