@@ -87,6 +87,36 @@ func (p *Page) FindLayout() *Page {
 	return search(dir)
 }
 
+// Parse a template file and execute it with the given data.
+func (p *Page) ParseTemplate(path string, source[]byte, data map[string] interface{}/* , funcs template.FuncMap */) ([]byte, error) {
+  var err error
+	tpl := template.New(path)
+	/*
+	if funcs != nil {
+		println("setting func map")
+		tpl.Funcs(funcs)
+	}
+	*/
+	tpl, err = tpl.Parse(string(source))
+	if err != nil {
+		return nil, err
+	}
+
+	w := new(bytes.Buffer)
+	tpl.Execute(w, data)
+	return w.Bytes(), nil
+}
+
+/*
+func (p *Page) getMarkupMap(markup string) template.FuncMap {
+	var m template.FuncMap = make(template.FuncMap)
+	m["markup"] = func() string {
+		return "<foobar>"
+	}
+	return m
+}
+*/
+
 // Render the current version of the virtual DOM to a byte 
 // array. If page data is available parse the file as an 
 // HTML template passing the page data to the template.
@@ -95,6 +125,7 @@ func (p *Page) FindLayout() *Page {
 func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   var err error
   var data []byte
+  var result []byte
   if vdom == nil {
     vdom = p.Dom
   }
@@ -110,17 +141,11 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   // Parse the file as a go HTML template if we have some 
   // page data.
   if p.PageDataType != DATA_NONE {
-    tpl := template.New(p.file.Relative)
-    tpl, err = tpl.Parse(string(data))
-    if err != nil {
-      return nil, err
-    }
-
-    w := new(bytes.Buffer)
-    tpl.Execute(w, p.PageData)
-
-    // Overwrite data with the parsed template.
-    data = w.Bytes()
+		result, err = p.ParseTemplate(p.file.Relative, data, p.PageData)
+		if err != nil {
+			return nil, err
+		}
+		data = result
 
     // Prepend frontmatter to the output.
     /*
@@ -144,7 +169,15 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 	//println("searching for layout file")
 	layout := p.FindLayout()
 	if layout != nil {
-		println("found layout")	
+		file := layout.file
+		//p.PageData["markup"] = string(data)
+		//funcs := p.getMarkupMap(string(data))
+		result, err = p.ParseTemplate(file.Relative, file.Source(), p.PageData/*, funcs */)
+		if err != nil {
+			return nil, err
+		}
+		data = result
+		println("found layout: " + string(data))
 	}
 
   return data, nil
