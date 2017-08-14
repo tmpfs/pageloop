@@ -4,6 +4,7 @@ package model
 import(
 	//"fmt"
   "bytes"
+	"strings"
   "html/template"
   "encoding/json"
 	"path/filepath"
@@ -62,17 +63,28 @@ func (p *Page) FindLayout() *Page {
 	var layout string = "layout.html"
 	var path string = p.Path
 	var dir string = filepath.Dir(path)
-	var target string = filepath.Join(dir, layout)
+	var appRoot string = strings.TrimSuffix(p.owner.Root.Path, "/")
 
 	// Do not process layout files
 	if p.Name == layout {
 		return nil
 	}
 
-	println("find layout: " + path)
-	println("find layout: " + target)
+	var search func(dir string) *Page
+	search = func(dir string) *Page {
+		var target string = filepath.Join(dir, layout)
+		for _, p := range p.owner.Pages {
+			if p.file.Path == target {
+				return p
+			}
+		}
+		if dir == appRoot {
+			return nil
+		}
+		return search(filepath.Dir(dir))
+	}
 
-	return nil
+	return search(dir)
 }
 
 // Render the current version of the virtual DOM to a byte 
@@ -129,7 +141,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
     */
   }
 
-	println("searching for layout file")
+	//println("searching for layout file")
 	layout := p.FindLayout()
 	if layout != nil {
 		println("found layout")	
