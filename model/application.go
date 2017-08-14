@@ -268,7 +268,6 @@ func (app *Application) merge() error {
         return err
       }
     }
-		println(string(page.Data()))
 		page.Parse(page.Data())
 		app.Pages[index] = page
   }

@@ -32,10 +32,7 @@ type Block struct {
 // documents they are converted to HTML first and the underlying 
 // markdown data is left untouched.
 func (p *Page) Data() []byte {
-	//fmt.Printf("getting data %d\n", p.Type)
-	//fmt.Printf("getting data %s\n", p.Url)
 	if p.Type == PageMarkdown {
-		//println("GETTING MARKDOWN DATA")
 		return []byte(Md2Html(string(p.file.data), CMARK_OPT_DEFAULT))
 	}
   return p.file.data
