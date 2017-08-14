@@ -27,11 +27,12 @@ var(
 )
 
 type RestService struct {
+	Url string
 	Root *PageLoop
 }
 
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
-	var rest *RestService = &RestService{Root: root}
+	var rest *RestService = &RestService{Root: root, Url: API_URL}
 
 	var url string
 	url= API_URL

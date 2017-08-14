@@ -10,14 +10,12 @@ import (
 	"fmt"
   "log"
 	"errors"
+	"strings"
   "net/http"
   "path/filepath"
 	"regexp"
   "time"
   "github.com/tmpfs/pageloop/model"
-	//"github.com/gorilla/rpc"
-	//"github.com/gorilla/rpc/json"
-  //"github.com/elazarl/go-bindata-assetfs"
 )
 
 const(
@@ -26,6 +24,16 @@ const(
 
 var config ServerConfig
 var mux *http.ServeMux
+
+// Maps application URLs to HTTP handlers.
+//
+// Because we want to mount and unmount applications and we cannot remove 
+// a handler we have a single handler that defers to these handlers.
+var mountpoints map[string] http.Handler
+
+// We need to know which requests go through the normal serve mux logic
+// so they do not collide with application requests.
+var multiplex map[string] bool
 
 type Mountpoint struct {
 	// The URL path component.
@@ -37,9 +45,6 @@ type Mountpoint struct {
 type PageLoop struct {
 	// Underlying HTTP server.
 	Server *http.Server `json:"-"`
-
-	// All application mountpoints.
-  Mountpoints []Mountpoint `json:"-"`
 
 	// Application host
 	Host *model.Host
@@ -60,8 +65,38 @@ type ServerHandler struct {}
 
 // The default server handler, defers to a multiplexer.
 func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-  handler, _ := mux.Handler(req)
-  handler.ServeHTTP(res, req)
+	var handler http.Handler
+	var path string = req.URL.Path
+
+	// Look for serve mux mappings first
+	for k, _ := range multiplex {
+		if strings.HasPrefix(path, k) {
+			handler, _ = mux.Handler(req)
+			handler.ServeHTTP(res, req)
+			return
+		}
+	}
+
+	// Check for application mountpoints.
+	//
+	// Serve the highest score which is the longest
+	// matching URL path.
+	var score int
+
+	for k, v := range mountpoints {
+		if strings.HasPrefix(path, k) {
+			if handler != nil && len(k) < score {
+				continue
+			}
+			handler = v
+			score = len(k)
+		}
+	}
+
+	if handler == nil {
+		handler = http.NotFoundHandler()
+	}
+	handler.ServeHTTP(res, req)
 }
 
 // Creates an HTTP server.
@@ -70,9 +105,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	l.Host = model.NewHost()
 
-	// Configure application container.
-	//l.Container = model.NewContainer()
-
+	// Configure application containers.
 	sys := model.NewContainer("system", "System applications")
 	usr := model.NewContainer("user", "User applications")
 	tpl := model.NewContainer("template", "Application templates")
@@ -83,16 +116,23 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	l.Host.Add(tpl)
 	l.Host.Add(snx)
 
+	// Initialize mountpoint maps
+	mountpoints = make(map[string] http.Handler)
+	multiplex = make(map[string] bool)
+
   // Initialize server mux
   mux = http.NewServeMux()
 
 	// RPC global endpoint (/rpc/)
-	NewRpcService(l, mux)
+	rpc := NewRpcService(l, mux)
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	NewRestService(l, mux)
+	rest := NewRestService(l, mux)
 	log.Printf("Serving rest service from %s", API_URL)
+
+	multiplex[rpc.Url] = true
+	multiplex[rest.Url] = true
 
 	// System applications to mount.
 	var system []Mountpoint
@@ -199,22 +239,14 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 
 // Mount an application from Public to Url.
 func (l *PageLoop) MountApplication(app *model.Application) {
-
 	// Serve the static build files from the mountpoint path.
 	url := app.Url
 	log.Printf("Serving app %s from %s", url, app.Public)
-	mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
+	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Public)))
 
 	// Serve the raw source files.
 	url = url + "-/source/"
 	log.Printf("Serving src %s from %s", url, app.Path)
-	sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(app.Path)))
-	mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
-		//log.Println("got source req")
-		//log.Printf("%#v\n", req)
-		//log.Printf("%#v\n", req.URL)
-		// TODO: serve in-memory versions
-		sourceFileServer.ServeHTTP(res, req)
-	})
+	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Path)))
 }
 

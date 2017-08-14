@@ -124,7 +124,7 @@ func TestRpcService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	print(string(body))
+	//print(string(body))
 
 	res = &RpcResponse{}
 	if err = json.Unmarshal(body, &res); err != nil {
@@ -199,18 +199,20 @@ func TestRestService(t *testing.T) {
 	var name string
 	var ok bool
 
+	//println(api)
+
 	// GET /api/
-	if resp, body, err = get(api); err != nil {
+	if resp, body, err = get(api + "/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, JSON_MIME)
 
+	//println(string(body))
+
 	if err = json.Unmarshal(body, &containers); err != nil {
 		t.Fatal(err)
 	}
-
-	println(string(body))
 
 	if container, ok = containers[1].(map [string] interface{}); !ok {
 		t.Error("Unexpected type for container")

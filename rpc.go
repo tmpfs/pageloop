@@ -15,11 +15,12 @@ const(
 )
 
 type RpcService struct {
+	Url string
 	Root *PageLoop
 }
 
 func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
-	var service *RpcService = &RpcService{Root: root}
+	var service *RpcService = &RpcService{Root: root, Url: RPC_URL}
 
 	// RPC endpoint
 	endpoint := rpc.NewServer()
