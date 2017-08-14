@@ -99,6 +99,7 @@ p {
 
 a, a:hover, a:visited {
   text-decoration: none;
+  color: #336699;
 }
 
 header > h3 {
