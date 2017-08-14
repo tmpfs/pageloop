@@ -7,6 +7,7 @@
 package pageloop
 
 import (
+	"fmt"
   "log"
 	"errors"
   "net/http"
@@ -161,8 +162,10 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
     }
 		name := filepath.Base(path)
 
+		// No mountpoint URL given so we assume an app
+		// relative to the container
 		if urlPath == "" {
-			urlPath = "/app/" + name + "/"
+			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
 		}
 
 		app := model.Application{Url: urlPath}
