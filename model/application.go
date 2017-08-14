@@ -358,7 +358,6 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 
   // frontmatter
   if FRONTMATTER.Match(page.file.data) {
-		println("got frontmatter for: " + page.file.Path)
     var read int = 4
     var lines [][]byte = bytes.Split(page.file.data, []byte("\n"))
     var frontmatter [][]byte

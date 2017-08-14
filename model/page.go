@@ -45,7 +45,6 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   var err error
 
 	if p.Type == PageMarkdown {
-		println("parse markdown: " + string(data))
 		data = []byte(Md2Html(string(data), CMARK_OPT_DEFAULT))
 	}
 
@@ -150,7 +149,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		if layout {
 			src = append(define, data...)
 			src = append(src, end...)
-			println(string(src))
+			//println(string(src))
 		}
 		return p.ParseTemplate(p.file.Path, src, nil)
 	}

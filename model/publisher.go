@@ -25,7 +25,6 @@ type PublishFilter interface {
 type DefaultFilter struct {}
 
 func (f *DefaultFilter) Rename(path string) string {
-	println(path)
 	name := filepath.Base(path)
 	if name == Layout {
 		return ""
