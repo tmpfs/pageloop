@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>API Documentation</title>
+		<link rel="stylesheet" href="/assets/css/global.css" />
+		<link rel="stylesheet" href="api-docs.css" />
+  </head>
+  <body>
+		<main>
+			<h3>API Documentation</h3>
+      <p>To make requests use your favourite command line program or the <a href="/api/probe/" title="API Probe">probe</a> tool. You can also <a href="/api/browser/" title="API Browser">browse</a> the GET requests.</p>
+      <p>All requests should have an <code>application/json</code> content type header. URLs are shown relative to the base <code>/api/</code> path.
+      <div class="request">
+        <h4>GET /</h4>
+        <p>Get the list of containers.</p>
+        <p>A container is a collection of web applications, each application contains a set of source files that are published to a public location.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/</h4>
+        <p>Get the list of applications in a container.</p>
+      </div>
+      <div class="request">
+        <h4>PUT /{container}/</h4>
+        <p>Create a new application.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/{application}/</h4>
+        <p>Get an application.</p>
+      </div>
+      <div class="request">
+        <h4>DELETE /{container}/{application}/</h4>
+        <p>Remove an application.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/{application}/files/</h4>
+        <p>Get the list of files for an application.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/{application}/files/{url}</h4>
+        <p>Get file information for the file URL.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/{application}/pages/</h4>
+        <p>Get the list of pages for an application.</p>
+      </div>
+      <div class="request">
+        <h4>GET /{container}/{application}/pages/{url}</h4>
+        <p>Get page information for the page URL.</p>
+      </div>
+			<script src="api-docs.js" async></script>
+		</main>
+  </body>
+</html>
