@@ -7,7 +7,7 @@ label {
 }
 
 hr {
-  margin-top: 2rem;
+  margin: 2rem 0 0 0;
 }
 
 input[type="radio"] + label {

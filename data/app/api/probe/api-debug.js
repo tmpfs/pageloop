@@ -65,7 +65,7 @@
     })
   }
 
-  let form = document.getElementById('debug')
+  let form = document.getElementById('probe')
   form.addEventListener('submit', onSubmit)
 
   let data = document.getElementById('data')

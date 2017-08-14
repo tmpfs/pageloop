@@ -1,17 +1,17 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>API Debug</title>
+    <title>Probe Tool (API)</title>
 		<link rel="stylesheet" href="/assets/css/global.css" />
 		<link rel="stylesheet" href="api-debug.css" />
   </head>
   <body>
 		<main>
-			<h3>API Debug</h3>
+			<h3>API Probe</h3>
       <p>Use this page to debug API requests and responses, to view the underlying data structures see the <a href="/api/browser/" title="API Browser">browser</a> tool.</p>
       <div id="request">
         <h4>Request</h4>
-        <form id="debug">
+        <form id="probe">
           <div>
             <input id="get" type="radio" name="method" value="GET" checked></input>
             <label for="get">GET</label>
@@ -28,7 +28,7 @@
           </div>
           <div class="disabled">
             <label for="data">JSON Data:</label>
-            <textarea id="data"></textarea>
+            <textarea id="data">{}</textarea>
           </div>
           <div>
             <input type="submit" name="submit" value="Send" />
@@ -44,7 +44,7 @@
       </div>
       <div>
         <h4>Log</h4>
-        <div id="log" class="mono"></div>
+        <p id="log" class="mono"></p>
       </div>
 			<script src="api-debug.js" async></script>
 		</main>
