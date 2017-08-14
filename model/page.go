@@ -37,15 +37,18 @@ type Block struct {
 // documents they are converted to HTML first and the underlying 
 // markdown data is left untouched.
 func (p *Page) Data() []byte {
-	if p.Type == PageMarkdown {
-		return []byte(Md2Html(string(p.file.data), CMARK_OPT_DEFAULT))
-	}
   return p.file.data
 }
 
 // Parse the file data into the virtual DOM of this page.
 func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   var err error
+
+	if p.Type == PageMarkdown {
+		data = []byte(Md2Html(string(data), CMARK_OPT_DEFAULT))
+		//println(string(data))
+	}
+
   var dom = vdom.Vdom{}
   err = dom.Parse(data)
   if err != nil {
@@ -134,8 +137,12 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		return nil, nil	
 	}
 
+	// FIXME: the html.Render() call escapes the double quotes
+	// FIXME: in the template define section so we need to unescape
+	data = []byte(html.UnescapeString(string(data)))
+
 	// Create and parse the primary template
-	tpl, err = p.ParseTemplate(p.file.Path, p.file.Source(), nil)
+	tpl, err = p.ParseTemplate(p.file.Path, data, nil)
 	if err != nil {
 		return nil, err
 	}

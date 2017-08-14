@@ -245,18 +245,15 @@ func (app *Application) Publish(publisher ApplicationPublisher, base string) err
   var data []byte
 
   // Render pages to the file data bytes.
-
 	for _, page := range app.Pages {
-		if page.Type == PageHtml {
-			node := page.Dom.Clean(nil)
-			if data, err = page.Render(page.Dom, node); err != nil {
-				return err
-			}
-			page.file.data = data
+		node := page.Dom.Clean(nil)
+		if data, err = page.Render(page.Dom, node); err != nil {
+			return err
 		}
+		page.file.data = data
 	}
 
-  if err = publisher.PublishApplication(app, base); err != nil {
+  if err = publisher.PublishApplication(app, base, nil); err != nil {
     return err
   }
 
@@ -296,12 +293,14 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
 func (app *Application) merge() error {
   var err error
   for index, page := range app.Pages {
-    if page.Type == PageHtml {
+		if page.Type == PageHtml {
       if _, err = app.getPageData(page); err != nil {
         return err
       }
-    }
-		page.Parse(page.Data())
+		}
+		if _, err = page.Parse(page.file.Source()); err != nil {
+			return err	
+		}
 		app.Pages[index] = page
   }
   return nil
