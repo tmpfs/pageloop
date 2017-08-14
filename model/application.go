@@ -293,12 +293,12 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
 func (app *Application) merge() error {
   var err error
   for index, page := range app.Pages {
-		if page.Type == PageHtml {
+		//if page.Type == PageHtml {
       if _, err = app.getPageData(page); err != nil {
         return err
       }
-		}
-		if _, err = page.Parse(page.file.Source()); err != nil {
+		//}
+		if _, err = page.Parse(page.file.data); err != nil {
 			return err	
 		}
 		app.Pages[index] = page
@@ -358,6 +358,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 
   // frontmatter
   if FRONTMATTER.Match(page.file.data) {
+		println("got frontmatter for: " + page.file.Path)
     var read int = 4
     var lines [][]byte = bytes.Split(page.file.data, []byte("\n"))
     var frontmatter [][]byte

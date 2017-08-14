@@ -45,8 +45,8 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   var err error
 
 	if p.Type == PageMarkdown {
+		println("parse markdown: " + string(data))
 		data = []byte(Md2Html(string(data), CMARK_OPT_DEFAULT))
-		//println(string(data))
 	}
 
   var dom = vdom.Vdom{}
@@ -139,18 +139,28 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 
 	// FIXME: the html.Render() call escapes the double quotes
 	// FIXME: in the template define section so we need to unescape
-	data = []byte(html.UnescapeString(string(data)))
+	//data = []byte(html.UnescapeString(string(data)))
 
 	// Create and parse the primary template
-	tpl, err = p.ParseTemplate(p.file.Path, data, nil)
-	if err != nil {
-		return nil, err
+	var primary func(layout bool) (*template.Template, error)
+	primary = func(layout bool) (*template.Template, error) {
+		var src []byte = data
+		var define []byte = []byte(`{{define "content"}}`)
+		var end []byte = []byte(`{{end}}`)
+		if layout {
+			src = append(define, data...)
+			src = append(src, end...)
+			println(string(src))
+		}
+		return p.ParseTemplate(p.file.Path, src, nil)
 	}
 
 	// See if we can find a layout
 	layout := p.FindLayout()
 	if layout != nil {
-
+		if tpl, err = primary(true); err != nil {
+			return nil, err
+		}
 		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
@@ -175,6 +185,9 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		data = result
 	// Template without layout, execute directly
 	} else {
+		if tpl, err = primary(false); err != nil {
+			return nil, err
+		}
 		if result, err = p.ExecuteTemplate(tpl, p.PageData); err != nil {
 			return nil, err
 		}
