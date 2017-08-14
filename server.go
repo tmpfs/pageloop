@@ -141,8 +141,8 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		ext := filepath.Ext(file.Name)
 		ct := mime.TypeByExtension(ext)
 		res.Header().Set("Content-Type", ct)
-		res.Header().Set("Content-Length", strconv.Itoa(len(file.Data())))
-		res.Write(file.Data())
+		res.Header().Set("Content-Length", strconv.Itoa(len(file.Source())))
+		res.Write(file.Source())
 		return
 	}
 

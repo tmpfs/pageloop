@@ -153,7 +153,18 @@ type File struct {
 	//Mime string `json:"mime,omitempty"`
   //Index bool `json:"index"`
   info os.FileInfo
+
+	// Raw source data.
+	source []byte
+
+	// Initially the source data but mutated later when 
+	// parsed from markdown or rendered from the vdom.
   data []byte
+}
+
+// Read only access to the source data outside this package.
+func (f *File) Source() []byte {
+	return f.source
 }
 
 // Read only access to the data outside this package.

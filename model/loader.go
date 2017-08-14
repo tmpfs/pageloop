@@ -45,6 +45,7 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
         return err
       }
       file.data = bytes
+			file.source = bytes
     }
 
 		var pageType int = PageNone
