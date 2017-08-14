@@ -1,5 +1,6 @@
 ---
 title: Documentation
+lang: en
 ---
 
 ### Documentation

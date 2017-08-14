@@ -136,10 +136,6 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		return nil, nil	
 	}
 
-	// FIXME: the html.Render() call escapes the double quotes
-	// FIXME: in the template define section so we need to unescape
-	//data = []byte(html.UnescapeString(string(data)))
-
 	// Create and parse the primary template
 	var primary func(layout bool) (*template.Template, error)
 	primary = func(layout bool) (*template.Template, error) {
