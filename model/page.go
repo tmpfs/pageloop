@@ -5,6 +5,7 @@ import(
 	//"fmt"
   "bytes"
 	"strings"
+	"regexp"
   "html/template"
   "encoding/json"
 	"path/filepath"
@@ -21,6 +22,12 @@ const(
 
 	Layout = "layout.html"
 	Content = "content"
+
+)
+
+var(
+	FragmentTop = regexp.MustCompile(`^<html><head></head><body>`)
+	FragmentTail = regexp.MustCompile(`</body></html>$`)
 )
 
 type Block struct {
@@ -153,6 +160,15 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 	// See if we can find a layout
 	layout := p.FindLayout()
 	if layout != nil {
+		// Markdown documents when going via the vdom are rendered
+		// with outer html, head and body elements. Markdown documents
+		// that are part of a layout need these removed.
+		if p.Type == PageMarkdown {
+			data = FragmentTop.ReplaceAll(data, []byte{})
+			data = FragmentTail.ReplaceAll(data, []byte{})
+		}
+
+
 		if tpl, err = primary(true); err != nil {
 			return nil, err
 		}
