@@ -10,6 +10,7 @@ import (
 	"fmt"
   "log"
 	"errors"
+	"mime"
 	"strings"
 	"strconv"
   "net/http"
@@ -143,12 +144,12 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
-		ct := http.DetectContentType(file.Data())
+		// TODO: use mime library, detect content type not accurate enough :(
+		ext := filepath.Ext(file.Name)
+		ct := mime.TypeByExtension(ext)
 		res.Header().Set("Content-Type", ct)
 		res.Header().Set("Content-Length", strconv.Itoa(len(file.Data())))
 		res.Write(file.Data())
-		println("got file: " + file.Url)
-		println("got file: " + ct)
 		return
 	}
 
@@ -274,7 +275,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		// TODO: make publishing optional
 
     // Publish the application files to a build directory
-    if err = app.Publish(nil, container.Name); err != nil {
+    if err = app.Publish(nil, "public/" + container.Name); err != nil {
       return err
     }
 
