@@ -97,6 +97,22 @@ p {
   margin: 0 0 1rem 0;
 }
 
+a, a:hover, a:visited {
+  text-decoration: none;
+}
+
+header > h3 {
+  position: relative;
+  text-align: center;
+}
+
+header > h3 > a:first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: black;
+}
+
 .mono {
   font-family: monospace;
 }

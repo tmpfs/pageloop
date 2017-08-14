@@ -1,0 +1,6 @@
+h4 {
+  display: inline-block;
+  border-bottom: 1px solid black;
+  text-transform: none;
+  margin-bottom: 1.5rem;
+}
