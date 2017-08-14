@@ -29,8 +29,8 @@ function containers (parent, doc) {
   let ul = document.createElement('ul')
   let i, item
   let html = ''
-  for (i = 0; i < doc.containers.length; i++) {
-    item = doc.containers[i]
+  for (i = 0; i < doc.length; i++) {
+    item = doc[i]
     html += `<li>`
     html += `<h4>${item.name}</h4>`
     html += `<span class="label">Container</span>`

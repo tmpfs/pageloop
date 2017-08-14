@@ -73,7 +73,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if data, err = json.Marshal(h.Root.Host); err == nil {
+		if data, err = json.Marshal(h.Root.Host.Containers); err == nil {
 			ok(res, data)
 			return
 		}
@@ -84,7 +84,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if len(parts) > 0 {
 		var c *model.Container = h.Root.Host.GetByName(parts[0])
 		if c == nil {
-			// Container not found	
+			// Container not found
 			ex(res, http.StatusNotFound, nil, nil)
 			return
 		}
@@ -98,7 +98,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
 		handler.ServeHTTP(res, req)
 		return
-	}	
+	}
 
 	if err != nil {
 		ex(res, http.StatusInternalServerError, nil, nil)
@@ -136,7 +136,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
 		name = parts[0]
 		if len(parts) > 1 {
-			action = parts[1]	
+			action = parts[1]
 		}
 		if len(parts) > 2 {
 			//item = parts[2]
@@ -274,7 +274,7 @@ func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, e
 
 // Validate a client request.
 //
-// Reads in the request body data, unmarshals to JSON and 
+// Reads in the request body data, unmarshals to JSON and
 // validates the result against the given schema.
 func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojsonschema.Result, error) {
 	var err error
@@ -329,6 +329,6 @@ func isMethodAllowed(method string, methods []string) bool {
 		if m == method {
 			return true
 		}
-	}	
+	}
 	return false
 }
