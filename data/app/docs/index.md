@@ -1,8 +1,9 @@
 ---
 title: Documentation
 lang: en
+description: Documentation for the system.
+keywords: web, editor, documentation
+leader: Documentation for the pageloop system.
 ---
 
-### Documentation
-
-This is some documentation.
+This is some *documentation*.

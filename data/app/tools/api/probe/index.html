@@ -1,54 +1,48 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Probe Tool (API)</title>
-		<link rel="stylesheet" href="/assets/css/global.css" />
-		<link rel="stylesheet" href="api-probe.css" />
-  </head>
-  <body>
-		<main>
-			<header>
-				<h3><a href="/" title="Home">Ꝏ</a> API Probe</h3>
-      </header>
-      <p>Use this page to debug API requests and responses, to view the underlying data structures see the <a href="/tools/api/browser/" title="API Browser">browser</a> tool. For more detail see the <a href="/docs/api/" title="API docs">docs</a>.</p>
-      <div id="request">
-        <h4>Request</h4>
-        <form id="probe">
-          <div>
-            <input id="get" type="radio" name="method" value="GET" checked></input>
-            <label for="get">GET</label>
-            <input id="put" type="radio" name="method" value="PUT"></input>
-            <label for="put">PUT</label>
-            <input id="post" type="radio" name="method" value="POST"></input>
-            <label for="post">POST</label>
-            <input id="delete" type="radio" name="method" value="DELETE"></input>
-            <label for="delete">DELETE</label>
-          </div>
-          <div>
-            <label for="url">URL:</label>
-            <input type="text" id="url" name="url" value="/api/" />
-          </div>
-          <div class="disabled">
-            <label for="data">JSON Data:</label>
-            <textarea id="data">{}</textarea>
-          </div>
-          <div>
-            <input type="submit" name="submit" value="Send" />
-          </div>
-        </form>
-        <hr />
-      </div>
+---
+title: Probe Tool (API)
+heading: API Probe 
+lang: en
+description: Send requests to the REST API.
+keywords: rest, api, probe
+leader: Use this page to debug API requests and responses.
+---
+<link rel="stylesheet" href="api-probe.css" />
+<p>To view the underlying data structures see the <a href="/tools/api/browser/" title="API Browser">browser</a> tool. For more detail see the <a href="/docs/api/" title="API docs">docs</a>.</p>
+<div id="request">
+	<h4>Request</h4>
+	<form id="probe">
+		<div>
+			<input id="get" type="radio" name="method" value="GET" checked></input>
+			<label for="get">GET</label>
+			<input id="put" type="radio" name="method" value="PUT"></input>
+			<label for="put">PUT</label>
+			<input id="post" type="radio" name="method" value="POST"></input>
+			<label for="post">POST</label>
+			<input id="delete" type="radio" name="method" value="DELETE"></input>
+			<label for="delete">DELETE</label>
+		</div>
+		<div>
+			<label for="url">URL:</label>
+			<input type="text" id="url" name="url" value="/api/" />
+		</div>
+		<div class="disabled">
+			<label for="data">JSON Data:</label>
+			<textarea id="data">{}</textarea>
+		</div>
+		<div>
+			<input type="submit" name="submit" value="Send" />
+		</div>
+	</form>
+	<hr />
+</div>
 
-      <div id="response" class="hidden">
-        <h4>Response (<span class="status"></span>)</h4>
-        <pre></pre>
-        <hr />
-      </div>
-      <div>
-        <h4>Log</h4>
-        <p id="log" class="mono"></p>
-      </div>
-			<script src="api-probe.js" async></script>
-		</main>
-  </body>
-</html>
+<div id="response" class="hidden">
+	<h4>Response (<span class="status"></span>)</h4>
+	<pre></pre>
+	<hr />
+</div>
+<div>
+	<h4>Log</h4>
+	<p id="log" class="mono"></p>
+</div>
+<script src="api-probe.js" async></script>
