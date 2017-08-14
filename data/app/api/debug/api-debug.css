@@ -10,6 +10,10 @@ hr {
   margin-top: 2rem;
 }
 
+input[type="radio"] + label {
+  display: inline-block;
+}
+
 #log {
   max-height: 12rem;
   overflow-y: auto;

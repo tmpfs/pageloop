@@ -13,16 +13,20 @@
         <h4>Request</h4>
         <form id="debug">
           <div>
-            <input type="radio" name="method" value="GET" checked>GET</input>
-            <input type="radio" name="method" value="PUT">PUT</input>
-            <input type="radio" name="method" value="POST">POST</input>
-            <input type="radio" name="method" value="DELETE">DELETE</input>
+            <input id="get" type="radio" name="method" value="GET" checked></input>
+            <label for="get">GET</label>
+            <input id="put" type="radio" name="method" value="PUT"></input>
+            <label for="put">PUT</label>
+            <input id="post" type="radio" name="method" value="POST"></input>
+            <label for="post">POST</label>
+            <input id="delete" type="radio" name="method" value="DELETE"></input>
+            <label for="delete">DELETE</label>
           </div>
           <div>
             <label for="url">URL:</label>
             <input type="text" id="url" name="url" value="/api/" />
           </div>
-          <div>
+          <div class="disabled">
             <label for="data">JSON Data:</label>
             <textarea id="data"></textarea>
           </div>

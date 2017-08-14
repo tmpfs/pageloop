@@ -67,4 +67,17 @@
 
   let form = document.getElementById('debug')
   form.addEventListener('submit', onSubmit)
+
+  let data = document.getElementById('data')
+  let radios = form.querySelectorAll('input[type="radio"]')
+  for (let i = 0; i < radios.length; i++) {
+    radios[i].addEventListener('click', (e) => {
+      let radio = e.currentTarget
+      if (radio.value === PUT || radio.value === POST) {
+        data.parentNode.classList.remove('disabled')
+      } else {
+        data.parentNode.classList.add('disabled')
+      }
+    })
+  }
 })()
