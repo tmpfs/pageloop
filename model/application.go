@@ -118,6 +118,9 @@ func (c *Container) GetByName(name string) *Application {
 }
 
 type Application struct {
+	// Mountpoint URL
+	Url string `json:"url"`
+
   Path string `json:"-"`
 
   // The public file system path for the HTTP server.

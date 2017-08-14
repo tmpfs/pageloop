@@ -42,7 +42,6 @@ type PageLoop struct {
 
 	// Application host
 	Host *model.Host
-	//Container *model.Container
 }
 
 type ServerConfig struct {
@@ -100,14 +99,18 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	system = append(system, Mountpoint{UrlPath: "/api/browser/", Path: "data://app/api/browser"})
 	system = append(system, Mountpoint{UrlPath: "/api/docs/", Path: "data://app/api/docs"})
 	system = append(system, Mountpoint{UrlPath: "/api/probe/", Path: "data://app/api/probe"})
-  if err = l.loadApps(system, sys); err != nil {
+
+  if err = l.LoadMountpoints(system, sys); err != nil {
     return nil, err
   }
 
 	// Add user applications from configuration mountpoints.
-  if err = l.loadApps(config.Mountpoints, usr); err != nil {
+  if err = l.LoadMountpoints(config.Mountpoints, usr); err != nil {
     return nil, err
   }
+
+	l.MountContainer(sys)
+	l.MountContainer(usr)
 
   s := &http.Server{
     Addr:           config.Addr,
@@ -136,10 +139,10 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	return nil
 }
 
-// Load application mountpoints.
-func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container) error {
+// Iterates a list of mountpoints and creates an application for each mountpoint
+// and adds it to the given container.
+func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) error {
   var err error
-
 	// Application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
@@ -162,12 +165,14 @@ func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container
 			urlPath = "/app/" + name + "/"
 		}
 
-    app := model.Application{}
+		app := model.Application{Url: urlPath}
 
     // Load the application files into memory
 		if err = app.Load(p, nil); err != nil {
 			return err
 		}
+
+		// TODO: make publishing optional
 
     // Publish the application files to a build directory
     if err = app.Publish(nil); err != nil {
@@ -178,36 +183,35 @@ func (l *PageLoop) loadApps(mountpoints []Mountpoint, container *model.Container
 		if err = container.Add(&app); err != nil {
 			return err
 		}
-
-    // Serve the static build files from the mountpoint path.
-    url := urlPath
-    log.Printf("Serving app %s from %s", url, app.Public)
-    mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
-
-		// Serve the raw source files.
-    url = urlPath + "-/source/"
-    log.Printf("Serving source %s from %s", url, p)
-		sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(p)))
-		mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
-			//log.Println("got source req")
-			//log.Printf("%#v\n", req)
-			//log.Printf("%#v\n", req.URL)
-			// TODO: serve in-memory versions
-			sourceFileServer.ServeHTTP(res, req)
-		})
-
-		// TODO: serve app editor application from /editor
-
-		/*
-		if config.Dev {
-			//mux.Handle("/", http.FileServer(http.Dir("data")))
-		} else {
-			mux.Handle("/",
-				http.FileServer(
-					&assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: "data"}))
-		}
-		*/
   }
-
-  return nil
+	return nil
 }
+
+// Mount all applications in a container.
+func (l *PageLoop) MountContainer(container *model.Container) {
+	for _, a := range container.Apps {
+		l.MountApplication(a)	
+	}
+}
+
+// Mount an application from Public to Url.
+func (l *PageLoop) MountApplication(app *model.Application) {
+
+	// Serve the static build files from the mountpoint path.
+	url := app.Url
+	log.Printf("Serving app %s from %s", url, app.Public)
+	mux.Handle(url, http.StripPrefix(url, http.FileServer(http.Dir(app.Public))))
+
+	// Serve the raw source files.
+	url = url + "-/source/"
+	log.Printf("Serving src %s from %s", url, app.Path)
+	sourceFileServer := http.StripPrefix(url, http.FileServer(http.Dir(app.Path)))
+	mux.HandleFunc(url, func(res http.ResponseWriter, req *http.Request) {
+		//log.Println("got source req")
+		//log.Printf("%#v\n", req)
+		//log.Printf("%#v\n", req.URL)
+		// TODO: serve in-memory versions
+		sourceFileServer.ServeHTTP(res, req)
+	})
+}
+
