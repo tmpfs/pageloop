@@ -95,6 +95,10 @@ p {
   margin: 0 0 1rem 0;
 }
 
+.mono {
+  font-family: monospace;
+}
+
 .hidden {
   display: none
 }

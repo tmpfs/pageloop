@@ -8,7 +8,7 @@
   <body>
 		<main>
 			<h3>API Debug</h3>
-      <p>Use this page to debug API requests and responses.</p>
+      <p>Use this page to debug API requests and responses, to view the underlying data structures see the <a href="/api/browser/" title="API Browser">browser</a> tool.</p>
       <div id="request">
         <h4>Request</h4>
         <form id="debug">
@@ -19,26 +19,28 @@
             <input type="radio" name="method" value="DELETE">DELETE</input>
           </div>
           <div>
-            <label for="url">URL</label>
+            <label for="url">URL:</label>
             <input type="text" id="url" name="url" value="/api/" />
           </div>
           <div>
-            <label for="data">Data</label>
+            <label for="data">JSON Data:</label>
             <textarea id="data"></textarea>
           </div>
           <div>
             <input type="submit" name="submit" value="Send" />
           </div>
         </form>
+        <hr />
       </div>
 
       <div id="response" class="hidden">
         <h4>Response (<span class="status"></span>)</h4>
-        <pre><pre>
+        <pre></pre>
+        <hr />
       </div>
       <div>
         <h4>Log</h4>
-        <pre id="log"></pre>
+        <div id="log" class="mono"></div>
       </div>
 			<script src="api-debug.js" async></script>
 		</main>

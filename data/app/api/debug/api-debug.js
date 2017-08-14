@@ -52,8 +52,6 @@
         return console.error(err)
       }
 
-      console.log(res)
-
       log(`${res.status} ${req.url}\n`)
 
       let response = document.getElementById('response')
