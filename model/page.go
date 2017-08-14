@@ -6,6 +6,7 @@ import(
   "bytes"
   "html/template"
   "encoding/json"
+	"path/filepath"
   "gopkg.in/yaml.v2"
   "golang.org/x/net/html"
   "github.com/tmpfs/pageloop/vdom"
@@ -50,6 +51,28 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   p.Dom = &dom
 
   return p.Dom, nil
+}
+
+// Attempts to find a layout.html file for a page.
+//
+// Starts by looking in the directory containing the file 
+// and walks the parent paths until it hits the application 
+// root searching for a layout file.
+func (p *Page) FindLayout() *Page {
+	var layout string = "layout.html"
+	var path string = p.Path
+	var dir string = filepath.Dir(path)
+	var target string = filepath.Join(dir, layout)
+
+	// Do not process layout files
+	if p.Name == layout {
+		return nil
+	}
+
+	println("find layout: " + path)
+	println("find layout: " + target)
+
+	return nil
 }
 
 // Render the current version of the virtual DOM to a byte 
@@ -104,7 +127,14 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
       data = append(fm, data...)
     }
     */
-  } 
+  }
+
+	println("searching for layout file")
+	layout := p.FindLayout()
+	if layout != nil {
+		println("found layout")	
+	}
+
   return data, nil
 }
 

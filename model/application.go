@@ -150,6 +150,11 @@ type File struct {
   Url string `json:"url"` 
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
+
+	// Owner application
+	owner *Application
+
+	// File stat information.
   info os.FileInfo
 
 	// Raw source data.
@@ -186,7 +191,26 @@ type Page struct {
   Dom *vdom.Vdom `json:"-"`
 
 	Type int `json:"-"`
+
+	// Owner application
+	owner *Application
+
+	// The underlying file data.
   file *File 
+}
+
+// Add a file to this application.
+func (app *Application) AddFile(file *File) int {
+	file.owner = app
+	app.Files = append(app.Files, file)
+	return len(app.Files)
+}
+
+// Add a page to this application.
+func (app *Application) AddPage(page *Page) int {
+	page.owner = app
+	app.Pages = append(app.Pages, page)
+	return len(app.Pages)
 }
 
 // Load an application using the given loader implementation, 

@@ -58,14 +58,14 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
 
 		if pageType != PageNone {
 			page := Page{file: &file, Path: path, Type: pageType}
-      app.Pages = append(app.Pages, &page)
+			app.AddPage(&page)
 		}
 
 		// 
 		if dir == path {
 			app.Root = &file
 		} else {
-			app.Files = append(app.Files, &file)
+			app.AddFile(&file)
 		}
 
     return nil
