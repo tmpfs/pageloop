@@ -3,7 +3,7 @@
 // Stores HTML documents on the server as in-memory DOM
 // documents that can be modified on the client. The client
 // provides an editor view and a preview of the rendered
-// page loaded in an iframe.
+// page.
 package pageloop
 
 import (
@@ -106,20 +106,14 @@ type ApplicationSourceHandler struct {
 	App *model.Application
 }
 
-// The default server handler, defers to a multiplexer.
+// Tests the request path and attempts to find a corresponding source file
+// in the application files.
 func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	index := "index.html"
 	urls := h.App.Urls
 	path := "/" + req.URL.Path
 	clean := strings.TrimSuffix(path, "/")
 	indexPage := clean + "/" + index
-
-	//println("source handler")
-	//println(req.Method)
-	//println(path)
-
-	//log.Printf("%#v\n", h.App.Name)
-	//log.Printf("%#v\n", urls)
 
 	// TODO: handle HEAD requests
 
@@ -144,7 +138,6 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
-		// TODO: use mime library, detect content type not accurate enough :(
 		ext := filepath.Ext(file.Name)
 		ct := mime.TypeByExtension(ext)
 		res.Header().Set("Content-Type", ct)
