@@ -11,6 +11,7 @@ import (
   "log"
 	"errors"
 	"strings"
+	"strconv"
   "net/http"
   "path/filepath"
 	"regexp"
@@ -61,6 +62,7 @@ type ServerConfig struct {
 	Dev bool
 }
 
+// Main HTTP server handler.
 type ServerHandler struct {}
 
 // The default server handler, defers to a multiplexer.
@@ -82,7 +84,6 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	// Serve the highest score which is the longest
 	// matching URL path.
 	var score int
-
 	for k, v := range mountpoints {
 		if strings.HasPrefix(path, k) {
 			if handler != nil && len(k) < score {
@@ -97,6 +98,61 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		handler = http.NotFoundHandler()
 	}
 	handler.ServeHTTP(res, req)
+}
+
+// Serves application source files from memory.
+type ApplicationSourceHandler struct {
+	App *model.Application
+}
+
+// The default server handler, defers to a multiplexer.
+func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	index := "index.html"
+	urls := h.App.Urls
+	path := "/" + req.URL.Path
+	clean := strings.TrimSuffix(path, "/")
+	indexPage := clean + "/" + index
+
+	//println("source handler")
+	//println(req.Method)
+	//println(path)
+
+	//log.Printf("%#v\n", h.App.Name)
+	//log.Printf("%#v\n", urls)
+
+	// TODO: handle HEAD requests
+
+	if req.Method != http.MethodGet {
+		res.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var file *model.File
+
+	// Exact match
+	if urls[path] != nil {
+		file = urls[path]
+	// Normalized without a trailing slash
+	} else if(urls[clean] != nil) {
+		file = urls[clean]
+	// Check for index page
+	} else if(urls[indexPage] != nil) {
+		file = urls[indexPage]
+	}
+
+	// TODO: write cache busting headers
+	// TODO: handle directory requests (no data)
+	if file != nil && !file.Info().IsDir() {
+		ct := http.DetectContentType(file.Data())
+		res.Header().Set("Content-Type", ct)
+		res.Header().Set("Content-Length", strconv.Itoa(len(file.Data())))
+		res.Write(file.Data())
+		println("got file: " + file.Url)
+		println("got file: " + ct)
+		return
+	}
+
+	http.NotFound(res, req)
 }
 
 // Creates an HTTP server.
@@ -218,7 +274,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		// TODO: make publishing optional
 
     // Publish the application files to a build directory
-    if err = app.Publish(nil); err != nil {
+    if err = app.Publish(nil, container.Name); err != nil {
       return err
     }
 
@@ -247,6 +303,6 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the raw source files.
 	url = url + "-/source/"
 	log.Printf("Serving src %s from %s", url, app.Path)
-	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Path)))
+	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
 }
 

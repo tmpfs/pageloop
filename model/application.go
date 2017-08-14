@@ -148,6 +148,16 @@ type File struct {
   data []byte
 }
 
+// Read only access to the data outside this package.
+func (f *File) Data() []byte {
+	return f.data
+}
+
+// Read only access to the file info outside this package.
+func (f *File) Info() os.FileInfo {
+	return f.info
+}
+
 type Page struct {
   Path string `json:"-"`
   Name string `json:"name"` 
@@ -183,7 +193,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
 
 // Publish files using the given publisher implementation, if a nil 
 // publisher is given the default file system publisher is used.
-func (app *Application) Publish(publisher ApplicationPublisher) error {
+func (app *Application) Publish(publisher ApplicationPublisher, base string) error {
   var err error
   if publisher == nil {
     publisher = FileSystemPublisher{}
@@ -200,8 +210,7 @@ func (app *Application) Publish(publisher ApplicationPublisher) error {
     page.file.data = data
   }
 
-  // TODO: allow setting base path for publish
-  if err = publisher.PublishApplication(app, ""); err != nil {
+  if err = publisher.PublishApplication(app, base); err != nil {
     return err
   }
 
