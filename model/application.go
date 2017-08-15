@@ -281,7 +281,7 @@ func (app *Application) GetPageByUrl(url string) *Page {
 
 // Determine a URL from a relative path.
 func (app *Application) getUrlFromPath(file *File, relative string) string {
-  var url string = strings.Join(strings.Split(relative, string(os.PathSeparator)), "/")
+	var url string = filepath.ToSlash(relative)
 	if file.info.IsDir() && !strings.HasSuffix(url, "/") {
 		url += "/"
 	}
