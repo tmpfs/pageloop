@@ -2,7 +2,7 @@
 package model
 
 import(
-	//"fmt"
+	"fmt"
   "bytes"
 	"strings"
 	"regexp"
@@ -41,8 +41,8 @@ type Block struct {
 
 // Get the HTML document data.
 //
-// For HTML documents the underlying data is used, for markdown 
-// documents they are converted to HTML first and the underlying 
+// For HTML documents the underlying data is used, for markdown
+// documents they are converted to HTML first and the underlying
 // markdown data is left untouched.
 func (p *Page) Data() []byte {
   return p.file.data
@@ -72,7 +72,7 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
 			dom.Document.AppendChild(n)
 		}
 	} else {
-		// Parse as full document.	
+		// Parse as full document.
 		err = dom.Parse(data)
 	}
   if err != nil {
@@ -86,8 +86,8 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
 
 // Attempts to find a layout.html file for a page.
 //
-// Starts by looking in the directory containing the file 
-// and walks the parent paths until it hits the application 
+// Starts by looking in the directory containing the file
+// and walks the parent paths until it hits the application
 // root searching for a layout file.
 func (p *Page) FindLayout() *Page {
 	var path string = p.Path
@@ -122,26 +122,60 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 
 	// Get a URL relative to the application root mountpoint.
 	funcs["root"] = func(path string) string {
-		//println("root func called with path: " + path)	
+		//println("root func called with path: " + path)
 		path = strings.TrimPrefix(path, SLASH)
 		return p.owner.Url + path
 	}
 
 	// Get a URL relative to the current page being parsed.
 	funcs["relative"] = func(path string) string {
-		//println("relative func called with path: " + path)	
+		//println("relative func called with path: " + path)
 		return path
 	}
 
 	return funcs
 }
 
+// Extract template delimiters from a map.
+func (p *Page) GetDelims() (string, string) {
+	var template map[interface{}] interface{}
+	var delims map[interface{}] interface{}
+	var ok bool
+	var left string
+	var right string
+	println("parsing delimiters: " + p.Url)
+	template, ok = p.PageData["template"].(map [interface{}] interface{})
+	fmt.Printf("%#v", p.PageData)
+	if template, ok = p.PageData["template"].(map [interface{}] interface{}); ok {
+		println("got template page data")
+		fmt.Printf("%#v\n", p.PageData)
+		if delims, ok = template["delims"].(map [interface{}] interface{}); ok {
+			if left, ok = delims["left"].(string); ok {
+				if right, ok = delims["right"].(string); ok {
+					println("setting delims on template!!!")
+					return left, right
+					//tpl.Delims(left, right)
+				}
+			}
+		}
+	}
+
+	return "{{", "}}"
+}
+
 // Creates a template and parses template source data.
-func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap) (*template.Template, error) {
+func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap, layout bool) (*template.Template, error) {
 	tpl := template.New(path)
 	if funcs != nil {
 		tpl.Funcs(funcs)
 	}
+
+	// set delims if necessary
+	if !layout && p.PageData != nil {
+		left, right := p.GetDelims()
+		tpl.Delims(left, right)
+	}
+
 	return tpl.Parse(string(source))
 }
 
@@ -155,8 +189,8 @@ func (p *Page) ExecuteTemplate(tpl *template.Template, data map[string] interfac
 	return w.Bytes(), nil
 }
 
-// Render the current version of the virtual DOM to a byte 
-// array. If page data is available parse the file as an 
+// Render the current version of the virtual DOM to a byte
+// array. If page data is available parse the file as an
 // HTML template passing the page data to the template.
 //
 // Use this for the static rendered HTML for a page.
@@ -172,28 +206,29 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   if node == nil {
     node = vdom.Document
   }
-  
+
   if data, err = vdom.RenderToBytes(node); err != nil {
     return nil, err
   }
 
 	// Do not handle layout files
 	if p.Name == Layout {
-		return nil, nil	
+		return nil, nil
 	}
 
 	// Create and parse the primary template
 	var primary func(layout bool) (*template.Template, error)
 	primary = func(layout bool) (*template.Template, error) {
 		var src []byte = data
-		var define []byte = []byte(`{{define "content"}}`)
-		var end []byte = []byte(`{{end}}`)
+		left, right := p.GetDelims()
+		var define []byte = []byte(left + `define "content"` + right)
+		var end []byte = []byte(left + `end` + right)
 		if layout {
 			src = append(define, data...)
 			src = append(src, end...)
 			//println(string(src))
 		}
-		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap())
+		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap(), false)
 	}
 
 	// See if we can find a layout
@@ -214,7 +249,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
-		if lyt, err = p.ParseTemplate(file.Path, file.Source(), p.DefaultFuncMap()); err != nil {
+		if lyt, err = p.ParseTemplate(file.Path, file.Source(), p.DefaultFuncMap(), true); err != nil {
 			return nil, err
 		}
 
@@ -269,7 +304,7 @@ func (p *Page) RemoveBlock(b Block) Page {
       }
       break
     }
-  } 
+  }
   return *p
 }
 */

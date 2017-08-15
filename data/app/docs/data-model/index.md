@@ -3,7 +3,8 @@ title: Data Model
 lang: en
 description: Describes the internal data model.
 keywords: web, editor, documentation
-leader: Conceptually the internal data hierarchy is quite simple.
+leader: |
+  Conceptually the internal data hierarchy is quite simple.
 ---
 
 ```

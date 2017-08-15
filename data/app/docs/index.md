@@ -3,7 +3,7 @@ title: Documentation
 lang: en
 description: Documentation for the system.
 keywords: web, editor, documentation
-leader: Documentation for the pageloop system.
+leader: Here you can find all the documents describing the system architecture.
 ---
 
 * [Data Model](/docs/data-model/)

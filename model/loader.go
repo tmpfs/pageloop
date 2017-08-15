@@ -35,8 +35,6 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
 
     mode := stat.Mode()
 
-		//println("load: " + path)
-
     var file File
 		var pageType int = PageNone
 
