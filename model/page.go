@@ -98,6 +98,7 @@ func (p *Page) FindLayout() *Page {
 	return search(dir)
 }
 
+// Creates a template and parses template source data.
 func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap) (*template.Template, error) {
 	tpl := template.New(path)
 	if funcs != nil {
@@ -106,7 +107,7 @@ func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap)
 	return tpl.Parse(string(source))
 }
 
-// Parse a template file and execute it with the given data.
+// Execute a template with the given data.
 func (p *Page) ExecuteTemplate(tpl *template.Template, data map[string] interface{}) ([]byte, error) {
 	var err error
 	w := new(bytes.Buffer)
