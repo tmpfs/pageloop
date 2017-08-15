@@ -2,10 +2,11 @@
 package model
 
 import(
-	"fmt"
+	//"fmt"
   "bytes"
 	"strings"
 	"regexp"
+	"net/url"
   "html/template"
   "encoding/json"
 	"path/filepath"
@@ -122,15 +123,31 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 
 	// Get a URL relative to the application root mountpoint.
 	funcs["root"] = func(path string) string {
-		//println("root func called with path: " + path)
 		path = strings.TrimPrefix(path, SLASH)
 		return p.owner.Url + path
 	}
 
 	// Get a URL relative to the current page being parsed.
-	funcs["relative"] = func(path string) string {
-		//println("relative func called with path: " + path)
-		return path
+	funcs["relative"] = func(path string) (string, error) {
+		println("relative func called with path: " + path)
+		var err error
+		domain := "http://localhost"
+		page := p.owner.Url + strings.TrimPrefix(p.Url, SLASH)
+		base := domain + page
+		println("relative page: " + page)
+		println("relative base: " + base)
+		var bu *url.URL
+		var tu *url.URL
+		var ru *url.URL
+		if bu, err = url.Parse(base); err != nil {
+			return "", err
+		}
+		if tu, err = url.Parse(page); err != nil {
+			return "", err
+		}
+		ru = bu.ResolveReference(tu)
+		println(ru.Path)
+		return path, nil
 	}
 
 	return funcs
@@ -143,18 +160,12 @@ func (p *Page) GetDelims() (string, string) {
 	var ok bool
 	var left string
 	var right string
-	println("parsing delimiters: " + p.Url)
 	template, ok = p.PageData["template"].(map [interface{}] interface{})
-	fmt.Printf("%#v", p.PageData)
 	if template, ok = p.PageData["template"].(map [interface{}] interface{}); ok {
-		println("got template page data")
-		fmt.Printf("%#v\n", p.PageData)
 		if delims, ok = template["delims"].(map [interface{}] interface{}); ok {
 			if left, ok = delims["left"].(string); ok {
 				if right, ok = delims["right"].(string); ok {
-					println("setting delims on template!!!")
 					return left, right
-					//tpl.Delims(left, right)
 				}
 			}
 		}
@@ -227,6 +238,11 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 			src = append(define, data...)
 			src = append(src, end...)
 			//println(string(src))
+
+			// FIXME: the output of calling golang.org/x/net/html#Render
+			// FIXME: escapes the quotes in template nodes so we need
+			// FIXME: to unescape them - there must be a better way ;)
+			src = []byte(html.UnescapeString(string(src)))
 		}
 		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap(), false)
 	}

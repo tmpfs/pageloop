@@ -52,3 +52,18 @@ lang: en
 ---
 <p>Page content.</p>
 ```
+
+#### Helper Functions
+
+Some useful functions are exposed to the templates so that you can
+create applications independent of the application mountpoint (URL).
+
+##### `root`
+
+Returns a  URL relative to the root of the application, for example:
+
+```html
+<link rel="stylesheet" href='{{root "app.css"}}' />
+```
+
+For an application mounted at `/docs/` would return `/docs/app.css`.
