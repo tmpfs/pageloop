@@ -105,7 +105,8 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 	// Get a URL relative to the application root mountpoint.
 	funcs["root"] = func(path string) string {
 		println("root func called with path: " + path)	
-		return p.owner.Url + "/" + path
+		path = strings.TrimPrefix(path, SLASH)
+		return p.owner.Url + path
 	}
 
 	// Get a URL relative to the current page being parsed.
