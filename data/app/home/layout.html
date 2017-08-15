@@ -12,15 +12,19 @@
 		<main>
 			<header>
 				<h3>
-					<a href="/" title="Home">Ꝏ</a>&nbsp;
+					<span>Ꝏ</span>&nbsp;
 					{{if .heading}}
 						{{.heading}}
 					{{else}}
 						{{.title}}
 					{{end}}
-					<a href="#menu" title="Menu">☰</a>
 				</h3>
 			</header>
+			<nav>
+				<a href="/" title="Home">Home</a>
+				<a href="/apps/" title="Applications">Apps</a>
+				<a href="/docs/" title="Documentation">Docs</a>
+			</nav>
 			<p>{{.leader}}</p>
 			{{template "content"}}
 		</main>

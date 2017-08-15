@@ -75,7 +75,7 @@ textarea {
 }
 
 header {
-  border-bottom: 4px double black
+  border-bottom: 4px double black;
 }
 
 h4 {
@@ -102,34 +102,59 @@ p {
 }
 
 a, a:hover, a:visited {
+	display: inline-block;
   text-decoration: none;
-  color: #336699;
+  color: #e30053;
+	line-height: 1em;
+	border-bottom: 2px solid transparent;
 }
 
-header {
-	margin-bottom: 3rem;
+a:hover {
+	border-bottom: 2px solid currentColor;
+	transition: all 0.4s ease-out;
 }
 
 header > h3 {
   position: relative;
   text-align: center;
-	margin-bottom: 0.5rem;
+	margin-bottom: 3rem;
 	font-size: 2.6rem;
+	vertical-align: top
 }
 
-header > h3 > a:first-child {
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: black;
+header > h3 > span:first-child {
+	font-size: 2.4rem;
 }
 
+/*
 header > h3 > a:last-child {
 	display: inline-block;
   position: absolute;
   right: 0;
   top: 1px;
   color: black;
+}
+*/
+
+header + nav {
+	display: flex;
+	font-size: 1.6rem;
+	font-family: SourceSans;
+	text-transform: uppercase;
+  /*border-bottom: 4px double black;*/
+	margin-bottom: 2rem;
+}
+
+header + nav > a, header + nav > a:visited {
+	flex: 1 0;
+	text-align: center;
+	padding: 0.5rem 0;
+  border-bottom: 4px double black;
+}
+
+header + nav > a:hover {
+  border-bottom: 4px double currentColor;
+	transition: all 0.35s ease-in;
 }
 
 .mono {
