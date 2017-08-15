@@ -13,15 +13,20 @@ li {
   color: blue
 }
 
+/*
+.api-link::after {
+  content: "⨂"
+}
+*/
+
 .label {
-  position: absolute;
-  top: 0;
-  right: 0;
+  /*position: absolute;*/
+  /*top: 0;*/
+  /*right: 0;*/
   font-size: 1.2rem;
   line-height: 1rem;
   text-transform: uppercase;
-  background: black;
-  color: white;
+  background: lightgray;
   padding: .5rem .5rem .3rem .5rem;
   border-radius: 2px;
 }
