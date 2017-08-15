@@ -11,6 +11,7 @@ import(
 	"path/filepath"
   "gopkg.in/yaml.v2"
   "golang.org/x/net/html"
+  "golang.org/x/net/html/atom"
   "github.com/tmpfs/pageloop/vdom"
 	. "github.com/rhinoman/go-commonmark"
 )
@@ -51,12 +52,29 @@ func (p *Page) Data() []byte {
 func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   var err error
 
+	// See if we can find a layout
+	layout := p.FindLayout()
+
 	if p.Type == PageMarkdown {
 		data = []byte(Md2Html(string(data), CMARK_OPT_DEFAULT))
 	}
 
   var dom = vdom.Vdom{}
-  err = dom.Parse(data)
+	dom.Document = &html.Node{Type: html.DocumentNode}
+
+	if layout != nil {
+		var nodes []*html.Node
+		var context *html.Node = &html.Node{Type: html.ElementNode, Data: "body", DataAtom:atom.Body}
+		if nodes, err = dom.ParseFragment(data, context); err != nil {
+			return nil, err
+		}
+		for _, n := range nodes {
+			dom.Document.AppendChild(n)
+		}
+	} else {
+		// Parse as full document.	
+		err = dom.Parse(data)
+	}
   if err != nil {
     return nil, err
   }
@@ -104,14 +122,14 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 
 	// Get a URL relative to the application root mountpoint.
 	funcs["root"] = func(path string) string {
-		println("root func called with path: " + path)	
+		//println("root func called with path: " + path)	
 		path = strings.TrimPrefix(path, SLASH)
 		return p.owner.Url + path
 	}
 
 	// Get a URL relative to the current page being parsed.
 	funcs["relative"] = func(path string) string {
-		println("relative func called with path: " + path)	
+		//println("relative func called with path: " + path)	
 		return path
 	}
 
