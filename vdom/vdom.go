@@ -304,6 +304,18 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
   return w.Bytes(), nil
 }
 
+// Render a node unescaped to a byte slice, typically for debugging.
+func (vdom *Vdom) RenderRaw(node *html.Node) ([]byte, error) {
+  w := new(bytes.Buffer)
+  err := RenderUnsafe(w, node)
+  if err != nil {
+    return nil, err
+  }
+	println(string(w.Bytes()))
+  return w.Bytes(), nil
+}
+
+
 // Render a node to a byte slice but do not perform HTML escaping.
 /*
 func (vdom *Vdom) RenderToBytesUnsafe(node *html.Node) ([]byte, error) {

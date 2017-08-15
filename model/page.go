@@ -218,7 +218,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
     node = vdom.Document
   }
 
-  if data, err = vdom.RenderToBytes(node); err != nil {
+  if data, err = vdom.RenderRaw(node); err != nil {
     return nil, err
   }
 
