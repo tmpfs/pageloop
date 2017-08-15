@@ -2,12 +2,20 @@
 package model
 
 import(
+	//"fmt"
   "bytes"
   "html/template"
   "encoding/json"
   "gopkg.in/yaml.v2"
   "golang.org/x/net/html"
   "github.com/tmpfs/pageloop/vdom"
+	. "github.com/rhinoman/go-commonmark"
+)
+
+const(
+	PageNone = iota
+	PageHtml
+	PageMarkdown
 )
 
 type Block struct {
@@ -18,11 +26,26 @@ type Block struct {
   Nodes []*html.Node
 }
 
+// Get the HTML document data.
+//
+// For HTML documents the underlying data is used, for markdown 
+// documents they are converted to HTML first and the underlying 
+// markdown data is left untouched.
+func (p *Page) Data() []byte {
+	//fmt.Printf("getting data %d\n", p.Type)
+	//fmt.Printf("getting data %s\n", p.Url)
+	if p.Type == PageMarkdown {
+		//println("GETTING MARKDOWN DATA")
+		return []byte(Md2Html(string(p.file.data), CMARK_OPT_DEFAULT))
+	}
+  return p.file.data
+}
+
 // Parse the file data into the virtual DOM of this page.
-func (p *Page) Parse() (*vdom.Vdom, error) {
+func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
   var err error
   var dom = vdom.Vdom{}
-  err = dom.Parse(p.file.data)
+  err = dom.Parse(data)
   if err != nil {
     return nil, err
   }

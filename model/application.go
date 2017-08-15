@@ -175,6 +175,8 @@ type Page struct {
 	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`
   Dom *vdom.Vdom `json:"-"`
+
+	Type int `json:"-"`
   file *File 
 }
 
@@ -210,13 +212,16 @@ func (app *Application) Publish(publisher ApplicationPublisher, base string) err
   var data []byte
 
   // Render pages to the file data bytes.
-  for _, page := range app.Pages {
-    node := page.Dom.Clean(nil)
-    if data, err = page.Render(page.Dom, node); err != nil {
-      return err
-    }
-    page.file.data = data
-  }
+
+	for _, page := range app.Pages {
+		if page.Type == PageHtml {
+			node := page.Dom.Clean(nil)
+			if data, err = page.Render(page.Dom, node); err != nil {
+				return err
+			}
+			page.file.data = data
+		}
+	}
 
   if err = publisher.PublishApplication(app, base); err != nil {
     return err
@@ -258,13 +263,14 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
 func (app *Application) merge() error {
   var err error
   for index, page := range app.Pages {
-    if TEMPLATE_FILE.MatchString(page.file.Path) {
+    if page.Type == PageHtml {
       if _, err = app.getPageData(page); err != nil {
         return err
       }
-      app.Pages[index] = page
-      app.Pages[index].Parse()
     }
+		println(string(page.Data()))
+		page.Parse(page.Data())
+		app.Pages[index] = page
   }
   return nil
 }

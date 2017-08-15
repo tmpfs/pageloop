@@ -15,7 +15,7 @@ type ApplicationLoader interface {
 type FileSystemLoader struct {}
 
 // Loads the application assets from a filesystem directory path and 
-// populate the given application with files and HTML pages.
+// populate the given application with files and pages.
 func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
   var err error
   err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -47,10 +47,18 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
       file.data = bytes
     }
 
+		var pageType int = PageNone
+
     if TEMPLATE_FILE.MatchString(path) {
-      page := Page{file: &file, Path: path}
+			pageType = PageHtml
+    } else if MARKDOWN_FILE.MatchString(path) {
+			pageType = PageMarkdown
+		}
+
+		if pageType != PageNone {
+			page := Page{file: &file, Path: path, Type: pageType}
       app.Pages = append(app.Pages, &page)
-    }
+		}
 
 		// 
 		if dir == path {
