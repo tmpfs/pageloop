@@ -1,6 +1,7 @@
 package model
 
 import (
+	//"fmt"
   "os"
 	"strings"
   "path/filepath"
@@ -41,8 +42,8 @@ func (f *DefaultFilter) Rename(path string) string {
 //
 // Writes all application files using the current data bytes.
 //
-// Use base as the output directory, if base is the empty string a 
-// public directory relative to the current working directory 
+// Use base as the output directory, if base is the empty string a
+// public directory relative to the current working directory
 // is used.
 func (p FileSystemPublisher) PublishApplication(app *Application, base string, filter PublishFilter) error {
   var err error
@@ -87,10 +88,11 @@ func (p FileSystemPublisher) PublishApplication(app *Application, base string, f
 
     // Set output path and create parent directories
     out := filepath.Join(dir, rel)
+
 		out = filter.Rename(out)
 		// Remove this file from the output
 		if out == "" {
-			return nil
+			continue
 		}
 
 		parent := out
@@ -108,7 +110,7 @@ func (p FileSystemPublisher) PublishApplication(app *Application, base string, f
 			if err = ioutil.WriteFile(out, f.data, mode); err != nil {
 				return err
 			}
-		}	
+		}
   }
 
   return nil

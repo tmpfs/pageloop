@@ -7,6 +7,7 @@ leader: Documentation for the pageloop system.
 ---
 
 * [Data Model](/docs/data-model/)
+* [Page Data](/docs/page-data/)
 * [Templates](/docs/templates/)
 * [RPC API](/docs/rpc/)
 * [REST API](/docs/api/)

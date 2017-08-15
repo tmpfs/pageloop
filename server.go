@@ -29,7 +29,7 @@ var mux *http.ServeMux
 
 // Maps application URLs to HTTP handlers.
 //
-// Because we want to mount and unmount applications and we cannot remove 
+// Because we want to mount and unmount applications and we cannot remove
 // a handler we have a single handler that defers to these handlers.
 var mountpoints map[string] http.Handler
 
@@ -187,7 +187,6 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	// System applications to mount.
 	var system []Mountpoint
 	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home"})
-	//system = append(system, Mountpoint{UrlPath: "/docs/api/", Path: "data://app/docs/api"})
 	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/"})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser"})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe"})
@@ -284,7 +283,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 // Mount all applications in a container.
 func (l *PageLoop) MountContainer(container *model.Container) {
 	for _, a := range container.Apps {
-		l.MountApplication(a)	
+		l.MountApplication(a)
 	}
 }
 
