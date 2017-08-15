@@ -11,15 +11,17 @@
   <body>
 		<main>
 			<header>
-				<h3><a href="/" title="Home">Ꝏ</a>&nbsp;
+				<h3>
+					<a href="/" title="Home">Ꝏ</a>&nbsp;
 					{{if .heading}}
 						{{.heading}}
 					{{else}}
 						{{.title}}
 					{{end}}
+					<a href="#menu" title="Menu">☰</a>
 				</h3>
-				<p>{{.leader}}</p>
 			</header>
+			<p>{{.leader}}</p>
 			{{template "content"}}
 		</main>
   </body>

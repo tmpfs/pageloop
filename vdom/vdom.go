@@ -311,7 +311,6 @@ func (vdom *Vdom) RenderRaw(node *html.Node) ([]byte, error) {
   if err != nil {
     return nil, err
   }
-	println(string(w.Bytes()))
   return w.Bytes(), nil
 }
 

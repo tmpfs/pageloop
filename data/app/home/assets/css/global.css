@@ -74,7 +74,7 @@ textarea {
   min-height: 8rem;
 }
 
-h3 {
+header {
   border-bottom: 4px double black
 }
 
@@ -106,15 +106,29 @@ a, a:hover, a:visited {
   color: #336699;
 }
 
+header {
+	margin-bottom: 3rem;
+}
+
 header > h3 {
   position: relative;
   text-align: center;
+	margin-bottom: 0.5rem;
+	font-size: 2.6rem;
 }
 
 header > h3 > a:first-child {
   position: absolute;
   left: 0;
   top: 0;
+  color: black;
+}
+
+header > h3 > a:last-child {
+	display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 1px;
   color: black;
 }
 
@@ -130,3 +144,4 @@ header > h3 > a:first-child {
   opacity: 0.6;
   pointer-events: none;
 }
+
