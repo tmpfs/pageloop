@@ -35,8 +35,6 @@ html, body {
 }
 
 body {
-  /*background:	lightgray;*/
-  /*color: black;*/
   text-align: center;
   font-size: 1.8rem;
   line-height: 2.2rem;
@@ -45,9 +43,6 @@ body {
 
 header, main, footer {
   text-align: left;
-  /*display: flex;*/
-  /*flex-direction: row;*/
-  /*flex-wrap: nowrap;*/
 }
 
 main {
