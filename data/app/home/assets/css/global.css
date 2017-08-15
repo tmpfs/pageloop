@@ -114,15 +114,15 @@ a:hover {
 	transition: all 0.4s ease-out;
 }
 
-header > h3 {
+header > h1 {
   position: relative;
   text-align: center;
-	margin-bottom: 3rem;
+	margin: 3rem 0;
 	font-size: 2.6rem;
 	vertical-align: top
 }
 
-header > h3 > span:first-child {
+header > h1 > span:first-child {
 	font-size: 2.4rem;
 }
 

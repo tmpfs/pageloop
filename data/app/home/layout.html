@@ -11,21 +11,23 @@
   <body>
 		<main>
 			<header>
-				<h3>
+				<h1>
 					<span>Ꝏ</span>&nbsp;
 					{{if .heading}}
 						{{.heading}}
 					{{else}}
 						{{.title}}
 					{{end}}
-				</h3>
+				</h1>
 			</header>
 			<nav>
 				<a href="/" title="Home">Home</a>
 				<a href="/apps/" title="Applications">Apps</a>
 				<a href="/docs/" title="Documentation">Docs</a>
 			</nav>
+			{{if .leader}}
 			<p>{{.leader}}</p>
+			{{end}}
 			{{template "content"}}
 		</main>
   </body>
