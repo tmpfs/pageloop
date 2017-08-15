@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	SLASH = "/"
+
   // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"
@@ -269,7 +271,7 @@ func (app *Application) GetFileByUrl(url string) *File {
 func (app *Application) GetPageByUrl(url string) *Page {
 	for _, page := range app.Pages {
 		u := page.Url
-		u = strings.TrimSuffix(u, "/")
+		u = strings.TrimSuffix(u, SLASH)
 		if u == url {
 			return page
 		}
@@ -282,7 +284,7 @@ func (app *Application) GetPageByUrl(url string) *Page {
 // Determine a URL from a relative path.
 func (app *Application) getUrlFromPath(file *File, relative string) string {
 	var url string = filepath.ToSlash(relative)
-	if file.info.IsDir() && !strings.HasSuffix(url, "/") {
+	if file.info.IsDir() && !strings.HasSuffix(url, SLASH) {
 		url += "/"
 	}
   return url
@@ -320,8 +322,8 @@ func (app *Application) setFileFields(file *File, base string) {
 	file.Name = name
 	file.Relative = relative
 	// Normalize directories for URLs without the /
-	if strings.HasSuffix(url, "/") {
-		url = strings.TrimSuffix(url, "/")
+	if strings.HasSuffix(url, SLASH) {
+		url = strings.TrimSuffix(url, SLASH)
 	}
 	file.Url = url
 	if !file.info.IsDir() {
