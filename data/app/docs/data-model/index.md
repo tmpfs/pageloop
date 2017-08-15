@@ -3,10 +3,8 @@ title: Data Model
 lang: en
 description: Describes the internal data model.
 keywords: web, editor, documentation
-leader: This section describes the data model used internally.
+leader: Conceptually the internal data hierarchy is quite simple.
 ---
-
-Conceptually the hierarchy is quite simple:
 
 ```
 host > container > application > (file|page)
@@ -37,11 +35,15 @@ The program configures some default containers:
 
 #### Application
 
-An application is the collection of source files for the web application,
+An application represents the collection of source files for the web application,
 typically it is loaded from the filesystem.
 
-It has a group of files which are assigned URLs matching their path relative
-to the application root. Markdown and HTML files need special treatment so
+Applications are referenced by name.
+
+Files added to an application are assigned URLs matching their path relative
+to the application root.
+
+Markdown and HTML files need special treatment so
 files ending with the `.html`, `.md` and `.markdown` extensions are added
 to a collection of pages and have additional fields including a pointer to
 the underlying file.
