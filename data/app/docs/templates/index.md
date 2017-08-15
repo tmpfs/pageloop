@@ -67,3 +67,22 @@ Returns a  URL relative to the root of the application, for example:
 ```
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
+
+#### Delimiters
+
+Sometimes you may want to switch the template left and right delimiters.
+Typically, when you want to show examples using the default delimiters.
+
+To change the delimiters for a page (note it only applies to the page
+template not a corresponding layout) you can specify them in the page data.
+
+An example that uses different delimiters for template parsing:
+
+```yaml
+---
+template:
+  delims:
+    left: ${
+    right: }
+---
+```

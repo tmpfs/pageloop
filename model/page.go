@@ -242,7 +242,9 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 			// FIXME: the output of calling golang.org/x/net/html#Render
 			// FIXME: escapes the quotes in template nodes so we need
 			// FIXME: to unescape them - there must be a better way ;)
-			src = []byte(html.UnescapeString(string(src)))
+
+			// FIXME: and if we actually use this we break markdown code blocks including markup :(
+			//src = []byte(html.UnescapeString(string(src)))
 		}
 		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap(), false)
 	}
