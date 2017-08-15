@@ -1,17 +1,17 @@
-// Virtual DOM implementation backed by the parse tree 
+// Virtual DOM implementation backed by the parse tree
 // returned from golang.org/x/net/html.
 //
-// When a document is parsed each element node is given a 
-// unique identifier in the form 0.1.2 where each integer 
-// represents the child index. Typically the html element 
+// When a document is parsed each element node is given a
+// unique identifier in the form 0.1.2 where each integer
+// represents the child index. Typically the html element
 // will be index 0.
 //
-// So that identifiers may be kept in sync you should call 
-// the wrapper API methods AppendChild, InsertBefore and 
-// RemoveChild. They each require an additional first 
+// So that identifiers may be kept in sync you should call
+// the wrapper API methods AppendChild, InsertBefore and
+// RemoveChild. They each require an additional first
 // argument which is the parent node to change.
 package vdom
-  
+
 import(
   //"log"
   "bytes"
@@ -31,7 +31,7 @@ type Vdom struct {
 }
 
 // Parse an HTML document assigning virtual dom identifiers.
-// Assigns each element an identifier attribute and adds entries 
+// Assigns each element an identifier attribute and adds entries
 // to the vdom Map for fast node lookup.
 func (vdom *Vdom) Parse(b []byte) error {
   r := bytes.NewBuffer(b)
@@ -64,7 +64,7 @@ func (vdom *Vdom) Parse(b []byte) error {
   return nil
 }
 
-// Clones a node and removes any attributes associated with 
+// Clones a node and removes any attributes associated with
 // the virtual DOM from elements in the tree.
 //
 // If the given node is nil then the document node is used.
@@ -151,7 +151,7 @@ func (vdom *Vdom) RemoveChild(parent *html.Node, node *html.Node) error {
 
 // Extensions to the basic API
 
-// Clone a node, if the deep option is given all descendants are 
+// Clone a node, if the deep option is given all descendants are
 // also cloned.
 func (vdom *Vdom) CloneNode(node *html.Node, deep bool) *html.Node {
   if node == nil {
@@ -220,7 +220,7 @@ func (vdom *Vdom) CreateDoctypeNode(doctype string) *html.Node {
 
 // Get an Attribute.
 //
-// Returns the index of the attribute and a pointer to 
+// Returns the index of the attribute and a pointer to
 // the attribute.
 func (vdom *Vdom) AttrGet(node *html.Node, key string) (int, *html.Attribute) {
   for index, attr := range node.Attr {
@@ -304,14 +304,52 @@ func (vdom *Vdom) RenderToBytes(node *html.Node) ([]byte, error) {
   return w.Bytes(), nil
 }
 
-// Compacts a DOM tree by removing text nodes between 
+// Render a node to a byte slice but do not perform HTML escaping.
+/*
+func (vdom *Vdom) RenderToBytesUnsafe(node *html.Node) ([]byte, error) {
+  w := new(bytes.Buffer)
+
+	var render func(node *html.Node)
+	render = func(node *html.Node) {
+		println("render: " + node.Data)
+		switch(node.Type) {
+			case html.DoctypeNode:
+				w.Write([]byte(`<!doctype ` + node.Data + `>`))
+			case html.TextNode:
+				w.Write([]byte(node.Data))
+			case html.CommentNode:
+				w.Write([]byte(`<!--` + node.Data + `-->`))
+			case html.DocumentNode:
+				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					render(c)
+				}
+			case html.ElementNode:
+				w.Write([]byte(`<` + node.Data))
+				for _, att := range node.Attr {
+					w.Write([]byte(` ` + att.Key + `='` + att.Val + `'`))
+				}
+				w.Write([]byte(`>`))
+				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					render(c)
+				}
+				w.Write([]byte(`</` + node.Data + `>`))
+		}
+	}
+
+	render(node)
+
+  return w.Bytes(), nil
+}
+*/
+
+// Compacts a DOM tree by removing text nodes between
 // element nodes that consist solely of whitespace.
 //
-// Removes whitespace from descendants of the target node 
-// and returns the target node with in place modifications 
+// Removes whitespace from descendants of the target node
+// and returns the target node with in place modifications
 // if you need to keep the original you should copy it first.
-// 
-// The text nodes are preserved in the tree; their Data is 
+//
+// The text nodes are preserved in the tree; their Data is
 // set to the empty string.
 func (vdom *Vdom) Compact(node *html.Node) *html.Node {
   var whitespace = regexp.MustCompile(`^\s+$`)
@@ -326,7 +364,7 @@ func (vdom *Vdom) Compact(node *html.Node) *html.Node {
       }
     }
     if (c.Type == html.ElementNode) {
-      vdom.Compact(c) 
+      vdom.Compact(c)
     }
   }
   return node
@@ -393,7 +431,7 @@ func (vdom *Vdom) TextDiff(parent *html.Node) {
 // Private vdom methods
 
 // Increments or decrements the identifiers for siblings that appear
-// after the target node. Used when modifying the DOM to keep identifiers 
+// after the target node. Used when modifying the DOM to keep identifiers
 // sequential.
 func (vdom *Vdom) adjustSiblings(node *html.Node, increment bool) error {
   for c := node.NextSibling; c != nil; c = c.NextSibling {
@@ -441,7 +479,7 @@ func intSliceToString(ids []int) string {
   return id
 }
 
-// Find the previous sibling that is of type element 
+// Find the previous sibling that is of type element
 // starting with the last child of the parent.
 func findLastChildElement(parent *html.Node) *html.Node {
   for c := parent.LastChild; c != nil; c = c.PrevSibling {
