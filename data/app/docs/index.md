@@ -6,4 +6,7 @@ keywords: web, editor, documentation
 leader: Documentation for the pageloop system.
 ---
 
-This is some *documentation*.
+* [Data Model](/docs/data-model/)
+* [Templates](/docs/templates/)
+* [RPC API](/docs/rpc/)
+* [REST API](/docs/api/)
