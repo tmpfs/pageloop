@@ -29,7 +29,7 @@ A layout file defines the page structure and loads the `content`
 template by convention. So a minimal layout would look like:
 
 ```html
-<!doctype html>
+<?`<!doctype html>
 <html lang="{{.lang}}">
   <head>
     <title>{{.title}}</title>
@@ -39,18 +39,18 @@ template by convention. So a minimal layout would look like:
       {{template "content"}}
     </main>
   </body>
-</html>
+</html>` | html ?>
 ```
 
 Your page file should not declare the `content` template it is
 declared automatically. An example page for this layout:
 
 ```html
----
+<?`---
 title: Page Title
 lang: en
 ---
-<p>Page content.</p>
+<p>Page content.</p>` | html ?>
 ```
 
 #### Helper Functions
@@ -63,7 +63,7 @@ create applications independent of the application mountpoint (URL).
 Returns a  URL relative to the root of the application, for example:
 
 ```html
-<link rel="stylesheet" href='{{root "app.css"}}' />
+<? `<link rel="stylesheet" href='{{root "app.css"}}' />` | html ?>
 ```
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
