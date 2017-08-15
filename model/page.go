@@ -98,6 +98,25 @@ func (p *Page) FindLayout() *Page {
 	return search(dir)
 }
 
+// The default function map for templates.
+func (p *Page) DefaultFuncMap() template.FuncMap {
+	funcs := make(template.FuncMap)
+
+	// Get a URL relative to the application root mountpoint.
+	funcs["root"] = func(path string) string {
+		println("root func called with path: " + path)	
+		return p.owner.Url + "/" + path
+	}
+
+	// Get a URL relative to the current page being parsed.
+	funcs["relative"] = func(path string) string {
+		println("relative func called with path: " + path)	
+		return path
+	}
+
+	return funcs
+}
+
 // Creates a template and parses template source data.
 func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap) (*template.Template, error) {
 	tpl := template.New(path)
@@ -155,7 +174,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 			src = append(src, end...)
 			//println(string(src))
 		}
-		return p.ParseTemplate(p.file.Path, src, nil)
+		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap())
 	}
 
 	// See if we can find a layout
@@ -176,7 +195,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
-		if lyt, err = p.ParseTemplate(file.Path, file.Source(), nil); err != nil {
+		if lyt, err = p.ParseTemplate(file.Path, file.Source(), p.DefaultFuncMap()); err != nil {
 			return nil, err
 		}
 
