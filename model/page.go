@@ -180,14 +180,13 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 
 // Extract template delimiters from a map.
 func (p *Page) GetDelims() (string, string) {
-	var template map[interface{}] interface{}
-	var delims map[interface{}] interface{}
+	var template map[string] interface{}
+	var delims map[string]interface{}
 	var ok bool
 	var left string
 	var right string
-	template, ok = p.PageData["template"].(map [interface{}] interface{})
-	if template, ok = p.PageData["template"].(map [interface{}] interface{}); ok {
-		if delims, ok = template["delims"].(map [interface{}] interface{}); ok {
+	if template, ok = p.PageData["template"].(map [string] interface{}); ok {
+		if delims, ok = template["delims"].(map [string] interface{}); ok {
 			if left, ok = delims["left"].(string); ok {
 				if right, ok = delims["right"].(string); ok {
 					return left, right
@@ -195,7 +194,6 @@ func (p *Page) GetDelims() (string, string) {
 			}
 		}
 	}
-
 	return "{{", "}}"
 }
 

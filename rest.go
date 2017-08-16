@@ -3,7 +3,6 @@
 package pageloop
 
 import (
-  "log"
 	"errors"
 	"io/ioutil"
 	"strings"
@@ -103,7 +102,6 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-    log.Println(err)
 		ex(res, http.StatusInternalServerError, nil, nil)
 		return
 	}
@@ -180,14 +178,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 								}
 							case PAGES:
 								if item == "" {
-                  log.Printf("%#v\n", app.Pages)
-                  println("marshalling page data")
 									// GET /api/apps/{name}/pages
 									data, err = json.Marshal(app.Pages)
-                  if err != nil {
-                  log.Printf("%#v\n", err)
-                    println("marshal error")
-                  }
 								} else {
 									// GET /api/apps/{name}/pages/{url}
 									page := app.GetPageByUrl(item)
@@ -255,7 +247,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 
 	if err != nil {
-    log.Println(err)
 		ex(res, http.StatusInternalServerError, nil, err)
 		return
 	}

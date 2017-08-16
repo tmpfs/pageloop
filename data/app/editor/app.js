@@ -92,7 +92,7 @@ class EditorApplication {
 
   getPageTemplate (item) {
     return `
-        <div class="page"><span class="name" data-file="${item.url}" title="Open ${item.name}">${item.name}</span></div>
+        <div class="page"><span class="name" data-file="${item.url}" title="Open ${item.name}">${item.url}</span></div>
       `
   }
 

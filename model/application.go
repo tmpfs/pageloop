@@ -288,27 +288,28 @@ func (app *Application) merge() error {
 		}
 		app.Pages[index] = page
 
-		/*
+		// Convert map[interface{}] interface{} to map[string] interface{}
+		// recursively in parsed page data.
+		//
+		// This is necessary as the YAML unmarshaller converts nested maps
+		// using interface{} keys and interface{} keys are not recognised when
+		// marshalling to JSON. We don't want to define a type for page data as
+		// it is intended to be arbitrary.
 		var coerce func(m map[string] interface{})
 		coerce = func(m map[string] interface{}) {
 			for key, value := range m {
-				if _, ok := value.(map[interface{}] interface{}); ok {
-					r := make(map[string] interface{})
-					for k, v := range value {
-						r[string(k)] = v
+				if val, ok := value.(map[interface{}] interface{}); ok {
+					var r map[string]interface{}
+					r = make(map[string]interface{})
+					for k, v := range val {
+						r[k.(string)] = v
 					}
-					println("got template node")
-					//println("k: " + key)
-					println(value)
-					println("got map string interface")
-					//delete m[key]
-					//m[string(key)]
+					coerce(r)
+					m[key] = r
 				}
 			}
 		}
-
 		coerce(page.PageData)
-		*/
   }
   return nil
 }
