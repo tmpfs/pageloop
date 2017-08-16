@@ -56,9 +56,31 @@ lang: en
 ## Helper Functions
 
 Some useful functions are exposed to the templates so that you can
-create applications independent of the application mountpoint (URL).
+create applications independent of the application mountpoint (URL)
+and perform other actions such as embed markdown in your HTML templates.
 
-### `root`
+### markdown
+
+Use the markdown helper function to embed markdown in your HTML documents:
+
+```html
+<? `
+<div>
+{{markdown "This is some *markdown* embedded in HTML."}}
+</div>
+` | html ?>
+```
+
+For long sections of markdown use the raw string type:
+
+```html
+{{markdown `
+  This is some *markdown* embedded in HTML with lots more
+  content.
+`}}
+```
+
+### root
 
 Returns a  URL relative to the root of the application, for example:
 

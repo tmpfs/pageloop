@@ -150,6 +150,12 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 		return path, nil
 	}
 
+  // Render markdown inline in an HTML template
+  funcs["markdown"] = func(md string) template.HTML {
+    var data string = Md2Html(md, CMARK_OPT_DEFAULT)
+    return template.HTML(data)
+  }
+
 	return funcs
 }
 
