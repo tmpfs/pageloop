@@ -301,12 +301,12 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Public)))
 
 	// Serve the raw source files.
-	url = url + "-/source/"
+	url = "/apps/source/" + app.Container.Name + "/" + app.Name + "/"
 	log.Printf("Serving src %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
 
 	// Serve the editor application for each app
-	url = "/apps/edit/" + app.Container.Name + "/" + app.Name
+	url = "/apps/edit/" + app.Container.Name + "/" + app.Name + "/"
 	log.Printf("Serving editor at %s", url)
 	editor := l.Host.GetByName("system").GetByName("editor")
 	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(editor.Public)))

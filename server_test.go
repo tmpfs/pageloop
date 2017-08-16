@@ -66,8 +66,8 @@ func TestMainPages(t *testing.T) {
 	assertStatus(resp, t, http.StatusOK)
 	assertContentType(resp, t, HTML_MIME)
 
-	// GET /-/source/
-	if resp, _, err = get(url + "/-/source/"); err != nil {
+	// GET /apps/source/system/home/
+	if resp, _, err = get(url + "/apps/source/system/home/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
@@ -81,7 +81,7 @@ func TestMainPages(t *testing.T) {
 	assertContentType(resp, t, HTML_MIME)
 
 	// GET /app/mock-app/-/source/
-	if resp, _, err = get(url + "/app/mock-app/-/source/"); err != nil {
+	if resp, _, err = get(url + "/apps/source/user/mock-app/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
