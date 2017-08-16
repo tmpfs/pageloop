@@ -32,7 +32,7 @@ function containers (parent, doc) {
   for (i = 0; i < doc.length; i++) {
     item = doc[i]
     html += `<li>`
-    html += `<h4>${item.name}</h4>`
+    html += `<h2>${item.name}</h2>`
     html += `<span class="label">Container</span>`
     if (item.description) {
       html += `<p>${item.description}</p>`
@@ -57,7 +57,7 @@ function applications (parent, url, doc) {
   for (i = 0; i < doc.length; i++) {
     item = doc[i]
     html += `<li>`
-    html += `<h4>${item.name}</h4>`
+    html += `<h2>${item.name}</h2>`
     html += `<span class="label">Application</span>`
     if (item.description) {
       html += `<p>${item.description}</p>`
@@ -83,7 +83,7 @@ function application (parent, url, doc) {
     item = doc[i]
     next = url.replace(/\/$/, '') + item.url
     html += `<li>`
-    html += `<h4>${item.name} ${item.dir ? '' : '(' + item.size + ' bytes)'}</h4>`
+    html += `<h2>${item.name} ${item.dir ? '' : '(' + item.size + ' bytes)'}</h2>`
     html += `<span class="label">${item.dir ? 'Dir' : 'File'}</span>`
     html += `<a class="api-link" href="#" data-renderer="files" data-method="get", data-url="${next}">GET ${next}</a>`
     // html += `<nav><a href="#raw">Raw</a></nav>`

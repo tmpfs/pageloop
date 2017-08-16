@@ -1,6 +1,6 @@
 ---
 title: Probe Tool (API)
-heading: API Probe 
+heading: API Probe
 lang: en
 description: Send requests to the REST API.
 keywords: rest, api, probe
@@ -8,7 +8,7 @@ leader: Use this page to debug API requests and responses.
 ---
 <p>To view the underlying data structures see the <a href="/tools/api/browser/" title="API Browser">browser</a> tool. For more detail see the <a href="/docs/api/" title="API docs">docs</a>.</p>
 <div id="request">
-	<h4>Request</h4>
+	<h2>Request</h2>
 	<form id="probe">
 		<div>
 			<input id="get" type="radio" name="method" value="GET" checked></input>
@@ -36,12 +36,12 @@ leader: Use this page to debug API requests and responses.
 </div>
 
 <div id="response" class="hidden">
-	<h4>Response (<span class="status"></span>)</h4>
+	<h2>Response (<span class="status"></span>)</h2>
 	<pre></pre>
 	<hr />
 </div>
 <div>
-	<h4>Log</h4>
+	<h2>Log</h2>
 	<p id="log" class="mono"></p>
 </div>
 <script src="api-probe.js" async></script>

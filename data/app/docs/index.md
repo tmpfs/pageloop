@@ -7,17 +7,17 @@ leader: |
   Here are all the documents you need to learn more about how to use pageloop.
 ---
 
-#### Concepts
+## Concepts
 
 * [Data Model](/docs/data-model/)
 * [Page Data](/docs/page-data/)
 * [Templates](/docs/templates/)
 
-#### RPC
+## RPC
 
 The RPC service provides a transport independent API, see the [RPC API](/docs/rpc/) documentation for more information.
 
-#### API
+## API
 
 The [REST API](/docs/api/) allows access to the system data representing the containers and applications that are being served.
 

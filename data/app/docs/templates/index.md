@@ -15,7 +15,7 @@ HTML files are parsed as templates and support all of the features of
 the `html/template` package. When a template is executed the context
 (`.`) is set to the the page data map, see [page data](/docs/page-data/).
 
-#### Layouts
+## Layouts
 
 A simple layout mechanism allows you to share common elements in a
 layout file which must be named `layout.html`. If a layout file is
@@ -53,12 +53,12 @@ lang: en
 <p>Page content.</p>` | html ?>
 ```
 
-#### Helper Functions
+## Helper Functions
 
 Some useful functions are exposed to the templates so that you can
 create applications independent of the application mountpoint (URL).
 
-##### `root`
+### `root`
 
 Returns a  URL relative to the root of the application, for example:
 
@@ -68,7 +68,7 @@ Returns a  URL relative to the root of the application, for example:
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
 
-#### Delimiters
+## Delimiters
 
 Sometimes you may want to switch the template left and right delimiters
 usually when you want to show examples using the default delimiters.

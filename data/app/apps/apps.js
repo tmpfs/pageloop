@@ -44,6 +44,7 @@
             document.createTextNode(application.url))
 
           app.querySelector('nav .view').setAttribute('href', application.url)
+          app.querySelector('nav .edit').setAttribute('href', 'edit/' + val.name + '/' + application.name)
 
           list.appendChild(app)
         })
