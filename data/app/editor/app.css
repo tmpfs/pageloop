@@ -76,7 +76,9 @@ h2 {
 }
 
 main {
-  flex: 1 0;
+  flex: 1 1;
+  height: calc(100% - 9rem);
+  max-height: calc(100% - 9rem);
 }
 
 footer {
@@ -84,6 +86,7 @@ footer {
   line-height: 1.6rem;
   padding: 0.8rem 0;
   height: 3.2rem;
+  /*min-height: 3.2rem;*/
   border-top: 1px solid currentColor;
 }
 
@@ -108,6 +111,7 @@ header p, footer p {
 .sidebar {
   background: white;
   border-right: 1px solid currentColor;
+  max-width: 32rem;
 }
 
 .editor {
@@ -120,8 +124,8 @@ header p, footer p {
 
 .scroll {
   overflow-x: hidden;
-  overflow-y: auto;
-  max-height: 100%;
+  overflow-y: scroll;
+  height: calc(100% - 23px);
 }
 
 iframe {
@@ -129,5 +133,5 @@ iframe {
   border: 0;
   margin: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 23px);
 }
