@@ -12,7 +12,6 @@ import (
   "io/ioutil"
   "encoding/json"
   "gopkg.in/yaml.v2"
-  "github.com/tmpfs/pageloop/vdom"
 )
 
 const (
@@ -185,25 +184,6 @@ func (f *File) Data() []byte {
 // Read only access to the file info outside this package.
 func (f *File) Info() os.FileInfo {
 	return f.info
-}
-
-type Page struct {
-  Path string `json:"-"`
-  Name string `json:"name"`
-  Url string `json:"url"`
-  Size int64 `json:"size,omitempty"`
-  PageData map[string] interface{} `json:"data"`
-	PageDataType int `json:"-"`
-  Blocks []Block  `json:"blocks"`
-  Dom *vdom.Vdom `json:"-"`
-
-	Type int `json:"-"`
-
-	// Owner application
-	owner *Application
-
-	// The underlying file data.
-  file *File
 }
 
 // Add a file to this application.

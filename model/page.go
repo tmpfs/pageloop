@@ -32,6 +32,25 @@ var(
 	FragmentTail = regexp.MustCompile(`</body></html>$`)
 )
 
+type Page struct {
+  Path string `json:"-"`
+  Name string `json:"name"`
+  Url string `json:"url"`
+  Size int64 `json:"size,omitempty"`
+  PageData map[string] interface{} `json:"data"`
+	PageDataType int `json:"-"`
+  Blocks []Block  `json:"blocks"`
+  Dom *vdom.Vdom `json:"-"`
+
+	Type int `json:"-"`
+
+	// Owner application
+	owner *Application
+
+	// The underlying file data.
+  file *File
+}
+
 type Block struct {
   Title string  `json:"title"`
   Name string  `json:"name"`
