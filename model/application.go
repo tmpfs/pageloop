@@ -1,10 +1,10 @@
 package model
 
 import (
+	//"log"
   "os"
 	"fmt"
   "bytes"
-	//"hash"
 	"errors"
 	"regexp"
   "strings"
@@ -280,15 +280,35 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
 func (app *Application) merge() error {
   var err error
   for index, page := range app.Pages {
-		//if page.Type == PageHtml {
-      if _, err = app.getPageData(page); err != nil {
-        return err
-      }
-		//}
+		if _, err = app.getPageData(page); err != nil {
+			return err
+		}
 		if _, err = page.Parse(page.file.data); err != nil {
 			return err
 		}
 		app.Pages[index] = page
+
+		/*
+		var coerce func(m map[string] interface{})
+		coerce = func(m map[string] interface{}) {
+			for key, value := range m {
+				if _, ok := value.(map[interface{}] interface{}); ok {
+					r := make(map[string] interface{})
+					for k, v := range value {
+						r[string(k)] = v
+					}
+					println("got template node")
+					//println("k: " + key)
+					println(value)
+					println("got map string interface")
+					//delete m[key]
+					//m[string(key)]
+				}
+			}
+		}
+
+		coerce(page.PageData)
+		*/
   }
   return nil
 }
@@ -406,6 +426,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
       break
     }
   }
+
   return page.PageData, nil
 }
 

@@ -185,6 +185,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 									// GET /api/apps/{name}/pages
 									data, err = json.Marshal(app.Pages)
                   if err != nil {
+                  log.Printf("%#v\n", err)
                     println("marshal error")
                   }
 								} else {
