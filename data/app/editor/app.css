@@ -68,7 +68,7 @@ h1 {
 }
 
 h2 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   text-transform: uppercase;
   /*background: darkgray;*/
   /*text-shadow: 1px 1px white;*/
@@ -76,7 +76,7 @@ h2 {
 }
 
 main {
-  flex: 1 1 auto;
+  flex: 1 0;
   background: red;
 }
 
@@ -92,6 +92,7 @@ header p, footer p {
 }
 
 .content {
+  position: relative;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -111,13 +112,11 @@ header p, footer p {
 
 .sidebar {
   background: white;
-  /*width: 24rem;*/
   border-right: 1px solid currentColor;
 }
 
 
 .editor, .preview {
-  /*width: 40%;*/
   background: green;
 }
 
