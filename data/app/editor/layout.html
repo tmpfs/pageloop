@@ -9,13 +9,22 @@
   </head>
   <body>
     <header>
-      <span class="app-id"></span>
+      <nav>
+        <a href="/" title="Home page">
+					<span>Ꝏ</span>&nbsp;Home
+        </a>
+        <a href="/apps/" title="All applications">Apps</a>
+        <a href="/docs/" title="Documentation">Docs</a>
+      </nav>
+      <div class="app-id"></div>
     </header>
 		<main>
 			{{template "content"}}
 		</main>
     <footer>
-      <p># This is some footer content</p>
+      <div class="log">
+      <!--<p># This is some footer content</p>-->
+      </div>
     </footer>
     <script src="app.js" async></script>
   </body>

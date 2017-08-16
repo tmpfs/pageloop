@@ -38,15 +38,14 @@ body {
   font-size: 1.8rem;
   line-height: 2.2rem;
   font-family: 'SourceSans';
-
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   overflow: hidden;
+}
 
-  /*justify-content: center;*/
-  /*align-content: space-between;*/
-  /*align-items: center;*/
+template {
+  display: none;
 }
 
 a, a:visited, a:hover {
@@ -57,9 +56,27 @@ a, a:visited, a:hover {
 header {
   margin: 0;
   padding: 0;
-  padding: 2rem;
   height: 6rem;
   border-bottom: 1px solid currentColor;
+}
+
+header nav {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+}
+
+header nav a {
+  flex: 1 0;
+  font-size: 1.6rem;
+  padding: .4rem 0 .4rem 2rem;
+  text-transform: uppercase;
+}
+
+header .app-id {
+  font-size: 1.4rem;
+  padding-left: 2rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -95,7 +112,7 @@ footer {
   border-top: 1px solid currentColor;
 }
 
-header p, footer p {
+footer p {
   margin: 0 2rem;
 }
 
@@ -147,7 +164,6 @@ header p, footer p {
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100% - 23px);
-  padding: 0 2rem;
 }
 
 iframe {
@@ -156,4 +172,38 @@ iframe {
   margin: 0;
   width: 100%;
   height: calc(100% - 23px);
+}
+
+.hidden {
+  display: none;
+}
+
+.sidebar .scroll {
+  /*padding-top: 1rem;*/
+}
+
+.tab > a, header > nav > a, .page, .file {
+  background: transparent;
+}
+
+.page, .file {
+  padding: .2rem 0 .2rem 2rem;
+  cursor: pointer;
+}
+
+.tab > a:hover, header > nav > a:hover, .page:hover, .file:hover {
+  background: #3000d9;
+  color: white;
+  transition: all 0.5s ease-out;
+}
+
+.tab > .selected {
+  text-decoration: underline;
+}
+
+.page, .file {
+  font-size: 1.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }

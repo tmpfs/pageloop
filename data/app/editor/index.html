@@ -7,13 +7,15 @@ keywords: web, editor, application
 
 <div class="content">
   <div class="sidebar">
-    <h2>
-      <a class="pages" href="#pages" title="Pages">Pages</a>
-      <a class="files" href="#files" title="Files">Files</a>
-      <a class="components" href="#components">Components</a>
+    <h2 class="tab">
+      <a class="pages selected" data-target=".pages-list" href="#pages" title="Show pages">Pages</a>
+      <a class="files" href="#files"  data-target=".files-list"title="Show files">Files</a>
+      <a class="components" href="#components" data-target=".components-list" title="Show components">Components</a>
     </h2>
     <div class="scroll">
-
+        <div class="pages-list"></div>
+        <div class="files-list hidden"></div>
+        <div class="components-list hidden"></div>
     </div>
   </div>
   <div class="editor">
@@ -23,7 +25,7 @@ keywords: web, editor, application
     </div>
   </div>
   <div class="preview">
-    <h2>Live Preview</h2>
+    <h2>Live Preview <a class="preview-url" href="" title="Preview URL"></a></h2>
     <!--<iframe src="http://localhost:3577/" class="live"></iframe>-->
     <iframe class="live"></iframe>
   </div>
