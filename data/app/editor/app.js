@@ -10,6 +10,7 @@ class EditorApplication {
     this.pages = null
     this.el = {
       appid: this.doc.querySelector('.app-id'),
+      switcher: this.doc.querySelector('.switcher'),
       previewUrl: this.doc.querySelector('.preview-url'),
       sidebar: this.doc.querySelector('.sidebar'),
       pagesList: this.doc.querySelector('.pages-list'),
@@ -58,7 +59,7 @@ class EditorApplication {
 
   refresh () {
     let u = this.getPreviewUrl()
-    this.el.previewUrl.innerText = `(${u})`
+    this.el.previewUrl.innerText = `${this.app.url}`
     this.el.previewUrl.setAttribute('href', u)
     this.el.live.addEventListener('load', () => {
       this.log(`Preview loaded ${u}`)
@@ -101,7 +102,22 @@ class EditorApplication {
       `
   }
 
+  getSwitcherContainer (c) {
+    let o = `<div class="container"><h3>${c.name}</h3><ul>`
+    c.apps.forEach((a) => {
+      let href = '/apps/edit/' + c.name + '/' + a.name + '/'
+      o += `
+          <li>
+            <a href="${href}">${a.name}</a>
+          </li>
+        `
+    })
+    o += `</ul></div>`
+    return o
+  }
+
   ui () {
+    // Sidebar tabs
     this.doc.querySelectorAll('.tab > a').forEach((n) => {
       console.log(n)
       n.addEventListener('click', (e) => {
@@ -117,6 +133,31 @@ class EditorApplication {
         el.classList.add('selected')
       })
     })
+
+    // Application switcher
+    this.doc.querySelector('.app-id a').addEventListener('click', (e) => {
+      e.preventDefault()
+      let n = e.currentTarget
+      !n.isOpen ? this.select() : this.el.switcher.classList.add('hidden')
+      n.isOpen = !n.isOpen
+    })
+  }
+
+  // Select an application.
+  select () {
+    let url = `/api/`
+    this.log(`Loading container data from ${url}`)
+    this.get(url)
+      .then((containers) => {
+        this.removeChildren(this.el.switcher)
+        this.el.switcher.classList.remove('hidden')
+        console.log(containers)
+        containers.forEach((c) => {
+          let cn = this.getSwitcherContainer(c)
+          this.el.switcher.innerHTML += cn
+        })
+      })
+      .catch((err) => { this.log(err) })
   }
 
   init () {
@@ -125,7 +166,8 @@ class EditorApplication {
     this.application = parts.pop()
     this.container = parts.pop()
 
-    this.el.appid.appendChild(this.text(`${this.container} / ${this.application}`))
+    this.el.appid.querySelector('.name').innerText =
+      `${this.container} / ${this.application}`
 
     let url = `/api/${this.container}/${this.application}/`
     this.log(`Loading app data from ${url}`)

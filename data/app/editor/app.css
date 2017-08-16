@@ -81,7 +81,7 @@ header nav a:hover {
 }
 
 header .app-id {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   padding-right: 2rem;
   text-align: right;
 }
@@ -218,3 +218,21 @@ h2 > a:hover, header > nav > a:hover {
   white-space: nowrap;
   overflow: hidden;
 }
+
+.switcher {
+  position: absolute;
+  top: 6rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000
+}
+
+/*
+.switcher .container {
+  flex: 1 0;
+  flex-direction: row;
+}
+*/
+
