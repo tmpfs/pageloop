@@ -6,15 +6,16 @@
 		<meta name="description" content="{{.description}}" />
 		{{end}}
 		<link rel="stylesheet" href='{{root "app.css"}}' />
-		<link rel="stylesheet" href="/assets/css/global.css" />
   </head>
   <body>
     <header>
-      <span>Ꝏ</span>&nbsp;
+      <a class="container" href="/">container</a>
+      <span>/</span>
+      <a class="application" href="/">application</a>
     </header>
-		<div class="main">
+		<main>
 			{{template "content"}}
-		</div>
+		</main>
     <footer>
       <p>This is some footer content</p>
     </footer>
