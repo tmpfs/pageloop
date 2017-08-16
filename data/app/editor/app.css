@@ -1,28 +1,33 @@
+/*
 html, body {
   min-height: 100%;
 }
+*/
 
 body {
-  height: 100%;
+  text-align: left !important;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  /*justify-content: center;*/
+  /*align-content: space-between;*/
+  /*align-items: center;*/
 }
 
 header, main, footer {
-  /*width: 100%;*/
-  display: flex;
 }
 
 header {
+  margin: 0;
+  padding: 0;
   height: 6rem;
   background: blue;
-  max-height: 6rem;
 }
 
-main {
+.main {
+  flex: 1 1 auto;
   background: red;
-  flex: 1 0;
-  /*justify-content: stretch;*/
-  /*min-height: 100%;*/
-  /*min-width: 100%;*/
 }
 
 footer {
