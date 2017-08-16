@@ -157,6 +157,10 @@ header + nav > a:hover {
 	transition: all 0.35s ease-in;
 }
 
+template {
+	display: none;
+}
+
 .mono {
   font-family: monospace;
 }
