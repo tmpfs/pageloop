@@ -190,6 +190,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	var system []Mountpoint
 	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
 	system = append(system, Mountpoint{UrlPath: "/apps/", Path: "data://app/apps/", Description: "Application manager."})
+	system = append(system, Mountpoint{UrlPath: "/apps/editor/", Path: "data://app/editor/", Description: "Application editor."})
 	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "System documentation."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe", Description: "API Probe."})
@@ -204,7 +205,9 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   }
 
 	l.MountContainer(sys)
+	l.MountContainer(tpl)
 	l.MountContainer(usr)
+	l.MountContainer(snx)
 
   s := &http.Server{
     Addr:           config.Addr,
@@ -301,5 +304,10 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	url = url + "-/source/"
 	log.Printf("Serving src %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
-}
 
+	// Serve the editor application for each app
+	url = "/apps/edit/" + app.Container.Name + "/" + app.Name
+	log.Printf("Serving editor at %s", url)
+	editor := l.Host.GetByName("system").GetByName("editor")
+	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(editor.Public)))
+}

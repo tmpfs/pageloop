@@ -98,6 +98,8 @@ func (c *Container) Add(app *Application) error {
 
 	app.Protected = c.Protected
 
+	app.Container = c
+
 	c.Apps = append(c.Apps, app)
 	return nil
 }
@@ -144,6 +146,8 @@ type Application struct {
 
 	// A protected application cannot be deleted.
 	Protected bool `json:"protected,omitempty"`
+
+	Container *Container `json:"-"`
 }
 
 type File struct {
