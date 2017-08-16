@@ -1,0 +1,32 @@
+html, body {
+  min-height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+header, main, footer {
+  /*width: 100%;*/
+  display: flex;
+}
+
+header {
+  height: 6rem;
+  background: blue;
+  max-height: 6rem;
+}
+
+main {
+  background: red;
+  flex: 1 0;
+  /*justify-content: stretch;*/
+  /*min-height: 100%;*/
+  /*min-width: 100%;*/
+}
+
+footer {
+  background: green;
+  height: 2rem;
+}
+

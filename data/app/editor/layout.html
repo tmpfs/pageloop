@@ -1,1 +1,24 @@
-../home/layout.html
+<!doctype html>
+<html lang="{{.lang}}">
+  <head>
+		<title>{{.title}}</title>
+		{{if .description}}
+		<meta name="description" content="{{.description}}" />
+		{{end}}
+		<link rel="stylesheet" href='{{root "app.css"}}' />
+		<link rel="stylesheet" href="/assets/css/global.css" />
+  </head>
+  <body>
+    <header>
+      <h1>
+        <span>Ꝏ</span>&nbsp;
+      </h1>
+    </header>
+		<main>
+			{{template "content"}}
+		</main>
+    <footer>
+      <p>This is some footer content</p>
+    </footer>
+  </body>
+</html>
