@@ -7,7 +7,7 @@ import (
 
 func main() {
   var apps []pageloop.Mountpoint
-	apps = append(apps, pageloop.Mountpoint{Path: "test/fixtures/mock-app"})
+	apps = append(apps, pageloop.Mountpoint{Path: "test/fixtures/mock-app", Description: "Mock application."})
   loop := &pageloop.PageLoop{}
 	conf := pageloop.ServerConfig{Mountpoints: apps, Addr: ":3577", Dev: true}
 	server, err := loop.NewServer(conf)

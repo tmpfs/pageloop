@@ -76,11 +76,11 @@ func NewContainer(name string, description string, protected bool) *Container {
 	return &Container{Name: name, Description: description, Protected: protected}
 }
 
-// Add an application to the container, the application must 
-// have the Name field set and it must not already exist in 
+// Add an application to the container, the application must
+// have the Name field set and it must not already exist in
 // the container list.
 //
-// Application names may only contain lowercase, uppercase, hyphens 
+// Application names may only contain lowercase, uppercase, hyphens
 // and digits. They may not begin with a hyphen.
 func (c *Container) Add(app *Application) error {
 	if app.Name == "" {
@@ -134,6 +134,7 @@ type Application struct {
   Public string `json:"-"`
 
   Name string `json:"name"`
+  Description string `json:"description"`
   Pages []*Page `json:"-"`
   Files []*File `json:"-"`
 	// The root file node, not included in the files slice.
@@ -147,9 +148,9 @@ type Application struct {
 
 type File struct {
   Path string `json:"-"`
-  Name string `json:"name"` 
-  Size int64 `json:"size,omitempty"` 
-  Url string `json:"url"` 
+  Name string `json:"name"`
+  Size int64 `json:"size,omitempty"`
+  Url string `json:"url"`
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
 
@@ -162,7 +163,7 @@ type File struct {
 	// Raw source data.
 	source []byte
 
-	// Initially the source data but mutated later when 
+	// Initially the source data but mutated later when
 	// parsed from markdown or rendered from the vdom.
   data []byte
 }
@@ -184,9 +185,9 @@ func (f *File) Info() os.FileInfo {
 
 type Page struct {
   Path string `json:"-"`
-  Name string `json:"name"` 
-  Url string `json:"url"` 
-  Size int64 `json:"size,omitempty"` 
+  Name string `json:"name"`
+  Url string `json:"url"`
+  Size int64 `json:"size,omitempty"`
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`
@@ -198,7 +199,7 @@ type Page struct {
 	owner *Application
 
 	// The underlying file data.
-  file *File 
+  file *File
 }
 
 // Add a file to this application.
@@ -215,7 +216,7 @@ func (app *Application) AddPage(page *Page) int {
 	return len(app.Pages)
 }
 
-// Load an application using the given loader implementation, 
+// Load an application using the given loader implementation,
 // if a nil loader is given the default file system loader is used.
 func (app *Application) Load(path string, loader ApplicationLoader) error {
   var err error
@@ -236,7 +237,7 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   return nil
 }
 
-// Publish files using the given publisher implementation, if a nil 
+// Publish files using the given publisher implementation, if a nil
 // publisher is given the default file system publisher is used.
 func (app *Application) Publish(publisher ApplicationPublisher, base string) error {
   var err error
@@ -290,7 +291,7 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
   return url
 }
 
-// Merge user data with page structs loading user data from a JSON 
+// Merge user data with page structs loading user data from a JSON
 // file with the same name of the HTML file that created the page.
 func (app *Application) merge() error {
   var err error
@@ -301,7 +302,7 @@ func (app *Application) merge() error {
       }
 		//}
 		if _, err = page.Parse(page.file.data); err != nil {
-			return err	
+			return err
 		}
 		app.Pages[index] = page
   }
@@ -347,10 +348,10 @@ func (app *Application) setComputedFields(path string) {
 	}
 }
 
-// Attempt to find user page data by first attempting to 
+// Attempt to find user page data by first attempting to
 // parse embedded frontmatter YAML.
-// 
-// If there is no frontmatter data it attempts to 
+//
+// If there is no frontmatter data it attempts to
 // load data from a corresponding file with a .yml extension.
 //
 // Finally if a .json file exists it is parsed.
@@ -368,7 +369,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
     for _, line := range lines {
       read += len(line) + 1
       if FRONTMATTER_END.Match(line) {
-        break 
+        break
       }
       frontmatter = append(frontmatter, line)
     }

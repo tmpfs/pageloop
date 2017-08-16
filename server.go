@@ -42,6 +42,8 @@ type Mountpoint struct {
 	UrlPath string `json:"url"`
 	// The path to pass to the loader.
 	Path string	`json:"path"`
+	// Description to pass to the application.
+	Description string `json:"description"`
 }
 
 type PageLoop struct {
@@ -156,10 +158,10 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	l.Host = model.NewHost()
 
 	// Configure application containers.
-	sys := model.NewContainer("system", "System applications", true)
-	tpl := model.NewContainer("template", "Application templates", true)
-	usr := model.NewContainer("user", "User applications", false)
-	snx := model.NewContainer("sandbox", "Playground", false)
+	sys := model.NewContainer("system", "System applications.", true)
+	tpl := model.NewContainer("template", "Application templates.", true)
+	usr := model.NewContainer("user", "User applications.", false)
+	snx := model.NewContainer("sandbox", "Playground.", false)
 
 	l.Host.Add(sys)
 	l.Host.Add(usr)
@@ -186,11 +188,11 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	// System applications to mount.
 	var system []Mountpoint
-	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home"})
-	system = append(system, Mountpoint{UrlPath: "/apps/", Path: "data://app/apps/"})
-	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/"})
-	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser"})
-	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe"})
+	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
+	system = append(system, Mountpoint{UrlPath: "/apps/", Path: "data://app/apps/", Description: "Application manager."})
+	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "System documentation."})
+	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
+	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe", Description: "API Probe."})
 
   if err = l.LoadMountpoints(system, sys); err != nil {
     return nil, err
@@ -259,7 +261,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
 		}
 
-		app := model.Application{Url: urlPath}
+		app := model.Application{Url: urlPath, Description: mt.Description}
 
     // Load the application files into memory
 		if err = app.Load(p, nil); err != nil {

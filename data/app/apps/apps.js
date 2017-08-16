@@ -40,11 +40,13 @@
           app = template('.app')
           app.querySelector('.name').appendChild(
             document.createTextNode(application.name))
+          app.querySelector('.description').appendChild(
+            document.createTextNode(application.description))
           app.querySelector('.url').appendChild(
             document.createTextNode(application.url))
 
           app.querySelector('nav .view').setAttribute('href', application.url)
-          app.querySelector('nav .edit').setAttribute('href', 'edit/' + val.name + '/' + application.name)
+          app.querySelector('nav .edit').setAttribute('href', 'edit/' + val.name + '/' + application.name + '/')
 
           list.appendChild(app)
         })
