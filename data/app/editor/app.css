@@ -49,6 +49,11 @@ body {
   /*align-items: center;*/
 }
 
+a, a:visited, a:hover {
+  color: #3000d9;
+  text-decoration: none;
+}
+
 header {
   margin: 0;
   padding: 0;
@@ -68,7 +73,7 @@ h1 {
 }
 
 h2 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   text-transform: uppercase;
   /*background: darkgray;*/
   /*text-shadow: 1px 1px white;*/
@@ -114,6 +119,22 @@ header p, footer p {
   max-width: 32rem;
 }
 
+.sidebar > h2 {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding: 0;
+}
+
+.sidebar > h2 > a {
+  flex: 1 0;
+  text-align: center;
+}
+
+.sidebar > h2 > a:not(:first-child) {
+  border-left: 1px solid currentColor;
+}
+
 .editor {
   border-right: 1px solid currentColor;
 }
@@ -124,8 +145,9 @@ header p, footer p {
 
 .scroll {
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
   height: calc(100% - 23px);
+  padding: 0 2rem;
 }
 
 iframe {
