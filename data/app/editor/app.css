@@ -65,18 +65,25 @@ header nav {
   flex-direction: row;
   margin: 0;
   padding: 0;
+  /*max-width: 32rem;*/
 }
 
 header nav a {
   flex: 1 0;
   font-size: 1.6rem;
-  padding: .4rem 0 .4rem 2rem;
+  padding: .3rem 2rem;
   text-transform: uppercase;
+  border-bottom: 4px double #3000d9;
+}
+
+header nav a:hover {
+  text-decoration: underline;
 }
 
 header .app-id {
   font-size: 1.4rem;
-  padding-left: 2rem;
+  padding-right: 2rem;
+  text-align: right;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -166,6 +173,10 @@ footer p {
   height: calc(100% - 23px);
 }
 
+.editor .scroll {
+  padding-left: 2rem;
+}
+
 iframe {
   display: block;
   border: 0;
@@ -191,7 +202,7 @@ iframe {
   cursor: pointer;
 }
 
-.tab > a:hover, header > nav > a:hover, .page:hover, .file:hover {
+h2 > a:hover, header > nav > a:hover {
   background: #3000d9;
   color: white;
   transition: all 0.5s ease-out;
