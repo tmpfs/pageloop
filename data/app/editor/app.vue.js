@@ -51,10 +51,12 @@ Vue.component('app-editor', {
 
 Vue.component('editor-main', {
   template: `
-          <div class="content">
-            <app-sidebar><slot /></app-sidebar>
-            <app-editor><slot /></app-editor>
-            <app-preview></app-preview>
+          <div class="content-main">
+            <div class="content">
+              <app-sidebar><slot /></app-sidebar>
+              <app-editor><slot /></app-editor>
+              <app-preview></app-preview>
+            </div>
           </div>
         `,
   created: function () {
