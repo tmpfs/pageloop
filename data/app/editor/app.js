@@ -34,8 +34,8 @@ class AppDataSource {
 }
 
 class EditorApplication {
-  constructor () {
-    this.location = new LocationParser().parse()
+  constructor (loc) {
+    this.loc = loc
     this.data = new AppDataSource(this.location)
   }
 
@@ -54,7 +54,7 @@ class EditorApplication {
     for (let k in app) {
       this.data.app[k] = app[k]
     }
-    this.identifier.name = this.location.container + '/' + this.location.application
+    this.identifier.name = this.loc.container + '/' + app.name
   }
 
   setPages (list) {
@@ -121,7 +121,8 @@ class EditorApplication {
         return {
           pages: [],
           files: [],
-          currentView: 'pages'
+          components: [],
+          currentView: ''
         }
       },
       methods: {
@@ -129,7 +130,12 @@ class EditorApplication {
           return get(url + 'pages/')
             .then((list) => {
               this.pages = list
-              console.log(this.pages)
+            })
+        },
+        loadFiles: function (url) {
+          return get(url + 'files/')
+            .then((list) => {
+              this.files = list
             })
         }
       },
@@ -141,11 +147,13 @@ class EditorApplication {
                 <span class="name">{{item.url}}</span>
               </div>
             </div>`,
-          props: ['pages'],
           data: function () {
             return {
-              list: this.pages
+              list: []
             }
+          },
+          created: function () {
+            this.list = this.$parent.pages
           }
         },
         files: {
@@ -155,22 +163,26 @@ class EditorApplication {
                 <span class="name">{{item.url}}</span>
               </div>
             </div>`,
-          props: ['files'],
           data: function () {
             return {
-              list: this.files
+              list: []
             }
+          },
+          created: function () {
+            this.list = this.$parent.files
           }
         },
         components: {
           template: `
             <div class="components-list">
             </div>`,
-          props: ['components'],
           data: function () {
             return {
-              list: this.components
+              list: []
             }
+          },
+          created: function () {
+            this.list = this.$parent.components
           }
         }
       }
@@ -263,6 +275,7 @@ class EditorApplication {
         this.setApplication(app)
         this.log(`Loading pages for ${this.data.app.name}`)
         return this.sidebar.loadPages(url)
+          .then(this.sidebar.loadFiles(url))
         /*
         return this.get(url + 'pages/')
           .then((pages) => {
@@ -283,14 +296,16 @@ class EditorApplication {
   }
 
   init (loc) {
+    loc = loc || this.loc
     this.ui(this.data)
     this.log('Interface created')
     this.load(loc, this.data)
       .then(() => {
+        this.sidebar.currentView = 'pages'
         this.log('Done')
       })
   }
 }
 
-let app = new EditorApplication()
-app.init(new LocationParser().parse())
+let app = new EditorApplication(new LocationParser().parse())
+app.init()
