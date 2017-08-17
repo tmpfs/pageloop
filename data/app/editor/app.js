@@ -53,26 +53,30 @@ class EditorApplication {
     return document.location.origin + this.data.app.url
   }
 
+  setApplication (app) {
+    this.data.app = app
+    this.identifier.name = this.location.container + '/' + this.location.application
+  }
+
   refresh () {
     this.preview.path = this.data.app.url
     this.preview.url = this.getPreviewUrl()
-    /*
-    let u = this.getPreviewUrl()
-    this.el.previewUrl.innerText = `${this.data.app.url}`
-    this.el.previewUrl.setAttribute('href', u)
-    this.el.live.addEventListener('load', () => {
-      this.log(`Preview loaded ${u}`)
-    })
-    this.el.live.setAttribute('src', u)
-    */
   }
 
   ui (data) {
-    Vue.component('app-id', {
-      template: `<div class="app-id"><a href="#switch">▾ <span class="name">{{name}}</span></a></div>`,
+    this.identifier = new Vue({
+      template: `<div class="app-id"><a href="#" @click="click">▾ <span class="name">{{name}}</span></a></div>`,
       data: function () {
         return {
-          name: 'container / application'
+          name: data.app.id,
+          show: false
+        }
+      },
+      methods: {
+        click: function (e) {
+          e.preventDefault()
+          this.show = !this.show
+          console.log('id click: ' + this.show)
         }
       }
     })
@@ -134,11 +138,12 @@ class EditorApplication {
 
     this.logger = new Vue({
       template: `
-        <div class="log"><p>{{message}}</p></div>
+        <p class="log" v-bind:class="{error: error}">{{message}}</p>
       `,
       data: function () {
         return {
-          message: ''
+          message: '',
+          error: false
         }
       }
     })
@@ -147,9 +152,10 @@ class EditorApplication {
     let main = new Vue({el: 'main', data: data})
     let footer = new Vue({el: 'footer', data: data})
 
-    // mount vues
+    // mount views
     this.preview.$mount('.preview')
     this.logger.$mount('footer .log')
+    this.identifier.$mount('.app-id')
 
     return {header: header, main: main, footer: footer}
   }
@@ -157,11 +163,12 @@ class EditorApplication {
   log (msg) {
     let err = (msg instanceof Error)
     if (err) {
-      // p.setAttribute('class', 'error')
+      // TODO: add error class
       msg = '! ' + msg
+      this.logger.error = true
     } else {
-      // p.setAttribute('class', 'info')
       msg = '# ' + msg
+      this.logger.error = false
     }
 
     this.logger.message = msg
@@ -170,9 +177,9 @@ class EditorApplication {
   load (data) {
     let url = `/api/${this.location.container}/${this.location.application}/`
     this.log(`Loading app data from ${url}`)
-    this.get(url)
+    return this.get(url)
       .then((app) => {
-        this.data.app = app
+        this.setApplication(app)
         this.log(`Loading pages for ${this.data.app.name}`)
         return this.get(url + 'pages/')
           .then((pages) => {
@@ -197,6 +204,9 @@ class EditorApplication {
     this.ui(this.data)
     this.log('Interface created')
     this.load(this.data)
+      .then(() => {
+        this.log('Done')
+      })
   }
 }
 

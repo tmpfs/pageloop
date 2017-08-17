@@ -234,6 +234,10 @@ h2 > a:hover, header > nav > a:hover {
   z-index: 1000
 }
 
+.log.error {
+  color: red;
+}
+
 /*
 .switcher .container {
   flex: 1 0;
