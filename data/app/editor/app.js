@@ -305,7 +305,8 @@ class EditorApplication {
               return res.text()
             }).then((content) => {
               item.content = content
-              this.$children[0].showSourceText(item, content)
+              this.title = item.url
+              this.$children[0].showSourceText(item)
               bus.$emit('open:complete', item)
             })
         }
@@ -341,8 +342,8 @@ class EditorApplication {
                 keyMap: 'vim'
               })
             },
-            showSourceText: function (item, content) {
-              this.setCodeMirror({value: content, mode: this.getModeForMime(item.mime)})
+            showSourceText: function (item) {
+              this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
             }
           },
           data: function () {
