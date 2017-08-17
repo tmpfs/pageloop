@@ -24,11 +24,6 @@ class AppDataSource {
       pages: [],
       files: []
     }
-
-    this.preview = {
-      url: '',
-      path: ''
-    }
   }
 
   json (url, options) {
@@ -84,16 +79,6 @@ class EditorApplication {
     return fetch(url, options)
       .then((res) => res.json())
       .catch((err) => err)
-  }
-
-  getPreviewUrl () {
-    return document.location.origin + this.data.app.url
-  }
-
-  refresh () {
-    this.log(`Loading preview ${this.getPreviewUrl()}`)
-    this.preview.path = this.data.app.url
-    this.preview.url = this.getPreviewUrl()
   }
 
   ui () {
@@ -245,8 +230,31 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          path: data.preview.path,
-          url: data.preview.url
+          path: '',
+          url: ''
+        }
+      },
+      created: function () {
+        bus.$on('open:complete', (item) => {
+          let url = item.url
+          let all = /\.(html?|md|markdown)$/
+          // Refresh preview when switching on page types
+          if (all.test(item.name)) {
+            let md = /\.(md|markdown)$/
+            if (md.test(item.name)) {
+              url = url.replace(md, '.html')
+            }
+            this.refresh(url)
+          }
+        })
+      },
+      methods: {
+        refresh (url) {
+          this.path = url || this.getPreviewUrl()
+          this.url = this.getPreviewUrl(url)
+        },
+        getPreviewUrl: function (url) {
+          return document.location.origin + data.app.url + (url || '')
         }
       }
     })
@@ -255,7 +263,7 @@ class EditorApplication {
       template: `
         <div class="editor">
           <div class="column-header">
-            <h2>Editor</h2>
+            <h2>{{title}}</h2>
             <div class="column-options">
               <nav class="tabs">
                 <a v-bind:class="{selected: currentView === 'source-editor'}"
@@ -272,6 +280,7 @@ class EditorApplication {
       `,
       data: function () {
         return {
+          title: 'Editor',
           currentView: 'welcome',
           defaultOpenView: 'source-editor',
           currentFile: {content: ''}
@@ -284,9 +293,6 @@ class EditorApplication {
       },
       methods: {
         open: function (item) {
-          console.log('open in editor')
-          console.log(item)
-
           data.currentFile = item
 
           if (this.currentView === 'welcome') {
@@ -300,16 +306,8 @@ class EditorApplication {
             }).then((content) => {
               item.content = content
               this.$children[0].showSourceText(item, content)
+              bus.$emit('open:complete', item)
             })
-
-          /*
-          const mime = item.mime.replace(/;.*$/, '')
-          switch (mime) {
-            case 'text/html':
-              console.log('got html mime type')
-              break
-          }
-          */
         }
       },
       components: {
@@ -322,7 +320,7 @@ class EditorApplication {
             getModeForMime (mime) {
               // remove charset info
               mime = mime.replace(/;.*$/, '')
-              console.log(mime)
+              // console.log(mime)
               switch (mime) {
                 case 'text/html':
                   return 'htmlmixed'
@@ -429,7 +427,7 @@ class EditorApplication {
       .then(this.sidebar.loadPages())
       .then(this.sidebar.loadFiles())
       .then(() => {
-        this.refresh()
+        this.preview.refresh()
       })
       .catch((err) => { this.log(err) })
   }
@@ -443,7 +441,7 @@ class EditorApplication {
         this.log('Done')
 
         //
-        console.log(this.data)
+        // console.log(this.data)
       })
   }
 }

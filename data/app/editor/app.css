@@ -146,6 +146,11 @@ footer p {
   background: white;
   border-right: 1px solid currentColor;
   max-width: 32rem;
+  width: 20%;
+}
+
+.editor, .preview {
+  width: 40%;
 }
 
 nav.tabs {
