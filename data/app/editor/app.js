@@ -117,17 +117,19 @@ class EditorApplication {
     this.sidebar = new Vue({
       template: `
         <div class="sidebar">
-          <nav class="tabs">
-            <a v-bind:class="{selected: currentView === 'pages'}"
-              @click="currentView = 'pages'"
-              href="#" title="Show pages">Pages</a>
-            <a v-bind:class="{selected: currentView === 'files'}"
-              @click="currentView = 'files'"
-              href="#"  title="Show files">Files</a>
-            <a v-bind:class="{selected: currentView === 'components'}"
-              @click="currentView = 'components'" href="#"
-              title="Show components">Components</a>
-          </nav>
+          <div class="column-header">
+            <nav class="tabs">
+              <a v-bind:class="{selected: currentView === 'pages'}"
+                @click="currentView = 'pages'"
+                href="#" title="Show pages">Pages</a>
+              <a v-bind:class="{selected: currentView === 'files'}"
+                @click="currentView = 'files'"
+                href="#"  title="Show files">Files</a>
+              <a v-bind:class="{selected: currentView === 'components'}"
+                @click="currentView = 'components'" href="#"
+                title="Show components">Components</a>
+            </nav>
+          </div>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
@@ -224,7 +226,9 @@ class EditorApplication {
     this.preview = new Vue({
       template: `
         <div class="preview">
-          <h2>Live Preview ~ <a class="preview-url" :href="url" title="Preview URL">{{path}}</a></h2>
+          <div class="column-header">
+            <h2>Live Preview ~ <a class="preview-url" :href="url" title="Preview URL">{{path}}</a></h2>
+          </div>
           <iframe :src="url" class="live"></iframe>
         </div>
       `,
@@ -266,10 +270,10 @@ class EditorApplication {
             <h2>{{title}}</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a v-bind:class="{selected: currentView === 'source-editor'}"
+                <a v-bind:class="{selected: currentView === 'source-editor', hidden: currentFile === null}"
                   @click="currentView = 'source-editor'"
                   href="#" title="Show source editor">Source</a>
-                <a v-bind:class="{selected: currentView === 'visual-editor'}"
+                <a v-bind:class="{selected: currentView === 'visual-editor', hidden: currentFile === null}"
                   @click="currentView = 'visual-editor'"
                   href="#"  title="Show visual editor">Visual</a>
               </nav>
@@ -350,13 +354,13 @@ class EditorApplication {
           methods: {
             closeFile: function (e) {
               e.preventDefault()
-              console.log('close file:' + this.currentFile)
-
               this.canSave = false
               bus.$emit('close:file')
             },
             saveAndRun: function (e) {
               e.preventDefault()
+
+              // TODO
               console.log('save and run:' + this.currentFile)
             },
             getModeForMime (mime) {
@@ -367,7 +371,6 @@ class EditorApplication {
                 case 'text/html':
                   return 'htmlmixed'
               }
-
               return mime
             },
             setCodeMirror: function (options) {

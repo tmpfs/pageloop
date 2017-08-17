@@ -98,7 +98,7 @@ h2 {
   text-transform: uppercase;
   /*background: darkgray;*/
   /*text-shadow: 1px 1px white;*/
-  border-bottom: 1px solid currentColor;
+  /*border-bottom: 1px solid currentColor;*/
 }
 
 main {
@@ -171,6 +171,7 @@ nav.tabs > a {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  border-bottom: 1px solid currentColor;
 }
 
 .column-header > * {
@@ -178,7 +179,7 @@ nav.tabs > a {
 }
 
 nav.tabs {
-  border-bottom: 1px solid currentColor;
+  /*border-bottom: 1px solid currentColor;*/
 }
 
 nav.tabs > a:not(:first-child) {
