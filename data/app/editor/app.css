@@ -203,7 +203,7 @@ nav.tabs > a:not(:first-child) {
   height: calc(100% - 23px);
 }
 
-.editor .scroll > p:first-child {
+.editor > .column-header + p {
   padding-left: 2rem;
 }
 
