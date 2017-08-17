@@ -283,7 +283,7 @@ class EditorApplication {
           title: 'Editor',
           currentView: 'welcome',
           defaultOpenView: 'source-editor',
-          currentFile: {content: ''}
+          currentFile: null
         }
       },
       created: function () {
@@ -293,7 +293,7 @@ class EditorApplication {
       },
       methods: {
         open: function (item) {
-          data.currentFile = item
+          this.currentFile = item
 
           if (this.currentView === 'welcome') {
             this.currentView = this.defaultOpenView
@@ -316,8 +316,26 @@ class EditorApplication {
           template: `<p>Select a page or file to start editing.</p>`
         },
         'source-editor': {
-          template: `<div class="source-editor"></div>`,
+          template: `<div class="source-editor">
+              <nav class="toolbar">
+                <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Close ❌</a>
+              </nav>
+              <div class="text-editor"></div>
+              <nav class="toolbar">
+                <a @click="saveAndRun" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Save & Run</a>
+              </nav>
+            </div>`,
+          data: function () {
+            return {
+              mirror: null,
+              canSave: false
+            }
+          },
           methods: {
+            saveAndRun: function (e) {
+              e.preventDefault()
+              console.log('save and run:' + this.currentFile)
+            },
             getModeForMime (mime) {
               // remove charset info
               mime = mime.replace(/;.*$/, '')
@@ -331,7 +349,7 @@ class EditorApplication {
             },
             setCodeMirror: function (options) {
               options = options || {}
-              let p = document.querySelector('.source-editor')
+              let p = document.querySelector('.text-editor')
               if (p.firstChild) {
                 p.removeChild(p.firstChild)
               }
@@ -343,12 +361,8 @@ class EditorApplication {
               })
             },
             showSourceText: function (item) {
+              this.canSave = true
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
-            }
-          },
-          data: function () {
-            return {
-              mirror: null
             }
           },
           mounted: function () {

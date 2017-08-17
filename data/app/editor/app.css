@@ -219,6 +219,11 @@ iframe {
   display: none;
 }
 
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .sidebar .scroll {
   /*padding-top: 1rem;*/
 }
@@ -276,6 +281,26 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 
 .source-editor {
   height: 100%;
+}
+
+.source-editor > .toolbar {
+  height: 2.3rem;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  text-align: right;
+  background: #073642; /* solarized dark */
+  color: #93a1a1;
+}
+
+.toolbar > a {
+  display: inline-block;
+  color: #eee8d5;
+  background: #586e75;
+  padding: 0 0.5rem;
+}
+
+.text-editor {
+  height: calc(100% - 6.9rem)
 }
 
 .CodeMirror {
