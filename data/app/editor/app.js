@@ -332,7 +332,7 @@ class EditorApplication {
             this.mirror = CodeMirror(document.querySelector('.source-editor'), {
               value: '',
               mode: 'htmlmixed',
-              theme: 'solarized'
+              theme: 'solarized dark'
             })
 
             // Handles setting file content when switching tabs
