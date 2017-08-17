@@ -59,13 +59,26 @@ class EditorApplication {
   }
 
   refresh () {
+    this.log(`Loading preview ${this.getPreviewUrl()}`)
     this.preview.path = this.data.app.url
     this.preview.url = this.getPreviewUrl()
   }
 
   ui (data) {
+    let switcher = this.switcher = new Vue({
+      template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
+      data: function () {
+        return {
+          hidden: true
+        }
+      }
+    })
+
     this.identifier = new Vue({
-      template: `<div class="app-id"><a href="#" @click="click">▾ <span class="name">{{name}}</span></a></div>`,
+      template: `
+        <div class="app-id">
+          <a href="#" @click="click">▾ <span class="name">{{name}}</span></a>
+        </div>`,
       data: function () {
         return {
           name: data.app.id,
@@ -76,7 +89,7 @@ class EditorApplication {
         click: function (e) {
           e.preventDefault()
           this.show = !this.show
-          console.log('id click: ' + this.show)
+          switcher.hidden = !this.show
         }
       }
     })
@@ -127,6 +140,7 @@ class EditorApplication {
     Vue.component('editor-main', {
       template: `
         <div class="content-main">
+          <div class="switcher hidden"></div>
           <div class="content">
             <app-sidebar></app-sidebar>
             <app-editor></app-editor>
@@ -156,6 +170,7 @@ class EditorApplication {
     this.preview.$mount('.preview')
     this.logger.$mount('footer .log')
     this.identifier.$mount('.app-id')
+    this.switcher.$mount('.switcher')
 
     return {header: header, main: main, footer: footer}
   }
@@ -192,9 +207,7 @@ class EditorApplication {
           })
       })
       .then(() => {
-        this.log(`Loading preview ${this.getPreviewUrl()}`)
-
-        // Load the iframe preview
+        // Load the preview
         this.refresh()
       })
       .catch((err) => { this.log(err) })
