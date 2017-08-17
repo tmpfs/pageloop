@@ -279,8 +279,10 @@ class EditorApplication {
         </div>
       `,
       data: function () {
+        let defaultTitle = 'Editor'
         return {
-          title: 'Editor',
+          title: defaultTitle,
+          defaultTitle: defaultTitle,
           currentView: 'welcome',
           defaultOpenView: 'source-editor',
           currentFile: null
@@ -290,10 +292,24 @@ class EditorApplication {
         bus.$on('open:file', (item) => {
           this.open(item)
         })
+        bus.$on('close:file', () => {
+          this.close()
+        })
       },
       methods: {
+        close: function () {
+          if (this.currentFile) {
+            this.currentView = 'welcome'
+            this.title = this.defaultTitle
+            this.currentFile = null
+            // Must clear for tabs too
+            data.currentFile = null
+          }
+        },
         open: function (item) {
-          this.currentFile = item
+          // NOTE: we need to store in data source for
+          // NOTE: switching editor tabs
+          data.currentFile = this.currentFile = item
 
           if (this.currentView === 'welcome') {
             this.currentView = this.defaultOpenView
@@ -318,7 +334,7 @@ class EditorApplication {
         'source-editor': {
           template: `<div class="source-editor">
               <nav class="toolbar">
-                <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Close ❌</a>
+                <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Close file">Close ❌</a>
               </nav>
               <div class="text-editor"></div>
               <nav class="toolbar">
@@ -332,6 +348,13 @@ class EditorApplication {
             }
           },
           methods: {
+            closeFile: function (e) {
+              e.preventDefault()
+              console.log('close file:' + this.currentFile)
+
+              this.canSave = false
+              bus.$emit('close:file')
+            },
             saveAndRun: function (e) {
               e.preventDefault()
               console.log('save and run:' + this.currentFile)
@@ -348,6 +371,7 @@ class EditorApplication {
               return mime
             },
             setCodeMirror: function (options) {
+              this.canSave = true
               options = options || {}
               let p = document.querySelector('.text-editor')
               if (p.firstChild) {
@@ -361,7 +385,6 @@ class EditorApplication {
               })
             },
             showSourceText: function (item) {
-              this.canSave = true
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
             }
           },

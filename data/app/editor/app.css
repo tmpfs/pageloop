@@ -300,6 +300,7 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 }
 
 .text-editor {
+  background: #002b36;
   height: calc(100% - 6.9rem)
 }
 
