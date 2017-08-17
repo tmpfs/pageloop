@@ -12,8 +12,9 @@ class LocationParser {
 
 class AppDataSource {
   constructor (loc) {
-    this.url = `/api/${loc.container}/${loc.application}/`
     this.loc = loc
+    this.url = `/api/${loc.container}/${loc.application}/`
+    this.source = `/apps/source/${loc.container}/${loc.application}`
 
     // current application
     this.app = {
@@ -36,10 +37,13 @@ class AppDataSource {
       .catch((err) => err)
   }
 
+  getFileContents (pathname) {
+    let url = this.source
+    return fetch(url + pathname)
+      .catch((err) => err)
+  }
+
   getApplication () {
-
-    console.log('getting app data: ' + this.url)
-
     return this.json(this.url)
       .then((app) => {
         // merge properties
@@ -47,7 +51,6 @@ class AppDataSource {
           this.app[k] = app[k]
         }
         this.app.identifier = this.app.owner + '/' + this.app.name
-        console.log('id: ' + this.app.identifier)
         return this.app
       })
   }
@@ -165,7 +168,6 @@ class EditorApplication {
           return data.getFiles()
             .then((list) => {
               this.files = list
-              console.log('FILES LOADED')
               bus.$emit('files:load', list)
             })
         }
@@ -265,9 +267,7 @@ class EditorApplication {
               </nav>
             </div>
           </div>
-          <div class="scroll">
-            <component v-bind:is="currentView"></component>
-          </div>
+          <component v-bind:is="currentView"></component>
         </div>
       `,
       data: function () {
@@ -291,15 +291,26 @@ class EditorApplication {
             this.currentView = this.defaultOpenView
           }
 
+          data.getFileContents(item.url)
+            .then((res) => {
+              // TODO: get blob for binary types
+              return res.text()
+            }).then((content) => {
+              console.log(content)
+              this.$children[0].showSourceText(item, content)
+            })
+
+          /*
+
           this.currentFile = item
 
           const mime = item.mime.replace(/;.*$/, '')
-
           switch (mime) {
             case 'text/html':
               console.log('got html mime type')
               break
           }
+          */
         }
       },
       components: {
@@ -308,27 +319,24 @@ class EditorApplication {
         },
         'source-editor': {
           template: `<div class="source-editor"></div>`,
+          methods: {
+            showSourceText: function (item, contents) {
+              console.log('show source text')
+              this.mirror.setValue(contents)
+            }
+          },
+          data: function () {
+            return {
+              mirror: null
+            }
+          },
           mounted: function () {
             console.log('mounted')
-            console.log(this.$parent.currentFile)
-
-            /*
-            let value = ''
-            let item = this.$parent.currentFile
-            if (item) {
-              value = `Loading ${item.url}`
-            }
-
-            let url = `/apps/source/${}`
-            */
-
-            /*
-            CodeMirror(document.querySelector('.source-editor'), {
-              value: value,
+            this.mirror = CodeMirror(document.querySelector('.source-editor'), {
+              value: '',
               mode: 'htmlmixed',
               theme: 'midnight'
             })
-            */
           }
         },
         'visual-editor': {
