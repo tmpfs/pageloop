@@ -148,19 +148,39 @@ footer p {
   max-width: 32rem;
 }
 
-.sidebar > h2 {
+nav.tabs {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   padding: 0;
+  font-size: 1.4rem;
+  text-transform: uppercase;
 }
 
-.sidebar > h2 > a {
+nav.tabs > a {
   flex: 1 0;
   text-align: center;
 }
 
-.sidebar > h2 > a:not(:first-child) {
+.column-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.column-header > * {
+  flex: 1 0;
+}
+
+nav.tabs {
+  border-bottom: 1px solid currentColor;
+}
+
+nav.tabs > a:not(:first-child) {
+  border-left: 1px solid currentColor;
+}
+
+.editor > .column-header .tabs > a {
   border-left: 1px solid currentColor;
 }
 
@@ -198,7 +218,7 @@ iframe {
   /*padding-top: 1rem;*/
 }
 
-.tab > a, header > nav > a, .page, .file {
+.tabs > a, header > nav > a, .page, .file {
   background: transparent;
 }
 
@@ -207,7 +227,7 @@ iframe {
   cursor: pointer;
 }
 
-h2 > a:hover, header > nav > a:hover {
+.tabs > a:hover, header > nav > a:hover {
   background: #3000d9;
   color: white;
   transition: all 0.5s ease-out;

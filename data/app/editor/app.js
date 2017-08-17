@@ -98,7 +98,7 @@ class EditorApplication {
     this.sidebar = new Vue({
       template: `
         <div class="sidebar">
-          <h2 class="tab">
+          <nav class="tabs">
             <a class="pages"
               v-bind:class="{selected: currentView === 'pages'}"
               @click="currentView = 'pages'"
@@ -111,7 +111,7 @@ class EditorApplication {
               v-bind:class="{selected: currentView === 'components'}"
               @click="currentView = 'components'" href="#"
               title="Show components">Components</a>
-          </h2>
+          </nav>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
@@ -205,10 +205,18 @@ class EditorApplication {
       }
     })
 
-    Vue.component('app-editor', {
+    this.editor = new Vue({
       template: `
         <div class="editor">
-          <h2>Editor</h2>
+          <div class="column-header">
+            <h2>Editor</h2>
+            <div class="column-options">
+              <nav class="tabs">
+                <a href="#">Source</a>
+                <a href="#">Visual</a>
+              </nav>
+            </div>
+          </div>
           <div class="scroll">
             <p>Select a page or file to start editing.</p>
           </div>
@@ -222,7 +230,7 @@ class EditorApplication {
           <div class="switcher hidden"></div>
           <div class="content">
             <div class="sidebar"></div>
-            <app-editor></app-editor>
+            <div class="editor"></div>
             <div class="preview"></div>
           </div>
         </div>
@@ -246,11 +254,12 @@ class EditorApplication {
     let footer = new Vue({el: 'footer', data: data})
 
     // mount views
-    this.preview.$mount('.preview')
     this.logger.$mount('footer .log')
     this.identifier.$mount('.app-id')
     this.switcher.$mount('.switcher')
     this.sidebar.$mount('.sidebar')
+    this.editor.$mount('.editor')
+    this.preview.$mount('.preview')
 
     return {header: header, main: main, footer: footer}
   }
