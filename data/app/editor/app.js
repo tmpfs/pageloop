@@ -99,9 +99,18 @@ class EditorApplication {
       template: `
         <div class="sidebar">
           <h2 class="tab">
-            <a class="pages" @click="currentView = 'pages'" href="#" title="Show pages">Pages</a>
-            <a class="files"  @click="currentView = 'files'" href="#"  title="Show files">Files</a>
-            <a class="components" @click="currentView = 'components'" href="#" title="Show components">Components</a>
+            <a class="pages"
+              v-bind:class="{selected: currentView === 'pages'}"
+              @click="currentView = 'pages'"
+              href="#" title="Show pages">Pages</a>
+            <a class="files"
+              v-bind:class="{selected: currentView === 'files'}"
+              @click="currentView = 'files'"
+              href="#"  title="Show files">Files</a>
+            <a class="components"
+              v-bind:class="{selected: currentView === 'components'}"
+              @click="currentView = 'components'" href="#"
+              title="Show components">Components</a>
           </h2>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
