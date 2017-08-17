@@ -5,8 +5,146 @@ description: Editor inferface for web applications.
 keywords: web, editor, application
 ---
 
-<script src="vendor/vue.js" async></script>
+<!doctype html>
+<html lang="{{.lang}}">
+  <head>
+		<title>{{.title}}</title>
+		{{if .description}}
+		<meta name="description" content="{{.description}}" />
+		{{end}}
+    <link rel="stylesheet" href='{{root "app.css"}}' />
+    <script src="vendor/vue.js"></script>
+  </head>
+  <body>
 
-<editor>
+    <header>
+      <nav>
+        <a href="/" title="Home page">
+          <span>Ꝏ</span>&nbsp;Home
+        </a>
+        <a href="/apps/" title="All applications">Apps</a>
+        <a href="/docs/" title="Documentation">Docs</a>
+      </nav>
+      <app-id></app-id>
+    </header>
+    <main>
+      <editor-main></editor-main>
+    </main>
+    <footer>
+      <div class="log"></div>
+    </footer>
 
-</editor>
+  <script>
+
+    Vue.component("app-id", {
+      template: `<div class="app-id"><a href="#switch">▾ <span class="name">${name}</span></a></div>`,
+      data: function() {
+        return {
+          name: "container / application"
+        }
+      },
+      created: function() {
+        console.log('app id created')
+      }
+    })
+
+    Vue.component("app-sidebar", {
+      template: `
+        <div class="sidebar">
+          <h2 class="tab">
+            <a class="pages selected" data-target=".pages-list" href="#pages" title="Show pages">Pages</a>
+            <a class="files" href="#files"  data-target=".files-list"title="Show files">Files</a>
+            <a class="components" href="#components" data-target=".components-list" title="Show components">Components</a>
+          </h2>
+          <div class="scroll">
+              <div class="pages-list"></div>
+              <div class="files-list hidden"></div>
+              <div class="components-list hidden"></div>
+          </div>
+        </div>
+        `
+    })
+
+    Vue.component("app-preview", {
+      template: `
+        <div class="preview">
+          <h2>Live Preview ~ <a class="preview-url" href="" title="Preview URL"></a></h2>
+          <iframe class="live"></iframe>
+        </div>
+        `
+    })
+
+    Vue.component("app-editor", {
+      template: `
+          <div class="editor">
+            <h2>Editor</h2>
+            <div class="scroll">
+              <p>Select a page or file to start editing.</p>
+            </div>
+          </div>
+        `
+    })
+
+    Vue.component("editor-main", {
+      template: `
+          <div class="content">
+            <app-sidebar><slot /></app-sidebar>
+            <app-editor><slot /></app-editor>
+            <app-preview></app-preview>
+          </div>
+        `,
+      created: function() {
+        console.log('app created')
+      }
+    })
+
+    new Vue(
+        {delimiters: ['${', '}'], el: 'main'})
+  </script>
+
+    <!--
+    <header>
+      <nav>
+        <a href="/" title="Home page">
+					<span>Ꝏ</span>&nbsp;Home
+        </a>
+        <a href="/apps/" title="All applications">Apps</a>
+        <a href="/docs/" title="Documentation">Docs</a>
+      </nav>
+      <div class="app-id"><a href="#switch">▾ <span class="name"></span></a></div>
+    </header>
+		<main>
+      <div class="switcher hidden"></div>
+      <div class="content">
+        <div class="sidebar">
+          <h2 class="tab">
+            <a class="pages selected" data-target=".pages-list" href="#pages" title="Show pages">Pages</a>
+            <a class="files" href="#files"  data-target=".files-list"title="Show files">Files</a>
+            <a class="components" href="#components" data-target=".components-list" title="Show components">Components</a>
+          </h2>
+          <div class="scroll">
+              <div class="pages-list"></div>
+              <div class="files-list hidden"></div>
+              <div class="components-list hidden"></div>
+          </div>
+        </div>
+        <div class="editor">
+          <h2>Editor</h2>
+          <div class="scroll">
+            <p>Select a page or file to start editing.</p>
+          </div>
+        </div>
+        <div class="preview">
+          <h2>Live Preview ~ <a class="preview-url" href="" title="Preview URL"></a></h2>
+          <iframe class="live"></iframe>
+        </div>
+      </div>
+		</main>
+    <footer>
+      <div class="log"></div>
+    </footer>
+    -->
+    <!--<script src="app.js" async></script>-->
+  </body>
+</html>
+
