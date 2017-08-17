@@ -57,15 +57,6 @@ class EditorApplication {
     this.identifier.name = this.loc.container + '/' + app.name
   }
 
-  setPages (list) {
-    this.sidebar.pages = list
-  }
-
-  setFiles (list) {
-    this.data.app.files = list
-    this.files.list = list
-  }
-
   refresh () {
     this.log(`Loading preview ${this.getPreviewUrl()}`)
     this.preview.path = this.data.app.url
@@ -129,12 +120,14 @@ class EditorApplication {
         loadPages: function (url) {
           return get(url + 'pages/')
             .then((list) => {
+              data.app.pages = list
               this.pages = list
             })
         },
         loadFiles: function (url) {
           return get(url + 'files/')
             .then((list) => {
+              data.app.files = list
               this.files = list
             })
         }
@@ -276,17 +269,6 @@ class EditorApplication {
         this.log(`Loading pages for ${this.data.app.name}`)
         return this.sidebar.loadPages(url)
           .then(this.sidebar.loadFiles(url))
-        /*
-        return this.get(url + 'pages/')
-          .then((pages) => {
-            this.setPages(pages)
-            this.log(`Loading files for ${this.data.app.name}`)
-            return this.get(url + 'files/')
-              .then((files) => {
-                this.setFiles(files)
-              })
-          })
-        */
       })
       .then(() => {
         // Load the preview
@@ -302,6 +284,7 @@ class EditorApplication {
     this.load(loc, this.data)
       .then(() => {
         this.sidebar.currentView = 'pages'
+        console.log(this.data)
         this.log('Done')
       })
   }
