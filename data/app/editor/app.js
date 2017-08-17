@@ -1,50 +1,46 @@
-/* globals document fetch */
+/* globals Vue document fetch */
+
+class LocationParser {
+  parse () {
+    let pth = document.location.pathname
+    let parts = pth.replace(/\/+$/, '').split('/')
+    let application = parts.pop()
+    let container = parts.pop()
+    return {application: application, container: container}
+  }
+}
+
+class AppDataSource {
+  constructor (location) {
+    this._location = location
+    this._containers = null
+
+    // current application
+    this.app = {
+      url: ''
+    }
+
+    this.preview = {
+      url: '',
+      path: ''
+    }
+
+    // application pages
+    this.pages = null
+
+    // application files
+    this.files = null
+  }
+
+  get containers () {
+    return this._containers
+  }
+}
+
 class EditorApplication {
   constructor () {
-    this.container = null
-    this.application = null
-
-    this.app = null
-    this.doc = document
-    this.files = null
-    this.pages = null
-    this.el = {
-      appid: this.doc.querySelector('.app-id'),
-      switcher: this.doc.querySelector('.switcher'),
-      previewUrl: this.doc.querySelector('.preview-url'),
-      sidebar: this.doc.querySelector('.sidebar'),
-      pagesList: this.doc.querySelector('.pages-list'),
-      filesList: this.doc.querySelector('.files-list'),
-      componentsList: this.doc.querySelector('.components-list'),
-      editor: this.doc.querySelector('.editor'),
-      preview: this.doc.querySelector('.preview'),
-      live: this.doc.querySelector('.live'),
-      log: this.doc.querySelector('.log')
-    }
-  }
-
-  template (selector) {
-    var tpl = document.querySelector('template')
-    tpl = tpl && tpl.content ? tpl.content : tpl
-    tpl = tpl.querySelector(selector)
-    tpl = tpl.cloneNode(true)
-    return tpl
-  }
-
-  text (txt) {
-    return this.doc.createTextNode(txt)
-  }
-
-  element (name, attr) {
-    let el = this.doc.createElement(name)
-    for (let k in attr) {
-      el.setAttribute(k, attr[k])
-    }
-    return el
-  }
-
-  removeChildren (node) {
-    node.innerHTML = ''
+    this.location = new LocationParser().parse()
+    this.data = new AppDataSource(this.location)
   }
 
   get (url, options) {
@@ -54,136 +50,137 @@ class EditorApplication {
   }
 
   getPreviewUrl () {
-    return document.location.origin + this.app.url
+    return document.location.origin + this.data.app.url
   }
 
   refresh () {
+    this.preview.path = this.data.app.url
+    this.preview.url = this.getPreviewUrl()
+    /*
     let u = this.getPreviewUrl()
-    this.el.previewUrl.innerText = `${this.app.url}`
+    this.el.previewUrl.innerText = `${this.data.app.url}`
     this.el.previewUrl.setAttribute('href', u)
     this.el.live.addEventListener('load', () => {
       this.log(`Preview loaded ${u}`)
     })
     this.el.live.setAttribute('src', u)
+    */
+  }
+
+  ui (data) {
+    Vue.component('app-id', {
+      template: `<div class="app-id"><a href="#switch">▾ <span class="name">{{name}}</span></a></div>`,
+      data: function () {
+        return {
+          name: 'container / application'
+        }
+      }
+    })
+
+    Vue.component('app-sidebar', {
+      template: `
+        <div class="sidebar">
+          <h2 class="tab">
+            <a class="pages selected" data-target=".pages-list" href="#pages" title="Show pages">Pages</a>
+            <a class="files" href="#files"  data-target=".files-list"title="Show files">Files</a>
+            <a class="components" href="#components" data-target=".components-list" title="Show components">Components</a>
+          </h2>
+          <div class="scroll">
+              <div class="pages-list"></div>
+              <div class="files-list hidden"></div>
+              <div class="components-list hidden"></div>
+          </div>
+        </div>
+      `
+    })
+
+    this.preview = new Vue({
+      template: `
+        <div class="preview">
+          <h2>Live Preview ~ <a class="preview-url" :href="url" title="Preview URL">{{path}}</a></h2>
+          <iframe :src="url" class="live"></iframe>
+        </div>
+      `,
+      data: function () {
+        return {
+          path: data.preview.path,
+          url: data.preview.url
+        }
+      }
+    })
+
+    Vue.component('app-editor', {
+      template: `
+        <div class="editor">
+          <h2>Editor</h2>
+          <div class="scroll">
+            <p>Select a page or file to start editing.</p>
+          </div>
+        </div>
+      `
+    })
+
+    Vue.component('editor-main', {
+      template: `
+        <div class="content-main">
+          <div class="content">
+            <app-sidebar></app-sidebar>
+            <app-editor></app-editor>
+            <div class="preview"></div>
+          </div>
+        </div>
+      `
+    })
+
+    this.logger = new Vue({
+      template: `
+        <div class="log"><p>{{message}}</p></div>
+      `,
+      data: function () {
+        return {
+          message: ''
+        }
+      }
+    })
+
+    let header = new Vue({el: 'header'})
+    let main = new Vue({el: 'main', data: data})
+    let footer = new Vue({el: 'footer', data: data})
+
+    // mount vues
+    this.preview.$mount('.preview')
+    this.logger.$mount('footer .log')
+
+    return {header: header, main: main, footer: footer}
   }
 
   log (msg) {
-    let p = this.element('p')
     let err = (msg instanceof Error)
     if (err) {
-      p.setAttribute('class', 'error')
-      msg = '! ' + err
+      // p.setAttribute('class', 'error')
+      msg = '! ' + msg
     } else {
-      p.setAttribute('class', 'info')
+      // p.setAttribute('class', 'info')
       msg = '# ' + msg
     }
-    p.appendChild(this.text(msg))
-    this.removeChildren(this.el.log)
-    this.el.log.appendChild(p)
+
+    this.logger.message = msg
   }
 
-  render (data, fn) {
-    let out = ''
-    data.forEach((item) => {
-      out += fn(item)
-    })
-    return out
-  }
-
-  getPageTemplate (item) {
-    return `
-        <div class="page"><span class="name" data-file="${item.url}" title="Open ${item.name}">${item.url}</span></div>
-      `
-  }
-
-  getFileTemplate (item) {
-    return `
-        <div class="file"><span class="name" data-file="${item.url}" title="Open ${item.name}">${item.url}</span></div>
-      `
-  }
-
-  getSwitcherContainer (c) {
-    let o = `<div class="container"><h3>${c.name}</h3><ul>`
-    c.apps.forEach((a) => {
-      let href = '/apps/edit/' + c.name + '/' + a.name + '/'
-      o += `
-          <li>
-            <a href="${href}">${a.name}</a>
-          </li>
-        `
-    })
-    o += `</ul></div>`
-    return o
-  }
-
-  ui () {
-    // Sidebar tabs
-    this.doc.querySelectorAll('.tab > a').forEach((n) => {
-      console.log(n)
-      n.addEventListener('click', (e) => {
-        e.preventDefault()
-        let el = e.currentTarget
-        let target = this.doc.querySelector(el.getAttribute('data-target'))
-
-        this.doc.querySelectorAll('.sidebar > .scroll > *').forEach((n) => {
-          n.classList.add('hidden')
-        })
-        target.classList.remove('hidden')
-        this.doc.querySelector('.tab > a.selected').classList.remove('selected')
-        el.classList.add('selected')
-      })
-    })
-
-    // Application switcher
-    this.doc.querySelector('.app-id a').addEventListener('click', (e) => {
-      e.preventDefault()
-      let n = e.currentTarget
-      !n.isOpen ? this.select() : this.el.switcher.classList.add('hidden')
-      n.isOpen = !n.isOpen
-    })
-  }
-
-  // Select an application.
-  select () {
-    let url = `/api/`
-    this.log(`Loading container data from ${url}`)
-    this.get(url)
-      .then((containers) => {
-        this.removeChildren(this.el.switcher)
-        this.el.switcher.classList.remove('hidden')
-        console.log(containers)
-        containers.forEach((c) => {
-          let cn = this.getSwitcherContainer(c)
-          this.el.switcher.innerHTML += cn
-        })
-      })
-      .catch((err) => { this.log(err) })
-  }
-
-  init () {
-    let pth = this.doc.location.pathname
-    let parts = pth.replace(/\/+$/, '').split('/')
-    this.application = parts.pop()
-    this.container = parts.pop()
-
-    this.el.appid.querySelector('.name').innerText =
-      `${this.container} / ${this.application}`
-
-    let url = `/api/${this.container}/${this.application}/`
+  load (data) {
+    let url = `/api/${this.location.container}/${this.location.application}/`
     this.log(`Loading app data from ${url}`)
     this.get(url)
       .then((app) => {
-        this.app = app
-        this.log(`Loading pages for ${this.app.name}`)
+        this.data.app = app
+        this.log(`Loading pages for ${this.data.app.name}`)
         return this.get(url + 'pages/')
           .then((pages) => {
-            this.pages = pages
-            this.el.pagesList.innerHTML = this.render(this.pages, this.getPageTemplate)
-            this.log(`Loading files for ${this.app.name}`)
+            this.data.pages = pages
+            this.log(`Loading files for ${this.data.app.name}`)
             return this.get(url + 'files/')
               .then((files) => {
-                this.files = files
-                this.el.filesList.innerHTML = this.render(this.files, this.getFileTemplate)
+                this.data.files = files
               })
           })
       })
@@ -192,13 +189,17 @@ class EditorApplication {
 
         // Load the iframe preview
         this.refresh()
-
-        // Initialize the UI event handling
-        this.ui()
       })
       .catch((err) => { this.log(err) })
+  }
+
+  init () {
+    this.ui(this.data)
+    this.log('Interface created')
+    this.load(this.data)
   }
 }
 
 let app = new EditorApplication()
 app.init()
+
