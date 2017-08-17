@@ -335,8 +335,9 @@ class EditorApplication {
             this.mirror = CodeMirror(document.querySelector('.source-editor'), {
               value: '',
               mode: 'htmlmixed',
-              theme: 'midnight'
+              theme: 'solarized'
             })
+            this.mirror.setSize('100%', '100%')
           }
         },
         'visual-editor': {
