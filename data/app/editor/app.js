@@ -319,8 +319,31 @@ class EditorApplication {
         'source-editor': {
           template: `<div class="source-editor"></div>`,
           methods: {
+            getModeForMime (mime) {
+              // remove charset info
+              mime = mime.replace(/;.*$/, '')
+              console.log(mime)
+              switch (mime) {
+                case 'text/html':
+                  return 'htmlmixed'
+              }
+
+              return mime
+            },
+            setCodeMirror: function (options) {
+              options = options || {}
+              let p = document.querySelector('.source-editor')
+              if (p.firstChild) {
+                p.removeChild(p.firstChild)
+              }
+              this.mirror = CodeMirror(p, {
+                value: options.value || '',
+                mode: options.mode || 'htmlmixed',
+                theme: options.theme || 'solarized dark'
+              })
+            },
             showSourceText: function (item, content) {
-              this.mirror.setValue(content)
+              this.setCodeMirror({value: content, mode: this.getModeForMime(item.mime)})
             }
           },
           data: function () {
@@ -329,15 +352,10 @@ class EditorApplication {
             }
           },
           mounted: function () {
-            this.mirror = CodeMirror(document.querySelector('.source-editor'), {
-              value: '',
-              mode: 'htmlmixed',
-              theme: 'solarized dark'
-            })
-
+            let item = data.currentFile
             // Handles setting file content when switching tabs
-            if (data.currentFile && data.currentFile.content) {
-              this.mirror.setValue(data.currentFile.content)
+            if (item && item.content) {
+              this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
             }
           }
         },

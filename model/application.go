@@ -395,6 +395,8 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 
     if len(frontmatter) > 0 {
       fm := bytes.Join(frontmatter, []byte("\n"))
+      println("parsing frontmatter")
+      println(page.Path)
       err := yaml.Unmarshal(fm, &page.PageData)
       if err != nil {
         return nil, err
@@ -410,8 +412,19 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
   // external files
   dir, name := filepath.Split(page.file.Path)
   for _, dataType := range types {
-    dataPath := TEMPLATE_FILE.ReplaceAllString(name, dataType)
+    dataPath := name
+    if TEMPLATE_FILE.MatchString(name) {
+      dataPath = TEMPLATE_FILE.ReplaceAllString(name, dataType)
+    } else if MARKDOWN_FILE.MatchString(name) {
+      dataPath = MARKDOWN_FILE.ReplaceAllString(name, dataType)
+    }
     dataPath = filepath.Join(dir, dataPath)
+    // Failed to change file extension
+    if dataPath == page.file.Path {
+      return nil, nil
+    }
+    println("loading external page data")
+    println(dataPath)
     fh, err := os.Open(dataPath)
     if err != nil {
       if !os.IsNotExist(err) {
@@ -432,6 +445,8 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
         }
         page.PageDataType = DATA_JSON_FILE
       } else if dataType == YAML {
+        println("parsing yaml document data type")
+        println(page.Path)
         err = yaml.Unmarshal(contents, &page.PageData)
         if err != nil {
           return nil, err
@@ -446,6 +461,10 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 }
 
 func init() {
-	// TODO: find out yaml mime type
-	mime.AddExtensionType(".yml", "text/yaml")
+  // Mime types set to those for code mirror modes
+	mime.AddExtensionType(".yml", "text/x-yaml")
+	mime.AddExtensionType(".yaml", "text/x-yaml")
+	mime.AddExtensionType(".md", "text/x-markdown")
+	mime.AddExtensionType(".markdown", "text/x-markdown")
+// text/x-markdown
 }
