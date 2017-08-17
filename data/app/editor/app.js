@@ -17,19 +17,15 @@ class AppDataSource {
 
     // current application
     this.app = {
-      url: ''
+      url: '',
+      pages: null,
+      files: null
     }
 
     this.preview = {
       url: '',
       path: ''
     }
-
-    // application pages
-    this.pages = null
-
-    // application files
-    this.files = null
   }
 
   get containers () {
@@ -54,8 +50,20 @@ class EditorApplication {
   }
 
   setApplication (app) {
-    this.data.app = app
+    // merge properties
+    for (let k in app) {
+      this.data.app[k] = app[k]
+    }
     this.identifier.name = this.location.container + '/' + this.location.application
+  }
+
+  setPages (list) {
+    this.sidebar.pages = list
+  }
+
+  setFiles (list) {
+    this.data.app.files = list
+    this.files.list = list
   }
 
   refresh () {
@@ -65,6 +73,8 @@ class EditorApplication {
   }
 
   ui (data) {
+    let get = this.get
+
     let switcher = this.switcher = new Vue({
       template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
       data: function () {
@@ -94,21 +104,76 @@ class EditorApplication {
       }
     })
 
-    Vue.component('app-sidebar', {
+    this.sidebar = new Vue({
       template: `
         <div class="sidebar">
           <h2 class="tab">
-            <a class="pages selected" data-target=".pages-list" href="#pages" title="Show pages">Pages</a>
-            <a class="files" href="#files"  data-target=".files-list"title="Show files">Files</a>
-            <a class="components" href="#components" data-target=".components-list" title="Show components">Components</a>
+            <a class="pages" @click="currentView = 'pages'" href="#" title="Show pages">Pages</a>
+            <a class="files"  @click="currentView = 'files'" href="#"  title="Show files">Files</a>
+            <a class="components" @click="currentView = 'components'" href="#" title="Show components">Components</a>
           </h2>
           <div class="scroll">
-              <div class="pages-list"></div>
-              <div class="files-list hidden"></div>
-              <div class="components-list hidden"></div>
+            <component v-bind:is="currentView"></component>
           </div>
         </div>
-      `
+      `,
+      data: function () {
+        return {
+          pages: [],
+          files: [],
+          currentView: 'pages'
+        }
+      },
+      methods: {
+        loadPages: function (url) {
+          return get(url + 'pages/')
+            .then((list) => {
+              this.pages = list
+              console.log(this.pages)
+            })
+        }
+      },
+      components: {
+        pages: {
+          template: `
+            <div class="pages-list">
+              <div class="page" v-for="item in list">
+                <span class="name">{{item.url}}</span>
+              </div>
+            </div>`,
+          props: ['pages'],
+          data: function () {
+            return {
+              list: this.pages
+            }
+          }
+        },
+        files: {
+          template: `
+            <div class="files-list">
+              <div class="file" v-for="item in list">
+                <span class="name">{{item.url}}</span>
+              </div>
+            </div>`,
+          props: ['files'],
+          data: function () {
+            return {
+              list: this.files
+            }
+          }
+        },
+        components: {
+          template: `
+            <div class="components-list">
+            </div>`,
+          props: ['components'],
+          data: function () {
+            return {
+              list: this.components
+            }
+          }
+        }
+      }
     })
 
     this.preview = new Vue({
@@ -142,7 +207,7 @@ class EditorApplication {
         <div class="content-main">
           <div class="switcher hidden"></div>
           <div class="content">
-            <app-sidebar></app-sidebar>
+            <div class="sidebar"></div>
             <app-editor></app-editor>
             <div class="preview"></div>
           </div>
@@ -171,6 +236,7 @@ class EditorApplication {
     this.logger.$mount('footer .log')
     this.identifier.$mount('.app-id')
     this.switcher.$mount('.switcher')
+    this.sidebar.$mount('.sidebar')
 
     return {header: header, main: main, footer: footer}
   }
@@ -189,22 +255,25 @@ class EditorApplication {
     this.logger.message = msg
   }
 
-  load (data) {
-    let url = `/api/${this.location.container}/${this.location.application}/`
+  load (loc, data) {
+    let url = `/api/${loc.container}/${loc.application}/`
     this.log(`Loading app data from ${url}`)
     return this.get(url)
       .then((app) => {
         this.setApplication(app)
         this.log(`Loading pages for ${this.data.app.name}`)
+        return this.sidebar.loadPages(url)
+        /*
         return this.get(url + 'pages/')
           .then((pages) => {
-            this.data.pages = pages
+            this.setPages(pages)
             this.log(`Loading files for ${this.data.app.name}`)
             return this.get(url + 'files/')
               .then((files) => {
-                this.data.files = files
+                this.setFiles(files)
               })
           })
+        */
       })
       .then(() => {
         // Load the preview
@@ -213,10 +282,10 @@ class EditorApplication {
       .catch((err) => { this.log(err) })
   }
 
-  init () {
+  init (loc) {
     this.ui(this.data)
     this.log('Interface created')
-    this.load(this.data)
+    this.load(loc, this.data)
       .then(() => {
         this.log('Done')
       })
@@ -224,5 +293,4 @@ class EditorApplication {
 }
 
 let app = new EditorApplication()
-app.init()
-
+app.init(new LocationParser().parse())
