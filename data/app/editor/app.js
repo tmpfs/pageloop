@@ -18,6 +18,8 @@ class AppDataSource {
     // current application
     this.app = {
       url: '',
+      identifier: '',
+      owner: loc.container,
       pages: [],
       files: []
     }
@@ -35,14 +37,18 @@ class AppDataSource {
   }
 
   getApplication () {
+
     console.log('getting app data: ' + this.url)
+
     return this.json(this.url)
       .then((app) => {
         // merge properties
         for (let k in app) {
           this.app[k] = app[k]
         }
-        return app
+        this.app.identifier = this.app.owner + '/' + this.app.name
+        console.log('id: ' + this.app.identifier)
+        return this.app
       })
   }
 
@@ -81,21 +87,14 @@ class EditorApplication {
     return document.location.origin + this.data.app.url
   }
 
-  setApplication (app) {
-    // merge properties
-    for (let k in app) {
-      this.data.app[k] = app[k]
-    }
-    this.identifier.name = this.loc.container + '/' + app.name
-  }
-
   refresh () {
     this.log(`Loading preview ${this.getPreviewUrl()}`)
     this.preview.path = this.data.app.url
     this.preview.url = this.getPreviewUrl()
   }
 
-  ui (data) {
+  ui () {
+    let data = this.data
     let bus = new Vue()
 
     let switcher = this.switcher = new Vue({
@@ -114,7 +113,7 @@ class EditorApplication {
         </div>`,
       data: function () {
         return {
-          name: data.app.id,
+          name: data.app.identifier,
           show: false
         }
       },
@@ -381,7 +380,6 @@ class EditorApplication {
   log (msg) {
     let err = (msg instanceof Error)
     if (err) {
-      // TODO: add error class
       msg = '! ' + msg
       this.logger.error = true
     } else {
@@ -391,49 +389,32 @@ class EditorApplication {
     this.logger.message = msg
   }
 
-  load (data) {
+  load () {
+    let data = this.data
     this.log(`Loading app from ${data.url}`)
     return this.data.getApplication()
       .then((app) => {
-        console.log('GOT APP DATA')
-        // todo: UPDATE VIEW
+        this.identifier.name = app.identifier
         this.log(`Loading pages for ${this.data.app.name}`)
       })
       .then(this.sidebar.loadPages())
       .then(this.sidebar.loadFiles())
       .then(() => {
-        // Load the preview
         this.refresh()
       })
       .catch((err) => { this.log(err) })
-
-    /*
-    return this.get(data.url)
-      .then((app) => {
-        this.setApplication(app)
-        console.log('app loaded')
-        this.log(`Loading pages for ${this.data.app.name}`)
-        return this.sidebar.loadPages()
-          .then(this.sidebar.loadFiles())
-      })
-      .then(() => {
-        // Load the preview
-        this.refresh()
-      })
-      .catch((err) => { this.log(err) })
-    */
   }
 
   init (loc) {
     loc = loc || this.loc
-    this.ui(this.data)
-    this.log('Interface created')
-    this.load(this.data)
+    this.ui()
+    this.load()
       .then(() => {
-        console.log('setting sidebar view')
         this.sidebar.currentView = 'pages'
-        console.log(this.data)
         this.log('Done')
+
+        //
+        console.log(this.data)
       })
   }
 }

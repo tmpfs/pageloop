@@ -218,8 +218,14 @@ iframe {
   /*padding-top: 1rem;*/
 }
 
-.tabs > a, header > nav > a, .page, .file {
+h2 a, .tabs > a, header > nav > a {
   background: transparent;
+}
+
+h2 a:hover, .tabs > a:hover, header > nav > a:hover {
+  background: #3000d9;
+  color: white;
+  transition: all 0.5s ease-out;
 }
 
 .page, .file {
@@ -228,14 +234,11 @@ iframe {
   cursor: pointer;
 }
 
-.tabs > a:hover, header > nav > a:hover {
-  background: #3000d9;
-  color: white;
-  transition: all 0.5s ease-out;
-}
-
 .tabs > .selected {
   text-decoration: underline;
+  background: #3000d9;
+  color: white;
+  pointer-events: none;
 }
 
 .page, .file {
