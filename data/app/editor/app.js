@@ -339,7 +339,8 @@ class EditorApplication {
               this.mirror = CodeMirror(p, {
                 value: options.value || '',
                 mode: options.mode || 'htmlmixed',
-                theme: options.theme || 'solarized dark'
+                theme: options.theme || 'solarized dark',
+                keyMap: 'vim'
               })
             },
             showSourceText: function (item, content) {
