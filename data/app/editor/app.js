@@ -1,4 +1,4 @@
-/* globals Vue document fetch */
+/* globals Vue CodeMirror document fetch */
 
 class LocationParser {
   parse () {
@@ -99,16 +99,13 @@ class EditorApplication {
       template: `
         <div class="sidebar">
           <nav class="tabs">
-            <a class="pages"
-              v-bind:class="{selected: currentView === 'pages'}"
+            <a v-bind:class="{selected: currentView === 'pages'}"
               @click="currentView = 'pages'"
               href="#" title="Show pages">Pages</a>
-            <a class="files"
-              v-bind:class="{selected: currentView === 'files'}"
+            <a v-bind:class="{selected: currentView === 'files'}"
               @click="currentView = 'files'"
               href="#"  title="Show files">Files</a>
-            <a class="components"
-              v-bind:class="{selected: currentView === 'components'}"
+            <a v-bind:class="{selected: currentView === 'components'}"
               @click="currentView = 'components'" href="#"
               title="Show components">Components</a>
           </nav>
@@ -145,25 +142,32 @@ class EditorApplication {
         pages: {
           template: `
             <div class="pages-list">
-              <div class="page" v-for="item in list">
+              <a @click="click(item)" class="page" v-for="item in list">
                 <span class="name">{{item.url}}</span>
-              </div>
+              </a>
             </div>`,
           data: function () {
             return {
-              list: []
+              list: [],
+              current: null
             }
           },
           created: function () {
             this.list = this.$parent.pages
+          },
+          methods: {
+            click: function (item) {
+              console.log('page clicked')
+              console.log(item)
+            }
           }
         },
         files: {
           template: `
             <div class="files-list">
-              <div class="file" v-for="item in list">
+              <a @click="click(item)" class="file" v-for="item in list">
                 <span class="name">{{item.url}}</span>
-              </div>
+              </a>
             </div>`,
           data: function () {
             return {
@@ -172,6 +176,12 @@ class EditorApplication {
           },
           created: function () {
             this.list = this.$parent.files
+          },
+          methods: {
+            click: function (item) {
+              console.log('file clicked')
+              console.log(item)
+            }
           }
         },
         components: {
@@ -212,16 +222,43 @@ class EditorApplication {
             <h2>Editor</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a href="#">Source</a>
-                <a href="#">Visual</a>
+                <a v-bind:class="{selected: currentView === 'source-editor'}"
+                  @click="currentView = 'source-editor'"
+                  href="#" title="Show source editor">Source</a>
+                <a v-bind:class="{selected: currentView === 'visual-editor'}"
+                  @click="currentView = 'visual-editor'"
+                  href="#"  title="Show visual editor">Visual</a>
               </nav>
             </div>
           </div>
           <div class="scroll">
-            <p>Select a page or file to start editing.</p>
+            <component v-bind:is="currentView"></component>
           </div>
         </div>
-      `
+      `,
+      data: function () {
+        return {
+          currentView: 'welcome'
+        }
+      },
+      components: {
+        welcome: {
+          template: `<p>Select a page or file to start editing.</p>`
+        },
+        'source-editor': {
+          template: `<div class="source-editor"></div>`,
+          mounted: function () {
+            console.log(document.querySelector('.source-editor'))
+            CodeMirror(document.querySelector('.source-editor'), {
+              value: 'function myScript(){return 100;}\n',
+              mode: 'javascript'
+            })
+          }
+        },
+        'visual-editor': {
+          template: `<div class="visual-editor"></div>`
+        }
+      }
     })
 
     Vue.component('editor-main', {

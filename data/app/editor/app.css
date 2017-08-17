@@ -198,7 +198,7 @@ nav.tabs > a:not(:first-child) {
   height: calc(100% - 23px);
 }
 
-.editor .scroll {
+.editor .scroll > p:first-child {
   padding-left: 2rem;
 }
 
@@ -223,6 +223,7 @@ iframe {
 }
 
 .page, .file {
+  display: block;
   padding: .2rem 0 .2rem 2rem;
   cursor: pointer;
 }
@@ -265,3 +266,6 @@ iframe {
 }
 */
 
+.CodeMirror {
+  font-size: 1.6rem;
+}

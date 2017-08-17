@@ -9,8 +9,12 @@ keywords: web, editor, application
   <head>
 		<title>{{.title}}</title>
 		<meta name="description" content="{{.description}}" />
+    <link rel="stylesheet" href="vendor/codemirror/lib/codemirror.css">
     <link rel="stylesheet" href='{{root "app.css"}}' />
+
     <script src="vendor/vue.js"></script>
+    <script src="vendor/codemirror/lib/codemirror.js"></script>
+    <script src="vendor/codemirror/mode/javascript/javascript.js"></script>
   </head>
   <body>
     <main>
