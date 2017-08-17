@@ -48,13 +48,13 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
       }
       file.data = bytes
 			file.source = bytes
-
-			if TEMPLATE_FILE.MatchString(path) {
-				pageType = PageHtml
-			} else if MARKDOWN_FILE.MatchString(path) {
-				pageType = PageMarkdown
-			}
-
+      if !VENDOR.MatchString(path) {
+        if TEMPLATE_FILE.MatchString(path) {
+          pageType = PageHtml
+        } else if MARKDOWN_FILE.MatchString(path) {
+          pageType = PageMarkdown
+        }
+      }
     }
 
 		if pageType != PageNone {
