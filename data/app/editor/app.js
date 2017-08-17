@@ -11,15 +11,15 @@ class LocationParser {
 }
 
 class AppDataSource {
-  constructor (location) {
-    this._location = location
-    this._containers = null
+  constructor (loc) {
+    this.url = `/api/${loc.container}/${loc.application}/`
+    this.loc = loc
 
     // current application
     this.app = {
       url: '',
-      pages: null,
-      files: null
+      pages: [],
+      files: []
     }
 
     this.preview = {
@@ -28,15 +28,47 @@ class AppDataSource {
     }
   }
 
-  get containers () {
-    return this._containers
+  json (url, options) {
+    return fetch(url, options)
+      .then((res) => res.json())
+      .catch((err) => err)
+  }
+
+  getApplication () {
+    console.log('getting app data: ' + this.url)
+    return this.json(this.url)
+      .then((app) => {
+        // merge properties
+        for (let k in app) {
+          this.app[k] = app[k]
+        }
+        return app
+      })
+  }
+
+  getPages () {
+    let url = this.url + 'pages/'
+    return this.json(url)
+      .then((list) => {
+        this.app.pages = list
+        return list
+      })
+  }
+
+  getFiles () {
+    let url = this.url + 'files/'
+    return this.json(url)
+      .then((list) => {
+        this.app.files = list
+        return list
+      })
   }
 }
 
 class EditorApplication {
   constructor (loc) {
     this.loc = loc
-    this.data = new AppDataSource(this.location)
+    this.data = new AppDataSource(this.loc)
   }
 
   get (url, options) {
@@ -65,7 +97,6 @@ class EditorApplication {
 
   ui (data) {
     let bus = new Vue()
-    let get = this.get
 
     let switcher = this.switcher = new Vue({
       template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
@@ -117,25 +148,26 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          pages: [],
-          files: [],
+          pages: data.app.pages,
+          files: data.app.files,
           components: [],
           currentView: ''
         }
       },
       methods: {
-        loadPages: function (url) {
-          return get(url + 'pages/')
+        loadPages: function () {
+          return data.getPages()
             .then((list) => {
-              data.app.pages = list
               this.pages = list
+              bus.$emit('pages:load', list)
             })
         },
         loadFiles: function (url) {
-          return get(url + 'files/')
+          return data.getFiles()
             .then((list) => {
-              data.app.files = list
               this.files = list
+              console.log('FILES LOADED')
+              bus.$emit('files:load', list)
             })
         }
       },
@@ -155,6 +187,9 @@ class EditorApplication {
           },
           created: function () {
             this.list = this.$parent.pages
+            bus.$on('pages:load', (list) => {
+              this.list = list
+            })
           },
           methods: {
             click: function (item) {
@@ -176,6 +211,9 @@ class EditorApplication {
           },
           created: function () {
             this.list = this.$parent.files
+            bus.$on('files:load', (list) => {
+              this.list = list
+            })
           },
           methods: {
             click: function (item) {
@@ -192,9 +230,7 @@ class EditorApplication {
               list: []
             }
           },
-          created: function () {
-            this.list = this.$parent.components
-          }
+          created: function () {}
         }
       }
     })
@@ -235,6 +271,13 @@ class EditorApplication {
           </div>
         </div>
       `,
+      data: function () {
+        return {
+          currentView: 'welcome',
+          defaultOpenView: 'source-editor',
+          currentFile: null
+        }
+      },
       created: function () {
         bus.$on('open:file', (item) => {
           this.open(item)
@@ -248,12 +291,16 @@ class EditorApplication {
           if (this.currentView === 'welcome') {
             this.currentView = this.defaultOpenView
           }
-        }
-      },
-      data: function () {
-        return {
-          currentView: 'welcome',
-          defaultOpenView: 'source-editor'
+
+          this.currentFile = item
+
+          const mime = item.mime.replace(/;.*$/, '')
+
+          switch (mime) {
+            case 'text/html':
+              console.log('got html mime type')
+              break
+          }
         }
       },
       components: {
@@ -263,12 +310,26 @@ class EditorApplication {
         'source-editor': {
           template: `<div class="source-editor"></div>`,
           mounted: function () {
-            console.log(document.querySelector('.source-editor'))
+            console.log('mounted')
+            console.log(this.$parent.currentFile)
+
+            /*
+            let value = ''
+            let item = this.$parent.currentFile
+            if (item) {
+              value = `Loading ${item.url}`
+            }
+
+            let url = `/apps/source/${}`
+            */
+
+            /*
             CodeMirror(document.querySelector('.source-editor'), {
-              value: 'function myScript(){return 100;}\n',
-              mode: 'javascript',
+              value: value,
+              mode: 'htmlmixed',
               theme: 'midnight'
             })
+            */
           }
         },
         'visual-editor': {
@@ -327,33 +388,49 @@ class EditorApplication {
       msg = '# ' + msg
       this.logger.error = false
     }
-
     this.logger.message = msg
   }
 
-  load (loc, data) {
-    let url = `/api/${loc.container}/${loc.application}/`
-    this.log(`Loading app data from ${url}`)
-    return this.get(url)
+  load (data) {
+    this.log(`Loading app from ${data.url}`)
+    return this.data.getApplication()
+      .then((app) => {
+        console.log('GOT APP DATA')
+        // todo: UPDATE VIEW
+        this.log(`Loading pages for ${this.data.app.name}`)
+      })
+      .then(this.sidebar.loadPages())
+      .then(this.sidebar.loadFiles())
+      .then(() => {
+        // Load the preview
+        this.refresh()
+      })
+      .catch((err) => { this.log(err) })
+
+    /*
+    return this.get(data.url)
       .then((app) => {
         this.setApplication(app)
+        console.log('app loaded')
         this.log(`Loading pages for ${this.data.app.name}`)
-        return this.sidebar.loadPages(url)
-          .then(this.sidebar.loadFiles(url))
+        return this.sidebar.loadPages()
+          .then(this.sidebar.loadFiles())
       })
       .then(() => {
         // Load the preview
         this.refresh()
       })
       .catch((err) => { this.log(err) })
+    */
   }
 
   init (loc) {
     loc = loc || this.loc
     this.ui(this.data)
     this.log('Interface created')
-    this.load(loc, this.data)
+    this.load(this.data)
       .then(() => {
+        console.log('setting sidebar view')
         this.sidebar.currentView = 'pages'
         console.log(this.data)
         this.log('Done')
