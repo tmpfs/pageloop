@@ -274,7 +274,7 @@ class EditorApplication {
         return {
           currentView: 'welcome',
           defaultOpenView: 'source-editor',
-          currentFile: null
+          currentFile: {content: ''}
         }
       },
       created: function () {
@@ -287,6 +287,8 @@ class EditorApplication {
           console.log('open in editor')
           console.log(item)
 
+          data.currentFile = item
+
           if (this.currentView === 'welcome') {
             this.currentView = this.defaultOpenView
           }
@@ -296,14 +298,11 @@ class EditorApplication {
               // TODO: get blob for binary types
               return res.text()
             }).then((content) => {
-              console.log(content)
+              item.content = content
               this.$children[0].showSourceText(item, content)
             })
 
           /*
-
-          this.currentFile = item
-
           const mime = item.mime.replace(/;.*$/, '')
           switch (mime) {
             case 'text/html':
@@ -320,9 +319,8 @@ class EditorApplication {
         'source-editor': {
           template: `<div class="source-editor"></div>`,
           methods: {
-            showSourceText: function (item, contents) {
-              console.log('show source text')
-              this.mirror.setValue(contents)
+            showSourceText: function (item, content) {
+              this.mirror.setValue(content)
             }
           },
           data: function () {
@@ -331,13 +329,16 @@ class EditorApplication {
             }
           },
           mounted: function () {
-            console.log('mounted')
             this.mirror = CodeMirror(document.querySelector('.source-editor'), {
               value: '',
               mode: 'htmlmixed',
               theme: 'solarized'
             })
-            this.mirror.setSize('100%', '100%')
+
+            // Handles setting file content when switching tabs
+            if (data.currentFile && data.currentFile.content) {
+              this.mirror.setValue(data.currentFile.content)
+            }
           }
         },
         'visual-editor': {
