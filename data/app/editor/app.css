@@ -193,7 +193,6 @@ nav.tabs > a:not(:first-child) {
 }
 
 .scroll {
-  position: relative;
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100% - 23px);
@@ -268,11 +267,6 @@ iframe {
 */
 
 .CodeMirror {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
   font-size: 1.6rem;
   width: 100%;
 
