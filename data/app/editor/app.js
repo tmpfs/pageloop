@@ -64,6 +64,7 @@ class EditorApplication {
   }
 
   ui (data) {
+    let bus = new Vue()
     let get = this.get
 
     let switcher = this.switcher = new Vue({
@@ -157,8 +158,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              console.log('page clicked')
-              console.log(item)
+              bus.$emit('open:file', item)
             }
           }
         },
@@ -179,8 +179,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              console.log('file clicked')
-              console.log(item)
+              bus.$emit('open:file', item)
             }
           }
         },
@@ -236,9 +235,25 @@ class EditorApplication {
           </div>
         </div>
       `,
+      created: function () {
+        bus.$on('open:file', (item) => {
+          this.open(item)
+        })
+      },
+      methods: {
+        open: function (item) {
+          console.log('open in editor')
+          console.log(item)
+
+          if (this.currentView === 'welcome') {
+            this.currentView = this.defaultOpenView
+          }
+        }
+      },
       data: function () {
         return {
-          currentView: 'welcome'
+          currentView: 'welcome',
+          defaultOpenView: 'source-editor'
         }
       },
       components: {
@@ -251,7 +266,8 @@ class EditorApplication {
             console.log(document.querySelector('.source-editor'))
             CodeMirror(document.querySelector('.source-editor'), {
               value: 'function myScript(){return 100;}\n',
-              mode: 'javascript'
+              mode: 'javascript',
+              theme: 'midnight'
             })
           }
         },
