@@ -370,6 +370,8 @@ class EditorApplication {
               switch (mime) {
                 case 'text/html':
                   return 'htmlmixed'
+                case 'text/x-markdown':
+                  return 'yaml-frontmatter'
               }
               return mime
             },
