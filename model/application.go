@@ -5,6 +5,7 @@ import (
   "os"
 	"fmt"
   "bytes"
+	"mime"
 	"errors"
 	"regexp"
   "strings"
@@ -156,6 +157,7 @@ type File struct {
   Url string `json:"url"`
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
+  Mime string `json:"mime"`
 
 	// Owner application
 	owner *Application
@@ -186,9 +188,19 @@ func (f *File) Info() os.FileInfo {
 	return f.info
 }
 
+func getMimeType(path string) string {
+	m := mime.TypeByExtension(filepath.Ext(path))
+	if m == "" {
+		m = "application/octet-stream"
+	}
+	return m
+}
+
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
 	file.owner = app
+	//file.Mime = mime.TypeByExtension(filepath.Ext(file.Path))
+	file.Mime = getMimeType(file.Path)
 	app.Files = append(app.Files, file)
 	return len(app.Files)
 }
@@ -196,6 +208,8 @@ func (app *Application) AddFile(file *File) int {
 // Add a page to this application.
 func (app *Application) AddPage(page *Page) int {
 	page.owner = app
+	//page.Mime = mime.TypeByExtension(filepath.Ext(page.Path))
+	page.Mime = getMimeType(page.Path)
 	app.Pages = append(app.Pages, page)
 	return len(app.Pages)
 }
@@ -431,3 +445,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
   return page.PageData, nil
 }
 
+func init() {
+	// TODO: find out yaml mime type
+	mime.AddExtensionType(".yml", "text/yaml")
+}
