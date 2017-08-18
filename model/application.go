@@ -216,15 +216,14 @@ func (app *Application) GetPageType(path string) int {
 func (app *Application) Add(file *File) {
 	var pageType int = app.GetPageType(file.Path)
 
-	// Add to the list of pages
-	if pageType != PageNone {
-		page := Page{file: file, Path: file.Path, Type: pageType}
-		app.AddPage(&page)
-	}
-
 	if file.Path == app.Path {
 		app.Root = file
 	} else {
+		// Add to the list of pages
+		if pageType != PageNone {
+			page := Page{file: file, Path: file.Path, Type: pageType}
+			app.AddPage(&page)
+		}
 		app.AddFile(file)
 	}
 }
