@@ -282,9 +282,6 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 
 	output := app.GetPathFromUrl(url)
 
-	println("create new file: " + url)
-	println("create new file path: " + output)
-
 	dir := filepath.Dir(output)
 
 	// Check if we are updating or creating and 
@@ -327,9 +324,6 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 				if file != nil {
 					// Strip charset for mime comparison
 					ct = CharsetStrip.ReplaceAllString(ct, "")
-
-					println("test for matching mime types: " + file.Mime)
-					println("test for matching mime types" + ct)
 
 					if file.Mime != ct {
 						ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
