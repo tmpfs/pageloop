@@ -367,8 +367,10 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 								if sh, err := os.Open(output); err == nil {
 									if stat, err := sh.Stat(); err == nil {
 										// Update the application model
-										var file *model.File = app.NewFile(output, stat, content)
-										app.Add(file)
+										if _, err = app.Create(output, stat, content); err != nil {
+											ex(res, http.StatusInternalServerError, nil, err)
+											return
+										}
 										created(res, OK)
 										return
 									}

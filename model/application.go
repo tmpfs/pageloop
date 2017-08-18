@@ -74,10 +74,53 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
-// Delete a file
+// Create a new file and publish it.
+func (app *Application) Create(path string, stat os.FileInfo, content []byte) (*File, error) {
+	var file *File = app.NewFile(path, stat, content)
+	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
+		return nil, err
+	}
+	app.Add(file)
+	return file, nil
+}
+
+// Delete a file.
+//
+// The file is removed from the URL map and the list of files 
+// for this application. If the file is also a page it is removed 
+// from the page list.
+//
+// Source and published versions are deleted from the filesystem.
 func (app *Application) Del(file *File) error {
 	println("Deleting file: " + file.Url)
-	return nil
+	// Remove from the URL map
+	delete(app.Urls, file.Url)
+
+	// Remove from the list of pages
+	for i, p := range app.Pages {
+		if p.file == file {
+      before := app.Pages[0:i]
+      after := app.Pages[i+1:]
+      app.Pages = append(before, after...)
+		}
+	}
+
+	// Remove from the list of files
+	for i, f := range app.Files {
+		if f == file {
+      before := app.Files[0:i]
+      after := app.Files[i+1:]
+      app.Files = append(before, after...)
+		}
+	}
+
+	/*
+	if file.Directory {
+		return app.FileSystem.RemoveAll(file)
+	}
+	*/
+
+	return app.FileSystem.Remove(file)
 }
 
 // Add a file or page inspecting the file path to determine

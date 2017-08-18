@@ -28,6 +28,10 @@ type ApplicationFileSystem interface {
 
 	PublishFile(dir string, f *File, filter FileFilter) error
 	Publish(dir string, filter FileFilter) error
+
+	// Remove the source and published files for a file reference
+	Remove(f *File) error
+	RemoveAll(f *File) error
 }
 
 // Default file system that uses the underlying host file system.
@@ -146,6 +150,8 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 	// Set output path and create parent directories
 	out := filepath.Join(dir, rel)
 
+	println("publishing to: " + out)
+
 	out = filter.Rename(out)
 	// Ignore publishing this file
 	if out == "" {
@@ -220,4 +226,33 @@ func (fs *UrlFileSystem) Publish(dir string, filter FileFilter) error {
 		}
   }
   return nil
+}
+
+// Remove the source and published files from the file system.
+func (fs *UrlFileSystem) Remove(f *File) error {
+	app := fs.App()
+	src := f.Path
+	pub := filepath.Join(app.Public, f.Relative)
+
+	println("fs delete: " + src)
+	println("fs delete: " + pub)
+
+	if err := os.Remove(pub); err != nil {
+		return err
+	}
+
+	return os.Remove(src)
+}
+
+// Recursively deletes a directory including source and 
+// published versions of the files.
+func (fs *UrlFileSystem) RemoveAll(f *File) error {
+	app := fs.App()
+	src := f.Path
+	pub := filepath.Join(app.Public, f.Relative)
+
+	println("fs delete: " + src)
+	println("fs delete: " + pub)
+
+	return nil
 }
