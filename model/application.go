@@ -230,6 +230,7 @@ func (app *Application) Add(file *File) {
 	}
 }
 
+// Create a new file.
 func (app *Application) NewFile(path string, info os.FileInfo, data []byte) *File {
 	return &File{Path: path, info: info, data: data, source: data}
 }
@@ -237,7 +238,6 @@ func (app *Application) NewFile(path string, info os.FileInfo, data []byte) *Fil
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
 	file.owner = app
-	//file.Mime = mime.TypeByExtension(filepath.Ext(file.Path))
 	file.Mime = getMimeType(file.Path)
 	app.Files = append(app.Files, file)
 	return len(app.Files)

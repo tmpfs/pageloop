@@ -367,7 +367,7 @@ func TestRestService(t *testing.T) {
 
 	// PUT /api/{container}/{app}/files/${url} - Created
 	doc = []byte(`{}`)
-	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/foo.json")
+	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json.log")
 	println("mock file url: " + mockFile)
 	if resp, body, err = put(mockFile, doc); err != nil {
 		t.Fatal(err)

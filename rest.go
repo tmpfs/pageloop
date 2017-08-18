@@ -281,23 +281,15 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 		return
 	}
 
-	dest := "/" + url
-	output := app.GetPathFromUrl(dest)
+	output := app.GetPathFromUrl(url)
 
 	//println("create new file: " + ct)
 	//println("create new file: " + cl)
-	println("create new file: " + dest)
-	println("create new file: " + output)
+	println("create new file: " + url)
+	println("create new file path: " + output)
 	//println(req.Body)
 	
 	// TODO: test is directory
-
-	/*
-	if app.Urls[dest] != nil {
-		ex(res, http.StatusConflict, nil, errors.New("File exists, use POST to update a file"))
-		return
-	}
-	*/
 
 	println("create new file output: " + output)
 
