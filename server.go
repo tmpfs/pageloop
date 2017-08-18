@@ -278,7 +278,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		// TODO: make publishing optional
 
     // Publish the application files to a build directory
-    if err = app.Publish(nil, "public/" + container.Name); err != nil {
+    if err = app.Publish("public/" + container.Name); err != nil {
       return err
     }
 

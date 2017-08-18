@@ -145,14 +145,9 @@ func (app *Application) Load(path string) error {
   return nil
 }
 
-// Publish files using the given publisher implementation, if a nil
-// publisher is given the default file system publisher is used.
-func (app *Application) Publish(publisher ApplicationPublisher, base string) error {
+// Publish application files to the given directory.
+func (app *Application) Publish(dir string) error {
   var err error
-  if publisher == nil {
-    publisher = FileSystemPublisher{}
-  }
-
   var data []byte
 
   // Render pages to the file data bytes.
@@ -164,7 +159,7 @@ func (app *Application) Publish(publisher ApplicationPublisher, base string) err
 		page.file.data = data
 	}
 
-  if err = publisher.PublishApplication(app, base, nil); err != nil {
+  if err = app.FileSystem.Publish(dir, nil); err != nil {
     return err
   }
 
