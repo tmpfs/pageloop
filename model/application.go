@@ -209,6 +209,26 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
+// Add a file or page inspecting the file path to determine
+// how to add the file.
+//
+// Note that pages also exist in the list of all files.
+func (app *Application) Add(file *File) {
+	var pageType int = app.GetPageType(file.Path)
+
+	// Add to the list of pages
+	if pageType != PageNone {
+		page := Page{file: file, Path: file.Path, Type: pageType}
+		app.AddPage(&page)
+	}
+
+	if file.Path == app.Path {
+		app.Root = file
+	} else {
+		app.AddFile(file)
+	}
+}
+
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
 	file.owner = app
@@ -234,13 +254,15 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
   if loader == nil {
     loader = FileSystemLoader{}
   }
+	app.Name = filepath.Base(path)
+  app.Path = path
+  app.Urls = make(map[string] *File)
+
   err = loader.LoadApplication(path, app)
   if err != nil {
     return err
   }
-	app.Name = filepath.Base(path)
-  app.Path = path
-  app.Urls = make(map[string] *File)
+
   app.setComputedFields(path)
   if err = app.merge(); err != nil {
     return err

@@ -36,7 +36,6 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
     mode := stat.Mode()
 
     var file File
-		var pageType int = app.GetPageType(path)
 
     if mode.IsDir() {
       file = File{Path: path, Directory: true, info: stat}
@@ -50,17 +49,7 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
 			file.source = bytes
     }
 
-		if pageType != PageNone {
-			page := Page{file: &file, Path: path, Type: pageType}
-			app.AddPage(&page)
-		}
-
-		//
-		if dir == path {
-			app.Root = &file
-		} else {
-			app.AddFile(&file)
-		}
+		app.Add(&file)
 
     return nil
   })
