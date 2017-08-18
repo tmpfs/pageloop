@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"net/http"
+	"path/filepath"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
 	"github.com/xeipuuv/gojsonschema"
@@ -38,13 +39,6 @@ func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
 	var url string
 	url= API_URL
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
-
-	/*
-	for key, c := range root.Host.Containers {
-		url = API_URL + key + "/"
-		mux.Handle(url, http.StripPrefix(url, RestAppHandler{Root: root, Container: c}))
-	}
-	*/
 
 	return rest
 }
@@ -286,28 +280,63 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 
 	println("create new file: " + url)
 	println("create new file path: " + output)
-	
-	// TODO: test is directory
 
-	fh, err := os.Create(output)
-	if err == nil {
+	dir := filepath.Dir(output)
+
+	// Check if we are updating or creating and 
+	// test for directories
+	fh, err := os.Open(output)
+	if err != nil {
+		// It's ok if it doesn't exist
+		if os.IsNotExist(err) {
+			err = nil
+			// Try to create parent directories
+			println("creating parent directories")
+			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+		}
+	}
+
+	if fh != nil {
 		defer fh.Close()
+		var stat os.FileInfo
 
-		// TODO: fix empty reply when there is no request body
-		var content []byte
-		if content, err = readBody(req); err == nil {
-			if _, err = fh.Write(content); err == nil {	
-				// Sync to stable storage
-				if err = fh.Sync(); err == nil {
-					if sh, err := os.Open(output); err == nil {
-						if stat, err := sh.Stat(); err == nil {
-							var file *model.File = app.NewFile(output, stat, content)
-							app.Add(file)
-							created(res, OK)
-							return
+		if stat, err = fh.Stat(); err != nil {
+			ex(res, http.StatusInternalServerError, nil, err)
+			return
+		}
+
+		mode := stat.Mode()
+		if mode.IsDir() {
+			// TODO: send error response
+			println("attempt to put to a directory....")
+			ex(res, http.StatusInternalServerError, nil, errors.New("Attempt to PUT to an existing directory"))
+			return
+		} else if mode.IsRegular() {
+			println("uploading to regular file...")
+
+			fh, err := os.Create(output)
+			if err == nil {
+				defer fh.Close()
+
+				// TODO: fix empty reply when there is no request body
+				var content []byte
+				if content, err = readBody(req); err == nil {
+					if _, err = fh.Write(content); err == nil {	
+						// Sync to stable storage
+						if err = fh.Sync(); err == nil {
+							if sh, err := os.Open(output); err == nil {
+								if stat, err := sh.Stat(); err == nil {
+									var file *model.File = app.NewFile(output, stat, content)
+									app.Add(file)
+									created(res, OK)
+									return
+								}
+							}
 						}
 					}
-
 				}
 			}
 		}
