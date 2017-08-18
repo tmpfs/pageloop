@@ -269,6 +269,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
+
 	// No content type header
 	if ct == "" {
 		ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
@@ -283,15 +284,10 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 
 	output := app.GetPathFromUrl(url)
 
-	//println("create new file: " + ct)
-	//println("create new file: " + cl)
 	println("create new file: " + url)
 	println("create new file path: " + output)
-	//println(req.Body)
 	
 	// TODO: test is directory
-
-	println("create new file output: " + output)
 
 	fh, err := os.Create(output)
 	if err == nil {

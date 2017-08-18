@@ -221,12 +221,14 @@ func (app *Application) Add(file *File) {
 	if file.Path == app.Path {
 		app.Root = file
 	} else {
+		// Must add the file before page for computed proxied fields
+		app.AddFile(file)
+
 		// Add to the list of pages
 		if pageType != PageNone {
 			page := Page{file: file, Path: file.Path, Type: pageType}
 			app.AddPage(&page)
 		}
-		app.AddFile(file)
 	}
 }
 
@@ -237,6 +239,7 @@ func (app *Application) NewFile(path string, info os.FileInfo, data []byte) *Fil
 
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
+	app.setComputedFileFields(file)
 	file.owner = app
 	file.Mime = getMimeType(file.Path)
 	app.Files = append(app.Files, file)
@@ -245,8 +248,8 @@ func (app *Application) AddFile(file *File) int {
 
 // Add a page to this application.
 func (app *Application) AddPage(page *Page) int {
+	app.setComputedPageFields(page)
 	page.owner = app
-	//page.Mime = mime.TypeByExtension(filepath.Ext(page.Path))
 	page.Mime = getMimeType(page.Path)
 	app.Pages = append(app.Pages, page)
 	return len(app.Pages)
@@ -268,10 +271,10 @@ func (app *Application) Load(path string, loader ApplicationLoader) error {
     return err
   }
 
-  app.setComputedFields(path)
   if err = app.merge(); err != nil {
     return err
   }
+
   return nil
 }
 
@@ -400,20 +403,20 @@ func (app *Application) setFileFields(file *File, base string) {
 	}
 }
 
-// Set computed fields.
-//
-func (app *Application) setComputedFields(path string) {
-  for _, file := range app.Files {
-		app.setFileFields(file, path)
-    app.Urls[file.Url] = file
-	}
+// Set computed fields for files.
+func (app *Application) setComputedFileFields(file *File) {
+	path := app.Path
+	app.setFileFields(file, path)
+	app.Urls[file.Url] = file
+}
 
-  for _, page := range app.Pages {
-		file := page.file
-		page.Name = file.Name
-		page.Url = file.Url
-		page.Size = file.info.Size()
-	}
+// Set computed fields for pages, the underlying file must
+// have had it's computed fields set.
+func (app *Application) setComputedPageFields(page *Page) {
+	file := page.file
+	page.Name = file.Name
+	page.Url = file.Url
+	page.Size = file.info.Size()
 }
 
 // Attempt to find user page data by first attempting to
