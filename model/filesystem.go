@@ -154,13 +154,7 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 	out := filepath.Join(dir, rel)
 	out = filter.Rename(out)
 
-	println("publishing to: " + out)
-
-	if strings.HasSuffix(out, ".html") {
-		println(string(f.data))
-	}
-
-	// TODO: set public URL for client
+	// TODO: set public URL for client after filter!
 
 	// Ignore publishing this file
 	if out == "" {
@@ -168,10 +162,8 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 	}
 
 	if f.page != nil {
-		println("parsing before publish")
-		println(string(f.source))
 		if _, err = f.page.Parse(f.source); err != nil {
-			return err	
+			return err
 		}
 		if err = f.page.Update(); err != nil {
 			return err
@@ -302,9 +294,8 @@ func (fs *UrlFileSystem) RemoveAll(f *File) error {
 	app := fs.App()
 	src := f.Path
 	pub := filepath.Join(app.Public, f.Relative)
-
-	println("fs delete: " + src)
-	println("fs delete: " + pub)
-
-	return nil
+	if err := os.RemoveAll(pub); err != nil {
+		return err
+	}
+	return os.RemoveAll(src)
 }

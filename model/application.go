@@ -79,6 +79,7 @@ func (app *Application) Create(path string, content []byte) (*File, error) {
 	// TODO: check path is not outside the application
 	//println("create file: " + path)
 	//println("create file app path: " + app.Path)
+
 	var err error
 	var fh *os.File
 	// The file must not exist in order to create
@@ -122,13 +123,12 @@ func (app *Application) Update(file *File, content []byte) error {
 
 // Delete a file.
 //
-// The file is removed from the URL map and the list of files 
-// for this application. If the file is also a page it is removed 
+// The file is removed from the URL map and the list of files
+// for this application. If the file is also a page it is removed
 // from the page list.
 //
 // Source and published versions are deleted from the filesystem.
 func (app *Application) Del(file *File) error {
-	println("Deleting file: " + file.Url)
 	// Remove from the URL map
 	delete(app.Urls, file.Url)
 
@@ -388,8 +388,6 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
 
     if len(frontmatter) > 0 {
       fm := bytes.Join(frontmatter, []byte("\n"))
-      println("parsing frontmatter")
-      println(page.Path)
       err := yaml.Unmarshal(fm, &page.PageData)
       if err != nil {
         return nil, err

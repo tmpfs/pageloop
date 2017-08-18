@@ -237,7 +237,6 @@ func (p *Page) Update() error {
 		return err
 	}
 	p.file.data = data
-	println("updating data from dom: " + string(p.file.data))
 	return nil
 }
 
