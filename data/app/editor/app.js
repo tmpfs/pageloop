@@ -302,6 +302,9 @@ class EditorApplication {
             <h2>{{title}}</h2>
             <div class="column-options">
               <nav class="tabs">
+                <a v-bind:class="{selected: currentView === 'file-editor', hidden: currentFile === null}"
+                  @click="currentView = 'file-editor'"
+                  href="#" title="Show file editor">File</a>
                 <a v-bind:class="{selected: currentView === 'source-editor', hidden: currentFile === null}"
                   @click="currentView = 'source-editor'"
                   href="#" title="Show source editor">Source</a>
@@ -358,7 +361,9 @@ class EditorApplication {
             }).then((content) => {
               item.content = content
               this.title = item.url
-              this.$children[0].showSourceText(item)
+              if (this.currentView === 'source-editor') {
+                this.$children[0].showSourceText(item)
+              }
               bus.$emit('open:complete', item)
             })
         }
@@ -366,6 +371,56 @@ class EditorApplication {
       components: {
         welcome: {
           template: `<p>Select a page or file to start editing.</p>`
+        },
+        'file-editor': {
+          template: `<div class="file-editor">
+              <div class="scroll panel">
+                <section>
+                  <h3>Rename File</h3>
+                  <p>Choose a new name for your file.</p>
+                  <form class="rename">
+                    <input type="text" name="fileName" :value="file.name" />
+                    <input type="submit" name="Rename" value="Rename" />
+                  </form>
+                </section>
+                <section>
+                  <h3>Delete File</h3>
+                  <p>
+                    <button @click="confirmDelete = true"
+                      v-bind:class="{hidden: confirmDelete}"
+                      class="danger">Delete {{file.url}}</button>
+                  </p>
+                  <div v-bind:class="{hidden: !confirmDelete}">
+                    <p>Are you sure you want to delete {{file.url}}?<br />
+                    <small>
+                      Deleting a file is irreversible, it cannot be undone.
+                    </small>
+                    </p>
+                    <div>
+                      <button @click="confirmDelete = false">Cancel</button>
+                      <button class="danger">Delete</button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>`,
+          data: function () {
+            return {
+              file: {name: '', url: ''},
+              confirmDelete: false
+            }
+          },
+          created: function () {
+            bus.$on('open:complete', (item) => {
+              console.log('updating file reference')
+              this.file = item
+            })
+          },
+          mounted: function () {
+            if (data.currentFile) {
+              this.file = data.currentFile
+            }
+          }
         },
         'source-editor': {
           template: `<div class="source-editor">

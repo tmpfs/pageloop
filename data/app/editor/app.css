@@ -86,7 +86,7 @@ header .app-id {
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   margin: 0;
-  padding: 0 2rem;
+  padding: 0;
 }
 
 h1 {
@@ -96,9 +96,13 @@ h1 {
 h2 {
   font-size: 1.4rem;
   text-transform: uppercase;
-  /*background: darkgray;*/
-  /*text-shadow: 1px 1px white;*/
-  /*border-bottom: 1px solid currentColor;*/
+  padding: 0 1rem;
+}
+
+h3 {
+  display: inline-block;
+  font-size: 1.4rem;
+  border-bottom: 1px solid currentColor;
 }
 
 main {
@@ -151,6 +155,14 @@ footer p {
 
 .editor, .preview {
   width: 40%;
+}
+
+.panel {
+  padding: 2rem;
+}
+
+section {
+  margin-bottom: 3rem;
 }
 
 nav.tabs {
@@ -280,7 +292,7 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 }
 */
 
-.source-editor {
+.file-editor, .source-editor, .visual-editor {
   height: 100%;
 }
 
