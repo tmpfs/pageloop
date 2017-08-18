@@ -52,12 +52,18 @@ Get the list of files for an application.
 Create a file for an application, if the file already exists an 
 error is returned.
 
+If the file is considered to be a page it is also added to the list 
+of pages for the application.
+
 Syncs the source file to disc and publishes an updated 
 version of the file to the public URL.
 
 ## POST /{container}/{application}/files/{url}
 
 Update file content for a file, the file must already exist.
+
+It is an error if the request MIME type does not match the 
+existing MIME type for the file.
 
 Syncs the source file to disc and publishes an updated 
 version of the file to the public URL.

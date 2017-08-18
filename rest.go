@@ -395,8 +395,6 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
 	}
 
 	var file *model.File = app.Urls[url]
-
-
 	if file != nil {
 		// Strip charset for mime comparison
 		ct = CharsetStrip.ReplaceAllString(ct, "")
