@@ -67,6 +67,28 @@ class AppDataSource {
         return list
       })
   }
+
+  saveFile (file, value) {
+    let url = this.url + 'files' + file.url
+
+    console.log('save and run:' + file)
+    console.log('save and run:' + value)
+    console.log('save and run:' + url)
+
+    let opts = {
+      method: 'POST',
+      headers: {
+        'Content-Type': file.mime
+      },
+      body: value
+    }
+
+    console.log(file.mime)
+
+    return fetch(url, opts)
+      .then((res) => res.json())
+      .then((doc) => console.log(doc))
+  }
 }
 
 class EditorApplication {
@@ -359,9 +381,10 @@ class EditorApplication {
             },
             saveAndRun: function (e) {
               e.preventDefault()
-
-              // TODO
-              console.log('save and run:' + this.currentFile)
+              let file = data.currentFile
+              let value = this.mirror.getValue()
+              // TODO: refresh preview after save
+              data.saveFile(file, value)
             },
             getModeForMime (mime) {
               // remove charset info

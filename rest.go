@@ -398,7 +398,8 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
 	if file != nil {
 		// Strip charset for mime comparison
 		ct = CharsetStrip.ReplaceAllString(ct, "")
-		if file.Mime != ct {
+		ft := CharsetStrip.ReplaceAllString(file.Mime, "")
+		if ft != ct {
 			ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
 			return
 		}
