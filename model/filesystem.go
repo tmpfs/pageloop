@@ -3,6 +3,7 @@ package model
 import(
   "os"
 	"errors"
+	"net/http"
   "path/filepath"
   "io/ioutil"
 )
@@ -16,16 +17,15 @@ type ApplicationReference interface {
 // relative to an application.
 type ApplicationFileSystem interface {
 	ApplicationReference
-	Open(url string) (*File, error)
+	http.FileSystem
 }
 
+// Default file system that uses the underlying host file system.
 type UrlFileSystem struct {
 	app *Application
 }
 
 // Create a new URL file system.
-//
-// This implementation syncs file contents to the host file system.
 func NewUrlFileSystem(app *Application) *UrlFileSystem {
 	return &UrlFileSystem{app: app}
 }
@@ -36,7 +36,7 @@ func (fs *UrlFileSystem) App() *Application {
 }
 
 // Get a pointer to a file and error if the file does not exist.
-func (fs *UrlFileSystem) Open(url string) (*File, error) {
+func (fs *UrlFileSystem) Open(url string) (http.File, error) {
 	file := fs.App().Urls[url]
 	if file == nil {
 		return nil, errors.New("File not found at url " + url)

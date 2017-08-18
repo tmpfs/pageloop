@@ -31,6 +31,34 @@ type File struct {
   data []byte
 }
 
+/*
+   io.Closer
+    io.Reader
+    io.Seeker
+    Readdir(count int) ([]os.FileInfo, error)
+    Stat() (os.FileInfo, error)
+*/
+
+func (f *File) Seek(offset int64, whence int) (int64, error) {
+	return 0, nil
+}
+
+func (f *File) Readdir(count int) ([]os.FileInfo, error) {
+	return nil, nil
+}
+
+func (f *File) Stat() (os.FileInfo, error) {
+	return f.info, nil
+}
+
+func (f *File) Read(p []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (f *File) Close() error {
+	return nil
+}
+
 // Read only access to the source data outside this package.
 func (f *File) Source() []byte {
 	return f.source
