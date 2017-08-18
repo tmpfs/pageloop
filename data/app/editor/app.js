@@ -69,8 +69,6 @@ class AppDataSource {
   }
 
   saveFile (file, value) {
-    console.log('old content: ' + file.content)
-    console.log('new content: ' + value)
     file.content = value
 
     let url = this.url + 'files' + file.url
@@ -279,7 +277,12 @@ class EditorApplication {
           if (md.test(url)) {
             url = url.replace(md, '.html')
           }
-          // console.log('refreshing preview...' + url)
+          // If the src attribute will not change the page
+          // won't be refreshed so we need to call reload()
+          if (url === this.path) {
+            let frame = document.querySelector('.live')
+            return frame.contentDocument.location.reload()
+          }
           this.path = url || this.getPreviewUrl()
           this.url = this.getPreviewUrl(url)
         },
