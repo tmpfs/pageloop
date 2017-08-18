@@ -32,6 +32,9 @@ type ApplicationFileSystem interface {
 	// Remove the source and published files for a file reference
 	Remove(f *File) error
 	RemoveAll(f *File) error
+
+	// Save the source file to the underlying file system
+	SaveFile(f *File) error
 }
 
 // Default file system that uses the underlying host file system.
@@ -169,7 +172,12 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 
 	// Write out the file data
 	if !isDir {
-		mode := f.info.Mode()
+
+		var mode os.FileMode = 0755
+
+		if f.info != nil {
+			mode = f.info.Mode()
+		}
 		if err = ioutil.WriteFile(out, f.data, mode); err != nil {
 			return err
 		}
@@ -226,6 +234,104 @@ func (fs *UrlFileSystem) Publish(dir string, filter FileFilter) error {
 		}
   }
   return nil
+}
+
+// Save the source file back to disc from the current file data.
+func (fs *UrlFileSystem) SaveFile(f *File) error {
+	var err error
+
+	/*
+	if f.Directory {
+		
+	}
+	*/
+
+	/*
+	dir := filepath.Dir(f.Path)
+	// Be certain the file does not exist on disc
+	fh, err := os.Open(f.Path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// Try to create parent directories
+			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
+				return err
+			}
+			// Create the destination file
+			if fh, err = os.Create(output); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+
+			defer fh.Close()
+			var stat os.FileInfo
+
+			if stat, err = fh.Stat(); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+
+			mode := stat.Mode()
+			if mode.IsDir() {
+				ex(res, http.StatusForbidden, nil, errors.New("Attempt to PUT a file to an existing directory"))
+				return
+			} else if mode.IsRegular() {
+				fh, err := os.Create(output)
+				if err == nil {
+					defer fh.Close()
+
+					// TODO: fix empty reply when there is no request body
+					// TODO: stream request body to disc
+					var content []byte
+					if content, err = readBody(req); err == nil {
+						// Write out file
+						if _, err = fh.Write(content); err == nil {	
+							// Sync to stable storage
+							if err = fh.Sync(); err == nil {
+								// Stat again so our file has up to date information
+								if sh, err := os.Open(output); err == nil {
+									if stat, err := sh.Stat(); err == nil {
+										// Update the application model
+										if _, err = app.Create(output, stat, content); err != nil {
+											ex(res, http.StatusInternalServerError, nil, err)
+											return
+										}
+										created(res, OK)
+										return
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+*/
+	var mode os.FileMode = 0755
+
+	if f.info != nil {
+		mode = f.info.Mode()
+	}
+
+	if err = ioutil.WriteFile(f.Path, f.data, mode); err != nil {
+		return err
+	}
+
+	var fh *os.File
+	var stat os.FileInfo
+
+	// Now update the Stat() info
+	if fh, err = os.Open(f.Path); err != nil {
+		return err
+	}
+	defer fh.Close()
+
+	if stat, err = fh.Stat(); err != nil {
+		return err
+	}
+
+	f.info = stat
+
+	return nil
 }
 
 // Remove the source and published files from the file system.

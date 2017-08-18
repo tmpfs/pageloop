@@ -74,9 +74,24 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
-// Create a new file and publish it.
-func (app *Application) Create(path string, stat os.FileInfo, content []byte) (*File, error) {
-	var file *File = app.NewFile(path, stat, content)
+// Create a new file and publish it, the file cannot already exist on disc.
+func (app *Application) Create(path string, content []byte) (*File, error) {
+	println("create file: " + path)
+	println("create file app path: " + app.Path)
+	var err error
+	var fh *os.File
+	if fh, err = os.Open(path); err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+	}
+	if fh != nil {
+		defer fh.Close()
+	}
+	var file *File = app.NewFile(path, nil, content)
+	if err := app.FileSystem.SaveFile(file); err != nil {
+		return nil, err
+	}
 	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
 		return nil, err
 	}

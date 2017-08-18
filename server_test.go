@@ -506,29 +506,29 @@ func TestPutDeleteFile( t *testing.T ) {
 	}
 	assertStatus(resp, t, http.StatusPreconditionFailed)
 
+	// POST /api/{container}/{app}/files/${url} - Bad request, mismatched mime types
+	doc = []byte(`{"name": "test-fixture-mismatched-mime"}`)
+	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json")
+	if resp, body, err = do(mockFile, http.MethodPost, doc, "text/html"); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusBadRequest)
+
+	// POST /api/{container}/{app}/files/${url} - Forbidden, attempt to write to directory
+	/*
+	doc = []byte(`{"name": "test-fixture-with-parent-directory-creation"}`)
+	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-parent/")
+	if resp, body, err = post(mockFile, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusForbidden)
+	*/
+
 	// DELETE /api/{container}/{app}/{url} - Remove the created file
 	if resp, body, err = del(mockFile, nil); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
-
-	/*
-	// PUT /api/{container}/{app}/files/${url} - Bad request, mismatched mime types
-	doc = []byte(`{"name": "test-fixture"}`)
-	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json")
-	if resp, body, err = do(mockFile, http.MethodPut, doc, "text/html"); err != nil {
-		t.Fatal(err)
-	}
-	assertStatus(resp, t, http.StatusBadRequest)
-
-	// PUT /api/{container}/{app}/files/${url} - Forbidden, attempt to write to directory
-	doc = []byte(`{"name": "test-fixture-with-parent-directory-creation"}`)
-	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-parent/")
-	if resp, body, err = put(mockFile, doc); err != nil {
-		t.Fatal(err)
-	}
-	assertStatus(resp, t, http.StatusForbidden)
-	*/
 }
 
 // Private helpers

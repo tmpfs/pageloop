@@ -267,7 +267,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			if name != "" && action == FILES && item != "" {
 				postFile(item, app, res, req)
 				return
-
 			}
 
 			ex(res, http.StatusMethodNotAllowed, nil, nil)
@@ -289,6 +288,8 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Create a new file for an application
 func putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+	var err error
+
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
@@ -306,13 +307,26 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 
 	var file *model.File = app.Urls[url]
 	output := app.GetPathFromUrl(url)
-	dir := filepath.Dir(output)
 
 	if file != nil {
 		ex(res, http.StatusPreconditionFailed, nil, errors.New("File already exists"))
 		return
 	}
 
+	// TODO: fix empty reply when there is no request body
+	// TODO: stream request body to disc
+	var content []byte
+	if content, err = readBody(req); err == nil {
+		// Update the application model
+		if _, err = app.Create(output, content); err != nil {
+			ex(res, http.StatusInternalServerError, nil, err)
+			return
+		}
+		created(res, OK)
+		return
+	}
+
+	/*
 	// Be certain the file does not exist on disc
 	fh, err := os.Open(output)
 	if err != nil {
@@ -345,39 +359,6 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 				if err == nil {
 					defer fh.Close()
 
-					if file != nil {
-						// Strip charset for mime comparison
-						ct = CharsetStrip.ReplaceAllString(ct, "")
-
-						if file.Mime != ct {
-							ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
-							return
-						}
-					}
-
-					// TODO: fix empty reply when there is no request body
-					// TODO: stream request body to disc
-					var content []byte
-					if content, err = readBody(req); err == nil {
-						// Write out file
-						if _, err = fh.Write(content); err == nil {	
-							// Sync to stable storage
-							if err = fh.Sync(); err == nil {
-								// Stat again so our file has up to date information
-								if sh, err := os.Open(output); err == nil {
-									if stat, err := sh.Stat(); err == nil {
-										// Update the application model
-										if _, err = app.Create(output, stat, content); err != nil {
-											ex(res, http.StatusInternalServerError, nil, err)
-											return
-										}
-										created(res, OK)
-										return
-									}
-								}
-							}
-						}
-					}
 				}
 			}
 		}
@@ -386,6 +367,8 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 		return
 	}
 	defer fh.Close()
+
+	*/
 
 	if err != nil {
 		ex(res, http.StatusInternalServerError, nil, err)
