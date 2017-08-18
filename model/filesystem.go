@@ -18,6 +18,8 @@ type ApplicationReference interface {
 type ApplicationFileSystem interface {
 	ApplicationReference
 	http.FileSystem
+	LoadFilePath(path string) (*File, error)
+	Load(dir string) error
 }
 
 // Default file system that uses the underlying host file system.

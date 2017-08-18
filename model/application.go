@@ -126,18 +126,14 @@ func (app *Application) AddPage(page *Page) int {
 	return len(app.Pages)
 }
 
-// Load an application using the given loader implementation,
-// if a nil loader is given the default file system loader is used.
-func (app *Application) Load(path string, loader ApplicationLoader) error {
+// Load an application using the file system assigned to this application.
+func (app *Application) Load(path string) error {
   var err error
-  if loader == nil {
-    loader = FileSystemLoader{}
-  }
 	app.Name = filepath.Base(path)
   app.Path = path
   app.Urls = make(map[string] *File)
 
-  err = loader.LoadApplication(path, app)
+  err = app.FileSystem.Load(path)
   if err != nil {
     return err
   }

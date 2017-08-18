@@ -271,7 +271,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		app.FileSystem = fs
 
     // Load the application files into memory
-		if err = app.Load(p, nil); err != nil {
+		if err = app.Load(p); err != nil {
 			return err
 		}
 
