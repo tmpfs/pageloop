@@ -264,7 +264,11 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
 		}
 
-		app := model.Application{Url: urlPath, Description: mt.Description}
+		//app := model.Application{Url: urlPath, Description: mt.Description}
+
+		app := model.NewApplication(urlPath, mt.Description)
+		fs := model.NewUrlFileSystem(app)
+		app.FileSystem = fs
 
     // Load the application files into memory
 		if err = app.Load(p, nil); err != nil {
@@ -279,7 +283,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
     }
 
 		// Add to the container
-		if err = container.Add(&app); err != nil {
+		if err = container.Add(app); err != nil {
 			return err
 		}
   }

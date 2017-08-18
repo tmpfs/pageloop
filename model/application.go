@@ -49,10 +49,16 @@ type Application struct {
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
 
+	FileSystem ApplicationFileSystem
+
 	// A protected application cannot be deleted.
 	Protected bool `json:"protected,omitempty"`
 
 	Container *Container `json:"-"`
+}
+
+func NewApplication(mountpoint, description string) *Application {
+	return &Application{Url: mountpoint, Description: description}
 }
 
 // Determine the page type for an input file path.

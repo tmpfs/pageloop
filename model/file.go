@@ -39,6 +39,7 @@ type File struct {
     Stat() (os.FileInfo, error)
 */
 
+// TODO: http.File implementation
 func (f *File) Seek(offset int64, whence int) (int64, error) {
 	return 0, nil
 }
