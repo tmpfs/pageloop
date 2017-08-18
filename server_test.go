@@ -396,7 +396,7 @@ func TestRestService(t *testing.T) {
 
 	// TRACE /api/ - Method Not Allowed
 	doc = []byte(``)
-	if resp, body, err = do(appUrl, http.MethodTrace, doc); err != nil {
+	if resp, body, err = do(appUrl, http.MethodTrace, doc, ""); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusMethodNotAllowed)
@@ -478,7 +478,7 @@ func TestRestPutFile( t *testing.T ) {
 
 	// PUT /api/{container}/{app}/files/${url} - Created
 	doc = []byte(`{"name": "test-fixture"}`)
-	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json.log")
+	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json")
 	if resp, body, err = put(mockFile, doc); err != nil {
 		t.Fatal(err)
 	}
@@ -492,6 +492,39 @@ func TestRestPutFile( t *testing.T ) {
 	if _, ok := document["ok"].(bool); !ok {
 		t.Error("Unexpected type for name")
 	}
+
+	// PUT /api/{container}/{app}/files/${url} - Creates parent directories
+	doc = []byte(`{"name": "test-fixture-with-parent-directory-creation"}`)
+	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-parent/mock-file-put.json")
+	if resp, body, err = put(mockFile, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusCreated)
+
+	document = make(map [string]interface{})
+	if err = json.Unmarshal(body, &document); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := document["ok"].(bool); !ok {
+		t.Error("Unexpected type for name")
+	}
+
+	// PUT /api/{container}/{app}/files/${url} - Bad request, mismatched mime types
+	doc = []byte(`{"name": "test-fixture"}`)
+	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json")
+	if resp, body, err = do(mockFile, http.MethodPut, doc, "text/html"); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusBadRequest)
+
+	// PUT /api/{container}/{app}/files/${url} - Forbidden, attempt to write to directory
+	doc = []byte(`{"name": "test-fixture-with-parent-directory-creation"}`)
+	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-parent/")
+	if resp, body, err = put(mockFile, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusForbidden)
 }
 
 // Private helpers
@@ -514,7 +547,7 @@ func del(url string, data []byte) (*http.Response, []byte, error) {
 	if data == nil {
 		data = make([]byte, 0)
 	}
-	return do(url, http.MethodDelete, data)
+	return do(url, http.MethodDelete, data, "")
 }
 
 func post(url string, contentType string, body []byte) (*http.Response, []byte, error) {
@@ -533,10 +566,10 @@ func post(url string, contentType string, body []byte) (*http.Response, []byte, 
 }
 
 func put(url string, body []byte) (*http.Response, []byte, error) {
-	return do(url, http.MethodPut, body)
+	return do(url, http.MethodPut, body, "")
 }
 
-func do(uri string, method string, body []byte) (*http.Response, []byte, error) {
+func do(uri string, method string, body []byte, contentType string) (*http.Response, []byte, error) {
 	var err error
 	var buf = new(bytes.Buffer)
 	buf.Write(body)
@@ -544,7 +577,11 @@ func do(uri string, method string, body []byte) (*http.Response, []byte, error) 
 	if req, err = http.NewRequest(method, uri, buf); err != nil {
 		return nil, nil, err
 	}
-	req.Header.Set("Content-Type", JSON_MIME)
+	if contentType == "" {
+		req.Header.Set("Content-Type", JSON_MIME)
+	} else {
+		req.Header.Set("Content-Type", contentType)
+	}
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

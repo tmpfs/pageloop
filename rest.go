@@ -6,6 +6,7 @@ import (
 	"os"
 	"errors"
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"net/http"
 	"path/filepath"
@@ -26,6 +27,7 @@ const(
 var(
 	OK = []byte(`{"ok": true}`)
 	SchemaAppNew = MustAsset("schema/app-new.json")
+	CharsetStrip = regexp.MustCompile(`;.*$`)
 )
 
 type RestService struct {
@@ -276,6 +278,8 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 		return
 	}
 
+	var file *model.File = app.Urls[url]
+
 	output := app.GetPathFromUrl(url)
 
 	println("create new file: " + url)
@@ -291,8 +295,11 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 		if os.IsNotExist(err) {
 			err = nil
 			// Try to create parent directories
-			println("creating parent directories")
 			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+			if fh, err = os.Create(output); err != nil {
 				ex(res, http.StatusInternalServerError, nil, err)
 				return
 			}
@@ -310,25 +317,38 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 
 		mode := stat.Mode()
 		if mode.IsDir() {
-			// TODO: send error response
-			println("attempt to put to a directory....")
-			ex(res, http.StatusInternalServerError, nil, errors.New("Attempt to PUT to an existing directory"))
+			ex(res, http.StatusForbidden, nil, errors.New("Attempt to PUT a file to an existing directory"))
 			return
 		} else if mode.IsRegular() {
-			println("uploading to regular file...")
-
 			fh, err := os.Create(output)
 			if err == nil {
 				defer fh.Close()
 
+				if file != nil {
+					// Strip charset for mime comparison
+					ct = CharsetStrip.ReplaceAllString(ct, "")
+
+					println("test for matching mime types: " + file.Mime)
+					println("test for matching mime types" + ct)
+
+					if file.Mime != ct {
+						ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
+						return
+					}
+				}
+
 				// TODO: fix empty reply when there is no request body
+				// TODO: stream request body to disc
 				var content []byte
 				if content, err = readBody(req); err == nil {
+					// Write out file
 					if _, err = fh.Write(content); err == nil {	
 						// Sync to stable storage
 						if err = fh.Sync(); err == nil {
+							// Stat again so our file has up to date information
 							if sh, err := os.Open(output); err == nil {
 								if stat, err := sh.Stat(); err == nil {
+									// Update the application model
 									var file *model.File = app.NewFile(output, stat, content)
 									app.Add(file)
 									created(res, OK)
