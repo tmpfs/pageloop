@@ -3,13 +3,11 @@
 package pageloop
 
 import (
-	"os"
 	"errors"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"net/http"
-	"path/filepath"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
 	"github.com/xeipuuv/gojsonschema"
@@ -380,6 +378,7 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 
 // Update file content for an application
 func postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+	var err error
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
@@ -397,79 +396,26 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
 
 	var file *model.File = app.Urls[url]
 
-	output := app.GetPathFromUrl(url)
 
-	dir := filepath.Dir(output)
-
-	// Check if we are updating or creating and 
-	// test for directories
-	fh, err := os.Open(output)
-	if err != nil {
-		// It's ok if it doesn't exist
-		if os.IsNotExist(err) {
-			err = nil
-			// Try to create parent directories
-			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-			if fh, err = os.Create(output); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-		}
-	}
-
-	if fh != nil {
-		defer fh.Close()
-		var stat os.FileInfo
-
-		if stat, err = fh.Stat(); err != nil {
-			ex(res, http.StatusInternalServerError, nil, err)
+	if file != nil {
+		// Strip charset for mime comparison
+		ct = CharsetStrip.ReplaceAllString(ct, "")
+		if file.Mime != ct {
+			ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
 			return
 		}
 
-		mode := stat.Mode()
-		if mode.IsDir() {
-			ex(res, http.StatusForbidden, nil, errors.New("Attempt to PUT a file to an existing directory"))
-			return
-		} else if mode.IsRegular() {
-			fh, err := os.Create(output)
-			if err == nil {
-				defer fh.Close()
-
-				if file != nil {
-					// Strip charset for mime comparison
-					ct = CharsetStrip.ReplaceAllString(ct, "")
-
-					if file.Mime != ct {
-						ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
-						return
-					}
-				}
-
-				// TODO: fix empty reply when there is no request body
-				// TODO: stream request body to disc
-				var content []byte
-				if content, err = readBody(req); err == nil {
-					// Write out file
-					if _, err = fh.Write(content); err == nil {	
-						// Sync to stable storage
-						if err = fh.Sync(); err == nil {
-							// Stat again so our file has up to date information
-							if sh, err := os.Open(output); err == nil {
-								if stat, err := sh.Stat(); err == nil {
-									// Update the application model
-									var file *model.File = app.NewFile(output, stat, content)
-									app.Add(file)
-									created(res, OK)
-									return
-								}
-							}
-						}
-					}
-				}
+		// TODO: fix empty reply when there is no request body
+		// TODO: stream request body to disc
+		var content []byte
+		if content, err = readBody(req); err == nil {
+			// Update the application model
+			if err = app.Update(file, content); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
 			}
+			ok(res, OK)
+			return
 		}
 	}
 

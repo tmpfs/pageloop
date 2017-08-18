@@ -52,13 +52,15 @@ Get the list of files for an application.
 Create a file for an application, if the file already exists an 
 error is returned.
 
-The body of the request should be the file content and is written 
-to a file system path relative to the base path for the application 
-using the URL submitted in the request to determine the relative path.
+Syncs the source file to disc and publishes an updated 
+version of the file to the public URL.
 
 ## POST /{container}/{application}/files/{url}
 
-Update file content for a file.
+Update file content for a file, the file must already exist.
+
+Syncs the source file to disc and publishes an updated 
+version of the file to the public URL.
 
 ## GET /{container}/{application}/files/{url}
 

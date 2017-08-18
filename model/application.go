@@ -76,10 +76,12 @@ func (app *Application) GetPageType(path string) int {
 
 // Create a new file and publish it, the file cannot already exist on disc.
 func (app *Application) Create(path string, content []byte) (*File, error) {
-	println("create file: " + path)
-	println("create file app path: " + app.Path)
+	// TODO: check path is not outside the application
+	//println("create file: " + path)
+	//println("create file app path: " + app.Path)
 	var err error
 	var fh *os.File
+	// The file must not exist in order to create
 	if fh, err = os.Open(path); err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -97,6 +99,25 @@ func (app *Application) Create(path string, content []byte) (*File, error) {
 	}
 	app.Add(file)
 	return file, nil
+}
+
+// Update an existing file and publish it, file must already exist on disc.
+func (app *Application) Update(file *File, content []byte) error {
+	var err error
+	var fh *os.File
+	// The file must exist in order to create
+	if fh, err = os.Open(file.Path); err != nil {
+		return err
+	}
+	defer fh.Close()
+	file.data = content
+	if err := app.FileSystem.SaveFile(file); err != nil {
+		return err
+	}
+	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Delete a file.
