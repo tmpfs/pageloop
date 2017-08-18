@@ -279,7 +279,7 @@ class EditorApplication {
           if (md.test(url)) {
             url = url.replace(md, '.html')
           }
-          console.log('refreshing preview...' + url)
+          // console.log('refreshing preview...' + url)
           this.path = url || this.getPreviewUrl()
           this.url = this.getPreviewUrl(url)
         },

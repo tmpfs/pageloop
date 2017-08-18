@@ -101,7 +101,7 @@ func (app *Application) Create(path string, content []byte) (*File, error) {
 	return file, nil
 }
 
-// Update an existing file and publish it, file must already exist on disc.
+// Update an existing file source and publish it, file must already exist on disc.
 func (app *Application) Update(file *File, content []byte) error {
 	var err error
 	var fh *os.File
@@ -110,7 +110,7 @@ func (app *Application) Update(file *File, content []byte) error {
 		return err
 	}
 	defer fh.Close()
-	file.data = content
+	file.source = content
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return err
 	}
@@ -228,16 +228,15 @@ func (app *Application) Load(path string) error {
 // Publish application files to the given directory.
 func (app *Application) Publish(dir string) error {
   var err error
-  var data []byte
 
   // Render pages to the file data bytes.
+	/*
 	for _, page := range app.Pages {
-		node := page.Dom.Clean(nil)
-		if data, err = page.Render(page.Dom, node); err != nil {
+		if err = page.Update(); err != nil {
 			return err
 		}
-		page.file.data = data
 	}
+	*/
 
   if err = app.FileSystem.Publish(dir, nil); err != nil {
     return err
@@ -397,6 +396,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
       }
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
+      page.file.source = page.file.source[read:]
 
       page.PageDataType = DATA_YAML
     }

@@ -227,6 +227,20 @@ func (p *Page) ExecuteTemplate(tpl *template.Template, data map[string] interfac
 	return w.Bytes(), nil
 }
 
+// Render with a clean DOM and update the page's file reference
+// with the new rendered data.
+func (p *Page) Update() error {
+	var err error
+	var data []byte
+	node := p.Dom.Clean(nil)
+	if data, err = p.Render(p.Dom, node); err != nil {
+		return err
+	}
+	p.file.data = data
+	println("updating data from dom: " + string(p.file.data))
+	return nil
+}
+
 // Render the current version of the virtual DOM to a byte
 // array. If page data is available parse the file as an
 // HTML template passing the page data to the template.
