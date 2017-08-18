@@ -9,6 +9,9 @@ import(
   "io/ioutil"
 )
 
+// Build directory.
+var public string = "public"
+
 // Represents types that reference an application.
 type ApplicationReference interface {
 	App() *Application
