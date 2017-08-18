@@ -469,7 +469,7 @@ func TestRestService(t *testing.T) {
 	assertStatus(resp, t, http.StatusNotFound)
 }
 
-func TestRestPutFile( t *testing.T ) {
+func TestPutDeleteFile( t *testing.T ) {
 	var err error
 	var resp *http.Response
 	var body []byte
@@ -493,6 +493,12 @@ func TestRestPutFile( t *testing.T ) {
 		t.Error("Unexpected type for name")
 	}
 
+	// GET /api/{container}/{app}/files/${url} - Check we can get the new file
+	if resp, body, err = get(mockFile); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusOK)
+
 	// PUT /api/{container}/{app}/files/${url} - File already exists
 	doc = []byte(`{"name": "test-fixture"}`)
 	if resp, body, err = put(mockFile, doc); err != nil {
@@ -500,7 +506,7 @@ func TestRestPutFile( t *testing.T ) {
 	}
 	assertStatus(resp, t, http.StatusPreconditionFailed)
 
-	// DELETE /api/{container}/{app}/{url} - OK
+	// DELETE /api/{container}/{app}/{url} - Remove the created file
 	if resp, body, err = del(mockFile, nil); err != nil {
 		t.Fatal(err)
 	}
