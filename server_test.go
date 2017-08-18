@@ -365,15 +365,6 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
-	// PUT /api/{container}/{app}/files/${url} - Created
-	doc = []byte(`{"name": "test-fixture"}`)
-	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json.log")
-	//println("mock file url: " + mockFile)
-	if resp, body, err = put(mockFile, doc); err != nil {
-		t.Fatal(err)
-	}
-	assertStatus(resp, t, http.StatusCreated)
-
 	// PUT /api/{container}/ - Created
 	doc = []byte(`{"name": "test-app"}`)
 	if resp, body, err = put(appUrl, doc); err != nil {
@@ -476,6 +467,31 @@ func TestRestService(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusNotFound)
+}
+
+func TestRestPutFile( t *testing.T ) {
+	var err error
+	var resp *http.Response
+	var body []byte
+	var doc []byte
+	var name string = "mock-app"
+
+	// PUT /api/{container}/{app}/files/${url} - Created
+	doc = []byte(`{"name": "test-fixture"}`)
+	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json.log")
+	if resp, body, err = put(mockFile, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusCreated)
+
+	document := make(map [string]interface{})
+	if err = json.Unmarshal(body, &document); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := document["ok"].(bool); !ok {
+		t.Error("Unexpected type for name")
+	}
 }
 
 // Private helpers
