@@ -422,7 +422,6 @@ class EditorApplication {
           },
           created: function () {
             bus.$on('open:complete', (item) => {
-              console.log('updating file reference')
               this.file = item
             })
           },
@@ -469,7 +468,6 @@ class EditorApplication {
             getModeForMime (mime) {
               // remove charset info
               mime = mime.replace(/;.*$/, '')
-              // console.log(mime)
               switch (mime) {
                 case 'text/html':
                   return 'htmlmixed'
