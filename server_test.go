@@ -249,7 +249,7 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for name")
 	}
 
-	// GET /api/{container}/apps/{name}/
+	// GET /api/{container}/{name}/
 	if resp, body, err = get(fmt.Sprintf("%s%s", appUrl, name + "/")); err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for name")
 	}
 
-	// GET /api/{container}/apps/{name}/files/
+	// GET /api/{container}/{name}/files/
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/files/")); err != nil {
 		t.Fatal(err)
 	}
@@ -289,7 +289,7 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for url")
 	}
 
-	// GET /api/apps/{name}/files/{url}/
+	// GET /api/{container}/{name}/files/{url}/
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/files/index.html")); err != nil {
 		t.Fatal(err)
 	}
@@ -313,7 +313,7 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
-	// GET /api/apps/{name}/pages/
+	// GET /api/{container}/{name}/pages/
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/pages/")); err != nil {
 		t.Fatal(err)
 	}
@@ -341,7 +341,7 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
-	// GET /api/apps/{name}/pages/{url}
+	// GET /api/{container}/{name}/pages/{url}
 	if resp, body, err = get(fmt.Sprintf("%s%s%s", appUrl, name, "/pages/index.html")); err != nil {
 		t.Fatal(err)
 	}
@@ -365,26 +365,26 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
-	// PUT /api/apps/ - Created
+	// PUT /api/{container}/ - Created
 	doc = []byte(`{"name": "test-app"}`)
 	if resp, body, err = put(appUrl, doc); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusCreated)
 
-	// GET /api/apps/test-app/ - OK
+	// GET /api/{container}/test-app/ - OK
 	if resp, body, err = get(appUrl + "test-app/"); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 
-	// DELETE /api/apps/test-app/ - OK
+	// DELETE /api/{container}/test-app/ - OK
 	if resp, body, err = del(appUrl + "test-app/", nil); err != nil {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusOK)
 
-	// GET /api/apps/test-app/ - Not Found
+	// GET /api/{container}/test-app/ - Not Found
 	if resp, body, err = get(appUrl + "test-app/"); err != nil {
 		t.Fatal(err)
 	}
