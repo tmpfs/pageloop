@@ -5,7 +5,6 @@ import (
   "os"
 	"fmt"
   "bytes"
-	"mime"
 	"errors"
 	"regexp"
   "strings"
@@ -469,12 +468,3 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
   return page.PageData, nil
 }
 
-func init() {
-  // Mime types set to those for code mirror modes
-	mime.AddExtensionType(".json", "application/json")
-	mime.AddExtensionType(".yml", "text/x-yaml")
-	mime.AddExtensionType(".yaml", "text/x-yaml")
-	mime.AddExtensionType(".md", "text/x-markdown")
-	mime.AddExtensionType(".markdown", "text/x-markdown")
-// text/x-markdown
-}

@@ -311,3 +311,13 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	editor := l.Host.GetByName("system").GetByName("editor")
 	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(editor.Public)))
 }
+
+func init() {
+  // Mime types set to those for code mirror modes
+	mime.AddExtensionType(".json", "application/json")
+	mime.AddExtensionType(".yml", "text/x-yaml")
+	mime.AddExtensionType(".yaml", "text/x-yaml")
+	mime.AddExtensionType(".md", "text/x-markdown")
+	mime.AddExtensionType(".markdown", "text/x-markdown")
+// text/x-markdown
+}
