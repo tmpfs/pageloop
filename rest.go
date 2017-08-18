@@ -3,6 +3,7 @@
 package pageloop
 
 import (
+	"os"
 	"errors"
 	"io/ioutil"
 	"strings"
@@ -239,7 +240,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				created(res, OK)
 				return
 			} else {
-				println("got put method at: " + name)
 				// PUT /api/{container}/{app}/
 				if name != "" && action != "" {
 					ct := req.Header.Get("Content-Type")
@@ -261,16 +261,45 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 						dest = dest + "/" + item
 					}
 
-				//fmt.Printf("PUT input: %#v\n", input)
-				//fmt.Printf("PUT result: %#v\n", result)
+					//println("create new file: " + ct)
+					//println("create new file: " + cl)
+					//println("create new file: " + dest)
+					//println(req.Body)
 
-					
-					println("create new file: " + ct)
-					println("create new file: " + cl)
-					println("create new file: " + dest)
+					if app.Urls[dest] != nil {
+						ex(res, http.StatusConflict, nil, errors.New("File exists, use POST to update a file"))
+						return
+					}
+
+					output := app.GetPathFromUrl(dest)
+
+					println("create new file output: " + output)
+
+					fh, err := os.Create(output)
+					if err == nil {
+						defer fh.Close()
+
+						// TODO: fix empty reply when there is no request body
+						var content []byte
+						if content, err = readBody(req); err == nil {
+							if _, err = fh.Write(content); err == nil {	
+								// Sync to stable storage
+								if err = fh.Sync(); err == nil {
+
+									// TODO: add the file to the application data
+									//app.AddFile()
+
+									created(res, OK)
+									return
+								}
+							}
+						}
+					}
 				}
-				ex(res, http.StatusMethodNotAllowed, nil, nil)
-				return
+
+				if _, err := ex(res, http.StatusMethodNotAllowed, nil, nil); err == nil {
+					return
+				}
 			}
 		}
 

@@ -289,6 +289,15 @@ func (app *Application) getUrlFromPath(file *File, relative string) string {
   return url
 }
 
+// Get an absolute path from a relative URL reference.
+func (app *Application) GetPathFromUrl(url string) string {
+	base := app.Path
+	parts := strings.Split(url, SLASH)
+	//dest = filepath.Join(path.Split(dest))
+
+	return base + SLASH + filepath.Join(parts...)
+}
+
 // Merge user data with page structs loading user data from a JSON
 // file with the same name of the HTML file that created the page.
 func (app *Application) merge() error {
@@ -423,8 +432,7 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
     if dataPath == page.file.Path {
       return nil, nil
     }
-    println("loading external page data")
-    println(dataPath)
+
     fh, err := os.Open(dataPath)
     if err != nil {
       if !os.IsNotExist(err) {
