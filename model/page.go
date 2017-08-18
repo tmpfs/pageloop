@@ -6,7 +6,7 @@ import(
   "bytes"
 	"strings"
 	"regexp"
-	"net/url"
+	//"net/url"
   "html/template"
   "encoding/json"
 	"path/filepath"
@@ -148,6 +148,8 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 	}
 
 	// Get a URL relative to the current page being parsed.
+
+	/*
 	funcs["relative"] = func(path string) (string, error) {
 		println("relative func called with path: " + path)
 		var err error
@@ -169,6 +171,7 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 		println(ru.Path)
 		return path, nil
 	}
+	*/
 
   // Render markdown inline in an HTML template
   funcs["markdown"] = func(md string) template.HTML {
