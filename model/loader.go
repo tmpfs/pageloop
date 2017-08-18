@@ -36,7 +36,7 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
     mode := stat.Mode()
 
     var file File
-		var pageType int = PageNone
+		var pageType int = app.GetPageType(path)
 
     if mode.IsDir() {
       file = File{Path: path, Directory: true, info: stat}
@@ -48,13 +48,6 @@ func (r FileSystemLoader) LoadApplication(dir string, app *Application) error {
       }
       file.data = bytes
 			file.source = bytes
-      if !VENDOR.MatchString(path) {
-        if TEMPLATE_FILE.MatchString(path) {
-          pageType = PageHtml
-        } else if MARKDOWN_FILE.MatchString(path) {
-          pageType = PageMarkdown
-        }
-      }
     }
 
 		if pageType != PageNone {

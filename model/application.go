@@ -196,6 +196,19 @@ func getMimeType(path string) string {
 	return m
 }
 
+// Determine the page type for an input file path.
+func (app *Application) GetPageType(path string) int {
+	var pageType int = PageNone
+	if !VENDOR.MatchString(path) {
+		if TEMPLATE_FILE.MatchString(path) {
+			pageType = PageHtml
+		} else if MARKDOWN_FILE.MatchString(path) {
+			pageType = PageMarkdown
+		}
+	}
+	return pageType
+}
+
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
 	file.owner = app
