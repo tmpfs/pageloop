@@ -259,14 +259,11 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 		case http.MethodPost:
-			println("got post request")
-
 			// POST /api/{container}/{app}/{url}
 			if name != "" && action == FILES && item != "" {
 				postFile(item, app, res, req)
 				return
 			}
-
 			ex(res, http.StatusMethodNotAllowed, nil, nil)
 			return
 	}

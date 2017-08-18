@@ -1,3 +1,6 @@
+---
+title: Foo Bar Mock
+---
 ## Mock document
 
 This is *some* mock text.
