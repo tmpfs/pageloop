@@ -23,7 +23,7 @@ type ApplicationFileSystem interface {
 	ApplicationReference
 	http.FileSystem
 
-	LoadFilePath(path string) (*File, error)
+	LoadFile(path string) (*File, error)
 	Load(dir string) error
 
 	PublishFile(dir string, f *File, filter FileFilter) error
@@ -83,7 +83,7 @@ func (fs *UrlFileSystem) Open(url string) (http.File, error) {
 //
 // The file reference has it's data and source set to the 
 // loaded file contents.
-func (fs *UrlFileSystem) LoadFilePath(path string) (*File, error) {
+func (fs *UrlFileSystem) LoadFile(path string) (*File, error) {
 	fh, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (fs *UrlFileSystem) Load(dir string) error {
     }
 
     var file *File
-		if file, err = fs.LoadFilePath(path); err != nil {
+		if file, err = fs.LoadFile(path); err != nil {
 			return err
 		}
 		app.Add(file)
