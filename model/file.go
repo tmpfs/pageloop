@@ -27,6 +27,9 @@ type File struct {
 	// Initially the source data but mutated later when
 	// parsed from markdown or rendered from the vdom.
   data []byte
+
+	// A corresponding page if this file represents a page
+	page *Page
 }
 
 // TODO: http.File implementation

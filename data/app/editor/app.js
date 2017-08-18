@@ -69,12 +69,11 @@ class AppDataSource {
   }
 
   saveFile (file, value) {
+    console.log('old content: ' + file.content)
+    console.log('new content: ' + value)
+    file.content = value
+
     let url = this.url + 'files' + file.url
-
-    console.log('save and run:' + file)
-    console.log('save and run:' + value)
-    console.log('save and run:' + url)
-
     let opts = {
       method: 'POST',
       headers: {
@@ -82,12 +81,12 @@ class AppDataSource {
       },
       body: value
     }
-
-    console.log(file.mime)
-
     return fetch(url, opts)
-      .then((res) => res.json())
-      .then((doc) => console.log(doc))
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
   }
 }
 
@@ -266,20 +265,28 @@ class EditorApplication {
           let all = /\.(html?|md|markdown)$/
           // Refresh preview when switching on page types
           if (all.test(item.name)) {
-            let md = /\.(md|markdown)$/
-            if (md.test(item.name)) {
-              url = url.replace(md, '.html')
-            }
             this.refresh(url)
           }
+        })
+
+        bus.$on('preview:refresh', (url) => {
+          this.refresh(url)
         })
       },
       methods: {
         refresh (url) {
+          let md = /\.(md|markdown)$/
+          if (md.test(url)) {
+            url = url.replace(md, '.html')
+          }
+          console.log('refreshing preview...' + url)
           this.path = url || this.getPreviewUrl()
           this.url = this.getPreviewUrl(url)
         },
         getPreviewUrl: function (url) {
+          if (url) {
+            url = url.replace(/^\//, '')
+          }
           return document.location.origin + data.app.url + (url || '')
         }
       }
@@ -383,8 +390,13 @@ class EditorApplication {
               e.preventDefault()
               let file = data.currentFile
               let value = this.mirror.getValue()
-              // TODO: refresh preview after save
               data.saveFile(file, value)
+                .then((res) => {
+                  let doc = res.document
+                  if (doc.ok) {
+                    bus.$emit('preview:refresh', file.url)
+                  }
+                })
             },
             getModeForMime (mime) {
               // remove charset info

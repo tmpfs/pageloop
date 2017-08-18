@@ -44,7 +44,7 @@ type UrlFileSystem struct {
 
 // Represents types that can change the name or path of files.
 //
-// Implementations may return the empty string to indicate the 
+// Implementations may return the empty string to indicate the
 // file should be ignored.
 type FileFilter interface {
 	Rename(path string) string
@@ -85,10 +85,10 @@ func (fs *UrlFileSystem) Open(url string) (http.File, error) {
 	return file, nil
 }
 
-// Loads a file from disc and returns a new file reference 
+// Loads a file from disc and returns a new file reference
 // to the underlying file.
 //
-// The file reference has it's data and source set to the 
+// The file reference has it's data and source set to the
 // loaded file contents.
 func (fs *UrlFileSystem) LoadFile(path string) (*File, error) {
 	fh, err := os.Open(path)
@@ -121,7 +121,7 @@ func (fs *UrlFileSystem) LoadFile(path string) (*File, error) {
 	return &file, nil
 }
 
-// Recursively loads all files from the given directory and 
+// Recursively loads all files from the given directory and
 // adds them to the application.
 func (fs *UrlFileSystem) Load(dir string) error {
 	var app *Application = fs.App()
@@ -152,10 +152,16 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 
 	// Set output path and create parent directories
 	out := filepath.Join(dir, rel)
+	out = filter.Rename(out)
 
 	println("publishing to: " + out)
 
-	out = filter.Rename(out)
+	if strings.HasSuffix(out, ".html") {
+		println(string(f.data))
+	}
+
+	// TODO: set public URL for client
+
 	// Ignore publishing this file
 	if out == "" {
 		return nil
@@ -242,7 +248,7 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 
 	/*
 	if f.Directory {
-		
+
 	}
 	*/
 
@@ -284,7 +290,7 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 					var content []byte
 					if content, err = readBody(req); err == nil {
 						// Write out file
-						if _, err = fh.Write(content); err == nil {	
+						if _, err = fh.Write(content); err == nil {
 							// Sync to stable storage
 							if err = fh.Sync(); err == nil {
 								// Stat again so our file has up to date information
@@ -350,7 +356,7 @@ func (fs *UrlFileSystem) Remove(f *File) error {
 	return os.Remove(src)
 }
 
-// Recursively deletes a directory including source and 
+// Recursively deletes a directory including source and
 // published versions of the files.
 func (fs *UrlFileSystem) RemoveAll(f *File) error {
 	app := fs.App()

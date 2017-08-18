@@ -176,8 +176,9 @@ func (app *Application) Add(file *File) {
 
 		// Add to the list of pages
 		if pageType != PageNone {
-			page := Page{file: file, Path: file.Path, Type: pageType}
-			app.AddPage(&page)
+			page := &Page{file: file, Path: file.Path, Type: pageType}
+			file.page = page
+			app.AddPage(page)
 		}
 	}
 }
