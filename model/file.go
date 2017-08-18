@@ -1,11 +1,9 @@
 package model
 
 import (
-	//"log"
   "os"
 	"mime"
   "path/filepath"
-  //"io/ioutil"
 )
 
 type File struct {
@@ -30,14 +28,6 @@ type File struct {
 	// parsed from markdown or rendered from the vdom.
   data []byte
 }
-
-/*
-   io.Closer
-    io.Reader
-    io.Seeker
-    Readdir(count int) ([]os.FileInfo, error)
-    Stat() (os.FileInfo, error)
-*/
 
 // TODO: http.File implementation
 func (f *File) Seek(offset int64, whence int) (int64, error) {
