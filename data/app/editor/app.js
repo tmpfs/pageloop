@@ -385,11 +385,12 @@ class EditorApplication {
                 </section>
                 <section>
                   <h3>Delete File</h3>
-                  <p>
+                  <p>Danger zone: be careful!</p>
+                  <div>
                     <button @click="confirmDelete = true"
                       v-bind:class="{hidden: confirmDelete}"
                       class="danger">Delete {{file.url}}</button>
-                  </p>
+                  </div>
                   <div v-bind:class="{hidden: !confirmDelete}">
                     <p>Are you sure you want to delete {{file.url}}?<br />
                     <small>
@@ -401,6 +402,15 @@ class EditorApplication {
                       <button class="danger">Delete</button>
                     </div>
                   </div>
+                </section>
+                <section>
+                  <h3>File Info</h3>
+                  <ul class="small compact-list">
+                    <li>Name: {{file.name}}</li>
+                    <li>URL : {{file.url}}</li>
+                    <li>Size: {{file.size}} bytes</li>
+                    <li>Mime: {{file.mime}}</li>
+                  </ul>
                 </section>
               </div>
             </div>`,

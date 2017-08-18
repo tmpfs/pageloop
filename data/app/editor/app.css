@@ -41,8 +41,8 @@ body {
   /*overflow: hidden;*/
 }
 
-template {
-  display: none;
+p, section > ul.compact-list {
+  margin: 1rem 0 2rem 0;
 }
 
 a, a:visited, a:hover {
@@ -239,6 +239,16 @@ iframe {
 
 .sidebar .scroll {
   /*padding-top: 1rem;*/
+}
+
+.small, small {
+  font-size: 1.4rem;
+}
+
+.compact-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 h2 a, .tabs > a, header > nav > a {
