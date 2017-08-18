@@ -3,6 +3,7 @@ package model
 import(
   "os"
 	"errors"
+	"strings"
 	"net/http"
   "path/filepath"
   "io/ioutil"
@@ -18,13 +19,41 @@ type ApplicationReference interface {
 type ApplicationFileSystem interface {
 	ApplicationReference
 	http.FileSystem
+
 	LoadFilePath(path string) (*File, error)
 	Load(dir string) error
+
+	PublishFile(dir string, f *File, filter FileFilter) error
+	Publish(dir string, filter FileFilter) error
 }
 
 // Default file system that uses the underlying host file system.
 type UrlFileSystem struct {
 	app *Application
+}
+
+// Represents types that can change the name or path of files.
+//
+// Implementations may return the empty string to indicate the 
+// file should be ignored.
+type FileFilter interface {
+	Rename(path string) string
+}
+
+type DefaultPublishFilter struct {}
+
+// Default file filter used during publishing.
+func (f *DefaultPublishFilter) Rename(path string) string {
+	name := filepath.Base(path)
+	if name == Layout {
+		return ""
+	}
+	ext := filepath.Ext(path)
+	if ext == ".md" || ext == ".markdown" {
+		name = strings.TrimSuffix(name, ext)
+		return filepath.Join(filepath.Dir(path), name + ".html")
+	}
+	return path
 }
 
 // Create a new URL file system.
@@ -100,4 +129,92 @@ func (fs *UrlFileSystem) Load(dir string) error {
     return nil
   })
   return err
+}
+
+// Publish a single file relative to the given directory.
+func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) error {
+	app := fs.App()
+	var err error
+	rel, err := filepath.Rel(app.Path, f.Path)
+	if err != nil {
+		return err
+	}
+
+	// Set output path and create parent directories
+	out := filepath.Join(dir, rel)
+
+	out = filter.Rename(out)
+	// Ignore publishing this file
+	if out == "" {
+		return nil
+	}
+
+	parent := out
+	isDir := f.info.Mode().IsDir()
+	if !isDir {
+		parent = filepath.Dir(out)
+	}
+	if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
+		return err
+	}
+
+	// Write out the file data
+	if !isDir {
+		mode := f.info.Mode()
+		if err = ioutil.WriteFile(out, f.data, mode); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Publishes the application to a directory.
+//
+// Writes all application files using the current data bytes.
+//
+// Use dir as the output directory, if dir is the empty string a
+// public directory relative to the current working directory
+// is used.
+//
+// If a nil file filter is given the default publish filter is used.
+func (fs *UrlFileSystem) Publish(dir string, filter FileFilter) error {
+	var app *Application = fs.App()
+  var err error
+  var cwd string
+	if filter == nil {
+		filter = &DefaultPublishFilter{}
+	}
+  if cwd, err = os.Getwd(); err != nil {
+    return err
+  }
+  if dir == "" {
+    dir = filepath.Join(cwd, public)
+  }
+  dir = filepath.Join(dir, filepath.Base(app.Path))
+  fh, err := os.Open(dir)
+  if err != nil {
+    if !os.IsNotExist(err) {
+      return err
+    // Try to make the directory.
+    } else {
+      if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
+        return err
+      }
+    }
+  }
+  defer fh.Close()
+
+	// TODO: remove this and assign outside the publisher
+  app.Public = dir
+
+  for _, f := range app.Files {
+    // Ignore the build directory
+    if f.Path == app.Path {
+      continue
+    }
+		if err = fs.PublishFile(dir, f, filter); err != nil {
+			return err
+		}
+  }
+  return nil
 }
