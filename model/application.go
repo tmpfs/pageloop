@@ -209,6 +209,12 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
+// Delete a file
+func (app *Application) Del(file *File) error {
+	println("Deleting file: " + file.Url)
+	return nil
+}
+
 // Add a file or page inspecting the file path to determine
 // how to add the file.
 //
@@ -496,8 +502,6 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
         }
         page.PageDataType = DATA_JSON_FILE
       } else if dataType == YAML {
-        println("parsing yaml document data type")
-        println(page.Path)
         err = yaml.Unmarshal(contents, &page.PageData)
         if err != nil {
           return nil, err

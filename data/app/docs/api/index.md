@@ -47,6 +47,19 @@ Remove an application.
 
 Get the list of files for an application.
 
+## PUT /{container}/{application}/files/{url}
+
+Create a file for an application, if the file already exists an 
+error is returned.
+
+The body of the request should be the file content and is written 
+to a file system path relative to the base path for the application 
+using the URL submitted in the request to determine the relative path.
+
+## POST /{container}/{application}/files/{url}
+
+Update file content for a file.
+
 ## GET /{container}/{application}/files/{url}
 
 Get file information for the file URL.

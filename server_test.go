@@ -493,23 +493,20 @@ func TestRestPutFile( t *testing.T ) {
 		t.Error("Unexpected type for name")
 	}
 
-	// PUT /api/{container}/{app}/files/${url} - Creates parent directories
-	doc = []byte(`{"name": "test-fixture-with-parent-directory-creation"}`)
-	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-parent/mock-file-put.json")
+	// PUT /api/{container}/{app}/files/${url} - File already exists
+	doc = []byte(`{"name": "test-fixture"}`)
 	if resp, body, err = put(mockFile, doc); err != nil {
 		t.Fatal(err)
 	}
-	assertStatus(resp, t, http.StatusCreated)
+	assertStatus(resp, t, http.StatusPreconditionFailed)
 
-	document = make(map [string]interface{})
-	if err = json.Unmarshal(body, &document); err != nil {
+	// DELETE /api/{container}/{app}/{url} - OK
+	if resp, body, err = del(mockFile, nil); err != nil {
 		t.Fatal(err)
 	}
+	assertStatus(resp, t, http.StatusOK)
 
-	if _, ok := document["ok"].(bool); !ok {
-		t.Error("Unexpected type for name")
-	}
-
+	/*
 	// PUT /api/{container}/{app}/files/${url} - Bad request, mismatched mime types
 	doc = []byte(`{"name": "test-fixture"}`)
 	mockFile = fmt.Sprintf("%s%s%s", appUrl, name, "/files/mock-file-put.json")
@@ -525,6 +522,7 @@ func TestRestPutFile( t *testing.T ) {
 		t.Fatal(err)
 	}
 	assertStatus(resp, t, http.StatusForbidden)
+	*/
 }
 
 // Private helpers

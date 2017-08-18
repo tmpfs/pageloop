@@ -209,6 +209,20 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 				ok(res, OK)
 				return
+			} else if action == FILES && item != "" {
+				var file *model.File = app.Urls[item]
+				if file == nil {
+					ex(res, http.StatusNotFound, nil, nil)
+					return
+				}
+
+				if err = app.Del(file); err != nil {
+					ex(res, http.StatusInternalServerError, nil, nil)
+					return
+				}
+
+				ok(res, OK)
+				return
 			} else {
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
@@ -236,18 +250,29 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				created(res, OK)
 				return
 			} else {
-				// PUT /api/{container}/{app}/
+				// PUT /api/{container}/{app}/{url}
 				if name != "" && action == FILES && item != "" {
-					writeFileByUrl(item, app, res, req)
+					putFile(item, app, res, req)
 					return
 
 				}
 
-				if _, err := ex(res, http.StatusMethodNotAllowed, nil, nil); err == nil {
-					return
-				}
+				ex(res, http.StatusMethodNotAllowed, nil, nil)
+				return
 			}
-		}
+		case http.MethodPost:
+			println("got post request")
+
+			// POST /api/{container}/{app}/{url}
+			if name != "" && action == FILES && item != "" {
+				postFile(item, app, res, req)
+				return
+
+			}
+
+			ex(res, http.StatusMethodNotAllowed, nil, nil)
+			return
+	}
 
 	if err != nil {
 		ex(res, http.StatusInternalServerError, nil, err)
@@ -262,7 +287,114 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ex(res, http.StatusNotFound, nil, nil)
 }
 
-func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+// Create a new file for an application
+func putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+	ct := req.Header.Get("Content-Type")
+	cl := req.Header.Get("Content-Length")
+
+	// No content type header
+	if ct == "" {
+		ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
+		return
+	}
+
+	// No content length header
+	if cl == "" {
+		ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
+		return
+	}
+
+	var file *model.File = app.Urls[url]
+	output := app.GetPathFromUrl(url)
+	dir := filepath.Dir(output)
+
+	if file != nil {
+		ex(res, http.StatusPreconditionFailed, nil, errors.New("File already exists"))
+		return
+	}
+
+	// Be certain the file does not exist on disc
+	fh, err := os.Open(output)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// Try to create parent directories
+			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+			// Create the destination file
+			if fh, err = os.Create(output); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+
+			defer fh.Close()
+			var stat os.FileInfo
+
+			if stat, err = fh.Stat(); err != nil {
+				ex(res, http.StatusInternalServerError, nil, err)
+				return
+			}
+
+			mode := stat.Mode()
+			if mode.IsDir() {
+				ex(res, http.StatusForbidden, nil, errors.New("Attempt to PUT a file to an existing directory"))
+				return
+			} else if mode.IsRegular() {
+				fh, err := os.Create(output)
+				if err == nil {
+					defer fh.Close()
+
+					if file != nil {
+						// Strip charset for mime comparison
+						ct = CharsetStrip.ReplaceAllString(ct, "")
+
+						if file.Mime != ct {
+							ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
+							return
+						}
+					}
+
+					// TODO: fix empty reply when there is no request body
+					// TODO: stream request body to disc
+					var content []byte
+					if content, err = readBody(req); err == nil {
+						// Write out file
+						if _, err = fh.Write(content); err == nil {	
+							// Sync to stable storage
+							if err = fh.Sync(); err == nil {
+								// Stat again so our file has up to date information
+								if sh, err := os.Open(output); err == nil {
+									if stat, err := sh.Stat(); err == nil {
+										// Update the application model
+										var file *model.File = app.NewFile(output, stat, content)
+										app.Add(file)
+										created(res, OK)
+										return
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		ex(res, http.StatusInternalServerError, nil, err)
+		return
+	}
+	defer fh.Close()
+
+	if err != nil {
+		ex(res, http.StatusInternalServerError, nil, err)
+		return
+	}
+
+	ex(res, http.StatusNotFound, nil, nil)
+}
+
+// Update file content for an application
+func postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
@@ -363,6 +495,7 @@ func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter,
 
 	ex(res, http.StatusNotFound, nil, nil)
 }
+
 
 // Send an error response to the client.
 func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, error) {
