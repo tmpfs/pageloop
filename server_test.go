@@ -365,6 +365,15 @@ func TestRestService(t *testing.T) {
 		t.Error("Unexpected type for size")
 	}
 
+	// PUT /api/{container}/{app}/files/${url} - Created
+	doc = []byte(`{}`)
+	mockFile := fmt.Sprintf("%s%s%s", appUrl, name, "/files/foo.json")
+	println("mock file url: " + mockFile)
+	if resp, body, err = put(mockFile, doc); err != nil {
+		t.Fatal(err)
+	}
+	assertStatus(resp, t, http.StatusCreated)
+
 	// PUT /api/{container}/ - Created
 	doc = []byte(`{"name": "test-app"}`)
 	if resp, body, err = put(appUrl, doc); err != nil {

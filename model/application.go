@@ -216,6 +216,8 @@ func (app *Application) GetPageType(path string) int {
 func (app *Application) Add(file *File) {
 	var pageType int = app.GetPageType(file.Path)
 
+	// TODO: merge and set computed properties!!!
+
 	if file.Path == app.Path {
 		app.Root = file
 	} else {
@@ -226,6 +228,10 @@ func (app *Application) Add(file *File) {
 		}
 		app.AddFile(file)
 	}
+}
+
+func (app *Application) NewFile(path string, info os.FileInfo, data []byte) *File {
+	return &File{Path: path, info: info, data: data, source: data}
 }
 
 // Add a file to this application.

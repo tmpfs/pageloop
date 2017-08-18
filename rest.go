@@ -241,60 +241,10 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				return
 			} else {
 				// PUT /api/{container}/{app}/
-				if name != "" && action != "" {
-					ct := req.Header.Get("Content-Type")
-					cl := req.Header.Get("Content-Length")
-					// No content type header
-					if ct == "" {
-						ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
-						return
-					}
+				if name != "" && action == FILES && item != "" {
+					writeFileByUrl(item, app, res, req)
+					return
 
-					// No content length header
-					if cl == "" {
-						ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
-						return
-					}
-
-					dest := "/" + action
-					if item != "" {
-						dest = dest + "/" + item
-					}
-
-					//println("create new file: " + ct)
-					//println("create new file: " + cl)
-					//println("create new file: " + dest)
-					//println(req.Body)
-
-					if app.Urls[dest] != nil {
-						ex(res, http.StatusConflict, nil, errors.New("File exists, use POST to update a file"))
-						return
-					}
-
-					output := app.GetPathFromUrl(dest)
-
-					println("create new file output: " + output)
-
-					fh, err := os.Create(output)
-					if err == nil {
-						defer fh.Close()
-
-						// TODO: fix empty reply when there is no request body
-						var content []byte
-						if content, err = readBody(req); err == nil {
-							if _, err = fh.Write(content); err == nil {	
-								// Sync to stable storage
-								if err = fh.Sync(); err == nil {
-
-									// TODO: add the file to the application data
-									//app.AddFile()
-
-									created(res, OK)
-									return
-								}
-							}
-						}
-					}
 				}
 
 				if _, err := ex(res, http.StatusMethodNotAllowed, nil, nil); err == nil {
@@ -310,6 +260,73 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	if data != nil {
 		ok(res, data)
+		return
+	}
+
+	ex(res, http.StatusNotFound, nil, nil)
+}
+
+func writeFileByUrl(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+	ct := req.Header.Get("Content-Type")
+	cl := req.Header.Get("Content-Length")
+	// No content type header
+	if ct == "" {
+		ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
+		return
+	}
+
+	// No content length header
+	if cl == "" {
+		ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
+		return
+	}
+
+	dest := "/" + url
+	output := app.GetPathFromUrl(dest)
+
+	//println("create new file: " + ct)
+	//println("create new file: " + cl)
+	println("create new file: " + dest)
+	println("create new file: " + output)
+	//println(req.Body)
+	
+	// TODO: test is directory
+
+	/*
+	if app.Urls[dest] != nil {
+		ex(res, http.StatusConflict, nil, errors.New("File exists, use POST to update a file"))
+		return
+	}
+	*/
+
+	println("create new file output: " + output)
+
+	fh, err := os.Create(output)
+	if err == nil {
+		defer fh.Close()
+
+		// TODO: fix empty reply when there is no request body
+		var content []byte
+		if content, err = readBody(req); err == nil {
+			if _, err = fh.Write(content); err == nil {	
+				// Sync to stable storage
+				if err = fh.Sync(); err == nil {
+					if sh, err := os.Open(output); err == nil {
+						if stat, err := sh.Stat(); err == nil {
+							var file *model.File = app.NewFile(output, stat, content)
+							app.Add(file)
+							created(res, OK)
+							return
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	if err != nil {
+		ex(res, http.StatusInternalServerError, nil, err)
 		return
 	}
 
