@@ -208,6 +208,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 				// TODO: rewrite mountpoints
 				// TODO: persist application mountpoints
+				// TODO: unmount application
 
 				ok(res, OK)
 				return
@@ -225,9 +226,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				//fmt.Printf("PUT input: %#v\n", input)
-				//fmt.Printf("PUT result: %#v\n", result)
-
 				// Add the application to the container.
 				if err = h.Container.Add(input); err != nil {
 					ex(res, http.StatusPreconditionFailed, nil, err)
@@ -241,6 +239,36 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				created(res, OK)
 				return
 			} else {
+				println("got put method at: " + name)
+				// PUT /api/{container}/{app}/
+				if name != "" && action != "" {
+					ct := req.Header.Get("Content-Type")
+					cl := req.Header.Get("Content-Length")
+					// No content type header
+					if ct == "" {
+						ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
+						return
+					}
+
+					// No content length header
+					if cl == "" {
+						ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
+						return
+					}
+
+					dest := "/" + action
+					if item != "" {
+						dest = dest + "/" + item
+					}
+
+				//fmt.Printf("PUT input: %#v\n", input)
+				//fmt.Printf("PUT result: %#v\n", result)
+
+					
+					println("create new file: " + ct)
+					println("create new file: " + cl)
+					println("create new file: " + dest)
+				}
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			}
@@ -278,6 +306,11 @@ func ex(res http.ResponseWriter, code int, data []byte, exception error) (int, e
 
 // Private helper functions.
 
+func readBody(req *http.Request) ([]byte, error) {
+	defer req.Body.Close()
+	return ioutil.ReadAll(req.Body)
+}
+
 // Validate a client request.
 //
 // Reads in the request body data, unmarshals to JSON and
@@ -286,8 +319,7 @@ func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojs
 	var err error
 	var body []byte
 	var result *gojsonschema.Result
-	defer req.Body.Close()
-	body, err = ioutil.ReadAll(req.Body)
+	body, err = readBody(req)
 	if err != nil {
 		return nil, err
 	}
