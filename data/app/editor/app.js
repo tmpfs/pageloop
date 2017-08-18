@@ -385,7 +385,7 @@ class EditorApplication {
                 </section>
                 <section>
                   <h3>Delete File</h3>
-                  <p>Danger zone: be careful!</p>
+                  <p v-bind:class="{hidden: confirmDelete}">Danger zone: be careful!</p>
                   <div>
                     <button @click="confirmDelete = true"
                       v-bind:class="{hidden: confirmDelete}"
