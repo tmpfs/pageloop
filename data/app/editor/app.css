@@ -302,6 +302,17 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 }
 */
 
+input[type="text"], input[type="submit"], button {
+  font-family: SourceSans;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+button, input[type="submit"] {
+  background: #eee8d5;
+  border: 2px solid #073642;
+}
+
 .file-editor, .source-editor, .visual-editor {
   height: 100%;
 }
