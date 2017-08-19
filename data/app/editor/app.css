@@ -1,3 +1,7 @@
+:root {
+  --link-color: #e30053;
+}
+
 @font-face {
   font-family: 'SourceSerif';
   src: url('/assets/font/sourceserifpro-regular-webfont.woff2') format('woff2'),
@@ -52,7 +56,7 @@ p, section > ul.compact-list {
 }
 
 a, a:visited, a:hover {
-  color: #3000d9;
+  color: var(--link-color);
   text-decoration: none;
 }
 
@@ -293,7 +297,7 @@ h2 a, .tabs > a, header > nav > a {
 }
 
 h2 a:hover, .tabs > a:hover, header > nav > a:hover {
-  background: #3000d9;
+  background: var(--link-color);
   color: white;
   transition: all 0.5s ease-out;
 }
@@ -307,7 +311,7 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 
 .tabs > .selected {
   text-decoration: underline;
-  background: #3000d9;
+  background: var(--link-color);
   color: white;
   pointer-events: none;
 }
