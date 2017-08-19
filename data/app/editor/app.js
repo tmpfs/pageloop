@@ -279,7 +279,7 @@ class EditorApplication {
             let frame = document.querySelector('.live')
             return frame.contentDocument.location.reload()
           }
-          this.path = url || this.getPreviewUrl()
+          this.path = url || '/'
           this.url = this.getPreviewUrl(url)
         },
         getPreviewUrl: function (url) {
