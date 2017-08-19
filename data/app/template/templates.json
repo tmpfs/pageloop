@@ -1,0 +1,19 @@
+{
+	"files": {
+		"html+standalone": {
+			"sources": [
+				"files/standalone-html.html"
+			]	
+		},
+		"html+layout": {
+			"sources": [
+				"files/html-layout.html"
+			]	
+		}
+		"markdown+standalone": {
+			"sources": [
+				"files/markdown-standalone.md"
+			]
+		}
+	}
+}
