@@ -515,7 +515,7 @@ class EditorApplication {
                 .then((res) => {
                   let doc = res.document
                   if (doc.ok) {
-                    bus.$emit('preview:refresh', file.url)
+                    bus.$emit('preview:refresh', file.uri)
                   }
                 })
             },
