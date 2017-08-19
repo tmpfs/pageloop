@@ -229,10 +229,15 @@ class EditorApplication {
                 name = '/' + name
               }
 
-              data.createNewFile(name)
+              return data.createNewFile(name)
                 .then((res, doc) => {
-                  console.log(res)
-                  console.log(doc)
+                  this.$parent.loadPages()
+                    .then(this.$parent.loadFiles())
+                    .then(() => {
+                      this.$parent.currentView = 'pages'
+                      console.log(res)
+                      console.log(doc)
+                    })
                 })
             }
           }
