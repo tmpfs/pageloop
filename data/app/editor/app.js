@@ -185,12 +185,12 @@ class EditorApplication {
                 title="Show components">Components</a>
             </nav>
           </div>
-          <div class="scroll">
-            <component v-bind:is="currentView"></component>
-          </div>
           <nav class="toolbar">
             <a @click="showNewFileView" href="#" title="New File">+ New</a>
           </nav>
+          <div class="scroll">
+            <component v-bind:is="currentView"></component>
+          </div>
         </div>
       `,
       data: function () {
