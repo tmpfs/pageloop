@@ -33,7 +33,10 @@ type File struct {
 	// File stat information.
   info os.FileInfo
 
-	// Raw source data.
+  // Frontmatter content
+  frontmatter []byte
+
+	// Raw source data (frontmatter is removed)
 	source []byte
 
 	// Initially the source data but mutated later when
@@ -66,7 +69,10 @@ func (f *File) Close() error {
 }
 
 // Read only access to the source data outside this package.
-func (f *File) Source() []byte {
+func (f *File) Source(raw bool) []byte {
+  if raw && f.frontmatter != nil {
+	  return append(f.frontmatter, f.source...)
+  }
 	return f.source
 }
 

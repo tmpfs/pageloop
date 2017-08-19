@@ -308,7 +308,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
-		if lyt, err = p.ParseTemplate(file.Path, file.Source(), p.DefaultFuncMap(), true); err != nil {
+		if lyt, err = p.ParseTemplate(file.Path, file.Source(false), p.DefaultFuncMap(), true); err != nil {
 			return nil, err
 		}
 

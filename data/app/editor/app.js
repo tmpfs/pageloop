@@ -14,7 +14,7 @@ class AppDataSource {
   constructor (loc) {
     this.loc = loc
     this.url = `/api/${loc.container}/${loc.application}/`
-    this.source = `/apps/source/${loc.container}/${loc.application}`
+    this.raw = `/apps/raw/${loc.container}/${loc.application}`
 
     // current application
     this.app = {
@@ -33,7 +33,7 @@ class AppDataSource {
   }
 
   getFileContents (pathname) {
-    let url = this.source
+    let url = this.raw
     return fetch(url + pathname)
       .catch((err) => err)
   }

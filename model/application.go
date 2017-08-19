@@ -400,9 +400,15 @@ func (app *Application) getPageData(page *Page) (map[string] interface{}, error)
       if err != nil {
         return nil, err
       }
+
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
       page.file.source = page.file.source[read:]
+      fm = append([]byte("---\n"), fm...)
+      fm = append(fm, []byte("\n---")...)
+      page.file.frontmatter = fm
+
+      //println(string(fm))
 
       page.PageDataType = DATA_YAML
     }

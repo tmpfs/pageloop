@@ -106,6 +106,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // Serves application source files from memory.
 type ApplicationSourceHandler struct {
 	App *model.Application
+	Raw bool
 }
 
 // Tests the request path and attempts to find a corresponding source file
@@ -142,9 +143,10 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	if file != nil && !file.Info().IsDir() {
 		ext := filepath.Ext(file.Name)
 		ct := mime.TypeByExtension(ext)
+		output := file.Source(h.Raw)
 		res.Header().Set("Content-Type", ct)
-		res.Header().Set("Content-Length", strconv.Itoa(len(file.Source())))
-		res.Write(file.Source())
+		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
+		res.Write(output)
 		return
 	}
 
@@ -305,10 +307,15 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	log.Printf("Serving app %s from %s", url, app.Public)
 	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Public)))
 
-	// Serve the raw source files.
+	// Serve the source files with frontmatter stripped.
 	url = "/apps/source/" + app.Container.Name + "/" + app.Name + "/"
 	log.Printf("Serving src %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
+
+	// Serve the raw source files.
+	url = "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
+	log.Printf("Serving src %s from %s", url, app.Path)
+	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
 
 	// Serve the editor application for each app
 	url = "/apps/edit/" + app.Container.Name + "/" + app.Name + "/"
