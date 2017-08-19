@@ -64,8 +64,20 @@ class AppDataSource {
     return this.json(url)
       .then((list) => {
         this.app.files = list
-        console.log('files list loaded..')
         return list
+      })
+  }
+
+  deleteFile (file) {
+    let url = this.url + 'files' + file.url
+    let opts = {
+      method: 'DELETE'
+    }
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
       })
   }
 
@@ -186,6 +198,9 @@ class EditorApplication {
           currentView: ''
         }
       },
+      created: function () {
+        bus.$on('sidebar:reload', this.reload)
+      },
       methods: {
         showNewFileView: function () {
           this.previousView = this.currentView
@@ -206,6 +221,12 @@ class EditorApplication {
             .then((list) => {
               this.files = list
               bus.$emit('files:load', list)
+            })
+        },
+        reload: function () {
+          return this.loadPages()
+            .then(() => {
+              return this.loadFiles()
             })
         }
       },
@@ -243,28 +264,21 @@ class EditorApplication {
                   if (res.response.status !== 201) {
                     let doc = res.document
                     let msg = doc.error || doc.message
-                    msg = `[${doc.code}] ${msg}`
+                    msg = `[${res.response.status}] ${msg}`
                     return bus.$emit('log', new Error(msg))
                   }
 
-                  // Refresh sidebar lists and close the view
-                  return this.$parent.loadPages()
-                    .then(() => {
-                      return this.$parent.loadFiles()
-                        .then(() => {
-                          bus.$emit('log', `Created ${this.fileName}`)
+                  bus.$emit('sidebar:reload')
+                  bus.$emit('log', `Created ${this.fileName}`)
 
-                          // Open the newly created file
-                          for (let i = 0; i < data.app.files.length; i++) {
-                            if (data.app.files[i].url === this.fileName) {
-                              console.log('got matching file')
-                              bus.$emit('open:file', data.app.files[i])
-                              break
-                            }
-                          }
-                          this.$parent.closeNewFileView()
-                        })
-                    })
+                  // Open the newly created file
+                  for (let i = 0; i < data.app.files.length; i++) {
+                    if (data.app.files[i].url === this.fileName) {
+                      bus.$emit('open:file', data.app.files[i])
+                      break
+                    }
+                  }
+                  this.$parent.closeNewFileView()
                 })
             }
           }
@@ -485,7 +499,7 @@ class EditorApplication {
                     </p>
                     <div>
                       <button @click="confirmDelete = false">Cancel</button>
-                      <button class="danger">Delete</button>
+                      <button @click="doDelete" class="danger">Delete</button>
                     </div>
                   </div>
                 </section>
@@ -514,6 +528,23 @@ class EditorApplication {
           mounted: function () {
             if (data.currentFile) {
               this.file = data.currentFile
+            }
+          },
+          methods: {
+            doDelete: function () {
+              return data.deleteFile(this.file)
+                .then((res) => {
+                  console.log(res.response)
+                  let doc = res.document
+                  if (res.response.status !== 200) {
+                    console.log(doc)
+                    let msg = doc.error || doc.message
+                    msg = `[${res.response.status}] ${msg}`
+                    return bus.$emit('log', new Error(msg))
+                  }
+                  bus.$emit('log', `Deleted ${this.file.url}`)
+                  bus.$emit('sidebar:reload')
+                })
             }
           }
         },

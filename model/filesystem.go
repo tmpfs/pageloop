@@ -5,6 +5,7 @@ import(
 	"errors"
 	"strings"
 	"net/http"
+  "path"
   "path/filepath"
   "io/ioutil"
 )
@@ -290,7 +291,8 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 func (fs *UrlFileSystem) Remove(f *File) error {
 	app := fs.App()
 	src := f.Path
-	pub := filepath.Join(app.Public, f.Relative)
+  uri := filepath.Join(path.Split(f.Uri))
+	pub := filepath.Join(app.Public, uri)
 	if err := os.Remove(pub); err != nil {
 		return err
 	}

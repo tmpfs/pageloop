@@ -215,7 +215,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				}
 
 				if err = app.Del(file); err != nil {
-					ex(res, http.StatusInternalServerError, nil, nil)
+					ex(res, http.StatusInternalServerError, nil, err)
 					return
 				}
 
