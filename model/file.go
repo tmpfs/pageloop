@@ -10,7 +10,19 @@ type File struct {
   Path string `json:"-"`
   Name string `json:"name"`
   Size int64 `json:"size,omitempty"`
+
+  // This is a slash separated path to the source file
+  // relative to the application base, it will start with
+  // a leading slash. Directories will always have a trailing
+  // slash.
   Url string `json:"url"`
+
+  // This is a slash separated path to the public URI for
+  // the published file, normally it will be the same as the
+  // url however if a publish file filter mutates the path
+  // then this will point to the mutated relative path.
+  Uri string `json:"uri"`
+
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
   Mime string `json:"mime"`

@@ -259,10 +259,10 @@ class EditorApplication {
       },
       created: function () {
         bus.$on('open:complete', (item) => {
-          let url = item.url
-          let all = /\.(html?|md|markdown)$/
+          let url = item.uri
+          let all = /\.html?$/
           // Refresh preview when switching on page types
-          if (all.test(item.name)) {
+          if (all.test(url)) {
             this.refresh(url)
           }
         })
@@ -273,10 +273,6 @@ class EditorApplication {
       },
       methods: {
         refresh (url) {
-          let md = /\.(md|markdown)$/
-          if (md.test(url)) {
-            url = url.replace(md, '.html')
-          }
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
           if (url === this.path) {
@@ -407,7 +403,7 @@ class EditorApplication {
                   <h3>File Info</h3>
                   <ul class="small compact-list">
                     <li>Name: {{file.name}}</li>
-                    <li>URL : {{file.url}}</li>
+                    <li>URL : {{file.uri}}</li>
                     <li>Size: {{file.size}} bytes</li>
                     <li>Mime: {{file.mime}}</li>
                   </ul>

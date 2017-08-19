@@ -150,16 +150,25 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 		return err
 	}
 
-	// Set output path and create parent directories
-	out := filepath.Join(dir, rel)
-	out = filter.Rename(out)
-
-	// TODO: set public URL for client after filter!
+	// Filter relative path
+	rel = filter.Rename(rel)
 
 	// Ignore publishing this file
-	if out == "" {
+	if rel == "" {
 		return nil
 	}
+
+	out := filepath.Join(dir, rel)
+
+	// Update public URL after path filter
+	f.Uri = app.GetUrlFromPath(f, rel)
+	if f.page != nil {
+		f.page.Uri = f.Uri
+	}
+
+	//println("Converting to URL: " + rel)
+	//println("Converting to URL: " + out)
+	//println("Converting to URL: " + f.Url)
 
 	if f.page != nil {
 		if _, err = f.page.Parse(f.source); err != nil {

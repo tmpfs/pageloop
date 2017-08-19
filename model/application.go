@@ -265,10 +265,13 @@ func (app *Application) GetPageByUrl(url string) *Page {
 // Private methods
 
 // Determine a URL from a relative path.
-func (app *Application) getUrlFromPath(file *File, relative string) string {
+func (app *Application) GetUrlFromPath(file *File, relative string) string {
 	var url string = filepath.ToSlash(relative)
 	if file.info.IsDir() && !strings.HasSuffix(url, SLASH) {
 		url += "/"
+	}
+	if !strings.HasPrefix(url, SLASH) {
+		url = "/"	+ url
 	}
   return url
 }
@@ -325,7 +328,7 @@ func (app *Application) merge() error {
 func (app *Application) getFileFields(file *File, base string) (string, string, string) {
 	name := file.info.Name()
 	relative := strings.TrimPrefix(file.Path, base)
-  url := app.getUrlFromPath(file, relative)
+  url := app.GetUrlFromPath(file, relative)
 	return name, relative, url
 }
 
