@@ -1,4 +1,4 @@
-PACKAGES = github.com/tmpfs/pageloop github.com/tmpfs/pageloop/model github.com/tmpfs/pageloop/vdom 
+PACKAGES = github.com/tmpfs/pageloop github.com/tmpfs/pageloop/model github.com/tmpfs/pageloop/vdom
 
 bindata:
 	@go-bindata -pkg pageloop -prefix data -o assets.go $(shell find ./data -type d)
@@ -9,11 +9,14 @@ bindata-dev:
 dev: bindata-dev
 	@go run bin/main.go
 
+build: bindata/
+	@cd bin && go build -o pageloop
+
 test:
-	@go test $(PACKAGES) 
+	@go test $(PACKAGES)
 
 cover:
-	@go test -cover $(PACKAGES) 
+	@go test -cover $(PACKAGES)
 
 coverage:
 	# TODO: run over all packages

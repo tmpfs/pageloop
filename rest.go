@@ -28,6 +28,7 @@ var(
 	OK = []byte(`{"ok": true}`)
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
+  TemplateNewFile map[string] []byte
 )
 
 type RestService struct {
@@ -508,4 +509,12 @@ func isMethodAllowed(method string, methods []string) bool {
 		}
 	}
 	return false
+}
+
+func init() {
+  TemplateNewFile = make(map[string] []byte)
+  TemplateNewFile["template/markdown+standalone"] = MustAsset("app/template/files/standalone-markdown.md")
+  TemplateNewFile["template/html+standalone"] = MustAsset("app/template/files/standalone-html.html")
+  TemplateNewFile["template/html+layout"] = MustAsset("app/template/files/layout.html")
+  TemplateNewFile["template/html+partial"] = MustAsset("app/template/files/partial-html.html")
 }
