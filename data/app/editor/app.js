@@ -546,6 +546,7 @@ class EditorApplication {
         'file-editor': {
           template: `<div class="file-editor">
               <div class="scroll panel">
+                <h2 class="file-info"><span v-bind:class="{hidden: !file.dir}">🗀</span><span v-bind:class="{hidden: file.dir}">🗎</span>&nbsp;{{file.name}}</h2>
                 <section>
                   <h3>Rename File</h3>
                   <p>Choose a new name for your file.</p>
@@ -579,7 +580,7 @@ class EditorApplication {
                   <ul class="small compact-list">
                     <li>Name: {{file.name}}</li>
                     <li>URL : {{file.uri}}</li>
-                    <li v-bind:class="{hidden: !file.dir}">Directory: 🗸</li>
+                    <li v-bind:class="{hidden: !file.dir}">Directory: yes</li>
                     <li v-bind:class="{hidden: file.dir}">Size: {{file.size}} bytes</li>
                     <li v-bind:class="{hidden: file.dir}">Mime: {{file.mime}}</li>
                   </ul>
