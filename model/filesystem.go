@@ -161,15 +161,11 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 
 	out := filepath.Join(dir, rel)
 
-	// Update public URL after path filter
+	// Update public URI after path filter
 	f.Uri = app.GetUrlFromPath(f, rel)
 	if f.page != nil {
 		f.page.Uri = f.Uri
 	}
-
-	//println("Converting to URL: " + rel)
-	//println("Converting to URL: " + out)
-	//println("Converting to URL: " + f.Url)
 
 	if f.page != nil {
 		if _, err = f.page.Parse(f.source); err != nil {
@@ -265,7 +261,7 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 		mode = f.info.Mode()
 	}
 
-	if err = ioutil.WriteFile(f.Path, f.source, mode); err != nil {
+	if err = ioutil.WriteFile(f.Path, f.Source(true), mode); err != nil {
 		return err
 	}
 

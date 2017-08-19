@@ -3,10 +3,13 @@ package model
 
 import(
 	//"fmt"
+
+  "os"
   "bytes"
 	"strings"
 	"regexp"
 	//"net/url"
+  "io/ioutil"
   "html/template"
   "encoding/json"
 	"path/filepath"
@@ -375,4 +378,138 @@ func (p *Page) AddBlock(b Block) Page {
 
 func (p *Page) Length() int {
   return len(p.Blocks)
+}
+
+func (page *Page) ParsePageData () error {
+  var err error
+  if _, err = page.parsePageData(); err != nil {
+    return err
+  }
+
+  if page.file.data != nil {
+    if _, err = page.Parse(page.file.data); err != nil {
+      return err
+    }
+  }
+
+  //app.Pages[index] = page
+
+  // Convert map[interface{}] interface{} to map[string] interface{}
+  // recursively in parsed page data.
+  //
+  // This is necessary as the YAML unmarshaller converts nested maps
+  // using interface{} keys and interface{} keys are not recognised when
+  // marshalling to JSON. We don't want to define a type for page data as
+  // it is intended to be arbitrary.
+  var coerce func(m map[string] interface{})
+  coerce = func(m map[string] interface{}) {
+    for key, value := range m {
+      if val, ok := value.(map[interface{}] interface{}); ok {
+        var r map[string]interface{}
+        r = make(map[string]interface{})
+        for k, v := range val {
+          r[k.(string)] = v
+        }
+        coerce(r)
+        m[key] = r
+      }
+    }
+  }
+  coerce(page.PageData)
+  return nil
+}
+
+// Attempt to find user page data by first attempting to
+// parse embedded frontmatter YAML.
+//
+// If there is no frontmatter data it attempts to
+// load data from a corresponding file with a .yml extension.
+//
+// Finally if a .json file exists it is parsed.
+func (page *Page) parsePageData() (map[string] interface{}, error) {
+  page.PageData = make(map[string] interface{})
+  page.PageDataType = DATA_NONE
+
+  // frontmatter
+  if FRONTMATTER.Match(page.file.source) {
+    var read int = 4
+    var lines [][]byte = bytes.Split(page.file.source, []byte("\n"))
+    var frontmatter [][]byte
+    // strip leading ---
+    lines = lines[1:]
+    for _, line := range lines {
+      read += len(line) + 1
+      if FRONTMATTER_END.Match(line) {
+        break
+      }
+      frontmatter = append(frontmatter, line)
+    }
+
+    if len(frontmatter) > 0 {
+      fm := bytes.Join(frontmatter, []byte("\n"))
+      err := yaml.Unmarshal(fm, &page.PageData)
+      if err != nil {
+        return nil, err
+      }
+
+      // strip frontmatter content from file data after parsing
+      page.file.data = page.file.data[read:]
+      page.file.source = page.file.source[read:]
+      fm = append([]byte("---\n"), fm...)
+      fm = append(fm, []byte("\n---\n")...)
+      page.file.frontmatter = fm
+
+      //println(string(fm))
+
+      page.PageDataType = DATA_YAML
+    }
+    return page.PageData, nil
+  }
+
+  // external files
+  dir, name := filepath.Split(page.file.Path)
+  for _, dataType := range types {
+    dataPath := name
+    if TEMPLATE_FILE.MatchString(name) {
+      dataPath = TEMPLATE_FILE.ReplaceAllString(name, dataType)
+    } else if MARKDOWN_FILE.MatchString(name) {
+      dataPath = MARKDOWN_FILE.ReplaceAllString(name, dataType)
+    }
+    dataPath = filepath.Join(dir, dataPath)
+    // Failed to change file extension
+    if dataPath == page.file.Path {
+      return nil, nil
+    }
+
+    fh, err := os.Open(dataPath)
+    if err != nil {
+      if !os.IsNotExist(err) {
+        return nil, err
+      }
+    }
+    if fh != nil {
+      defer fh.Close()
+      contents, err := ioutil.ReadFile(dataPath)
+      if err != nil {
+        return nil, err
+      }
+
+      if dataType == JSON {
+        err = json.Unmarshal(contents, &page.PageData)
+        if err != nil {
+          return nil, err
+        }
+        page.PageDataType = DATA_JSON_FILE
+      } else if dataType == YAML {
+        err = yaml.Unmarshal(contents, &page.PageData)
+        if err != nil {
+          return nil, err
+        }
+        page.PageDataType = DATA_YAML_FILE
+      }
+      break
+    }
+  }
+
+  return page.PageData, nil
 }

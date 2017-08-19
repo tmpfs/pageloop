@@ -3,13 +3,9 @@ package model
 import (
 	//"log"
   "os"
-  "bytes"
 	"regexp"
   "strings"
   "path/filepath"
-  "io/ioutil"
-  "encoding/json"
-  "gopkg.in/yaml.v2"
 )
 
 const (
@@ -116,7 +112,13 @@ func (app *Application) Update(file *File, content []byte) error {
 		return err
 	}
 	defer fh.Close()
+
 	file.source = content
+  if file.page != nil {
+    if err := file.page.ParsePageData(); err != nil {
+      return err
+    }
+  }
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return err
 	}
@@ -168,7 +170,7 @@ func (app *Application) Del(file *File) error {
 // how to add the file.
 //
 // Note that pages also exist in the list of all files.
-func (app *Application) Add(file *File) {
+func (app *Application) Add(file *File) error {
 	var pageType int = app.GetPageType(file.Path)
 
 	// TODO: merge and set computed properties!!!
@@ -184,8 +186,12 @@ func (app *Application) Add(file *File) {
 			page := &Page{file: file, Path: file.Path, Type: pageType}
 			file.page = page
 			app.AddPage(page)
+      if err := page.ParsePageData(); err != nil {
+        return err
+      }
 		}
 	}
+  return nil
 }
 
 // Create a new file.
@@ -220,10 +226,6 @@ func (app *Application) Load(path string) error {
 
   err = app.FileSystem.Load(path)
   if err != nil {
-    return err
-  }
-
-  if err = app.merge(); err != nil {
     return err
   }
 
@@ -290,45 +292,6 @@ func (app *Application) GetPathFromUrl(url string) string {
 	return base + SLASH + filepath.Join(parts...)
 }
 
-// Merge user data with page structs loading user data from a JSON
-// file with the same name of the HTML file that created the page.
-func (app *Application) merge() error {
-  var err error
-  for index, page := range app.Pages {
-		if _, err = app.getPageData(page); err != nil {
-			return err
-		}
-		if _, err = page.Parse(page.file.data); err != nil {
-			return err
-		}
-		app.Pages[index] = page
-
-		// Convert map[interface{}] interface{} to map[string] interface{}
-		// recursively in parsed page data.
-		//
-		// This is necessary as the YAML unmarshaller converts nested maps
-		// using interface{} keys and interface{} keys are not recognised when
-		// marshalling to JSON. We don't want to define a type for page data as
-		// it is intended to be arbitrary.
-		var coerce func(m map[string] interface{})
-		coerce = func(m map[string] interface{}) {
-			for key, value := range m {
-				if val, ok := value.(map[interface{}] interface{}); ok {
-					var r map[string]interface{}
-					r = make(map[string]interface{})
-					for k, v := range val {
-						r[k.(string)] = v
-					}
-					coerce(r)
-					m[key] = r
-				}
-			}
-		}
-		coerce(page.PageData)
-  }
-  return nil
-}
-
 // Extract a name, relative path and URL for a file.
 func (app *Application) getFileFields(file *File, base string) (string, string, string) {
 	name := file.info.Name()
@@ -367,99 +330,3 @@ func (app *Application) setComputedPageFields(page *Page) {
 	page.Url = file.Url
 	page.Size = file.info.Size()
 }
-
-// Attempt to find user page data by first attempting to
-// parse embedded frontmatter YAML.
-//
-// If there is no frontmatter data it attempts to
-// load data from a corresponding file with a .yml extension.
-//
-// Finally if a .json file exists it is parsed.
-func (app *Application) getPageData(page *Page) (map[string] interface{}, error) {
-  page.PageData = make(map[string] interface{})
-  page.PageDataType = DATA_NONE
-
-  // frontmatter
-  if FRONTMATTER.Match(page.file.data) {
-    var read int = 4
-    var lines [][]byte = bytes.Split(page.file.data, []byte("\n"))
-    var frontmatter [][]byte
-    // strip leading ---
-    lines = lines[1:]
-    for _, line := range lines {
-      read += len(line) + 1
-      if FRONTMATTER_END.Match(line) {
-        break
-      }
-      frontmatter = append(frontmatter, line)
-    }
-
-    if len(frontmatter) > 0 {
-      fm := bytes.Join(frontmatter, []byte("\n"))
-      err := yaml.Unmarshal(fm, &page.PageData)
-      if err != nil {
-        return nil, err
-      }
-
-      // strip frontmatter content from file data after parsing
-      page.file.data = page.file.data[read:]
-      page.file.source = page.file.source[read:]
-      fm = append([]byte("---\n"), fm...)
-      fm = append(fm, []byte("\n---")...)
-      page.file.frontmatter = fm
-
-      //println(string(fm))
-
-      page.PageDataType = DATA_YAML
-    }
-    return page.PageData, nil
-  }
-
-  // external files
-  dir, name := filepath.Split(page.file.Path)
-  for _, dataType := range types {
-    dataPath := name
-    if TEMPLATE_FILE.MatchString(name) {
-      dataPath = TEMPLATE_FILE.ReplaceAllString(name, dataType)
-    } else if MARKDOWN_FILE.MatchString(name) {
-      dataPath = MARKDOWN_FILE.ReplaceAllString(name, dataType)
-    }
-    dataPath = filepath.Join(dir, dataPath)
-    // Failed to change file extension
-    if dataPath == page.file.Path {
-      return nil, nil
-    }
-
-    fh, err := os.Open(dataPath)
-    if err != nil {
-      if !os.IsNotExist(err) {
-        return nil, err
-      }
-    }
-    if fh != nil {
-      defer fh.Close()
-      contents, err := ioutil.ReadFile(dataPath)
-      if err != nil {
-        return nil, err
-      }
-
-      if dataType == JSON {
-        err = json.Unmarshal(contents, &page.PageData)
-        if err != nil {
-          return nil, err
-        }
-        page.PageDataType = DATA_JSON_FILE
-      } else if dataType == YAML {
-        err = yaml.Unmarshal(contents, &page.PageData)
-        if err != nil {
-          return nil, err
-        }
-        page.PageDataType = DATA_YAML_FILE
-      }
-      break
-    }
-  }
-
-  return page.PageData, nil
-}
-
