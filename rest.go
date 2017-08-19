@@ -300,26 +300,12 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 		return
 	}
 
-	var file *model.File = app.Urls[url]
-	output := app.GetPathFromUrl(url)
-
-	if file != nil {
-		ex(res, http.StatusPreconditionFailed, nil, errors.New("File already exists"))
-		return
-	}
-
-	// TODO: fix empty reply when there is no request body
-	// TODO: stream request body to disc
 	var content []byte
-
-  println("creating file content type: " + ct)
-
   content = TemplateNewFile[ct]
-  if content != nil {
-    println("using template bytes: " + string(content))
-  }
   // Read content from request body if no template available
   if content == nil {
+    // TODO: fix empty reply when there is no request body
+    // TODO: stream request body to disc
     if content, err = readBody(req); err != nil {
       ex(res, http.StatusInternalServerError, nil, err)
       return
@@ -327,7 +313,7 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
   }
 
   // Update the application model
-  if _, err = app.Create(output, content); err != nil {
+  if _, err = app.Create(url, content); err != nil {
     ex(res, http.StatusInternalServerError, nil, err)
     return
   }

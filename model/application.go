@@ -1,8 +1,10 @@
 package model
 
 import (
+  "fmt"
 	//"log"
   "os"
+  "path"
 	"regexp"
   "strings"
   "path/filepath"
@@ -70,9 +72,37 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
+// Tests for that would conflict when published, for example
+// document.md and document.html would be published to the same location
+// so we have to test for this when creating new files.
+func (app *Application) ExistsConflict(url string) bool {
+  var ext string = path.Ext(url)
+  if TEMPLATE_FILE.MatchString(url) {
+    url = strings.TrimSuffix(url, ext) + ".md"
+    if app.Urls[url] != nil {
+      return true
+    }
+  } else if MARKDOWN_FILE.MatchString(url) {
+    url = strings.TrimSuffix(url, ext)
+    if app.Urls[url + ".htm"] != nil || app.Urls[url + ".html"] != nil {
+      return true
+    }
+  }
+  return false
+}
+
 // Create a new file and publish it, the file cannot already exist on disc.
-func (app *Application) Create(path string, content []byte) (*File, error) {
-	// TODO: check path is not outside the application
+func (app *Application) Create(url string, content []byte) (*File, error) {
+	var file *File = app.Urls[url]
+	path := app.GetPathFromUrl(url)
+	if file != nil {
+		return nil, fmt.Errorf("File already exists %s", url)
+	}
+
+  if app.ExistsConflict(url) {
+		return nil, fmt.Errorf("File already exists, publish conflict on %s", url)
+  }
+
   println("create file: " + path)
   println("create file app path: " + app.Path)
 
@@ -87,7 +117,7 @@ func (app *Application) Create(path string, content []byte) (*File, error) {
 	if fh != nil {
 		defer fh.Close()
 	}
-	var file *File = app.NewFile(path, nil, content)
+	file = app.NewFile(path, nil, content)
   // TODO: remove file from list on error!
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return nil, err
