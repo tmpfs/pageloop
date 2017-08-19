@@ -258,19 +258,28 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 		mode = f.info.Mode()
 	}
 
+	var fh *os.File
+	var stat os.FileInfo
+
+	fh, err = os.Open(f.Path)
+  if err != nil {
+    if !os.IsNotExist(err) {
+      return err
+    // Try to make the directory.
+    } else {
+      if err = os.MkdirAll(filepath.Dir(f.Path), os.ModeDir | 0755); err != nil {
+        return err
+      }
+    }
+  }
+	defer fh.Close()
+
+  // Write out the raw file contents
 	if err = ioutil.WriteFile(f.Path, f.Source(true), mode); err != nil {
 		return err
 	}
 
-	var fh *os.File
-	var stat os.FileInfo
-
 	// Now update the Stat() info
-	if fh, err = os.Open(f.Path); err != nil {
-		return err
-	}
-	defer fh.Close()
-
 	if stat, err = fh.Stat(); err != nil {
 		return err
 	}
