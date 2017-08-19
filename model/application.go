@@ -29,6 +29,19 @@ var(
 	re = regexp.MustCompile(ptn)
 )
 
+type StatusError struct {
+	Status int
+	Message string
+}
+
+func (s StatusError) Error() string {
+	return s.Message
+}
+
+func NewStatusError (status int, message string, a ...interface{}) StatusError {
+	return StatusError{Status: status, Message: fmt.Sprintf(message, a...)}
+}
+
 type Application struct {
 	// Mountpoint URL
 	Url string `json:"url"`
@@ -96,11 +109,11 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 	var file *File = app.Urls[url]
 	path := app.GetPathFromUrl(url)
 	if file != nil {
-		return nil, fmt.Errorf("File already exists %s", url)
+		return nil, NewStatusError(412, "File already exists %s", url)
 	}
 
   if app.ExistsConflict(url) {
-		return nil, fmt.Errorf("File already exists, publish conflict on %s", url)
+		return nil, NewStatusError(412, "File already exists, publish conflict on %s", url)
   }
 
   println("create file: " + path)

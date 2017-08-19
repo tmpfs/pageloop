@@ -735,9 +735,11 @@ class EditorApplication {
       `
     })
 
-    this.logger = new Vue({
+    this.footer = new Vue({
       template: `
-        <p class="log" v-bind:class="{error: error}">{{message}}</p>
+        <footer>
+          <p class="log" v-bind:class="{error: error}">{{message}}</p>
+        </footer>
       `,
       data: function () {
         return {
@@ -772,7 +774,7 @@ class EditorApplication {
     this.sidebar.$mount('.sidebar')
     this.editor.$mount('.editor')
     this.preview.$mount('.preview')
-    this.logger.$mount('footer .log')
+    this.footer.$mount('footer')
 
     return main
   }

@@ -314,6 +314,11 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 
   // Update the application model
   if _, err = app.Create(url, content); err != nil {
+    if err, ok := err.(model.StatusError); ok {
+      ex(res, err.Status, nil, err)
+      return
+    }
+
     ex(res, http.StatusInternalServerError, nil, err)
     return
   }
