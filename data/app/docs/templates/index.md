@@ -36,7 +36,7 @@ template by convention. So a minimal layout would look like:
   </head>
   <body>
     <main>
-      {{template "content"}}
+      {{block "content" .}}{{end}}
     </main>
   </body>
 </html>` | html ?>
