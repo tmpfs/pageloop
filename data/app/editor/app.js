@@ -763,9 +763,7 @@ class EditorApplication {
       }
     })
 
-    let header = new Vue({el: 'header'})
-    let main = new Vue({el: 'main', data: data})
-    let footer = new Vue({el: 'footer', data: data})
+    let main = new Vue({el: 'main'})
 
     // mount views
     this.header.$mount('header')
@@ -776,7 +774,7 @@ class EditorApplication {
     this.preview.$mount('.preview')
     this.logger.$mount('footer .log')
 
-    return {header: header, main: main, footer: footer}
+    return main
   }
 
   log (msg) {
