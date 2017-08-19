@@ -579,8 +579,9 @@ class EditorApplication {
                   <ul class="small compact-list">
                     <li>Name: {{file.name}}</li>
                     <li>URL : {{file.uri}}</li>
-                    <li>Size: {{file.size}} bytes</li>
-                    <li>Mime: {{file.mime}}</li>
+                    <li v-bind:class="{hidden: !file.dir}">Directory: 🗸</li>
+                    <li v-bind:class="{hidden: file.dir}">Size: {{file.size}} bytes</li>
+                    <li v-bind:class="{hidden: file.dir}">Mime: {{file.mime}}</li>
                   </ul>
                 </section>
               </div>
