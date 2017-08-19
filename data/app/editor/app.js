@@ -223,10 +223,15 @@ class EditorApplication {
               bus.$emit('files:load', list)
             })
         },
-        reload: function () {
+        reload: function (fn) {
           return this.loadPages()
             .then(() => {
               return this.loadFiles()
+                .then(() => {
+                  if (typeof fn === 'function') {
+                    return fn()
+                  }
+                })
             })
         }
       },
@@ -242,6 +247,7 @@ class EditorApplication {
                     <input type="submit" name="Create" value="Create" />
                   </form>
                 </p>
+                <p class="small">Tip: Use <code>/path/to/file/document.md</code> to create directories when adding new files.</p>
               </section>
             </div>`,
           data: function () {
@@ -268,16 +274,18 @@ class EditorApplication {
                     return bus.$emit('log', new Error(msg))
                   }
 
-                  bus.$emit('sidebar:reload')
                   bus.$emit('log', `Created ${this.fileName}`)
-
-                  // Open the newly created file
-                  for (let i = 0; i < data.app.files.length; i++) {
-                    if (data.app.files[i].url === this.fileName) {
-                      bus.$emit('open:file', data.app.files[i])
-                      break
+                  bus.$emit('sidebar:reload', () => {
+                    console.log('sidebar reload cb called')
+                    // Open the newly created file
+                    for (let i = 0; i < data.app.files.length; i++) {
+                      if (data.app.files[i].url === this.fileName) {
+                        bus.$emit('open:file', data.app.files[i])
+                        break
+                      }
                     }
-                  }
+                  })
+
                   this.$parent.closeNewFileView()
                 })
             }
