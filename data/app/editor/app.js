@@ -64,6 +64,7 @@ class AppDataSource {
     return this.json(url)
       .then((list) => {
         this.app.files = list
+        console.log('files list loaded..')
         return list
       })
   }
@@ -173,7 +174,7 @@ class EditorApplication {
             <component v-bind:is="currentView"></component>
           </div>
           <nav class="toolbar">
-            <a @click="currentView = 'new-page'" v-bind:class="{hidden: currentView != 'pages'}" href="#" title="New Pagefile">+ New</a>
+            <a @click="showNewFileView" href="#" title="New File">+ New</a>
           </nav>
         </div>
       `,
@@ -186,6 +187,13 @@ class EditorApplication {
         }
       },
       methods: {
+        showNewFileView: function () {
+          this.previousView = this.currentView
+          this.currentView = 'new-file'
+        },
+        closeNewFileView: function () {
+          this.currentView = this.previousView
+        },
         loadPages: function () {
           return data.getPages()
             .then((list) => {
@@ -202,7 +210,7 @@ class EditorApplication {
         }
       },
       components: {
-        'new-page': {
+        'new-file': {
           template: `
             <div class="new-page">
               <section>
@@ -231,17 +239,31 @@ class EditorApplication {
 
               return data.createNewFile(name)
                 .then((res) => {
+                  // Show error response
                   if (res.response.status !== 201) {
                     let doc = res.document
                     let msg = doc.error || doc.message
                     msg = `[${doc.code}] ${msg}`
                     return bus.$emit('log', new Error(msg))
                   }
+
+                  // Refresh sidebar lists and close the view
                   return this.$parent.loadPages()
-                    .then(this.$parent.loadFiles())
                     .then(() => {
-                      this.$parent.currentView = 'pages'
-                      return bus.$emit('log', `Created ${this.fileName}`)
+                      return this.$parent.loadFiles()
+                        .then(() => {
+                          bus.$emit('log', `Created ${this.fileName}`)
+
+                          // Open the newly created file
+                          for (let i = 0; i < data.app.files.length; i++) {
+                            if (data.app.files[i].url === this.fileName) {
+                              console.log('got matching file')
+                              bus.$emit('open:file', data.app.files[i])
+                              break
+                            }
+                          }
+                          this.$parent.closeNewFileView()
+                        })
                     })
                 })
             }
