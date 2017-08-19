@@ -468,6 +468,8 @@ func (page *Page) parsePageData() (map[string] interface{}, error) {
         return nil, err
       }
 
+      //println(string(page.file.data))
+
       // strip frontmatter content from file data after parsing
       page.file.data = page.file.data[read:]
       page.file.source = page.file.source[read:]
