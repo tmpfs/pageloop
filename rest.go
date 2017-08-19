@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 	"net/http"
+  "mime"
+  "path/filepath"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
 	"github.com/xeipuuv/gojsonschema"
@@ -248,18 +250,17 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				created(res, OK)
 				return
 			} else {
-				// PUT /api/{container}/{app}/{url}
+				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
 					putFile(item, app, res, req)
 					return
-
 				}
 
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return
 			}
 		case http.MethodPost:
-			// POST /api/{container}/{app}/{url}
+			// POST /api/{container}/{app}/files/{url}
 			if name != "" && action == FILES && item != "" {
 				postFile(item, app, res, req)
 				return
@@ -288,10 +289,8 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
-	// No content type header
 	if ct == "" {
-		ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
-		return
+    ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
 
 	// No content length header
@@ -311,6 +310,9 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 	// TODO: fix empty reply when there is no request body
 	// TODO: stream request body to disc
 	var content []byte
+
+  println("creating file content type: " + ct)
+
 	if content, err = readBody(req); err == nil {
 		// Update the application model
 		if _, err = app.Create(output, content); err != nil {

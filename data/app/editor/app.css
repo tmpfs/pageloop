@@ -41,8 +41,14 @@ body {
   /*overflow: hidden;*/
 }
 
+form, fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
 p, section > ul.compact-list {
-  margin: 1rem 0 2rem 0;
+  margin: 1rem 0 1rem 0;
 }
 
 a, a:visited, a:hover {
@@ -103,6 +109,11 @@ h3 {
   display: inline-block;
   font-size: 1.4rem;
   border-bottom: 1px solid currentColor;
+	margin-bottom: 1rem;
+}
+
+h3 + p {
+	margin-top: 0;
 }
 
 main {
@@ -312,15 +323,31 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
 }
 */
 
-input[type="text"], input[type="submit"], button {
+input[type="text"], input[type="submit"], input[type="reset"], button {
   font-family: SourceSans;
   padding: 0.5rem;
   border-radius: 6px;
 }
 
-button, input[type="submit"] {
+input[type="text"] {
+	width: 100%;
+}
+
+button, input[type="submit"], input[type="reset"] {
   background: #eee8d5;
   border: 2px solid #073642;
+}
+
+input[type="submit"], input[type="reset"] {
+	margin-top: 1rem;
+}
+
+.form-actions {
+	text-align: right;
+}
+
+.form-actions > * {
+	margin-left: 0.5rem;
 }
 
 .file-editor, .source-editor, .visual-editor {

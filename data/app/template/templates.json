@@ -1,4 +1,5 @@
 {
+	"mime": "template/",
 	"files": {
 		"html+standalone": {
 			"sources": [
@@ -9,7 +10,12 @@
 			"sources": [
 				"files/layout.html"
 			]
-		}
+		},
+		"html+partial": {
+			"sources": [
+				"files/partial-html.html"
+			]
+		},
 		"markdown+standalone": {
 			"sources": [
 				"files/standalone-markdown.md"

@@ -101,15 +101,18 @@ class AppDataSource {
   }
 
   createNewFile (name, template) {
-    if (!template) {
-      template = 'template/markdown+standalone'
-    }
     let url = this.url + 'files' + name
     let opts = {
       method: 'PUT',
       headers: {
         'Content-Type': template
       }
+    }
+
+    // Create empty file
+    if (template === '') {
+      opts.headers['Content-Length'] = 0
+      opts.body = ''
     }
     return fetch(url, opts)
       .then((res) => {
@@ -241,21 +244,59 @@ class EditorApplication {
             <div class="new-page">
               <section>
                 <h3>File Name</h3>
-                <p>
-                  <form class="new-page" @submit="createNewFile">
-                    <input v-model="fileName" type="text" name="name" :value="fileName" />
+                <form @submit="createNewFile">
+                  <input v-model="fileName" type="text" name="name" :value="fileName" />
+                  <p class="small">Tip: Use <code>/path/to/file/document.md</code> to create directories when adding new files.</p>
+
+                  <div class="template-select">
+                    <h3>Template</h3>
+                    <p class="small">Select an optional file template:</p>
+                    <ul class="small compact-list">
+                      <li>
+                        <input type="radio" v-model="template"
+                          id="empty-file" name="template" value="" checked />
+                        <label for="empty-file">Empty File</label>
+                      </li>
+                      <li>
+                        <input type="radio" v-model="template"
+                          id="markdown-file" name="template" value="template/markdown+standalone" />
+                        <label for="markdown-file">Markdown</label>
+                      </li>
+                      <li>
+                        <input type="radio" v-model="template"
+                          id="layout-file" name="template" value="template/html+layout" />
+                        <label for="layout-file">HTML Layout</label>
+                      </li>
+                      <li>
+                        <input type="radio" v-model="template"
+                          id="html-partial" name="template" value="template/html+partial" />
+                        <label for="html-partial">HTML Partial</label>
+                      </li>
+                      <li>
+                        <input type="radio" v-model="template"
+                          id="html-file" name="template" value="template/html+standalone" />
+                        <label for="html-file">HTML Standalone</label>
+                      </li>
+                    </ul>
+                  </div>
+                  <nav class="form-actions">
+                    <input @click="cancel" type="reset" name="Reset" value="Cancel" />
                     <input type="submit" name="Create" value="Create" />
-                  </form>
-                </p>
-                <p class="small">Tip: Use <code>/path/to/file/document.md</code> to create directories when adding new files.</p>
+                  </nav>
+                </form>
               </section>
             </div>`,
           data: function () {
             return {
-              fileName: '/untitled.md'
+              fileName: '/untitled.md',
+              template: ''
             }
           },
           methods: {
+            cancel: function (e) {
+              e.preventDefault()
+              this.$parent.closeNewFileView()
+            },
             createNewFile: function (e) {
               e.preventDefault()
 
@@ -264,7 +305,7 @@ class EditorApplication {
                 name = '/' + name
               }
 
-              return data.createNewFile(name)
+              return data.createNewFile(name, this.template)
                 .then((res) => {
                   // Show error response
                   if (res.response.status !== 201) {
