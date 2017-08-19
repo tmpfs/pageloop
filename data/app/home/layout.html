@@ -33,7 +33,7 @@
 			{{if .leader}}
 			<p>{{.leader}}</p>
 			{{end}}
-			{{template "content"}}
+			{{block "content" .}}{{end}}
 		</main>
   </body>
 </html>

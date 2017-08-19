@@ -136,9 +136,9 @@ func (p *Page) FindLayout() *Page {
 	var appRoot string = strings.TrimSuffix(p.owner.Root.Path, "/")
 
 	// Do not process layout files
-	if p.Name == name {
-		return nil
-	}
+	//if p.Name == name {
+		//return nil
+	//}
 
 	var search func(dir string) *Page
 	search = func(dir string) *Page {
@@ -283,9 +283,11 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
   }
 
 	// Do not handle layout files
+  /*
 	if p.Name == Layout {
 		return nil, nil
 	}
+  */
 
 	// Create and parse the primary template
 	var primary func(layout bool) (*template.Template, error)
@@ -320,10 +322,10 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 			data = FragmentTail.ReplaceAll(data, []byte{})
 		}
 
-
 		if tpl, err = primary(true); err != nil {
 			return nil, err
 		}
+
 		// Configure the layout template
 		file := layout.file
 		var lyt *template.Template
@@ -331,15 +333,17 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 			return nil, err
 		}
 
-		// Add the content template
-		for _, t := range tpl.Templates() {
-			if t.Name() == Content {
-				if _, err = lyt.AddParseTree(Content, t.Tree); err != nil {
-					return nil, err
-				}
-				break
-			}
-		}
+		// Add the content template to the parse tree if we are not the layout itself
+    if layout != p {
+      for _, t := range tpl.Templates() {
+        if t.Name() == Content {
+          if _, err = lyt.AddParseTree(Content, t.Tree); err != nil {
+            return nil, err
+          }
+          break
+        }
+      }
+    }
 
 		// Execute the outer layout template
 		if result, err = p.ExecuteTemplate(lyt, p.PageData); err != nil {
