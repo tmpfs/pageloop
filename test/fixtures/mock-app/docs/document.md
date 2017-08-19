@@ -1,6 +1,6 @@
 ---
 title: Foo Bar Mock
-layout: true
+layout: false
 ---
 ## Mock document
 

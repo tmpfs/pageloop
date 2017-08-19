@@ -45,7 +45,7 @@ class AppDataSource {
         for (let k in app) {
           this.app[k] = app[k]
         }
-        this.app.identifier = this.app.owner + '/' + this.app.name
+        this.app.identifier = this.app.owner + ' / ' + this.app.name
         return this.app
       })
   }
@@ -140,6 +140,21 @@ class EditorApplication {
     let data = this.data
     let bus = this.bus
 
+    this.header = new Vue({
+      template: `
+          <header>
+            <nav>
+              <a href="/" title="Home page">
+                <span>Ꝏ</span>&nbsp;Home
+              </a>
+              <a href="/apps/" title="All applications">Apps</a>
+              <a href="/docs/" title="Documentation">Docs</a>
+            </nav>
+            <div class="app-id"></div>
+          </header>
+        `
+    })
+
     let switcher = this.switcher = new Vue({
       template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
       data: function () {
@@ -152,7 +167,7 @@ class EditorApplication {
     this.identifier = new Vue({
       template: `
         <div class="app-id">
-          <a href="#" @click="click">▾ <span class="name">{{name}}</span></a>
+          <span class="name">{{name}}</span>
         </div>`,
       data: function () {
         return {
@@ -186,7 +201,8 @@ class EditorApplication {
             </nav>
           </div>
           <nav class="toolbar">
-            <a @click="showNewFileView" href="#" title="New File">+ New</a>
+            <a href="#" title="Delete File">➖</a>
+            <a @click="showNewFileView" href="#" title="New File">➕</a>
           </nav>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
@@ -752,12 +768,13 @@ class EditorApplication {
     let footer = new Vue({el: 'footer', data: data})
 
     // mount views
-    this.logger.$mount('footer .log')
+    this.header.$mount('header')
     this.identifier.$mount('.app-id')
     this.switcher.$mount('.switcher')
     this.sidebar.$mount('.sidebar')
     this.editor.$mount('.editor')
     this.preview.$mount('.preview')
+    this.logger.$mount('footer .log')
 
     return {header: header, main: main, footer: footer}
   }

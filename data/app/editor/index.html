@@ -20,6 +20,7 @@ keywords: web, editor, application
     <link rel="stylesheet" href='{{root "app.css"}}' />
 
     <script src="vendor/vue.js"></script>
+
     <script src="vendor/codemirror/lib/codemirror.js"></script>
     <script src="vendor/codemirror/keymap/vim.js"></script>
     <script src="vendor/codemirror/addon/mode/overlay.js"></script>
@@ -34,16 +35,7 @@ keywords: web, editor, application
   </head>
   <body>
     <main>
-      <header>
-        <nav>
-          <a href="/" title="Home page">
-            <span>Ꝏ</span>&nbsp;Home
-          </a>
-          <a href="/apps/" title="All applications">Apps</a>
-          <a href="/docs/" title="Documentation">Docs</a>
-        </nav>
-        <div class="app-id"></div>
-      </header>
+      <header></header>
       <editor-main></editor-main>
       <footer>
         <p class="log"></p>
@@ -52,4 +44,3 @@ keywords: web, editor, application
     <script src="app.js" async></script>
   </body>
 </html>
-

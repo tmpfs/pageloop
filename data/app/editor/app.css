@@ -68,15 +68,15 @@ header nav {
   flex-direction: row;
   margin: 0;
   padding: 0;
+  width: 12rem;
   /*max-width: 32rem;*/
 }
 
 header nav a {
   flex: 1 0;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   padding: .3rem 2rem;
   text-transform: uppercase;
-  border-bottom: 4px double #3000d9;
 }
 
 header nav a:hover {
@@ -84,7 +84,7 @@ header nav a:hover {
 }
 
 header .app-id {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   padding-right: 2rem;
   text-align: right;
 }
@@ -262,9 +262,20 @@ iframe {
 	height: calc(100% - 4.3rem);
 }
 
-.sidebar .scroll + .toolbar {
+.sidebar .toolbar {
 	height: 2.3rem;
+  font-size: 1.4rem;
 	border-bottom: 1px solid currentColor;
+  text-align: right;
+}
+
+.sidebar .toolbar a {
+  display: inline-block;
+  text-align: center;
+  /*background: #eee8d5;*/
+  color: black;
+  width: 2.3rem;
+  height: 2.3rem;
 }
 
 .small, small {
@@ -291,6 +302,7 @@ h2 a:hover, .tabs > a:hover, header > nav > a:hover {
   display: block;
   padding: .2rem 0 .2rem 2rem;
   cursor: pointer;
+  user-select: none;
 }
 
 .tabs > .selected {
