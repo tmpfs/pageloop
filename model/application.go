@@ -92,13 +92,18 @@ func (app *Application) Create(path string, content []byte) (*File, error) {
 		defer fh.Close()
 	}
 	var file *File = app.NewFile(path, nil, content)
+  // TODO: remove file from list on error!
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return nil, err
 	}
+
+  // Must add before publish for all fields to be available
+	app.Add(file)
+
 	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
 		return nil, err
 	}
-	app.Add(file)
+
 	return file, nil
 }
 

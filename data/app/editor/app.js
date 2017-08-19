@@ -276,7 +276,6 @@ class EditorApplication {
 
                   bus.$emit('log', `Created ${this.fileName}`)
                   bus.$emit('sidebar:reload', () => {
-                    console.log('sidebar reload cb called')
                     // Open the newly created file
                     for (let i = 0; i < data.app.files.length; i++) {
                       if (data.app.files[i].url === this.fileName) {
@@ -365,7 +364,7 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          path: '',
+          path: '/',
           url: ''
         }
       },
@@ -542,10 +541,8 @@ class EditorApplication {
             doDelete: function () {
               return data.deleteFile(this.file)
                 .then((res) => {
-                  console.log(res.response)
                   let doc = res.document
                   if (res.response.status !== 200) {
-                    console.log(doc)
                     let msg = doc.error || doc.message
                     msg = `[${res.response.status}] ${msg}`
                     return bus.$emit('log', new Error(msg))
