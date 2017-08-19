@@ -77,8 +77,8 @@ func (app *Application) GetPageType(path string) int {
 // Create a new file and publish it, the file cannot already exist on disc.
 func (app *Application) Create(path string, content []byte) (*File, error) {
 	// TODO: check path is not outside the application
-	//println("create file: " + path)
-	//println("create file app path: " + app.Path)
+  println("create file: " + path)
+  println("create file app path: " + app.Path)
 
 	var err error
 	var fh *os.File

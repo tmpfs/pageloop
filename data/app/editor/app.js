@@ -86,6 +86,25 @@ class AppDataSource {
         })
       })
   }
+
+  createNewFile (name, template) {
+    if (!template) {
+      template = 'template/markdown+standalone'
+    }
+    let url = this.url + 'files' + name
+    let opts = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': template
+      }
+    }
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
 }
 
 class EditorApplication {
@@ -152,6 +171,9 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
+          <nav class="toolbar">
+            <a @click="currentView = 'new-page'" v-bind:class="{hidden: currentView != 'pages'}" href="#" title="New Pagefile">+ New</a>
+          </nav>
         </div>
       `,
       data: function () {
@@ -179,6 +201,42 @@ class EditorApplication {
         }
       },
       components: {
+        'new-page': {
+          template: `
+            <div class="new-page">
+              <section>
+                <h3>File Name</h3>
+                <p>
+                  <form class="new-page" @submit="createNewFile">
+                    <input v-model="fileName" type="text" name="name" :value="fileName" />
+                    <input type="submit" name="Create" value="Create" />
+                  </form>
+                </p>
+              </section>
+            </div>`,
+          data: function () {
+            return {
+              fileName: '/untitled.md'
+            }
+          },
+          methods: {
+            createNewFile: function (e) {
+              e.preventDefault()
+              console.log('create new file: ' + this.fileName)
+              let name = this.fileName
+
+              if (!/^\//.test(name)) {
+                name = '/' + name
+              }
+
+              data.createNewFile(name)
+                .then((res, doc) => {
+                  console.log(res)
+                  console.log(doc)
+                })
+            }
+          }
+        },
         pages: {
           template: `
             <div class="pages-list">

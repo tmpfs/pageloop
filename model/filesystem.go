@@ -190,7 +190,7 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 
 	// Write out the file data
 	if !isDir {
-		var mode os.FileMode = 0755
+		var mode os.FileMode = 0644
 		if f.info != nil {
 			mode = f.info.Mode()
 		}
@@ -258,7 +258,7 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 
 	// TODO: handle attempts to save directories!
 
-	var mode os.FileMode = 0755
+	var mode os.FileMode = 0644
 
 	if f.info != nil {
 		mode = f.info.Mode()
