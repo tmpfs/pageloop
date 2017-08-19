@@ -110,6 +110,7 @@ class AppDataSource {
 class EditorApplication {
   constructor (loc) {
     this.loc = loc
+    this.bus = new Vue()
     this.data = new AppDataSource(this.loc)
   }
 
@@ -121,7 +122,7 @@ class EditorApplication {
 
   ui () {
     let data = this.data
-    let bus = new Vue()
+    let bus = this.bus
 
     let switcher = this.switcher = new Vue({
       template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
@@ -222,21 +223,25 @@ class EditorApplication {
           methods: {
             createNewFile: function (e) {
               e.preventDefault()
-              console.log('create new file: ' + this.fileName)
-              let name = this.fileName
 
+              let name = this.fileName
               if (!/^\//.test(name)) {
                 name = '/' + name
               }
 
               return data.createNewFile(name)
-                .then((res, doc) => {
-                  this.$parent.loadPages()
+                .then((res) => {
+                  if (res.response.status !== 201) {
+                    let doc = res.document
+                    let msg = doc.error || doc.message
+                    msg = `[${doc.code}] ${msg}`
+                    return bus.$emit('log', new Error(msg))
+                  }
+                  return this.$parent.loadPages()
                     .then(this.$parent.loadFiles())
                     .then(() => {
                       this.$parent.currentView = 'pages'
-                      console.log(res)
-                      console.log(doc)
+                      return bus.$emit('log', `Created ${this.fileName}`)
                     })
                 })
             }
@@ -599,6 +604,22 @@ class EditorApplication {
           message: '',
           error: false
         }
+      },
+      created: function () {
+        bus.$on('log', this.log)
+      },
+      methods: {
+        log: function (msg) {
+          let err = (msg instanceof Error)
+          if (err) {
+            msg = '! ' + msg
+            this.error = true
+          } else {
+            msg = '# ' + msg
+            this.error = false
+          }
+          this.message = msg
+        }
       }
     })
 
@@ -618,15 +639,7 @@ class EditorApplication {
   }
 
   log (msg) {
-    let err = (msg instanceof Error)
-    if (err) {
-      msg = '! ' + msg
-      this.logger.error = true
-    } else {
-      msg = '# ' + msg
-      this.logger.error = false
-    }
-    this.logger.message = msg
+    this.bus.$emit('log', msg)
   }
 
   load () {
