@@ -72,7 +72,7 @@ func (app *Application) GetPageType(path string) int {
 	return pageType
 }
 
-// Tests for that would conflict when published, for example
+// Tests for files that would conflict when published, for example
 // document.md and document.html would be published to the same location
 // so we have to test for this when creating new files.
 func (app *Application) ExistsConflict(url string) bool {

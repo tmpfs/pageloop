@@ -56,9 +56,6 @@ type DefaultPublishFilter struct {}
 // Default file filter used during publishing.
 func (f *DefaultPublishFilter) Rename(path string) string {
 	name := filepath.Base(path)
-	if name == Layout {
-		return ""
-	}
 	ext := filepath.Ext(path)
 	if ext == ".md" || ext == ".markdown" {
 		name = strings.TrimSuffix(name, ext)
