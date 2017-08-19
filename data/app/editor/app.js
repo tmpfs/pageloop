@@ -258,23 +258,23 @@ class EditorApplication {
                         <label for="empty-file">Empty File</label>
                       </li>
                       <li>
-                        <input type="radio" v-model="template"
+                        <input type="radio" @change="extension = '.md'" v-model="template"
                           id="markdown-file" name="template" value="template/markdown+standalone" />
                         <label for="markdown-file">Markdown</label>
                       </li>
                       <li>
                         <input type="radio" v-model="template"
-                          id="layout-file" name="template" value="template/html+layout" />
+                          id="layout-file" @change="extension = '.html'" name="template" value="template/html+layout" />
                         <label for="layout-file">HTML Layout</label>
                       </li>
                       <li>
                         <input type="radio" v-model="template"
-                          id="html-partial" name="template" value="template/html+partial" />
+                          id="html-partial" @change ="extension = '.html'" name="template" value="template/html+partial" />
                         <label for="html-partial">HTML Partial</label>
                       </li>
                       <li>
                         <input type="radio" v-model="template"
-                          id="html-file" name="template" value="template/html+standalone" />
+                          id="html-file" @change="extension = '.html'" name="template" value="template/html+standalone" />
                         <label for="html-file">HTML Standalone</label>
                       </li>
                     </ul>
@@ -289,7 +289,30 @@ class EditorApplication {
           data: function () {
             return {
               fileName: '/untitled.md',
-              template: ''
+              template: '',
+              extension: ''
+            }
+          },
+          watch: {
+            extension: function (val) {
+              console.log('extension changed to: ' + val)
+              this.displayExtension = val
+            }
+          },
+          computed: {
+            displayExtension: {
+              get: function () {
+                return this.extension
+              },
+              set: function (val) {
+                if (val) {
+                  let current = this.fileName
+                  if (/[^.]+\.[^.]*$/.test(current)) {
+                    current = current.replace(/\.[^.]*$/, val)
+                    this.fileName = current
+                  }
+                }
+              }
             }
           },
           methods: {
