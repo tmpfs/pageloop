@@ -115,18 +115,34 @@ func (p *Page) Parse(data []byte) (*vdom.Vdom, error) {
 // and walks the parent paths until it hits the application
 // root searching for a layout file.
 func (p *Page) FindLayout() *Page {
+  var name string = Layout
+  if p.PageData != nil {
+    // Layout disabled in page data
+    if layout, ok := p.PageData["layout"].(bool); ok {
+      if !layout {
+        return nil
+      }
+    }
+
+    // String value specifies name of the layout file
+    if layoutName, ok := p.PageData["layout"].(string); ok {
+      if layoutName != "" {
+        name = layoutName
+      }
+    }
+  }
 	var path string = p.Path
 	var dir string = filepath.Dir(path)
 	var appRoot string = strings.TrimSuffix(p.owner.Root.Path, "/")
 
 	// Do not process layout files
-	if p.Name == Layout {
+	if p.Name == name {
 		return nil
 	}
 
 	var search func(dir string) *Page
 	search = func(dir string) *Page {
-		var target string = filepath.Join(dir, Layout)
+		var target string = filepath.Join(dir, name)
 		for _, p := range p.owner.Pages {
 			if p.file.Path == target {
 				return p

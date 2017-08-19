@@ -1,5 +1,6 @@
 ---
 title: Foo Bar Mock
+layout: alt-layout.html
 ---
 ## Mock document
 

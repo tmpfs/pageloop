@@ -314,15 +314,25 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 
   println("creating file content type: " + ct)
 
-	if content, err = readBody(req); err == nil {
-		// Update the application model
-		if _, err = app.Create(output, content); err != nil {
-			ex(res, http.StatusInternalServerError, nil, err)
-			return
-		}
-		created(res, OK)
-		return
-	}
+  content = TemplateNewFile[ct]
+  if content != nil {
+    println("using template bytes: " + string(content))
+  }
+  // Read content from request body if no template available
+  if content == nil {
+    if content, err = readBody(req); err != nil {
+      ex(res, http.StatusInternalServerError, nil, err)
+      return
+    }
+  }
+
+  // Update the application model
+  if _, err = app.Create(output, content); err != nil {
+    ex(res, http.StatusInternalServerError, nil, err)
+    return
+  }
+  created(res, OK)
+  return
 
 	/*
 	// Be certain the file does not exist on disc
