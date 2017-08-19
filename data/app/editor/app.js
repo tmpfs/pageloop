@@ -472,19 +472,29 @@ class EditorApplication {
               }
               return mime
             },
+            changes: function (cm, changes) {
+              // console.log(changes)
+            },
             setCodeMirror: function (options) {
               this.canSave = true
               options = options || {}
               let p = document.querySelector('.text-editor')
-              if (p.firstChild) {
-                p.removeChild(p.firstChild)
+
+              if (this.mirror) {
+                // TODO: verify listener is removed
+                this.mirror.off('changes', this.changes)
+                if (p.firstChild) {
+                  p.removeChild(p.firstChild)
+                }
               }
               this.mirror = CodeMirror(p, {
                 value: options.value || '',
                 mode: options.mode || 'htmlmixed',
                 theme: options.theme || 'solarized dark',
+                lineNumbers: true,
                 keyMap: 'vim'
               })
+              this.mirror.on('changes', this.changes)
             },
             showSourceText: function (item) {
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
