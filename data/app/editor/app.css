@@ -214,7 +214,7 @@ section {
   flex: 1 0;
 }
 
-.editor > .column-header .tabs > a {
+.editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
   border-left: 1px solid var(--border-color);
 }
 
@@ -294,6 +294,18 @@ iframe {
   list-style-type: none;
   margin: 0;
   padding: 0;
+}
+
+.clearfix {
+  clear: both;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
 }
 
 .tabs {

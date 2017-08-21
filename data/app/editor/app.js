@@ -210,8 +210,13 @@ class EditorApplication {
             </nav>
           </div>
           <nav class="toolbar">
-            <a href="#" title="Delete File">➖</a>
-            <a @click="showNewFileView" href="#" title="New File">➕</a>
+            <a
+              v-bind:class="{disabled: currentView === 'new-file'}"
+              href="#" title="Delete File">➖</a>
+            <a
+              @click="showNewFileView"
+              v-bind:class="{disabled: currentView === 'new-file'}"
+              href="#" title="New File">➕</a>
           </nav>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
@@ -451,10 +456,16 @@ class EditorApplication {
       template: `
         <div class="preview">
           <div class="column-header">
-            <h2>Live Preview ~ <a class="preview-url" :href="url" title="Preview URL">{{path}}</a></h2>
+            <h2>{{path}}</h2>
+            <div class="column-options">
+              <nav class="tabs">
+                <a href="#preview" title="Publish preview">Preview</a>
+                <a href="#docs" title="Browse the help & documentation">Docs</a>
+              </nav>
+            </div>
           </div>
-          <nav class="toolbar">
-            <span>{{path}}</span>
+          <nav class="toolbar clearfix">
+            <a href="#reload">Reload</a>
           </nav>
           <iframe :src="url" class="live"></iframe>
         </div>
@@ -613,10 +624,10 @@ class EditorApplication {
                       Deleting a file is irreversible, it cannot be undone.
                     </small>
                     </p>
-                    <div>
+                    <nav class="form-actions">
                       <button @click="confirmDelete = false">Cancel</button>
                       <button @click="doDelete" class="danger">Delete</button>
-                    </div>
+                    </nav>
                   </div>
                 </section>
                 <section>
