@@ -143,7 +143,7 @@ class EditorApplication {
     let data = this.data
     let bus = this.bus
 
-    this.header = new Vue({
+    let header = {
       template: `
           <header>
             <nav>
@@ -153,11 +153,16 @@ class EditorApplication {
               <a @click="navigate" href="#settings" title="Settings">Settings</a>
               <a @click="navigate" href="/" title="Home page">Ꝏ</a>
             </nav>
-            <div class="app-id"></div>
+            <div class="app-id">
+              <span class="name">{{name}}</span>
+            </div>
           </header>
         `,
-      data: {
-        currentView: 'editor'
+      data: function () {
+        return {
+          currentView: 'editor',
+          name: data.app.identifier
+        }
       },
       methods: {
         navigate: function (e) {
@@ -165,8 +170,9 @@ class EditorApplication {
           console.log(this)
         }
       }
-    })
+    }
 
+    /*
     let switcher = this.switcher = new Vue({
       template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
       data: function () {
@@ -175,6 +181,7 @@ class EditorApplication {
         }
       }
     })
+    */
 
     this.identifier = new Vue({
       template: `
@@ -191,12 +198,12 @@ class EditorApplication {
         click: function (e) {
           e.preventDefault()
           this.show = !this.show
-          switcher.hidden = !this.show
+          // switcher.hidden = !this.show
         }
       }
     })
 
-    this.sidebar = new Vue({
+    let sidebar = this.sidebar = {
       template: `
         <div class="sidebar">
           <div class="column-header">
@@ -453,9 +460,9 @@ class EditorApplication {
           created: function () {}
         }
       }
-    })
+    }
 
-    this.preview = new Vue({
+    let preview = {
       template: `
         <div class="preview">
           <div class="column-header">
@@ -511,9 +518,9 @@ class EditorApplication {
           return document.location.origin + data.app.url + (url || '')
         }
       }
-    })
+    }
 
-    this.editor = new Vue({
+    let editor = {
       template: `
         <div class="editor">
           <div class="column-header">
@@ -756,9 +763,9 @@ class EditorApplication {
           template: `<div class="visual-editor"></div>`
         }
       }
-    })
+    }
 
-    this.footer = new Vue({
+    let footer = {
       template: `
         <footer>
           <p class="log" v-bind:class="{error: error}">{{message}}</p>
@@ -786,33 +793,42 @@ class EditorApplication {
           this.message = msg
         }
       }
-    })
+    }
 
-    Vue.component('editor-main', {
+    let app = new Vue({
       template: `
-        <div class="content-main">
-          <div class="switcher hidden"></div>
-          <div class="content">
-            <div class="sidebar"></div>
-            <div class="editor"></div>
-            <div class="preview"></div>
-          </div>
-        </div>
-      `
+        <main>
+          <app-header></app-header>
+          <app-main></app-main>
+          <app-footer></app-footer>
+        </main>
+      `,
+      components: {
+        'app-header': header,
+        'app-main': {
+          template: `
+            <div class="content-main">
+              <div class="switcher hidden"></div>
+              <div class="content">
+                <sidebar></sidebar>
+                <editor></editor>
+                <preview></preview>
+              </div>
+            </div>
+          `,
+          components: {
+            sidebar,
+            editor,
+            preview
+          }
+        },
+        'app-footer': footer
+      }
     })
 
-    let main = new Vue({el: 'main'})
+    app.$mount('main')
 
-    // mount views
-    this.header.$mount('header')
-    this.identifier.$mount('.app-id')
-    this.switcher.$mount('.switcher')
-    this.sidebar.$mount('.sidebar')
-    this.editor.$mount('.editor')
-    this.preview.$mount('.preview')
-    this.footer.$mount('footer')
-
-    return main
+    return app
   }
 
   log (msg) {
@@ -827,8 +843,8 @@ class EditorApplication {
         this.identifier.name = app.identifier
         this.log(`Loading pages for ${this.data.app.name}`)
       })
-      .then(this.sidebar.loadPages())
-      .then(this.sidebar.loadFiles())
+      // .then(this.sidebar.loadPages())
+      // .then(this.sidebar.loadFiles())
       .then(() => {
         this.preview.refresh()
       })
