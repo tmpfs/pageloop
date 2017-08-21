@@ -679,6 +679,15 @@ class EditorApplication {
       methods: {
         saveAndRun: function (e) {
           e.preventDefault()
+          let file = data.currentFile
+          let value = this.mirror.getValue()
+          data.saveFile(file, value)
+            .then((res) => {
+              let doc = res.document
+              if (doc.ok) {
+                bus.$emit('preview:refresh', file.uri)
+              }
+            })
         }
       },
       components: {
@@ -785,18 +794,6 @@ class EditorApplication {
               this.canSave = false
               bus.$emit('close:file')
             },
-            saveAndRun: function (e) {
-              e.preventDefault()
-              let file = data.currentFile
-              let value = this.mirror.getValue()
-              data.saveFile(file, value)
-                .then((res) => {
-                  let doc = res.document
-                  if (doc.ok) {
-                    bus.$emit('preview:refresh', file.uri)
-                  }
-                })
-            },
             getModeForMime (mime) {
               // remove charset info
               mime = mime.replace(/;.*$/, '')
@@ -832,12 +829,6 @@ class EditorApplication {
               })
               this.mirror.on('changes', this.changes)
             }
-
-            /*
-            showSourceText: function (item) {
-              this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
-            }
-            */
           },
           mounted: function () {
             let item = this.currentFile
