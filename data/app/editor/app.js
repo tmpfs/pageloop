@@ -825,25 +825,20 @@ class EditorApplication {
                 </div>
               </header>
             `,
-
           data: function () {
             return {
               selectedView: ''
             }
           },
           computed: {
-            currentView: {
-              get: function () {
-                return this.selectedView
-              },
-              set: function (view) {
-                bus.$emit('view:select', view)
-                this.selectedView = view
-              }
-            },
             name: function () {
               return this.$store.state.app.identifier
             }
+          },
+          created: function () {
+            bus.$on('view:select', (view) => {
+              this.selectedView = view
+            })
           }
         },
         'app-main': {
