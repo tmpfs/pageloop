@@ -1,4 +1,4 @@
-/* globals Vue CodeMirror document fetch */
+/* globals Vue Vuex CodeMirror document fetch */
 
 class LocationParser {
   parse () {
@@ -128,6 +128,9 @@ class EditorApplication {
     this.loc = loc
     this.bus = new Vue()
     this.data = new AppDataSource(this.loc)
+    this.store = new Vuex.Store({
+      state: this.data
+    })
   }
 
   get (url, options) {
