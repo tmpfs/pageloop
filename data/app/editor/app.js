@@ -160,8 +160,12 @@ class EditorApplication {
         `,
       data: function () {
         return {
-          currentView: 'editor',
-          name: data.app.identifier
+          currentView: 'editor'
+        }
+      },
+      computed: {
+        name: function () {
+          return this.$store.state.app.identifier
         }
       },
       methods: {
@@ -171,37 +175,6 @@ class EditorApplication {
         }
       }
     }
-
-    /*
-    let switcher = this.switcher = new Vue({
-      template: `<div class="switcher" v-bind:class="{hidden: hidden}"></div>`,
-      data: function () {
-        return {
-          hidden: true
-        }
-      }
-    })
-    */
-
-    this.identifier = new Vue({
-      template: `
-        <div class="app-id">
-          <span class="name">{{name}}</span>
-        </div>`,
-      data: function () {
-        return {
-          name: data.app.identifier,
-          show: false
-        }
-      },
-      methods: {
-        click: function (e) {
-          e.preventDefault()
-          this.show = !this.show
-          // switcher.hidden = !this.show
-        }
-      }
-    })
 
     let sidebar = this.sidebar = {
       template: `
@@ -406,17 +379,10 @@ class EditorApplication {
                 <span class="name">{{item.url}}</span>
               </a>
             </div>`,
-          data: function () {
-            return {
-              list: [],
-              current: null
+          computed: {
+            list: function () {
+              return this.$store.state.app.pages
             }
-          },
-          created: function () {
-            this.list = this.$parent.pages
-            bus.$on('pages:load', (list) => {
-              this.list = list
-            })
           },
           methods: {
             click: function (item) {
@@ -431,16 +397,10 @@ class EditorApplication {
                 <span class="name">{{item.url}}</span>
               </a>
             </div>`,
-          data: function () {
-            return {
-              list: []
+          computed: {
+            list: function () {
+              return this.$store.state.app.files
             }
-          },
-          created: function () {
-            this.list = this.$parent.files
-            bus.$on('files:load', (list) => {
-              this.list = list
-            })
           },
           methods: {
             click: function (item) {
@@ -452,12 +412,11 @@ class EditorApplication {
           template: `
             <div class="components-list">
             </div>`,
-          data: function () {
-            return {
-              list: []
+          computed: {
+            list: function () {
+              return this.$store.state.app.components
             }
-          },
-          created: function () {}
+          }
         }
       }
     }
@@ -803,6 +762,7 @@ class EditorApplication {
           <app-footer></app-footer>
         </main>
       `,
+      store: this.store,
       components: {
         'app-header': header,
         'app-main': {
@@ -840,11 +800,10 @@ class EditorApplication {
     this.log(`Loading app from ${data.url}`)
     return this.data.getApplication()
       .then((app) => {
-        this.identifier.name = app.identifier
         this.log(`Loading pages for ${this.data.app.name}`)
       })
-      // .then(this.sidebar.loadPages())
-      // .then(this.sidebar.loadFiles())
+      .then(data.getPages())
+      .then(data.getFiles())
       .then(() => {
         this.preview.refresh()
       })
