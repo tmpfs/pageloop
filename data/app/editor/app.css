@@ -1,7 +1,28 @@
 :root {
+
+  --base03-color: #002b36;
+  --base02-color: #073642;
+  --base01-color: #586e75;
+  --base00-color: #657b83;
+  --base0-color: #839496;
+  --base1-color: #93a1a1;
+  --base2-color: #eee8d5;
+  --base3-color: #fdf6e3;
+  --yellow-color: #b58900;
+  --orange-color: #cb4b16;
+  --red-color: #dc322f;
+  --magenta-color: #d33682;
+  --violet-color: #6c71c4;
+  --blue-color: #268bd2;
+  --cyan-color: #2aa198;
+  --green-color: #859900;
+
   /*--link-color: #e30053;*/
+  --background: #073642;
+  --color: #93a1a1;
   --link-color: #d33682;
   --border-color: #002b36;
+  --toolbar-link: #839496;
 }
 
 @font-face {
@@ -44,10 +65,9 @@ body {
   font-size: 1.8rem;
   line-height: 2.2rem;
   font-family: 'SourceSans';
-  background: #073642;
-  color: #93a1a1;
-  /*color: white;*/
-  /*overflow: hidden;*/
+  background: var(--background);
+  color: var(--color);
+  overflow: hidden;
 }
 
 form, fieldset {
@@ -63,6 +83,7 @@ p, section > ul.compact-list {
 a, a:visited, a:hover {
   color: var(--link-color);
   text-decoration: none;
+  transition: all 0.5s ease-out;
 }
 
 header {
@@ -70,32 +91,21 @@ header {
   padding: 0;
   height: 6rem;
   border-bottom: 1px solid var(--border-color);
+  clear: both;
 }
 
 header nav {
   display: flex;
   flex-direction: row;
+  float: right;
   margin: 0;
   padding: 0;
-  width: 12rem;
-  /*max-width: 32rem;*/
-}
-
-header nav a {
-  flex: 1 0;
-  font-size: 1.4rem;
-  padding: .3rem 2rem;
-  text-transform: uppercase;
-}
-
-header nav a:hover {
-  text-decoration: underline;
 }
 
 header .app-id {
+  float: left;
   font-size: 1.6rem;
-  padding-right: 2rem;
-  text-align: right;
+  padding: .3rem 2rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -281,6 +291,7 @@ iframe {
   display: inline-block;
   text-align: center;
   /*background: #eee8d5;*/
+  color: var(--toolbar-link)
   width: 2.3rem;
   height: 2.3rem;
 }
@@ -303,7 +314,7 @@ h2 a, .tabs > a, header > nav > a {
   background: transparent;
 }
 
-h2 a:hover, .tabs > a:hover, header > nav > a:hover {
+h2 a:hover, .tabs > a:hover {
   background: var(--link-color);
   color: white;
   transition: all 0.5s ease-out;
@@ -387,20 +398,15 @@ input[type="submit"], input[type="reset"] {
   font-size: 1.3rem;
   text-transform: uppercase;
   text-align: right;
-  background: #073642; /* solarized dark */
+  /*
+  background: #073642;
   color: #93a1a1;
-}
-
-.source-editor > .toolbar > a {
-  display: inline-block;
-  color: #eee8d5;
-  background: #586e75;
-  padding: 0 0.5rem;
+  */
 }
 
 .text-editor {
   background: #002b36;
-  height: calc(100% - 6.9rem)
+  height: calc(100% - 4.3rem)
 }
 
 .CodeMirror {
@@ -408,3 +414,18 @@ input[type="submit"], input[type="reset"] {
   width: 100%;
   height: 100%;
 }
+
+header > nav > a {
+  flex: 1 0;
+  font-size: 1.4rem;
+  padding: .3rem 2rem;
+  text-transform: uppercase;
+  color: var(--blue-color) !important;
+}
+
+header > nav > a:hover {
+  text-decoration: underline;
+  color: white !important;
+  background: var(--blue-color)
+}
+

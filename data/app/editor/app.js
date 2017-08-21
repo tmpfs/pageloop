@@ -144,11 +144,11 @@ class EditorApplication {
       template: `
           <header>
             <nav>
-              <a href="/" title="Home page">
-                <span>Ꝏ</span>&nbsp;Home
-              </a>
-              <a href="/apps/" title="All applications">Apps</a>
-              <a href="/docs/" title="Documentation">Docs</a>
+              <a href="#apps" title="All applications">Apps</a>
+              <a href="#docs" title="Documentation">Docs</a>
+              <a href="#editor" title="Editor">Editor</a>
+              <a href="#setttings" title="Settings">Settings</a>
+              <a href="/" title="Home page">Ꝏ</a>
             </nav>
             <div class="app-id"></div>
           </header>
@@ -639,11 +639,9 @@ class EditorApplication {
           template: `<div class="source-editor">
               <nav class="toolbar">
                 <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Close file">Close ❌</a>
-              </nav>
-              <div class="text-editor"></div>
-              <nav class="toolbar">
                 <a @click="saveAndRun" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Save & Run</a>
               </nav>
+              <div class="text-editor"></div>
             </div>`,
           data: function () {
             return {
