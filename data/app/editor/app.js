@@ -98,7 +98,7 @@ class AppDataSource {
   constructor () {
     this.api = '/api/'
     this.containers = []
-    this.setApplication()
+    this.setApplication('', '')
   }
 
   setApplication (container, application) {
@@ -115,6 +115,10 @@ class AppDataSource {
       pages: [],
       files: []
     }
+  }
+
+  hasApplication () {
+    return this.container && this.application
   }
 
   json (url, options) {
@@ -224,8 +228,13 @@ class EditorApplication {
           .then(() => {
             bus.$emit('view:select', section)
           })
-      } else if (section === 'edit' && data.container && data.application) {
-        return r.replace('apps/' + data.container + '/' + data.application, true)
+      } else if (section === 'edit') {
+        if (data.hasApplication()) {
+          return r.replace('apps/' + data.container + '/' + data.application, true)
+        } else {
+          // no app being edited redirect to apps list
+          return r.replace('apps', true)
+        }
       }
       bus.$emit('view:select', section)
     })
@@ -838,7 +847,7 @@ class EditorApplication {
                     href="#docs" title="Documentation">Docs</a>
                   <a
                     @click="$store.dispatch('navigate', 'edit')"
-                    :class="{selected: selectedView === 'edit', disabled: $store.state.app === null}"
+                    :class="{selected: selectedView === 'edit', hidden: $store.state.container === ''}"
                     href="#edit" title="Edit Application">Edit</a>
                   <a
                     @click="$store.dispatch('navigate', 'settings')"

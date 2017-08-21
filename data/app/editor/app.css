@@ -373,9 +373,12 @@ iframe.publish-preview {
   background: transparent;
 }
 
+.selected {
+  pointer-events: none;
+}
+
 .tabs > .selected {
   text-decoration: underline;
-  pointer-events: none;
 }
 
 .tabs > a:not(:first-child) {
@@ -482,6 +485,6 @@ header > nav > a {
 header > nav > a:hover, header > nav > a.selected {
   text-decoration: underline;
   color: white !important;
-  background: var(--blue-color)
+  background: var(--blue-color);
 }
 
