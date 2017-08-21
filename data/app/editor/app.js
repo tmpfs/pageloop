@@ -262,6 +262,9 @@ class EditorApplication {
         },
         'current-file': function (state, file) {
           state.app.current = file
+        },
+        'preview-url': function (state, url) {
+          state.app.previewUrl = url
         }
       },
       actions: {
@@ -319,6 +322,9 @@ class EditorApplication {
               file.content = content
               context.commit('current-file', file)
             })
+        },
+        'preview-refresh': function (context, url) {
+          context.commit('preview-url', url)
         }
       }
     })
@@ -583,8 +589,8 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          path: '',
-          url: ''
+          url: '',
+          path: ''
         }
       },
       computed: {
@@ -602,16 +608,11 @@ class EditorApplication {
           }
         }
       },
-      created: function () {
-        bus.$on('preview:refresh', (url) => {
-          this.refresh(url)
-        })
-      },
       methods: {
         refresh (url) {
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
-          if (url === true || url === this.path || url === this.url) {
+          if (url === true || url === this.path) {
             let frame = document.querySelector('.publish-preview')
             return frame.contentDocument.location.reload()
           }
@@ -679,13 +680,13 @@ class EditorApplication {
       methods: {
         saveAndRun: function (e) {
           e.preventDefault()
-          let file = data.currentFile
+          let file = this.currentFile
           let value = this.mirror.getValue()
           data.saveFile(file, value)
             .then((res) => {
               let doc = res.document
               if (doc.ok) {
-                bus.$emit('preview:refresh', file.uri)
+                this.$store.dispatch('preview-refresh', file.uri)
               }
             })
         }
