@@ -655,7 +655,7 @@ class EditorApplication {
         'source-editor': {
           template: `<div class="source-editor">
               <nav class="toolbar">
-                <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Close file">Close ❌</a>
+                <!-- <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Close file">Close ❌</a> -->
                 <a @click="saveAndRun" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Save & Run</a>
               </nav>
               <div class="text-editor"></div>
