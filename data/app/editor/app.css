@@ -280,20 +280,28 @@ iframe {
 	height: calc(100% - 4.3rem);
 }
 
-.sidebar .toolbar {
-	height: 2.3rem;
-  font-size: 1.4rem;
+.toolbar {
+  height: 2.3rem;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  text-align: right;
+  /*font-size: 1.4rem;*/
 	border-bottom: 1px solid var(--border-color);
   text-align: right;
 }
 
-.sidebar .toolbar a {
+.toolbar a {
   display: inline-block;
   text-align: center;
-  /*background: #eee8d5;*/
   color: var(--toolbar-link)
   width: 2.3rem;
   height: 2.3rem;
+  padding: 0 0.5rem;
+}
+
+.toolbar a:hover {
+  background: var(--base03-color);
+  color: var(--base3-color);
 }
 
 .files-list a, .pages-list a {
@@ -379,6 +387,10 @@ button, input[type="submit"], input[type="reset"] {
   border-style: none;
 }
 
+.danger {
+  background: var(--red-color);
+}
+
 input[type="submit"], input[type="reset"] {
 	margin-top: 1rem;
 }
@@ -393,17 +405,6 @@ input[type="submit"], input[type="reset"] {
 
 .file-editor, .source-editor, .visual-editor {
   height: 100%;
-}
-
-.source-editor > .toolbar {
-  height: 2.3rem;
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  text-align: right;
-  /*
-  background: #073642;
-  color: #93a1a1;
-  */
 }
 
 .text-editor {
