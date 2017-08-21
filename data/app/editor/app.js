@@ -144,15 +144,24 @@ class EditorApplication {
       template: `
           <header>
             <nav>
-              <a href="#apps" title="All applications">Apps</a>
-              <a href="#docs" title="Documentation">Docs</a>
-              <a href="#editor" title="Editor">Editor</a>
-              <a href="#setttings" title="Settings">Settings</a>
-              <a href="/" title="Home page">Ꝏ</a>
+              <a @click="navigate" href="#apps" title="All applications">Apps</a>
+              <a @click="navigate" href="#docs" title="Documentation">Docs</a>
+              <a @click="navigate" href="#editor" title="Editor">Editor</a>
+              <a @click="navigate" href="#settings" title="Settings">Settings</a>
+              <a @click="navigate" href="/" title="Home page">Ꝏ</a>
             </nav>
             <div class="app-id"></div>
           </header>
-        `
+        `,
+      data: {
+        currentView: 'editor'
+      },
+      methods: {
+        navigate: function (e) {
+          e.preventDefault()
+          console.log(this)
+        }
+      }
     })
 
     let switcher = this.switcher = new Vue({
@@ -720,19 +729,6 @@ class EditorApplication {
       }
     })
 
-    Vue.component('editor-main', {
-      template: `
-        <div class="content-main">
-          <div class="switcher hidden"></div>
-          <div class="content">
-            <div class="sidebar"></div>
-            <div class="editor"></div>
-            <div class="preview"></div>
-          </div>
-        </div>
-      `
-    })
-
     this.footer = new Vue({
       template: `
         <footer>
@@ -761,6 +757,19 @@ class EditorApplication {
           this.message = msg
         }
       }
+    })
+
+    Vue.component('editor-main', {
+      template: `
+        <div class="content-main">
+          <div class="switcher hidden"></div>
+          <div class="content">
+            <div class="sidebar"></div>
+            <div class="editor"></div>
+            <div class="preview"></div>
+          </div>
+        </div>
+      `
     })
 
     let main = new Vue({el: 'main'})

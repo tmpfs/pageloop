@@ -364,7 +364,7 @@ h2 a:hover, .tabs > a:hover {
 
 input[type="text"], input[type="submit"], input[type="reset"], button {
   font-family: SourceSans;
-  padding: 0.5rem;
+  padding: 1rem;
   border-radius: 6px;
 }
 
@@ -373,8 +373,10 @@ input[type="text"] {
 }
 
 button, input[type="submit"], input[type="reset"] {
-  background: #eee8d5;
-  border: 2px solid #073642;
+  background: var(--blue-color);
+  color: var(--base3-color);
+  border: 2px solid var(--base1-color);
+  border-style: none;
 }
 
 input[type="submit"], input[type="reset"] {
@@ -406,7 +408,7 @@ input[type="submit"], input[type="reset"] {
 
 .text-editor {
   background: #002b36;
-  height: calc(100% - 4.3rem)
+  height: calc(100% - 4.6rem)
 }
 
 .CodeMirror {
