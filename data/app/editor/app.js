@@ -284,13 +284,18 @@ class EditorApplication {
                       </li>
                       <li>
                         <input type="radio" @change="extension = '.md'" v-model="template"
-                          id="markdown-file" name="template" value="template/markdown+standalone" />
-                        <label for="markdown-file">Markdown</label>
+                          id="markdown-partial" name="template" value="template/markdown+partial" />
+                        <label for="markdown-partial">Markdown Partial</label>
+                      </li>
+                      <li>
+                        <input type="radio" @change="extension = '.md'" v-model="template"
+                          id="markdown-standalone" name="template" value="template/markdown+standalone" />
+                        <label for="markdown-standalone">Markdown Standalone</label>
                       </li>
                       <li>
                         <input type="radio" v-model="template"
-                          id="layout-file" @change="extension = '.html'" name="template" value="template/html+layout" />
-                        <label for="layout-file">HTML Layout</label>
+                          id="html-layout" @change="extension = '.html'" name="template" value="template/html+layout" />
+                        <label for="html-layout">HTML Layout</label>
                       </li>
                       <li>
                         <input type="radio" v-model="template"
@@ -299,8 +304,8 @@ class EditorApplication {
                       </li>
                       <li>
                         <input type="radio" v-model="template"
-                          id="html-file" @change="extension = '.html'" name="template" value="template/html+standalone" />
-                        <label for="html-file">HTML Standalone</label>
+                          id="html-standalone" @change="extension = '.html'" name="template" value="template/html+standalone" />
+                        <label for="html-standalone">HTML Standalone</label>
                       </li>
                     </ul>
                   </div>
