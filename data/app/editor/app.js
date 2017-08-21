@@ -286,6 +286,10 @@ class EditorApplication {
             .then((list) => {
               context.commit('pages', list)
             })
+        },
+        'reload': function (context) {
+          return context.dispatch('list-pages')
+            .then(context.dispatch('list-files'))
         }
       }
     })
@@ -349,6 +353,10 @@ class EditorApplication {
         },
         closeNewFileView: function () {
           this.currentView = this.previousView
+        },
+        reload: function (next) {
+          this.$store.dispatch('reload')
+            .then(next)
         }
       },
       components: {
