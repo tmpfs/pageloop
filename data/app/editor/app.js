@@ -1,15 +1,5 @@
 /* globals Vue Vuex CodeMirror document fetch document history window */
 
-class LocationParser {
-  parse () {
-    let pth = document.location.hash
-    let parts = pth.replace(/\/+$/, '').split('/')
-    let application = parts.pop()
-    let container = parts.pop()
-    return {application: application, container: container}
-  }
-}
-
 class Router {
   constructor (href) {
     this.defaultHref = href
@@ -103,19 +93,21 @@ class Router {
 }
 
 class AppDataSource {
-  constructor (loc) {
-    this.loc = loc
+  constructor () {
     this.api = '/api/'
-    this.url = `${this.api}${loc.container}/${loc.application}/`
-    this.raw = `/apps/raw/${loc.container}/${loc.application}`
-
     this.containers = []
+    this.setApplication()
+  }
+
+  setApplication (container, application) {
+    this.url = `${this.api}${container}/${application}/`
+    this.raw = `/apps/raw/${container}/${application}`
 
     // current application
     this.app = {
       url: '',
       identifier: '',
-      owner: loc.container,
+      owner: container,
       pages: [],
       files: []
     }
@@ -210,10 +202,9 @@ class AppDataSource {
 }
 
 class EditorApplication {
-  constructor (loc) {
-    this.loc = loc
+  constructor () {
     this.bus = new Vue()
-    let data = this.data = new AppDataSource(this.loc)
+    let data = this.data = new AppDataSource()
     this.store = new Vuex.Store({
       state: this.data,
       mutations: {
@@ -965,9 +956,12 @@ class EditorApplication {
     return app
   }
 
-  load () {
+  load (container, application) {
     let bus = this.bus
     let data = this.data
+
+    this.data.setApplication(container, application)
+
     bus.$emit('log', `Loading app from ${data.url}`)
     return this.store.dispatch('containers')
       .then(() => this.store.dispatch('app'))
@@ -987,8 +981,13 @@ class EditorApplication {
     let bus = this.bus
     this.ui()
     this.load()
-
     let r = new Router('apps')
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/, ['section', 'container', 'application'], (match) => {
+      this.load(match.map.container, match.map.application)
+        .then(() => {
+          bus.$emit('view:select', 'edit')
+        })
+    })
     r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
       bus.$emit('view:select', match.map.section)
     })
@@ -996,5 +995,5 @@ class EditorApplication {
   }
 }
 
-let app = new EditorApplication(new LocationParser().parse())
+let app = new EditorApplication()
 app.init()
