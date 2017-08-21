@@ -39,6 +39,7 @@ body {
   font-size: 1.8rem;
   line-height: 2.2rem;
   font-family: 'SourceSerif';
+  background: white;
 }
 
 header, main, footer {

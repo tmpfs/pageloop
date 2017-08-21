@@ -400,7 +400,7 @@ class EditorApplication {
           <nav class="toolbar clearfix">
             <a href="#reload">Reload</a>
           </nav>
-          <iframe :src="url" class="live"></iframe>
+          <iframe :src="url" class="preview"></iframe>
         </div>
       `,
       data: function () {
@@ -767,7 +767,7 @@ class EditorApplication {
             'docs-main': {
               template: `
                 <div class="content-main">
-                  <h3>Docs</h3>
+                  <iframe class="docs" src="/docs/"></iframe>
                 </div>
               `
             },
