@@ -229,11 +229,16 @@ section {
 .scroll {
   overflow-x: hidden;
   overflow-y: auto;
-  height: calc(100% - 23px);
+  height: calc(100% - 4.6rem);
 }
 
-.editor > .column-header + p {
-  padding-left: 2rem;
+.sidebar .scroll {
+  /*padding-top: 1rem;*/
+	height: calc(100% - 4.3rem);
+}
+
+.welcome.scroll {
+  padding: 0 2rem;
 }
 
 iframe {
@@ -245,17 +250,12 @@ iframe {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .disabled {
   opacity: 0.6;
   pointer-events: none;
-}
-
-.sidebar .scroll {
-  /*padding-top: 1rem;*/
-	height: calc(100% - 4.3rem);
 }
 
 .toolbar {
@@ -303,6 +303,7 @@ iframe {
   padding: 0;
   font-size: 1.4rem;
   text-transform: uppercase;
+  user-select: none;
 }
 
 .tabs > a {

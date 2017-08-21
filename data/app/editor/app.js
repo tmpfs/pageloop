@@ -518,6 +518,10 @@ class EditorApplication {
               </nav>
             </div>
           </div>
+          <nav class="toolbar">
+            <a @click="saveAndRun"
+              v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
+          </nav>
           <component v-bind:is="currentView"></component>
         </div>
       `,
@@ -540,6 +544,9 @@ class EditorApplication {
         })
       },
       methods: {
+        saveAndRun: function (e) {
+          e.preventDefault()
+        },
         close: function () {
           if (this.currentFile) {
             this.currentView = 'welcome'
@@ -574,7 +581,11 @@ class EditorApplication {
       },
       components: {
         welcome: {
-          template: `<p>Select a page or file to start editing.</p>`
+          template: `
+            <div class="welcome scroll">
+              <p>Select a page or file to start editing.</p>
+            </div>
+          `
         },
         'file-editor': {
           template: `<div class="file-editor">
@@ -654,10 +665,6 @@ class EditorApplication {
         },
         'source-editor': {
           template: `<div class="source-editor">
-              <nav class="toolbar">
-                <!-- <a @click="closeFile" v-bind:class="{disabled: !canSave}" href="#" title="Close file">Close ❌</a> -->
-                <a @click="saveAndRun" v-bind:class="{disabled: !canSave}" href="#" title="Save & Run">Save & Run</a>
-              </nav>
               <div class="text-editor"></div>
             </div>`,
           data: function () {
