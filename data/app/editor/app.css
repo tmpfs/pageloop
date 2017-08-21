@@ -167,6 +167,10 @@ footer p {
   margin: 0 2rem;
 }
 
+.name + p.small {
+  margin-top: 0.2rem;
+}
+
 .content {
   position: relative;
   display: flex;

@@ -779,9 +779,11 @@ class EditorApplication {
                   <div class="content">
                     <div class="containers" v-for="item in list">
                       <span class="name">{{item.name}}</span>
+                      <p class="small">{{item.description}}</p>
                       <ul class="compact-list">
                         <div class="app" v-for="app in item.apps">
-                            <a :href="linkify(item, app)">{{app.name}}</a>
+                            <a class="name" :href="linkify(item, app)" title="title(app)">{{app.name}}</a>
+                            <p class="small">{{app.description}}</p>
                         </div>
                       </ul>
                     </div>
@@ -796,6 +798,9 @@ class EditorApplication {
               methods: {
                 linkify: function (c, a) {
                   return `#apps/${c.name}/${a.name}`
+                },
+                title: function (a) {
+                  return `Edit ${a.name}`
                 }
               }
             },
