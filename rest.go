@@ -514,6 +514,7 @@ func isMethodAllowed(method string, methods []string) bool {
 
 func init() {
   TemplateNewFile = make(map[string] []byte)
+  TemplateNewFile["template/markdown+partial"] = MustAsset("app/template/files/partial-markdown.md")
   TemplateNewFile["template/markdown+standalone"] = MustAsset("app/template/files/standalone-markdown.md")
   TemplateNewFile["template/html+standalone"] = MustAsset("app/template/files/standalone-html.html")
   TemplateNewFile["template/html+layout"] = MustAsset("app/template/files/layout.html")

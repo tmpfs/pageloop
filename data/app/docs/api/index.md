@@ -49,23 +49,39 @@ Get the list of files for an application.
 
 ## PUT /{container}/{application}/files/{url}
 
-Create a file for an application, if the file already exists an 
-error is returned.
+Create a file for an application, if the file already exists an
+error is returned. Note that because file extensions can be changed
+when files are published. For example, if you have an existing file
+named `document.html` and try to create a file named `document.md`
+it is an error as the published URLs would conflict.
 
-If the file is considered to be a page it is also added to the list 
+If the file is considered to be a page it is also added to the list
 of pages for the application.
 
-Syncs the source file to disc and publishes an updated 
+Syncs the source file to disc and publishes an updated
 version of the file to the public URL.
+
+You can create a file using the content from an existing file template,
+to do so you should send a `Content-Type` header using one of the following
+MIME types:
+
+* `template/markdown+partial`
+* `template/markdown+standalone`
+* `template/html+standalone`
+* `template/html+layout`
+* `template/html+partial`
+
+When creating new files from templates there is no need to send a
+request body.
 
 ## POST /{container}/{application}/files/{url}
 
 Update file content for a file, the file must already exist.
 
-It is an error if the request MIME type does not match the 
+It is an error if the request MIME type does not match the
 existing MIME type for the file.
 
-Syncs the source file to disc and publishes an updated 
+Syncs the source file to disc and publishes an updated
 version of the file to the public URL.
 
 ## GET /{container}/{application}/files/{url}
