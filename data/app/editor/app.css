@@ -429,7 +429,7 @@ header > nav > a {
   color: var(--blue-color) !important;
 }
 
-header > nav > a:hover {
+header > nav > a:hover, header > nav > a.selected {
   text-decoration: underline;
   color: white !important;
   background: var(--blue-color)

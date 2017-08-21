@@ -119,8 +119,6 @@ class EditorApplication {
       state: this.data,
       mutations: {
         init (state, app) {
-          console.log('init mutation called')
-          console.log(app)
           // merge properties
           for (let k in app) {
             state.app[k] = app[k]
@@ -167,39 +165,6 @@ class EditorApplication {
     let data = this.data
     let bus = this.bus
 
-    let header = {
-      template: `
-          <header>
-            <nav>
-              <a @click="navigate" href="#apps" title="All applications">Apps</a>
-              <a @click="navigate" href="#docs" title="Documentation">Docs</a>
-              <a @click="navigate" href="#editor" title="Editor">Editor</a>
-              <a @click="navigate" href="#settings" title="Settings">Settings</a>
-              <a @click="navigate" href="/" title="Home page">Ꝏ</a>
-            </nav>
-            <div class="app-id">
-              <span class="name">{{name}}</span>
-            </div>
-          </header>
-        `,
-      data: function () {
-        return {
-          currentView: 'editor'
-        }
-      },
-      computed: {
-        name: function () {
-          return this.$store.state.app.identifier
-        }
-      },
-      methods: {
-        navigate: function (e) {
-          e.preventDefault()
-          console.log(this)
-        }
-      }
-    }
-
     let sidebar = {
       template: `
         <div class="sidebar">
@@ -232,7 +197,6 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          components: [],
           currentView: ''
         }
       },
@@ -429,7 +393,7 @@ class EditorApplication {
             <div class="column-options">
               <nav class="tabs">
                 <a href="#preview" title="Publish preview">Preview</a>
-                <a href="#docs" title="Browse the help & documentation">Docs</a>
+                <!-- <a href="#docs" title="Browse the help & documentation">Docs</a> -->
               </nav>
             </div>
           </div>
@@ -724,36 +688,6 @@ class EditorApplication {
       }
     }
 
-    let footer = {
-      template: `
-        <footer>
-          <p class="log" v-bind:class="{error: error}">{{message}}</p>
-        </footer>
-      `,
-      data: function () {
-        return {
-          message: '',
-          error: false
-        }
-      },
-      created: function () {
-        bus.$on('log', this.log)
-      },
-      methods: {
-        log: function (msg) {
-          let err = (msg instanceof Error)
-          if (err) {
-            msg = '! ' + msg
-            this.error = true
-          } else {
-            msg = '# ' + msg
-            this.error = false
-          }
-          this.message = msg
-        }
-      }
-    }
-
     let app = new Vue({
       template: `
         <main>
@@ -764,25 +698,133 @@ class EditorApplication {
       `,
       store: this.store,
       components: {
-        'app-header': header,
-        'app-main': {
+        'app-header': {
           template: `
-            <div class="content-main">
-              <div class="switcher hidden"></div>
-              <div class="content">
-                <sidebar></sidebar>
-                <editor></editor>
-                <preview></preview>
-              </div>
-            </div>
-          `,
-          components: {
-            sidebar,
-            editor,
-            preview
+              <header>
+                <nav>
+                  <a @click="currentView = 'apps-main'"
+                    v-bind:class="{selected: selectedView === 'apps-main'}"
+                    href="#apps" title="All applications">Apps</a>
+                  <a @click="currentView = 'docs-main'"
+                    v-bind:class="{selected: selectedView === 'docs-main'}"
+                    href="#docs" title="Documentation">Docs</a>
+                  <a @click="currentView = 'editor-main'"
+                    v-bind:class="{selected: selectedView === 'editor-main'}"
+                    href="#editor" title="Editor">Editor</a>
+                  <a @click="currentView = 'settings-main'"
+                    v-bind:class="{selected: selectedView === 'settings-main'}"
+                    href="#settings" title="Settings">Settings</a>
+                </nav>
+                <div class="app-id">
+                  <a href="/" title="Home page">Ꝏ</a>
+                  <span class="name">{{name}}</span>
+                </div>
+              </header>
+            `,
+
+          data: function () {
+            return {
+              selectedView: 'editor-main'
+            }
+          },
+          computed: {
+            currentView: {
+              get: function () {
+                return this.selectedView
+              },
+              set: function (view) {
+                bus.$emit('view:select', view)
+                this.selectedView = view
+              }
+            },
+            name: function () {
+              return this.$store.state.app.identifier
+            }
           }
         },
-        'app-footer': footer
+        'app-main': {
+          template: `
+            <component v-bind:is="currentView"></component>
+          `,
+          data: function () {
+            return {
+              currentView: 'editor-main'
+            }
+          },
+          created: function () {
+            bus.$on('view:select', (view) => {
+              this.currentView = view
+            })
+          },
+          components: {
+            'apps-main': {
+              template: `
+                <div class="content-main">
+                  <h3>Apps</h3>
+                </div>
+              `
+            },
+            'docs-main': {
+              template: `
+                <div class="content-main">
+                  <h3>Docs</h3>
+                </div>
+              `
+            },
+            'editor-main': {
+              template: `
+                <div class="content-main">
+                  <div class="content">
+                    <sidebar></sidebar>
+                    <editor></editor>
+                    <preview></preview>
+                  </div>
+                </div>
+              `,
+              components: {
+                sidebar,
+                editor,
+                preview
+              }
+            },
+            'settings-main': {
+              template: `
+                <div class="content-main">
+                  <h3>Settings</h3>
+                </div>
+              `
+            }
+          }
+        },
+        'app-footer': {
+          template: `
+            <footer>
+              <p class="log" v-bind:class="{error: error}">{{message}}</p>
+            </footer>
+          `,
+          data: function () {
+            return {
+              message: '',
+              error: false
+            }
+          },
+          created: function () {
+            bus.$on('log', this.log)
+          },
+          methods: {
+            log: function (msg) {
+              let err = (msg instanceof Error)
+              if (err) {
+                msg = '! ' + msg
+                this.error = true
+              } else {
+                msg = '# ' + msg
+                this.error = false
+              }
+              this.message = msg
+            }
+          }
+        }
       }
     })
 
