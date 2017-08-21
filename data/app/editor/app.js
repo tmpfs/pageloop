@@ -527,7 +527,7 @@ class EditorApplication {
             <h2>{{path}}</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a href="#preview" title="Publish preview">Preview</a>
+                <!-- <a href="#preview" title="Publish preview">Preview</a> -->
                 <!-- <a href="#docs" title="Browse the help & documentation">Docs</a> -->
               </nav>
             </div>
