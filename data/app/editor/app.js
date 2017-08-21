@@ -542,14 +542,15 @@ class EditorApplication {
           </div>
           <nav class="toolbar clearfix">
             <h2>{{path}}</h2>
-            <a href="#reload">Reload</a>
+            <a @click="refresh(true)"
+               :class="{hidden: path == ''}">Reload</a>
           </nav>
           <iframe :src="url" class="publish-preview"></iframe>
         </div>
       `,
       data: function () {
         return {
-          path: '/',
+          path: '',
           url: ''
         }
       },
@@ -571,7 +572,7 @@ class EditorApplication {
         refresh (url) {
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
-          if (url === this.path) {
+          if (url === true || url === this.path || url === this.url) {
             let frame = document.querySelector('.publish-preview')
             return frame.contentDocument.location.reload()
           }
@@ -1022,7 +1023,6 @@ class EditorApplication {
       this.store.dispatch('list-files')
         .then(this.store.dispatch('list-pages'))
         .then(() => {
-          bus.$emit('preview:refresh')
           bus.$emit('sidebar:select', 'pages')
           bus.$emit('log', 'Done')
         })
