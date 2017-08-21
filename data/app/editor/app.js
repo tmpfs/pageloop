@@ -314,39 +314,11 @@ class EditorApplication {
             })
         },
         'open-file': function (context, file) {
-          // NOTE: we need to store in data source for
-          // NOTE: switching editor tabs
-          // context.state.app.currentFile = item
-
-          /*
-          if (this.currentView === 'welcome') {
-            this.currentView = this.defaultOpenView
-          }
-          */
-
-          console.log('opening file')
-          console.log(file)
-
           return context.dispatch('get-file-contents', file)
             .then((content) => {
               file.content = content
               context.commit('current-file', file)
             })
-
-          /*
-          data.getFileContents(item.url)
-            .then((res) => {
-              // TODO: get blob for binary types
-              return res.text()
-            }).then((content) => {
-              item.content = content
-              this.title = item.url
-              if (this.$children[0] && this.$children[0].showSourceText) {
-                this.$children[0].showSourceText(item)
-              }
-              bus.$emit('open:complete', item)
-            })
-          */
         }
       }
     })
@@ -398,7 +370,7 @@ class EditorApplication {
         }
       },
       created: function () {
-        bus.$on('sidebar:reload', this.reload)
+        // bus.$on('sidebar:reload', this.reload)
         bus.$on('sidebar:select', (view) => {
           this.currentView = view
         })
@@ -410,11 +382,13 @@ class EditorApplication {
         },
         closeNewFileView: function () {
           this.currentView = this.previousView
-        },
+        }
+        /*
         reload: function (next) {
           this.$store.dispatch('reload')
             .then(next)
         }
+        */
       },
       components: {
         'new-file': {
@@ -521,15 +495,17 @@ class EditorApplication {
                   }
 
                   bus.$emit('log', `Created ${this.fileName}`)
-                  bus.$emit('sidebar:reload', () => {
-                    // Open the newly created file
-                    for (let i = 0; i < data.app.files.length; i++) {
-                      if (data.app.files[i].url === this.fileName) {
-                        bus.$emit('open:file', data.app.files[i])
-                        break
+
+                  this.$store.dispatch('reload')
+                    .then(() => {
+                      // Open the newly created file
+                      for (let i = 0; i < data.app.files.length; i++) {
+                        if (data.app.files[i].url === this.fileName) {
+                          this.$store.dispatch('open-file', data.app.files[i])
+                          break
+                        }
                       }
-                    }
-                  })
+                    })
 
                   this.$parent.closeNewFileView()
                 })
@@ -550,7 +526,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              bus.$emit('open:file', item)
+              return this.$store.dispatch('open-file', item)
             }
           }
         },
@@ -568,7 +544,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              bus.$emit('open:file', item)
+              return this.$store.dispatch('open-file', item)
             }
           }
         },
@@ -611,16 +587,22 @@ class EditorApplication {
           url: ''
         }
       },
-      created: function () {
-        bus.$on('open:complete', (item) => {
-          let url = item.uri
+      computed: {
+        currentFile: function () {
+          return this.$store.state.app.current
+        }
+      },
+      watch: {
+        currentFile: function (file) {
+          let url = file.uri
           let all = /\.html?$/
           // Refresh preview when switching on page types
           if (all.test(url)) {
             this.refresh(url)
           }
-        })
-
+        }
+      },
+      created: function () {
         bus.$on('preview:refresh', (url) => {
           this.refresh(url)
         })
@@ -672,58 +654,31 @@ class EditorApplication {
           <component v-bind:is="currentView"></component>
         </div>
       `,
+      computed: {
+        currentFile: function () {
+          return this.$store.state.app.current
+        }
+      },
+      watch: {
+        currentFile: function (file) {
+          if (this.currentView === 'welcome') {
+            this.currentView = this.defaultOpenView
+          }
+          this.title = file.url
+        }
+      },
       data: function () {
         let defaultTitle = ''
         return {
           title: defaultTitle,
           defaultTitle: defaultTitle,
           currentView: 'welcome',
-          defaultOpenView: 'source-editor',
-          currentFile: null
+          defaultOpenView: 'source-editor'
         }
-      },
-      created: function () {
-        bus.$on('open:file', (item) => {
-          this.open(item)
-        })
-        bus.$on('close:file', () => {
-          this.close()
-        })
       },
       methods: {
         saveAndRun: function (e) {
           e.preventDefault()
-        },
-        close: function () {
-          if (this.currentFile) {
-            this.currentView = 'welcome'
-            this.title = this.defaultTitle
-            this.currentFile = null
-            // Must clear for tabs too
-            data.currentFile = null
-          }
-        },
-        open: function (item) {
-          // NOTE: we need to store in data source for
-          // NOTE: switching editor tabs
-          data.currentFile = this.currentFile = item
-
-          if (this.currentView === 'welcome') {
-            this.currentView = this.defaultOpenView
-          }
-
-          data.getFileContents(item.url)
-            .then((res) => {
-              // TODO: get blob for binary types
-              return res.text()
-            }).then((content) => {
-              item.content = content
-              this.title = item.url
-              if (this.$children[0] && this.$children[0].showSourceText) {
-                this.$children[0].showSourceText(item)
-              }
-              bus.$emit('open:complete', item)
-            })
         }
       },
       components: {
@@ -780,18 +735,12 @@ class EditorApplication {
             </div>`,
           data: function () {
             return {
-              file: {name: '', url: ''},
               confirmDelete: false
             }
           },
-          created: function () {
-            bus.$on('open:complete', (item) => {
-              this.file = item
-            })
-          },
-          mounted: function () {
-            if (data.currentFile) {
-              this.file = data.currentFile
+          computed: {
+            file: function () {
+              return this.$store.state.app.current
             }
           },
           methods: {
@@ -805,7 +754,7 @@ class EditorApplication {
                     return bus.$emit('log', new Error(msg))
                   }
                   bus.$emit('log', `Deleted ${this.file.url}`)
-                  bus.$emit('sidebar:reload')
+                  this.$store.dispatch('reload')
                 })
             }
           }
@@ -818,6 +767,16 @@ class EditorApplication {
             return {
               mirror: null,
               canSave: false
+            }
+          },
+          computed: {
+            currentFile: function () {
+              return this.$store.state.app.current
+            }
+          },
+          watch: {
+            currentFile: function (file) {
+              this.setCodeMirror({value: file.content, mode: this.getModeForMime(file.mime)})
             }
           },
           methods: {
@@ -872,15 +831,16 @@ class EditorApplication {
                 keyMap: 'vim'
               })
               this.mirror.on('changes', this.changes)
-            },
+            }
+
+            /*
             showSourceText: function (item) {
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
             }
+            */
           },
           mounted: function () {
-            let item = this.$store.state.app.current
-            console.log('source mounted')
-            console.log(item)
+            let item = this.currentFile
             // Handles setting file content when switching tabs
             if (item && item.content) {
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
