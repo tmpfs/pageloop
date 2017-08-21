@@ -81,7 +81,7 @@ p, section > ul.compact-list {
 }
 
 a, a:visited, a:hover {
-  color: var(--link-color);
+  color: currentColor;
   text-decoration: none;
   transition: all 0.5s ease-out;
 }
@@ -203,20 +203,6 @@ section {
   margin-bottom: 3rem;
 }
 
-nav.tabs {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  padding: 0;
-  font-size: 1.4rem;
-  text-transform: uppercase;
-}
-
-nav.tabs > a {
-  flex: 1 0;
-  text-align: center;
-}
-
 .column-header {
   display: flex;
   flex-direction: row;
@@ -226,14 +212,6 @@ nav.tabs > a {
 
 .column-header > * {
   flex: 1 0;
-}
-
-nav.tabs {
-  /*border-bottom: 1px solid currentColor;*/
-}
-
-nav.tabs > a:not(:first-child) {
-  border-left: 1px solid var(--border-color);
 }
 
 .editor > .column-header .tabs > a {
@@ -318,13 +296,33 @@ iframe {
   padding: 0;
 }
 
-h2 a, .tabs > a, header > nav > a {
+.tabs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding: 0;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+}
+
+.tabs > a {
+  flex: 1 0;
+  text-align: center;
   background: transparent;
 }
 
-h2 a:hover, .tabs > a:hover {
-  background: var(--link-color);
-  color: white;
+.tabs > .selected {
+  text-decoration: underline;
+  pointer-events: none;
+}
+
+.tabs > a:not(:first-child) {
+  border-left: 1px solid var(--border-color);
+}
+
+.tabs > a:hover, .tabs > a.selected {
+  background: var(--base03-color);
+  color: var(--base3-color);
   transition: all 0.5s ease-out;
 }
 
@@ -333,13 +331,6 @@ h2 a:hover, .tabs > a:hover {
   padding: .2rem 0 .2rem 2rem;
   cursor: pointer;
   user-select: none;
-}
-
-.tabs > .selected {
-  text-decoration: underline;
-  background: var(--link-color);
-  color: white;
-  pointer-events: none;
 }
 
 .page, .file {
