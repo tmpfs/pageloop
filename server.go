@@ -196,9 +196,18 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "System documentation."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe", Description: "API Probe."})
-	system = append(system, Mountpoint{UrlPath: "/template/", Path: "data://app/template", Description: "Application and file templates."})
+
+
+	// Template applications to mount.
+	var template []Mountpoint
+	template = append(template, Mountpoint{UrlPath: "/template/files/", Path: "data://app/template/files", Description: "File templates."})
+	template = append(template, Mountpoint{UrlPath: "/template/apps/", Path: "data://app/template/apps", Description: "Application templates."})
 
   if err = l.LoadMountpoints(system, sys); err != nil {
+    return nil, err
+  }
+
+  if err = l.LoadMountpoints(template, tpl); err != nil {
     return nil, err
   }
 
