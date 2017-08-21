@@ -166,8 +166,8 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	snx := model.NewContainer("sandbox", "Playground.", false)
 
 	l.Host.Add(sys)
-	l.Host.Add(usr)
 	l.Host.Add(tpl)
+	l.Host.Add(usr)
 	l.Host.Add(snx)
 
 	// Initialize mountpoint maps

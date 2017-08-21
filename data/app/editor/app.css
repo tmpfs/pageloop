@@ -80,9 +80,17 @@ p, section > ul.compact-list {
 }
 
 a, a:visited, a:hover {
-  color: currentColor;
+  color: var(--blue-color);
   text-decoration: none;
   transition: all 0.5s ease-out;
+}
+
+p a{
+  border-bottom: 2px solid transparent;
+}
+
+p a:hover {
+  border-bottom: 2px solid currentColor;
 }
 
 header {
@@ -167,6 +175,12 @@ footer p {
   margin: 0 2rem;
 }
 
+.name.container {
+  font-size: 1.4rem;
+  text-decoration: underline;
+  text-transform: uppercase;
+}
+
 .name + p.small {
   margin-top: 0.2rem;
 }
@@ -188,6 +202,19 @@ footer p {
 
 .containers > ul {
   margin-left: 2rem;
+}
+
+.app > p.small {
+  margin-bottom: 0;
+}
+
+.app > .app-actions {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.app-actions > *:not(:last-child) {
+  margin-right: 1rem;
 }
 
 .sidebar, .editor, .preview {
@@ -340,6 +367,7 @@ iframe.publish-preview {
 
 .tabs > a {
   flex: 1 0;
+  color: currentColor;
   text-align: center;
   background: transparent;
 }

@@ -777,13 +777,20 @@ class EditorApplication {
               template: `
                 <div class="content-main">
                   <div class="content">
-                    <div class="containers" v-for="item in list">
-                      <span class="name">{{item.name}}</span>
-                      <p class="small">{{item.description}}</p>
+                    <div class="containers" v-for="container in list">
+                      <span :class="{hidden: !container.protected}">🔒&nbsp;</span>
+                      <span class="name container">{{container.name}}</span>
+                      <p class="small">{{container.description}}</p>
                       <ul class="compact-list">
-                        <div class="app" v-for="app in item.apps">
-                            <a class="name" :href="linkify(item, app)" title="title(app)">{{app.name}}</a>
-                            <p class="small">{{app.description}}</p>
+                        <div class="app" v-for="app in container.apps">
+                            <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
+                            <span class="name">{{app.name}}</span>
+                            <p class="small">URL: {{app.url}}<br />{{app.description}}
+                              <p class="app-actions">
+                                <a class="name" :href="linkify(container, app)" :title="title(app, 'Edit')">Edit</a>
+                                <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
+                              </p>
+                            </p>
                         </div>
                       </ul>
                     </div>
@@ -796,11 +803,14 @@ class EditorApplication {
                 }
               },
               methods: {
-                linkify: function (c, a) {
+                linkify: function (c, a, open) {
+                  if (open) {
+                    return a.url
+                  }
                   return `#apps/${c.name}/${a.name}`
                 },
-                title: function (a) {
-                  return `Edit ${a.name}`
+                title: function (a, prefix) {
+                  return `${prefix} ${a.name}`
                 }
               }
             },
