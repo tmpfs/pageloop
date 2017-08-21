@@ -90,7 +90,8 @@ header {
   padding: 0;
   height: 6rem;
   border-bottom: 1px solid var(--border-color);
-  clear: both;
+  user-select: none;
+  cursor: default;
 }
 
 header nav {
@@ -251,7 +252,7 @@ iframe.docs {
   height: 100%;
 }
 
-iframe.preview {
+iframe.publish-preview {
   height: calc(100% - 4.6rem);
 }
 

@@ -400,7 +400,7 @@ class EditorApplication {
           <nav class="toolbar clearfix">
             <a href="#reload">Reload</a>
           </nav>
-          <iframe :src="url" class="preview"></iframe>
+          <iframe :src="url" class="publish-preview"></iframe>
         </div>
       `,
       data: function () {
@@ -700,7 +700,7 @@ class EditorApplication {
       components: {
         'app-header': {
           template: `
-              <header>
+              <header class="clearfix">
                 <nav>
                   <a @click="currentView = 'apps-main'"
                     v-bind:class="{selected: selectedView === 'apps-main'}"
