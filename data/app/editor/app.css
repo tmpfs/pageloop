@@ -177,6 +177,15 @@ footer p {
   min-height: 100%;
 }
 
+.containers {
+  flex: 1 0;
+  padding: 2rem;
+}
+
+.containers > ul {
+  margin-left: 2rem;
+}
+
 .sidebar, .editor, .preview {
   flex: 1 0 auto;
 }

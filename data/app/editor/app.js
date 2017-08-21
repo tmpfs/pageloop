@@ -13,8 +13,11 @@ class LocationParser {
 class AppDataSource {
   constructor (loc) {
     this.loc = loc
-    this.url = `/api/${loc.container}/${loc.application}/`
+    this.api = '/api/'
+    this.url = `${this.api}${loc.container}/${loc.application}/`
     this.raw = `/apps/raw/${loc.container}/${loc.application}`
+
+    this.containers = []
 
     // current application
     this.app = {
@@ -32,10 +35,8 @@ class AppDataSource {
       .catch((err) => err)
   }
 
-  getFileContents (pathname) {
-    let url = this.raw
-    return fetch(url + pathname)
-      .catch((err) => err)
+  getContainers () {
+    return this.json(this.api)
   }
 
   getApplication (loc) {
@@ -53,6 +54,12 @@ class AppDataSource {
   getFiles () {
     let url = this.url + 'files/'
     return this.json(url)
+  }
+
+  getFileContents (pathname) {
+    let url = this.raw
+    return fetch(url + pathname)
+      .catch((err) => err)
   }
 
   deleteFile (file) {
@@ -118,7 +125,10 @@ class EditorApplication {
     this.store = new Vuex.Store({
       state: this.data,
       mutations: {
-        init (state, app) {
+        containers (state, list) {
+          state.containers = list
+        },
+        app (state, app) {
           // merge properties
           for (let k in app) {
             state.app[k] = app[k]
@@ -133,10 +143,16 @@ class EditorApplication {
         }
       },
       actions: {
-        'init': function (context) {
+        'containers': function (context) {
+          return data.getContainers()
+            .then((list) => {
+              context.commit('containers', list)
+            })
+        },
+        'app': function (context) {
           return data.getApplication()
             .then((doc) => {
-              context.commit('init', doc)
+              context.commit('app', doc)
             })
         },
         'list-files': function (context) {
@@ -760,9 +776,28 @@ class EditorApplication {
             'apps-main': {
               template: `
                 <div class="content-main">
-                  <h3>Apps</h3>
+                  <div class="content">
+                    <div class="containers" v-for="item in list">
+                      <span class="name">{{item.name}}</span>
+                      <ul class="compact-list">
+                        <div class="app" v-for="app in item.apps">
+                            <a :href="linkify(item, app)">{{app.name}}</a>
+                        </div>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-              `
+              `,
+              computed: {
+                list: function () {
+                  return this.$store.state.containers
+                }
+              },
+              methods: {
+                linkify: function (c, a) {
+                  return `#apps/${c.name}/${a.name}`
+                }
+              }
             },
             'docs-main': {
               template: `
@@ -836,7 +871,8 @@ class EditorApplication {
     let bus = this.bus
     let data = this.data
     bus.$emit('log', `Loading app from ${data.url}`)
-    return this.store.dispatch('init')
+    return this.store.dispatch('containers')
+      .then(() => this.store.dispatch('app'))
       .then(() => {
         this.store.dispatch('list-files')
           .then(this.store.dispatch('list-pages'))
@@ -849,8 +885,7 @@ class EditorApplication {
       })
   }
 
-  init (loc) {
-    loc = loc || this.loc
+  init () {
     this.ui()
     this.load()
   }
