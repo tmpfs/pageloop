@@ -200,7 +200,7 @@ class EditorApplication {
       }
     }
 
-    let sidebar = this.sidebar = {
+    let sidebar = {
       template: `
         <div class="sidebar">
           <div class="column-header">
@@ -238,6 +238,9 @@ class EditorApplication {
       },
       created: function () {
         bus.$on('sidebar:reload', this.reload)
+        bus.$on('sidebar:select', (view) => {
+          this.currentView = view
+        })
       },
       methods: {
         showNewFileView: function () {
@@ -787,22 +790,18 @@ class EditorApplication {
     return app
   }
 
-  log (msg) {
-    this.bus.$emit('log', msg)
-  }
-
   load () {
     let bus = this.bus
     let data = this.data
-    this.log(`Loading app from ${data.url}`)
+    bus.$emit('log', `Loading app from ${data.url}`)
     return this.store.dispatch('init')
       .then(() => {
         this.store.dispatch('list-files')
           .then(this.store.dispatch('list-pages'))
           .then(() => {
             bus.$emit('preview:refresh')
-            this.sidebar.currentView = 'pages'
-            this.log('Done')
+            bus.$emit('sidebar:select', 'pages')
+            bus.$emit('log', 'Done')
           })
           .catch((err) => bus.$emit('log', err))
       })
