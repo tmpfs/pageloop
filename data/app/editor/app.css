@@ -1,5 +1,7 @@
 :root {
-  --link-color: #e30053;
+  /*--link-color: #e30053;*/
+  --link-color: #d33682;
+  --border-color: #002b36;
 }
 
 @font-face {
@@ -42,6 +44,9 @@ body {
   font-size: 1.8rem;
   line-height: 2.2rem;
   font-family: 'SourceSans';
+  background: #073642;
+  color: #93a1a1;
+  /*color: white;*/
   /*overflow: hidden;*/
 }
 
@@ -64,7 +69,7 @@ header {
   margin: 0;
   padding: 0;
   height: 6rem;
-  border-bottom: 1px solid currentColor;
+  border-bottom: 1px solid var(--border-color);
 }
 
 header nav {
@@ -145,7 +150,7 @@ footer {
   padding: 0.8rem 0;
   height: 3.2rem;
   /*min-height: 3.2rem;*/
-  border-top: 1px solid currentColor;
+  border-top: 1px solid var(--border-color);
 }
 
 footer p {
@@ -167,8 +172,7 @@ footer p {
 }
 
 .sidebar {
-  background: white;
-  border-right: 1px solid currentColor;
+  border-right: 1px solid var(--border-color);
   max-width: 32rem;
   width: 20%;
 }
@@ -207,7 +211,7 @@ nav.tabs > a {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  border-bottom: 1px solid currentColor;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .column-header > * {
@@ -219,15 +223,15 @@ nav.tabs {
 }
 
 nav.tabs > a:not(:first-child) {
-  border-left: 1px solid currentColor;
+  border-left: 1px solid var(--border-color);
 }
 
 .editor > .column-header .tabs > a {
-  border-left: 1px solid currentColor;
+  border-left: 1px solid var(--border-color);
 }
 
 .editor {
-  border-right: 1px solid currentColor;
+  border-right: 1px solid var(--border-color);
 }
 
 .preview {
@@ -269,7 +273,7 @@ iframe {
 .sidebar .toolbar {
 	height: 2.3rem;
   font-size: 1.4rem;
-	border-bottom: 1px solid currentColor;
+	border-bottom: 1px solid var(--border-color);
   text-align: right;
 }
 
@@ -277,9 +281,12 @@ iframe {
   display: inline-block;
   text-align: center;
   /*background: #eee8d5;*/
-  color: black;
   width: 2.3rem;
   height: 2.3rem;
+}
+
+.files-list a, .pages-list a {
+  color: currentColor;
 }
 
 .small, small {
