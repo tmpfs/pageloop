@@ -83,6 +83,7 @@ a, a:visited, a:hover {
   color: var(--blue-color);
   text-decoration: none;
   transition: all 0.5s ease-out;
+  cursor: pointer;
 }
 
 p a{

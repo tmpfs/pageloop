@@ -9,6 +9,7 @@ class Router {
   navigate (href, state) {
     let url = this.url(href)
     history.pushState({href: href, state: state}, '', url)
+    this.route(href)
   }
 
   url (href) {
@@ -38,9 +39,10 @@ class Router {
     this.routes.push({ptn: ptn, fn: fn, map: map})
   }
 
-  route (href) {
-    function state (href, route) {
+  route (href, state) {
+    function result (href, route) {
       let o = {
+        state: state,
         href: href,
         route: route,
         parts: [],
@@ -65,23 +67,23 @@ class Router {
       ptn = r.ptn
       fn = r.fn
       if (typeof ptn === 'string' && href === ptn) {
-        fn(state(href, r))
+        fn(result(href, r))
+        break
       } else if (ptn instanceof RegExp && ptn.test(href)) {
-        fn(state(href, r))
+        fn(result(href, r))
+        break
       }
     }
   }
 
   start () {
-    window.addEventListener('hashchange', () => {
-      this.route(this.hash)
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.href) {
+        this.route(e.state.href, e.state.state)
+      } else {
+        this.route(this.hash)
+      }
     })
-    /*
-    window.addEventListener('popstate', (state) => {
-      console.log('pop state')
-      console.log(state)
-    })
-    */
     if (!this.hash) {
       if (this.defaultHref) {
         this.replace(this.defaultHref, true)
@@ -100,6 +102,8 @@ class AppDataSource {
   }
 
   setApplication (container, application) {
+    this.container = container
+    this.application = application
     this.url = `${this.api}${container}/${application}/`
     this.raw = `/apps/raw/${container}/${application}`
 
@@ -203,8 +207,29 @@ class AppDataSource {
 
 class EditorApplication {
   constructor () {
-    this.bus = new Vue()
+    let bus = this.bus = new Vue()
     let data = this.data = new AppDataSource()
+
+    let r = this.router = new Router('apps')
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/, ['section', 'container', 'application'], (match) => {
+      this.load(match.map.container, match.map.application)
+        .then(() => {
+          bus.$emit('view:select', 'edit')
+        })
+    })
+    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
+      let section = match.map.section
+      if (section === 'apps') {
+        return this.store.dispatch('containers')
+          .then(() => {
+            bus.$emit('view:select', section)
+          })
+      } else if (section === 'edit' && data.container && data.application) {
+        return r.replace('apps/' + data.container + '/' + data.application, true)
+      }
+      bus.$emit('view:select', section)
+    })
+
     this.store = new Vuex.Store({
       state: this.data,
       mutations: {
@@ -226,6 +251,9 @@ class EditorApplication {
         }
       },
       actions: {
+        'navigate': function (context, href) {
+          r.navigate(href)
+        },
         'containers': function (context) {
           return data.getContainers()
             .then((list) => {
@@ -376,7 +404,6 @@ class EditorApplication {
           },
           watch: {
             extension: function (val) {
-              console.log('extension changed to: ' + val)
               this.displayExtension = val
             }
           },
@@ -527,7 +554,7 @@ class EditorApplication {
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
           if (url === this.path) {
-            let frame = document.querySelector('.live')
+            let frame = document.querySelector('.publish-preview')
             return frame.contentDocument.location.reload()
           }
           this.path = url || '/'
@@ -615,7 +642,7 @@ class EditorApplication {
             }).then((content) => {
               item.content = content
               this.title = item.url
-              if (this.currentView === 'source-editor') {
+              if (this.$children[0] && this.$children[0].showSourceText) {
                 this.$children[0].showSourceText(item)
               }
               bus.$emit('open:complete', item)
@@ -801,13 +828,21 @@ class EditorApplication {
           template: `
               <header class="clearfix">
                 <nav>
-                  <a :class="{selected: selectedView === 'apps'}"
+                  <a
+                    @click="$store.dispatch('navigate', 'apps')"
+                    :class="{selected: selectedView === 'apps'}"
                     href="#apps" title="All applications">Apps</a>
-                  <a :class="{selected: selectedView === 'docs'}"
+                  <a
+                    @click="$store.dispatch('navigate', 'docs')"
+                    :class="{selected: selectedView === 'docs'}"
                     href="#docs" title="Documentation">Docs</a>
-                  <a :class="{selected: selectedView === 'edit', disabled: $store.state.app === null}"
+                  <a
+                    @click="$store.dispatch('navigate', 'edit')"
+                    :class="{selected: selectedView === 'edit', disabled: $store.state.app === null}"
                     href="#edit" title="Edit Application">Edit</a>
-                  <a :class="{selected: selectedView === 'settings'}"
+                  <a
+                    @click="$store.dispatch('navigate', 'settings')"
+                    :class="{selected: selectedView === 'settings'}"
                     href="#settings" title="Settings">Settings</a>
                 </nav>
                 <div class="app-id">
@@ -861,7 +896,7 @@ class EditorApplication {
                             <span class="name">{{app.name}}</span>
                             <p class="small">URL: {{app.url}}<br />{{app.description}}
                               <p class="app-actions">
-                                <a class="name" :href="linkify(container, app)" :title="title(app, 'Edit')">Edit</a>
+                                <a class="name" @click="$store.dispatch('navigate', linkify(container, app))" :title="title(app, 'Edit')">Edit</a>
                                 <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
                               </p>
                             </p>
@@ -881,7 +916,7 @@ class EditorApplication {
                   if (open) {
                     return a.url
                   }
-                  return `#apps/${c.name}/${a.name}`
+                  return `apps/${c.name}/${a.name}`
                 },
                 title: function (a, prefix) {
                   return `${prefix} ${a.name}`
@@ -963,35 +998,23 @@ class EditorApplication {
     this.data.setApplication(container, application)
 
     bus.$emit('log', `Loading app from ${data.url}`)
-    return this.store.dispatch('containers')
-      .then(() => this.store.dispatch('app'))
-      .then(() => {
-        this.store.dispatch('list-files')
-          .then(this.store.dispatch('list-pages'))
-          .then(() => {
-            bus.$emit('preview:refresh')
-            bus.$emit('sidebar:select', 'pages')
-            bus.$emit('log', 'Done')
-          })
-          .catch((err) => bus.$emit('log', err))
-      })
+    return this.store.dispatch('app')
+    .then(() => {
+      this.store.dispatch('list-files')
+        .then(this.store.dispatch('list-pages'))
+        .then(() => {
+          bus.$emit('preview:refresh')
+          bus.$emit('sidebar:select', 'pages')
+          bus.$emit('log', 'Done')
+        })
+        .catch((err) => bus.$emit('log', err))
+    })
   }
 
   init () {
-    let bus = this.bus
     this.ui()
-    this.load()
-    let r = new Router('apps')
-    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/, ['section', 'container', 'application'], (match) => {
-      this.load(match.map.container, match.map.application)
-        .then(() => {
-          bus.$emit('view:select', 'edit')
-        })
-    })
-    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
-      bus.$emit('view:select', match.map.section)
-    })
-    r.start()
+    // this.load()
+    this.router.start()
   }
 }
 
