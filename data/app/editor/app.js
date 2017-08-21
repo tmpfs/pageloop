@@ -38,34 +38,21 @@ class AppDataSource {
       .catch((err) => err)
   }
 
-  getApplication () {
+  getApplication (loc) {
+    if (!loc) {
+      loc = this.loc
+    }
     return this.json(this.url)
-      .then((app) => {
-        // merge properties
-        for (let k in app) {
-          this.app[k] = app[k]
-        }
-        this.app.identifier = this.app.owner + ' / ' + this.app.name
-        return this.app
-      })
   }
 
   getPages () {
     let url = this.url + 'pages/'
     return this.json(url)
-      .then((list) => {
-        this.app.pages = list
-        return list
-      })
   }
 
   getFiles () {
     let url = this.url + 'files/'
     return this.json(url)
-      .then((list) => {
-        this.app.files = list
-        return list
-      })
   }
 
   deleteFile (file) {
@@ -127,9 +114,46 @@ class EditorApplication {
   constructor (loc) {
     this.loc = loc
     this.bus = new Vue()
-    this.data = new AppDataSource(this.loc)
+    let data = this.data = new AppDataSource(this.loc)
     this.store = new Vuex.Store({
-      state: this.data
+      state: this.data,
+      mutations: {
+        init (state, app) {
+          console.log('init mutation called')
+          console.log(app)
+          // merge properties
+          for (let k in app) {
+            state.app[k] = app[k]
+          }
+          state.app.identifier = state.app.owner + ' / ' + state.app.name
+        },
+        files: function (state, list) {
+          state.app.files = list
+        },
+        pages: function (state, list) {
+          state.app.pages = list
+        }
+      },
+      actions: {
+        'init': function (context) {
+          return data.getApplication()
+            .then((doc) => {
+              context.commit('init', doc)
+            })
+        },
+        'list-files': function (context) {
+          return data.getFiles()
+            .then((list) => {
+              context.commit('files', list)
+            })
+        },
+        'list-pages': function (context) {
+          return data.getPages()
+            .then((list) => {
+              context.commit('pages', list)
+            })
+        }
+      }
     })
   }
 
@@ -208,8 +232,6 @@ class EditorApplication {
       `,
       data: function () {
         return {
-          pages: data.app.pages,
-          files: data.app.files,
           components: [],
           currentView: ''
         }
@@ -224,31 +246,6 @@ class EditorApplication {
         },
         closeNewFileView: function () {
           this.currentView = this.previousView
-        },
-        loadPages: function () {
-          return data.getPages()
-            .then((list) => {
-              this.pages = list
-              bus.$emit('pages:load', list)
-            })
-        },
-        loadFiles: function (url) {
-          return data.getFiles()
-            .then((list) => {
-              this.files = list
-              bus.$emit('files:load', list)
-            })
-        },
-        reload: function (fn) {
-          return this.loadPages()
-            .then(() => {
-              return this.loadFiles()
-                .then(() => {
-                  if (typeof fn === 'function') {
-                    return fn()
-                  }
-                })
-            })
         }
       },
       components: {
@@ -787,7 +784,6 @@ class EditorApplication {
     })
 
     app.$mount('main')
-
     return app
   }
 
@@ -796,31 +792,26 @@ class EditorApplication {
   }
 
   load () {
+    let bus = this.bus
     let data = this.data
     this.log(`Loading app from ${data.url}`)
-    return this.data.getApplication()
-      .then((app) => {
-        this.log(`Loading pages for ${this.data.app.name}`)
-      })
-      .then(data.getPages())
-      .then(data.getFiles())
+    return this.store.dispatch('init')
       .then(() => {
-        this.preview.refresh()
+        this.store.dispatch('list-files')
+          .then(this.store.dispatch('list-pages'))
+          .then(() => {
+            bus.$emit('preview:refresh')
+            this.sidebar.currentView = 'pages'
+            this.log('Done')
+          })
+          .catch((err) => bus.$emit('log', err))
       })
-      .catch((err) => { this.log(err) })
   }
 
   init (loc) {
     loc = loc || this.loc
     this.ui()
     this.load()
-      .then(() => {
-        this.sidebar.currentView = 'pages'
-        this.log('Done')
-
-        //
-        // console.log(this.data)
-      })
   }
 }
 
