@@ -1,12 +1,104 @@
-/* globals Vue Vuex CodeMirror document fetch */
+/* globals Vue Vuex CodeMirror document fetch document history window */
 
 class LocationParser {
   parse () {
-    let pth = document.location.pathname
+    let pth = document.location.hash
     let parts = pth.replace(/\/+$/, '').split('/')
     let application = parts.pop()
     let container = parts.pop()
     return {application: application, container: container}
+  }
+}
+
+class Router {
+  constructor (href) {
+    this.defaultHref = href
+    this.routes = []
+  }
+
+  navigate (href, state) {
+    let url = this.url(href)
+    history.pushState({href: href, state: state}, '', url)
+  }
+
+  url (href) {
+    return this.pathname + '#' + href
+  }
+
+  get pathname () {
+    return document.location.pathname
+  }
+
+  get hash () {
+    return document.location.hash.replace(/^#/, '')
+  }
+
+  replace (href, trigger) {
+    document.location.replace(this.url(href))
+    if (trigger) {
+      this.route(href)
+    }
+  }
+
+  add (ptn, map, fn) {
+    if (typeof map === 'function') {
+      fn = map
+      map = null
+    }
+    this.routes.push({ptn: ptn, fn: fn, map: map})
+  }
+
+  route (href) {
+    function state (href, route) {
+      let o = {
+        href: href,
+        route: route,
+        parts: [],
+        map: {}
+      }
+
+      let parts = href.replace(/^\//, '').replace(/\/$/, '').split('/')
+      o.parts = parts
+
+      if (route.map) {
+        route.map.forEach((val, i) => {
+          o.map[val] = parts[i]
+        })
+      }
+
+      return o
+    }
+
+    let r, ptn, fn
+    for (let i = 0; i < this.routes.length; i++) {
+      r = this.routes[i]
+      ptn = r.ptn
+      fn = r.fn
+      if (typeof ptn === 'string' && href === ptn) {
+        fn(state(href, r))
+      } else if (ptn instanceof RegExp && ptn.test(href)) {
+        fn(state(href, r))
+      }
+    }
+  }
+
+  start () {
+    window.addEventListener('hashchange', () => {
+      this.route(this.hash)
+    })
+    /*
+    window.addEventListener('popstate', (state) => {
+      console.log('pop state')
+      console.log(state)
+    })
+    */
+    if (!this.hash) {
+      if (this.defaultHref) {
+        this.replace(this.defaultHref, true)
+      }
+    } else {
+      this.route(this.hash)
+    }
   }
 }
 
@@ -718,17 +810,13 @@ class EditorApplication {
           template: `
               <header class="clearfix">
                 <nav>
-                  <a @click="currentView = 'apps-main'"
-                    v-bind:class="{selected: selectedView === 'apps-main'}"
+                  <a :class="{selected: selectedView === 'apps'}"
                     href="#apps" title="All applications">Apps</a>
-                  <a @click="currentView = 'docs-main'"
-                    v-bind:class="{selected: selectedView === 'docs-main'}"
+                  <a :class="{selected: selectedView === 'docs'}"
                     href="#docs" title="Documentation">Docs</a>
-                  <a @click="currentView = 'editor-main'"
-                    v-bind:class="{selected: selectedView === 'editor-main'}"
-                    href="#editor" title="Editor">Editor</a>
-                  <a @click="currentView = 'settings-main'"
-                    v-bind:class="{selected: selectedView === 'settings-main'}"
+                  <a :class="{selected: selectedView === 'edit', disabled: $store.state.app === null}"
+                    href="#edit" title="Edit Application">Edit</a>
+                  <a :class="{selected: selectedView === 'settings'}"
                     href="#settings" title="Settings">Settings</a>
                 </nav>
                 <div class="app-id">
@@ -740,7 +828,7 @@ class EditorApplication {
 
           data: function () {
             return {
-              selectedView: 'editor-main'
+              selectedView: ''
             }
           },
           computed: {
@@ -764,7 +852,7 @@ class EditorApplication {
           `,
           data: function () {
             return {
-              currentView: 'editor-main'
+              currentView: ''
             }
           },
           created: function () {
@@ -773,7 +861,7 @@ class EditorApplication {
             })
           },
           components: {
-            'apps-main': {
+            'apps': {
               template: `
                 <div class="content-main">
                   <div class="content">
@@ -814,14 +902,14 @@ class EditorApplication {
                 }
               }
             },
-            'docs-main': {
+            'docs': {
               template: `
                 <div class="content-main">
                   <iframe class="docs" src="/docs/"></iframe>
                 </div>
               `
             },
-            'editor-main': {
+            'edit': {
               template: `
                 <div class="content-main">
                   <div class="content">
@@ -837,7 +925,7 @@ class EditorApplication {
                 preview
               }
             },
-            'settings-main': {
+            'settings': {
               template: `
                 <div class="content-main">
                   <h3>Settings</h3>
@@ -901,8 +989,15 @@ class EditorApplication {
   }
 
   init () {
+    let bus = this.bus
     this.ui()
     this.load()
+
+    let r = new Router('apps')
+    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
+      bus.$emit('view:select', match.map.section)
+    })
+    r.start()
   }
 }
 
