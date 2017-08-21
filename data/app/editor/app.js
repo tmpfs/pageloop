@@ -448,6 +448,9 @@ class EditorApplication {
           <div class="column-header">
             <h2>Live Preview ~ <a class="preview-url" :href="url" title="Preview URL">{{path}}</a></h2>
           </div>
+          <nav class="toolbar">
+            <span>{{path}}</span>
+          </nav>
           <iframe :src="url" class="live"></iframe>
         </div>
       `,
