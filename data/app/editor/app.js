@@ -113,7 +113,9 @@ class AppDataSource {
       identifier: '',
       owner: container,
       pages: [],
-      files: []
+      files: [],
+      // current selected file
+      current: {content: ''}
     }
   }
 
@@ -257,6 +259,9 @@ class EditorApplication {
         },
         pages: function (state, list) {
           state.app.pages = list
+        },
+        'current-file': function (state, file) {
+          state.app.current = file
         }
       },
       actions: {
@@ -290,6 +295,58 @@ class EditorApplication {
         'reload': function (context) {
           return context.dispatch('list-pages')
             .then(context.dispatch('list-files'))
+        },
+        'index-page-select': function (context) {
+          let files = context.state.app.files
+          for (let i = 0; i < files.length; i++) {
+            // got a published index page whether the source is
+            // HTML or markdown
+            if (files[i].uri === '/index.html') {
+              return context.dispatch('open-file', files[i])
+            }
+          }
+        },
+        'get-file-contents': function (context, item) {
+          return data.getFileContents(item.url)
+            .then((res) => {
+              // TODO: get blob for binary types
+              return res.text()
+            })
+        },
+        'open-file': function (context, file) {
+          // NOTE: we need to store in data source for
+          // NOTE: switching editor tabs
+          // context.state.app.currentFile = item
+
+          /*
+          if (this.currentView === 'welcome') {
+            this.currentView = this.defaultOpenView
+          }
+          */
+
+          console.log('opening file')
+          console.log(file)
+
+          return context.dispatch('get-file-contents', file)
+            .then((content) => {
+              file.content = content
+              context.commit('current-file', file)
+            })
+
+          /*
+          data.getFileContents(item.url)
+            .then((res) => {
+              // TODO: get blob for binary types
+              return res.text()
+            }).then((content) => {
+              item.content = content
+              this.title = item.url
+              if (this.$children[0] && this.$children[0].showSourceText) {
+                this.$children[0].showSourceText(item)
+              }
+              bus.$emit('open:complete', item)
+            })
+          */
         }
       }
     })
@@ -821,7 +878,9 @@ class EditorApplication {
             }
           },
           mounted: function () {
-            let item = data.currentFile
+            let item = this.$store.state.app.current
+            console.log('source mounted')
+            console.log(item)
             // Handles setting file content when switching tabs
             if (item && item.content) {
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
@@ -1025,6 +1084,7 @@ class EditorApplication {
         .then(() => {
           bus.$emit('sidebar:select', 'pages')
           bus.$emit('log', 'Done')
+          return this.store.dispatch('index-page-select')
         })
         .catch((err) => bus.$emit('log', err))
     })
@@ -1032,7 +1092,6 @@ class EditorApplication {
 
   init () {
     this.ui()
-    // this.load()
     this.router.start()
   }
 }
