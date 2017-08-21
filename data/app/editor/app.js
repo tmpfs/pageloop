@@ -524,7 +524,7 @@ class EditorApplication {
       template: `
         <div class="preview">
           <div class="column-header">
-            <h2>{{path}}</h2>
+            <h2>Preview</h2>
             <div class="column-options">
               <nav class="tabs">
                 <!-- <a href="#preview" title="Publish preview">Preview</a> -->
@@ -533,6 +533,7 @@ class EditorApplication {
             </div>
           </div>
           <nav class="toolbar clearfix">
+            <h2>{{path}}</h2>
             <a href="#reload">Reload</a>
           </nav>
           <iframe :src="url" class="publish-preview"></iframe>
@@ -582,7 +583,7 @@ class EditorApplication {
       template: `
         <div class="editor">
           <div class="column-header">
-            <h2>{{title}}</h2>
+            <h2>Editor</h2>
             <div class="column-options">
               <nav class="tabs">
                 <a v-bind:class="{selected: currentView === 'file-editor', hidden: currentFile === null}"
@@ -597,7 +598,8 @@ class EditorApplication {
               </nav>
             </div>
           </div>
-          <nav class="toolbar">
+          <nav class="toolbar clearfix">
+            <h2>{{title}}</h2>
             <a @click="saveAndRun"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
           </nav>
@@ -605,7 +607,7 @@ class EditorApplication {
         </div>
       `,
       data: function () {
-        let defaultTitle = 'Editor'
+        let defaultTitle = ''
         return {
           title: defaultTitle,
           defaultTitle: defaultTitle,
