@@ -109,6 +109,15 @@ class AppDataSource {
     this.sidebarView = ''
   }
 
+  getAppHref (...args) {
+    let p = ['apps', this.container, this.application]
+    args = args.map((val) => {
+      return val.replace(/^\//, '')
+    })
+    p.push(...args)
+    return p.join('/')
+  }
+
   getIndexFile () {
     let files = this.app.files
     for (let i = 0; i < files.length; i++) {
@@ -272,7 +281,7 @@ class EditorApplication {
       },
       actions: {
         'navigate': function (context, request) {
-          r.navigate(request.href, request.state)
+          return r.navigate(request.href, request.state)
         },
         'containers': function (context) {
           return data.getContainers()
@@ -316,9 +325,12 @@ class EditorApplication {
               context.commit('current-file', file)
             })
         },
+        'go-page': function (context, file) {
+          let href = context.state.getAppHref('pages', file.url)
+          return context.dispatch('navigate', {href: href, state: file})
+        },
         'go-file': function (context, file) {
-          let href = 'apps/' + context.state.container +
-            '/' + context.state.application + '/files' + file.url
+          let href = context.state.getAppHref('files', file.url)
           return context.dispatch('navigate', {href: href, state: file})
         },
         'preview-refresh': function (context, url) {
@@ -328,17 +340,22 @@ class EditorApplication {
     })
 
     let r = this.router = new Router('apps', true)
-    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/files\/(.*)$/,
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(pages|files)\/(.*)$/,
       ['section', 'container', 'application', 'action'],
       (match) => {
         let href = '/' + match.parts.slice(4).join('/')
         let container = match.map.container
         let application = match.map.application
+        let action = match.map.action
 
         function findAndOpen (href) {
-          for (let i = 0; i < data.app.files.length; i++) {
-            if (data.app.files[i].url === href) {
-              store.dispatch('open-file', data.app.files[i])
+          let arr = data.app.files
+          if (action === 'pages') {
+            arr = data.app.pages
+          }
+          for (let i = 0; i < arr.length; i++) {
+            if (arr[i].url === href) {
+              store.dispatch('open-file', arr[i])
               break
             }
           }
@@ -350,10 +367,29 @@ class EditorApplication {
             .then(() => {
               findAndOpen(href)
               store.commit('main-view', 'edit')
+              store.commit('sidebar-view', action)
             })
         } else {
           findAndOpen(href)
           store.commit('main-view', 'edit')
+          store.commit('sidebar-view', action)
+        }
+      })
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|components)$/,
+      ['section', 'container', 'application', 'action'],
+      (match) => {
+        let container = match.map.container
+        let application = match.map.application
+        let action = match.map.action
+
+        // Need to load application data
+        if (container !== data.container || (container === data.container && application !== data.application)) {
+          this.load(match.map.container, match.map.application)
+            .then(() => {
+              store.commit('sidebar-view', action)
+            })
+        } else {
+          store.commit('sidebar-view', action)
         }
       })
     r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
@@ -406,13 +442,13 @@ class EditorApplication {
             <nav class="tabs">
               <a v-bind:class="{selected: currentView === 'pages'}"
                 @click="currentView = 'pages'"
-                href="#pages" title="Show pages">Pages</a>
+                title="Show pages">Pages</a>
               <a v-bind:class="{selected: currentView === 'files'}"
                 @click="currentView = 'files'"
-                href="#files"  title="Show files">Files</a>
+                title="Show files">Files</a>
               <a v-bind:class="{selected: currentView === 'components'}"
                 @click="currentView = 'components'"
-                href="#components" title="Show components">Components</a>
+                title="Show components">Components</a>
             </nav>
           </div>
           <nav class="toolbar">
@@ -435,7 +471,8 @@ class EditorApplication {
             return this.$store.state.sidebarView
           },
           set: function (val) {
-            this.$store.state.sidebarView = val
+            let href = this.$store.state.getAppHref(val)
+            this.$store.dispatch('navigate', {href: href})
           }
         }
       },
@@ -587,7 +624,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              return this.$store.dispatch('go-file', item)
+              return this.$store.dispatch('go-page', item)
             }
           }
         },
