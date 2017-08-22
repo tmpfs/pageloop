@@ -145,8 +145,6 @@ class AppDataSource {
 
     this.defaultFile = {content: ''}
 
-    this.currentDocumentValue = ''
-
     this.previewUrl = ''
 
     // State for maximized column in edit mode
@@ -443,7 +441,7 @@ class EditorApplication {
           return context.dispatch('navigate', {href: href, state: file})
         },
         'preview-refresh': function (context) {
-          context.commit('preview-url', true)
+          context.commit('preview-url', '')
         },
         'new-file': function (context, {name, template, action}) {
           if (!/^\//.test(name)) {
@@ -899,7 +897,7 @@ class EditorApplication {
           </div>
           <nav class="toolbar clearfix">
             <h2>{{path}}</h2>
-            <a @click="refresh(true)"
+            <a @click="refresh()"
                :class="{hidden: path == ''}">Reload</a>
             <a
               @click="maximized = 'preview'"
@@ -939,6 +937,7 @@ class EditorApplication {
       },
       methods: {
         refresh (url) {
+          console.log('refresh: ' + url)
           if (url === false) {
             this.path = ''
             this.src = ''
@@ -946,7 +945,7 @@ class EditorApplication {
           }
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
-          if (url === true || url === this.path) {
+          if (!url || url === this.path) {
             let frame = document.querySelector('.publish-preview')
             return frame.contentDocument.location.reload()
           }
@@ -1037,11 +1036,12 @@ class EditorApplication {
         saveAndRun: function (e) {
           e.preventDefault()
           let file = this.currentFile
-          let value = this.$store.state.currentDocumentValue
+          let value = file.content
           data.saveFile(file, value)
             .then((res) => {
               let doc = res.document
               if (doc.ok) {
+                console.log('refreshing preview')
                 this.$store.dispatch('preview-refresh')
               }
             })
@@ -1130,10 +1130,10 @@ class EditorApplication {
             },
             value: {
               get: function () {
-                return this.$store.state.currentDocumentValue
+                return this.$store.state.current.content
               },
               set: function (val) {
-                this.$store.state.currentDocumentValue = val
+                this.$store.state.current.content = val
               }
             }
           },
