@@ -1207,33 +1207,35 @@ class EditorApplication {
         'app-header': {
           template: `
               <header class="clearfix">
-                <nav>
+                <nav class="main">
                   <a
                     @click="$store.dispatch('navigate', {href: 'apps'})"
                     :class="{selected: selectedView === 'apps'}"
-                    href="#apps" title="All applications">Apps</a>
+                    title="View and edit applications">Apps</a>
                   <a
                     @click="$store.dispatch('navigate', {href: 'docs'})"
                     :class="{selected: selectedView === 'docs'}"
-                    href="#docs" title="Documentation">Docs</a>
+                    title="Documentation">Docs</a>
                   <a
                     @click="$store.dispatch('navigate', {href: 'edit'})"
-                    :class="{selected: selectedView === 'edit', hidden: $store.state.container === ''}"
-                    href="#edit" title="Edit Application">Edit</a>
+                    :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
+                    title="Edit Current Application">{{name}}</a>
                   <a
                     @click="$store.dispatch('navigate', {href: 'settings'})"
                     :class="{selected: selectedView === 'settings'}"
-                    href="#settings" title="Settings">Settings</a>
+                    title="Settings">Settings</a>
                 </nav>
-                <div class="app-id">
-                  <a href="/" title="Home page">Ꝏ</a>
-                  <span class="name">{{name}}</span>
-                </div>
+                <nav class="home">
+                  <a
+                    @click="$store.dispatch('navigate', {href: '/'})"
+                    class="home"
+                    title="Home page">Ꝏ </a>
+                </nav>
               </header>
             `,
           computed: {
             name: function () {
-              return this.$store.state.app.identifier
+              return this.$store.state.application
             },
             selectedView: function () {
               return this.$store.state.mainView

@@ -97,7 +97,7 @@ p a:hover {
 header {
   margin: 0;
   padding: 0;
-  height: 6rem;
+  height: 3rem;
   border-bottom: 1px solid var(--border-color);
   user-select: none;
   cursor: default;
@@ -111,10 +111,14 @@ header nav {
   padding: 0;
 }
 
-header .app-id {
+header nav.home {
   float: left;
-  font-size: 1.6rem;
-  padding: .3rem 2rem;
+}
+
+nav.home > a.home {
+  /*background: var(--base03-color);*/
+  color: var(--base3-color) !important;
+  text-decoration: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -159,15 +163,15 @@ main {
 
 main > .content-main {
   flex: 1 1;
-  height: calc(100% - 9rem);
-  max-height: calc(100% - 9rem);
+  height: calc(100% - 6rem);
+  max-height: calc(100% - 6rem);
 }
 
 footer {
   font-size: 1.6rem;
   line-height: 1.6rem;
   padding: 0.8rem 0;
-  height: 3.2rem;
+  height: 3rem;
   /*min-height: 3.2rem;*/
   border-top: 1px solid var(--border-color);
 }
@@ -507,7 +511,6 @@ input[type="submit"], input[type="reset"] {
 }
 
 header > nav > a {
-  flex: 1 0;
   font-size: 1.4rem;
   padding: .3rem 2rem;
   text-transform: uppercase;
