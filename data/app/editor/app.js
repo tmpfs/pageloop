@@ -1,9 +1,10 @@
 /* globals Vue Vuex CodeMirror document fetch document history window */
 
 class Router {
-  constructor (href) {
+  constructor (href, strip) {
     this.defaultHref = href
     this.routes = []
+    this.strip = strip
   }
 
   navigate (href, state) {
@@ -21,7 +22,11 @@ class Router {
   }
 
   get hash () {
-    return document.location.hash.replace(/^#/, '')
+    let h = document.location.hash.replace(/^#/, '')
+    if (this.strip) {
+      h = h.replace(/\/$/, '')
+    }
+    return h
   }
 
   replace (href, trigger) {
@@ -99,6 +104,21 @@ class AppDataSource {
     this.api = '/api/'
     this.containers = []
     this.setApplication('', '')
+
+    this.mainView = ''
+    this.sidebarView = ''
+  }
+
+  getIndexFile () {
+    let files = this.app.files
+    for (let i = 0; i < files.length; i++) {
+      // got a published index page whether the source is
+      // HTML or markdown
+      if (files[i].uri === '/index.html') {
+        console.log('got matching index file to open')
+        return files[i]
+      }
+    }
   }
 
   setApplication (container, application) {
@@ -121,6 +141,10 @@ class AppDataSource {
 
   hasApplication () {
     return this.container && this.application
+  }
+
+  hasFile () {
+    return this.app.current.url !== undefined
   }
 
   json (url, options) {
@@ -213,35 +237,9 @@ class AppDataSource {
 
 class EditorApplication {
   constructor () {
-    let bus = this.bus = new Vue()
+    this.bus = new Vue()
     let data = this.data = new AppDataSource()
-
-    let r = this.router = new Router('apps')
-    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/, ['section', 'container', 'application'], (match) => {
-      this.load(match.map.container, match.map.application)
-        .then(() => {
-          bus.$emit('view:select', 'edit')
-        })
-    })
-    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
-      let section = match.map.section
-      if (section === 'apps') {
-        return this.store.dispatch('containers')
-          .then(() => {
-            bus.$emit('view:select', section)
-          })
-      } else if (section === 'edit') {
-        if (data.hasApplication()) {
-          return r.replace('apps/' + data.container + '/' + data.application, true)
-        } else {
-          // no app being edited redirect to apps list
-          return r.replace('apps', true)
-        }
-      }
-      bus.$emit('view:select', section)
-    })
-
-    this.store = new Vuex.Store({
+    let store = this.store = new Vuex.Store({
       state: this.data,
       mutations: {
         containers (state, list) {
@@ -260,7 +258,15 @@ class EditorApplication {
         pages: function (state, list) {
           state.app.pages = list
         },
+        'main-view': function (state, view) {
+          state.mainView = view
+        },
+        'sidebar-view': function (state, view) {
+          state.sidebarView = view
+        },
         'current-file': function (state, file) {
+          console.log('committing current file: ' + file)
+          console.log(file)
           state.app.current = file
         },
         'preview-url': function (state, url) {
@@ -268,8 +274,8 @@ class EditorApplication {
         }
       },
       actions: {
-        'navigate': function (context, href) {
-          r.navigate(href)
+        'navigate': function (context, request) {
+          r.navigate(request.href, request.state)
         },
         'containers': function (context) {
           return data.getContainers()
@@ -300,12 +306,16 @@ class EditorApplication {
             .then(context.dispatch('list-files'))
         },
         'index-page-select': function (context) {
-          let files = context.state.app.files
-          for (let i = 0; i < files.length; i++) {
-            // got a published index page whether the source is
-            // HTML or markdown
-            if (files[i].uri === '/index.html') {
-              return context.dispatch('open-file', files[i])
+          console.log('selecting index page: ' + context.state.hasFile())
+          if (!context.state.hasFile()) {
+            let files = context.state.app.files
+            for (let i = 0; i < files.length; i++) {
+              // got a published index page whether the source is
+              // HTML or markdown
+              if (files[i].uri === '/index.html') {
+                console.log('got matching index file to open')
+                return context.dispatch('open-file', files[i])
+              }
             }
           }
         },
@@ -317,16 +327,93 @@ class EditorApplication {
             })
         },
         'open-file': function (context, file) {
+          console.log('opening file: ' + file.url)
           return context.dispatch('get-file-contents', file)
             .then((content) => {
               file.content = content
               context.commit('current-file', file)
             })
         },
+        'go-file': function (context, file) {
+          let href = 'apps/' + context.state.container +
+            '/' + context.state.application + '/files' + file.url
+          console.log('go to file: ' + href)
+          return context.dispatch('navigate', {href: href, state: file})
+        },
         'preview-refresh': function (context, url) {
           context.commit('preview-url', url)
         }
       }
+    })
+
+    let r = this.router = new Router('apps', true)
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/files\/(.*)$/,
+      ['section', 'container', 'application', 'action'],
+      (match) => {
+        console.log('got file route request')
+        console.log(match)
+
+        let href = '/' + match.parts.slice(4).join('/')
+        let container = match.map.container
+        let application = match.map.application
+
+        console.log(href)
+
+        function findAndOpen (href) {
+          for (let i = 0; i < data.app.files.length; i++) {
+            console.log(data.app.files[i].url)
+            if (data.app.files[i].url === href) {
+              console.log('foudn file to load!!: ' + href)
+              store.dispatch('open-file', data.app.files[i])
+              break
+            }
+          }
+        }
+
+        // Need to load application data
+        if (container !== data.container || (container === data.container && application !== data.application)) {
+          this.load(match.map.container, match.map.application)
+            .then(() => {
+              console.log('app loaded: ' + data.app.files.length)
+              findAndOpen(href)
+              store.commit('main-view', 'edit')
+            })
+        } else {
+          findAndOpen(href)
+          store.commit('main-view', 'edit')
+        }
+      })
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
+      ['section', 'container', 'application'],
+      (match) => {
+        this.load(match.map.container, match.map.application)
+          .then(() => {
+            let index = store.state.getIndexFile()
+            if (index) {
+              console.log(match)
+              let href = match.href + '/files' + index.url
+              // Redirect to index page if there is one
+              return r.replace(href, true)
+            }
+            store.commit('main-view', 'edit')
+          })
+      })
+    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
+      let section = match.map.section
+      if (section === 'apps') {
+        return this.store.dispatch('containers')
+          .then(() => {
+            store.commit('main-view', section)
+          })
+      } else if (section === 'edit') {
+        if (data.hasApplication()) {
+          return r.replace('apps/' + data.container + '/' + data.application, true)
+        } else {
+          // no app being edited redirect to apps list
+          return r.replace('apps', true)
+        }
+      }
+      store.commit('main-view', section)
     })
   }
 
@@ -370,17 +457,26 @@ class EditorApplication {
           </div>
         </div>
       `,
+      /*
       data: function () {
         return {
           currentView: ''
         }
       },
+      */
+      computed: {
+        currentView: function () {
+          return this.$store.state.sidebarView
+        }
+      },
+      /*
       created: function () {
         // bus.$on('sidebar:reload', this.reload)
         bus.$on('sidebar:select', (view) => {
           this.currentView = view
         })
       },
+      */
       methods: {
         showNewFileView: function () {
           this.previousView = this.currentView
@@ -532,7 +628,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              return this.$store.dispatch('open-file', item)
+              return this.$store.dispatch('go-file', item)
             }
           }
         },
@@ -550,7 +646,7 @@ class EditorApplication {
           },
           methods: {
             click: function (item) {
-              return this.$store.dispatch('open-file', item)
+              return this.$store.dispatch('go-file', item)
             }
           }
         },
@@ -775,8 +871,7 @@ class EditorApplication {
             </div>`,
           data: function () {
             return {
-              mirror: null,
-              canSave: false
+              mirror: null
             }
           },
           computed: {
@@ -790,11 +885,6 @@ class EditorApplication {
             }
           },
           methods: {
-            closeFile: function (e) {
-              e.preventDefault()
-              this.canSave = false
-              bus.$emit('close:file')
-            },
             getModeForMime (mime) {
               // remove charset info
               mime = mime.replace(/;.*$/, '')
@@ -810,7 +900,6 @@ class EditorApplication {
               // console.log(changes)
             },
             setCodeMirror: function (options) {
-              this.canSave = true
               options = options || {}
               let p = document.querySelector('.text-editor')
 
@@ -860,19 +949,19 @@ class EditorApplication {
               <header class="clearfix">
                 <nav>
                   <a
-                    @click="$store.dispatch('navigate', 'apps')"
+                    @click="$store.dispatch('navigate', {href: 'apps'})"
                     :class="{selected: selectedView === 'apps'}"
                     href="#apps" title="All applications">Apps</a>
                   <a
-                    @click="$store.dispatch('navigate', 'docs')"
+                    @click="$store.dispatch('navigate', {href: 'docs'})"
                     :class="{selected: selectedView === 'docs'}"
                     href="#docs" title="Documentation">Docs</a>
                   <a
-                    @click="$store.dispatch('navigate', 'edit')"
+                    @click="$store.dispatch('navigate', {href: 'edit'})"
                     :class="{selected: selectedView === 'edit', hidden: $store.state.container === ''}"
                     href="#edit" title="Edit Application">Edit</a>
                   <a
-                    @click="$store.dispatch('navigate', 'settings')"
+                    @click="$store.dispatch('navigate', {href: 'settings'})"
                     :class="{selected: selectedView === 'settings'}"
                     href="#settings" title="Settings">Settings</a>
                 </nav>
@@ -882,36 +971,48 @@ class EditorApplication {
                 </div>
               </header>
             `,
+
+          /*
           data: function () {
             return {
               selectedView: ''
             }
           },
+          */
           computed: {
             name: function () {
               return this.$store.state.app.identifier
+            },
+            selectedView: function () {
+              return this.$store.state.mainView
             }
-          },
+          }
+
+          /*
           created: function () {
             bus.$on('view:select', (view) => {
               this.selectedView = view
             })
           }
+          */
         },
         'app-main': {
           template: `
             <component v-bind:is="currentView"></component>
           `,
-          data: function () {
-            return {
-              currentView: ''
+          computed: {
+            currentView: function () {
+              return this.$store.state.mainView
             }
           },
+
+          /*
           created: function () {
             bus.$on('view:select', (view) => {
               this.currentView = view
             })
           },
+          */
           components: {
             'apps': {
               template: `
@@ -927,7 +1028,7 @@ class EditorApplication {
                             <span class="name">{{app.name}}</span>
                             <p class="small">URL: {{app.url}}<br />{{app.description}}
                               <p class="app-actions">
-                                <a class="name" @click="$store.dispatch('navigate', linkify(container, app))" :title="title(app, 'Edit')">Edit</a>
+                                <a class="name" @click="$store.dispatch('navigate', {href: linkify(container, app)})" :title="title(app, 'Edit')">Edit</a>
                                 <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
                               </p>
                             </p>
@@ -1030,16 +1131,13 @@ class EditorApplication {
 
     bus.$emit('log', `Loading app from ${data.url}`)
     return this.store.dispatch('app')
-    .then(() => {
-      this.store.dispatch('list-files')
-        .then(this.store.dispatch('list-pages'))
-        .then(() => {
-          bus.$emit('sidebar:select', 'pages')
-          bus.$emit('log', 'Done')
-          return this.store.dispatch('index-page-select')
-        })
-        .catch((err) => bus.$emit('log', err))
-    })
+      .then(() => this.store.dispatch('list-files'))
+      .then(() => this.store.dispatch('list-pages'))
+      .then(() => {
+        this.store.commit('sidebar-view', 'pages')
+        bus.$emit('log', 'Done')
+      })
+      .catch((err) => bus.$emit('log', err))
   }
 
   init () {
