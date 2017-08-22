@@ -469,6 +469,13 @@ class EditorApplication {
             })
         },
         'delete-file': function (context, file) {
+          let list = context.state.app.files
+          let ctx = context.state.sidebarView
+          if (ctx === 'pages') {
+            list = context.state.app.pages
+          }
+          let index = list.indexOf(file)
+          let len = list.length
           return context.state.deleteFile(file)
             .then((res) => {
               let doc = res.document
@@ -476,12 +483,20 @@ class EditorApplication {
                 let msg = doc.error || doc.message
                 msg = `[${res.response.status}] ${msg}`
                 return context.dispatch('log', new Error(msg))
-              } else if (file === context.state.current) {
-                // TODO: select next nearest file
-                context.commit('reset-current-file')
-                store.commit('editor-view', 'welcome')
               }
+
               return context.dispatch('reload')
+                .then(() => {
+                  if (len <= 1) {
+                    // TODO: select next nearest file
+                    context.commit('reset-current-file')
+                    store.commit('editor-view', 'welcome')
+                  } else if (index > -1) {
+                    let neighbour = list[index - 1] || list[index + 1]
+                    let href = context.state.getAppHref(ctx, neighbour.url)
+                    return context.dispatch('navigate', {href: href})
+                  }
+                })
             })
         }
       }
@@ -634,7 +649,7 @@ class EditorApplication {
               title="Confirm file deletion">Delete {{currentFile.name}}</a>
             <a
               @click="shouldDelete = true"
-              v-bind:class="{disabled: currentView === 'new'}"
+              v-bind:class="{hidden: !canDelete}"
               title="Delete File">➖</a>
             <a
               @click="showNewFileView"
@@ -652,6 +667,9 @@ class EditorApplication {
         }
       },
       computed: {
+        canDelete: function () {
+          return this.$store.state.hasFile()
+        },
         currentFile: function () {
           return this.$store.state.current
         },
