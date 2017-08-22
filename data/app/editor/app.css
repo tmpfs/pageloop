@@ -229,6 +229,7 @@ footer p {
 
 .sidebar, .editor, .preview {
   flex: 1 0 auto;
+  transition: all 0.5s ease-out;
 }
 
 .sidebar {
@@ -510,3 +511,13 @@ header > nav > a:hover, header > nav > a.selected {
   background: var(--blue-color);
 }
 
+.maximized {
+  width: 100%;
+  max-width: none;
+}
+
+.minimized {
+  width: 0%;
+  opacity: 0;
+  pointer-events: none;
+}

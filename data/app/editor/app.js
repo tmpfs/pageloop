@@ -149,6 +149,9 @@ class AppDataSource {
 
     this.previewUrl = ''
 
+    // State for maximized column in edit mode
+    this.maximizedColumn = ''
+
     this.log = new Log()
 
     this._flash = undefined
@@ -373,6 +376,9 @@ class EditorApplication {
         'reset-current-file': function (state, url) {
           state.current = state.defaultFile
           state.previewUrl = false
+        },
+        'maximize-column': function (state, info) {
+          state.maximizedColumn = info
         }
       },
       actions: {
@@ -627,7 +633,8 @@ class EditorApplication {
 
     let sidebar = {
       template: `
-        <div class="sidebar">
+        <div class="sidebar"
+          :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
           <div class="column-header">
             <nav class="tabs">
               <a v-bind:class="{selected: currentView === 'pages'}"
@@ -655,6 +662,14 @@ class EditorApplication {
               @click="showNewFileView"
               v-bind:class="{disabled: currentView === 'new'}"
               title="New File">➕</a>
+            <a
+              @click="maximized = 'sidebar'"
+              :class="{hidden: maximized === 'sidebar'}"
+              title="Maximize">◩</a>
+            <a
+              @click="maximized = ''"
+              :class="{hidden: maximized !== 'sidebar'}"
+              title="Minimize">▣</a>
           </nav>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
@@ -667,6 +682,14 @@ class EditorApplication {
         }
       },
       computed: {
+        maximized: {
+          get: function () {
+            return this.$store.state.maximizedColumn
+          },
+          set: function (val) {
+            this.$store.commit('maximize-column', val)
+          }
+        },
         canDelete: function () {
           return this.$store.state.hasFile()
         },
@@ -862,7 +885,9 @@ class EditorApplication {
 
     let preview = {
       template: `
-        <div class="preview">
+        <div
+          :class="{maximized: maximized === 'preview', minimized: maximized != '' && maximized !== 'preview'}"
+          class="preview">
           <div class="column-header">
             <h2>Preview</h2>
             <div class="column-options">
@@ -876,6 +901,14 @@ class EditorApplication {
             <h2>{{path}}</h2>
             <a @click="refresh(true)"
                :class="{hidden: path == ''}">Reload</a>
+            <a
+              @click="maximized = 'preview'"
+              :class="{hidden: maximized === 'preview'}"
+              title="Maximize">◩</a>
+            <a
+              @click="maximized = ''"
+              :class="{hidden: maximized !== 'preview'}"
+              title="Minimize">▣</a>
           </nav>
           <iframe :src="src" class="publish-preview"></iframe>
         </div>
@@ -887,6 +920,14 @@ class EditorApplication {
         }
       },
       computed: {
+        maximized: {
+          get: function () {
+            return this.$store.state.maximizedColumn
+          },
+          set: function (val) {
+            this.$store.commit('maximize-column', val)
+          }
+        },
         url: function () {
           return this.$store.state.previewUrl
         }
@@ -923,7 +964,9 @@ class EditorApplication {
 
     let editor = {
       template: `
-        <div class="editor">
+        <div
+          :class="{maximized: maximized === 'editor', minimized: maximized != '' && maximized !== 'editor'}"
+          class="editor">
           <div class="column-header">
             <h2>Editor</h2>
             <div class="column-options">
@@ -944,11 +987,27 @@ class EditorApplication {
             <h2>{{title}}</h2>
             <a @click="saveAndRun"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
+            <a
+              @click="maximized = 'editor'"
+              :class="{hidden: maximized === 'editor'}"
+              title="Maximize">◩</a>
+            <a
+              @click="maximized = ''"
+              :class="{hidden: maximized !== 'editor'}"
+              title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
         </div>
       `,
       computed: {
+        maximized: {
+          get: function () {
+            return this.$store.state.maximizedColumn
+          },
+          set: function (val) {
+            this.$store.commit('maximize-column', val)
+          }
+        },
         hidden: function () {
           return !this.$store.state.hasFile()
         },
