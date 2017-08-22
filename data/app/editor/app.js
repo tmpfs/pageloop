@@ -99,6 +99,27 @@ class Router {
   }
 }
 
+class Log {
+  constructor () {
+    this.maximum = 1024
+    this.messages = []
+  }
+
+  add (message) {
+    this.messages.push(message)
+    if (this.messages.length > this.maximum) {
+      this.messages.shift()
+    }
+  }
+
+  get last () {
+    if (this.messages.length) {
+      return this.messages[this.messages.length - 1]
+    }
+    return null
+  }
+}
+
 class AppDataSource {
   constructor () {
     this.api = '/api/'
@@ -107,6 +128,8 @@ class AppDataSource {
 
     this.mainView = ''
     this.sidebarView = ''
+
+    this.log = new Log()
   }
 
   getAppHref (...args) {
@@ -278,6 +301,9 @@ class EditorApplication {
     let store = this.store = new Vuex.Store({
       state: this.data,
       mutations: {
+        log: function (state, message) {
+          state.log.add(message)
+        },
         containers (state, list) {
           state.containers = list
         },
@@ -308,6 +334,9 @@ class EditorApplication {
         }
       },
       actions: {
+        'log': function (context, message) {
+          context.commit('log', message)
+        },
         'navigate': function (context, request) {
           return r.navigate(request.href, request.state)
         },
@@ -435,9 +464,13 @@ class EditorApplication {
             store.commit('main-view', 'edit')
           })
       })
-    r.add(/^(apps|docs|edit|settings)$/, ['section'], (match) => {
+    r.add(/^(|apps|docs|edit|settings)$/, ['section'], (match) => {
       let section = match.map.section
-      if (section === 'apps') {
+
+      // Request with just the #
+      if (section === '') {
+        return r.replace('apps', true)
+      } else if (section === 'apps') {
         return this.store.dispatch('containers')
           .then(() => {
             store.commit('main-view', section)
@@ -452,6 +485,10 @@ class EditorApplication {
       }
       store.commit('main-view', section)
     })
+
+    r.add(/.*/, (match) => {
+      console.log('URL not found!!')
+    })
   }
 
   get (url, options) {
@@ -462,7 +499,6 @@ class EditorApplication {
 
   ui () {
     let data = this.data
-    let bus = this.bus
 
     let sidebar = {
       template: `
@@ -624,10 +660,10 @@ class EditorApplication {
                     let doc = res.document
                     let msg = doc.error || doc.message
                     msg = `[${res.response.status}] ${msg}`
-                    return bus.$emit('log', new Error(msg))
+                    return this.store.dispatch('log', new Error(msg))
                   }
 
-                  bus.$emit('log', `Created ${this.fileName}`)
+                  this.store.dispatch('log', `Created ${this.fileName}`)
 
                   this.$store.dispatch('reload')
                     .then(() => {
@@ -894,9 +930,8 @@ class EditorApplication {
                   if (res.response.status !== 200) {
                     let msg = doc.error || doc.message
                     msg = `[${res.response.status}] ${msg}`
-                    return bus.$emit('log', new Error(msg))
+                    return this.store.dispatch('log', new Error(msg))
                   }
-                  bus.$emit('log', `Deleted ${this.file.url}`)
                   this.$store.dispatch('reload')
                 })
             }
@@ -1103,29 +1138,23 @@ class EditorApplication {
         'app-footer': {
           template: `
             <footer>
-              <p class="log" v-bind:class="{error: error}">{{message}}</p>
+              <p class="log" v-bind:class="{error: error}">{{prefix}}{{message}}</p>
             </footer>
           `,
-          data: function () {
-            return {
-              message: '',
-              error: false
-            }
-          },
-          created: function () {
-            bus.$on('log', this.log)
-          },
-          methods: {
-            log: function (msg) {
-              let err = (msg instanceof Error)
-              if (err) {
-                msg = '! ' + msg
-                this.error = true
-              } else {
-                msg = '# ' + msg
-                this.error = false
+          computed: {
+            message: function () {
+              return this.$store.state.log.last
+            },
+            error: function () {
+              return (this.message instanceof Error)
+            },
+            prefix: function () {
+              if (this.message && this.error) {
+                return '! '
+              } else if (this.message && !this.error) {
+                return '# '
               }
-              this.message = msg
+              return ''
             }
           }
         }
@@ -1137,20 +1166,19 @@ class EditorApplication {
   }
 
   load (container, application) {
-    let bus = this.bus
     let data = this.data
 
     this.data.setApplication(container, application)
 
-    bus.$emit('log', `Loading app from ${data.url}`)
+    this.store.dispatch('log', `Loading app from ${data.url}`)
     return this.store.dispatch('app')
       .then(() => this.store.dispatch('list-files'))
       .then(() => this.store.dispatch('list-pages'))
       .then(() => {
         this.store.commit('sidebar-view', 'pages')
-        bus.$emit('log', 'Done')
+        this.store.dispatch('log', 'Done')
       })
-      .catch((err) => bus.$emit('log', err))
+      .catch((err) => this.store.dispatch('log', err))
   }
 
   init () {
