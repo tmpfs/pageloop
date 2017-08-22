@@ -259,6 +259,7 @@ section {
   flex-direction: row;
   flex-wrap: nowrap;
   border-bottom: 1px solid var(--border-color);
+  user-select: none;
 }
 
 .column-header > * {
@@ -324,6 +325,7 @@ iframe.publish-preview {
   /*font-size: 1.4rem;*/
 	border-bottom: 1px solid var(--border-color);
   text-align: right;
+  user-select: none;
 }
 
 .toolbar a {
@@ -387,6 +389,13 @@ iframe.publish-preview {
   color: currentColor;
   text-align: center;
   background: transparent;
+
+  /*
+  max-width: 12rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  */
 }
 
 .selected {
