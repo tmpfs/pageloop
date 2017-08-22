@@ -146,6 +146,8 @@ class AppDataSource {
 
     this.defaultFile = {content: ''}
 
+    this.currentDocumentValue = ''
+
     this.previewUrl = ''
 
     this.log = new Log()
@@ -432,8 +434,8 @@ class EditorApplication {
           let href = context.state.getAppHref('files', file.url)
           return context.dispatch('navigate', {href: href, state: file})
         },
-        'preview-refresh': function (context, url) {
-          context.commit('preview-url', url)
+        'preview-refresh': function (context) {
+          context.commit('preview-url', true)
         },
         'delete-file': function (context, file) {
           return context.state.deleteFile(file)
@@ -930,12 +932,12 @@ class EditorApplication {
         saveAndRun: function (e) {
           e.preventDefault()
           let file = this.currentFile
-          let value = this.mirror.getValue()
+          let value = this.$store.state.currentDocumentValue
           data.saveFile(file, value)
             .then((res) => {
               let doc = res.document
               if (doc.ok) {
-                this.$store.dispatch('preview-refresh', file.uri)
+                this.$store.dispatch('preview-refresh')
               }
             })
         }
@@ -1020,6 +1022,14 @@ class EditorApplication {
           computed: {
             currentFile: function () {
               return this.$store.state.app.current
+            },
+            value: {
+              get: function () {
+                return this.$store.state.currentDocumentValue
+              },
+              set: function (val) {
+                this.$store.state.currentDocumentValue = val
+              }
             }
           },
           watch: {
@@ -1042,7 +1052,7 @@ class EditorApplication {
               return mime
             },
             changes: function (cm, changes) {
-              // console.log(changes)
+              this.value = this.mirror.getValue()
             },
             setCodeMirror: function (options) {
               options = options || {}
