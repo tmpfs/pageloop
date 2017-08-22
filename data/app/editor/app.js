@@ -598,6 +598,12 @@ class EditorApplication {
           </div>
           <nav class="toolbar">
             <a
+              @click="quickDeleteFile"
+              v-bind:class="{hidden: !shouldDelete}"
+              class="danger"
+              title="Confirm file deletion">Delete {{currentFile.name}}</a>
+            <a
+              @click="shouldDelete = true"
               v-bind:class="{disabled: currentView === 'new'}"
               title="Delete File">➖</a>
             <a
@@ -610,7 +616,15 @@ class EditorApplication {
           </div>
         </div>
       `,
+      data: function () {
+        return {
+          shouldDelete: false
+        }
+      },
       computed: {
+        currentFile: function () {
+          return this.$store.state.current
+        },
         currentView: {
           get: function () {
             return this.$store.state.sidebarView
@@ -631,6 +645,11 @@ class EditorApplication {
         }
       },
       methods: {
+        quickDeleteFile: function (e) {
+          e.preventDefault()
+          return this.$store.dispatch('delete-file', this.currentFile)
+            .then(() => { this.shouldDelete = false })
+        },
         showNewFileView: function () {
           this.previousView = this.currentView
           this.currentView = 'new'
