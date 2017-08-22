@@ -147,12 +147,40 @@ class AppDataSource {
     }
   }
 
+  get current () {
+    return this.app.current
+  }
+
+  set current (file) {
+    if (file) {
+      let pages = this.app.pages
+      for (let i = 0; i < pages.length; i++) {
+        if (pages[i].url === file.url) {
+          file.page = pages[i]
+          break
+        }
+      }
+    }
+    this.app.current = file
+  }
+
   hasApplication () {
     return this.container && this.application
   }
 
   hasFile () {
     return this.app.current.url !== undefined
+  }
+
+  getFile () {
+    if (this.hasFile()) {
+      return this.app.current
+    }
+    return null
+  }
+
+  isPage (file) {
+    return file && file.page !== undefined
   }
 
   json (url, options) {
@@ -273,7 +301,7 @@ class EditorApplication {
           state.sidebarView = view
         },
         'current-file': function (state, file) {
-          state.app.current = file
+          state.current = file
         },
         'preview-url': function (state, url) {
           state.app.previewUrl = url
@@ -471,7 +499,19 @@ class EditorApplication {
             return this.$store.state.sidebarView
           },
           set: function (val) {
-            let href = this.$store.state.getAppHref(val)
+            var values = [val]
+            var file = this.$store.state.getFile()
+            console.log('setting sidebarview')
+            console.log(file)
+            if (file !== null) {
+              if (val === 'files') {
+                values.push(file.url)
+              } else if (val === 'pages' && this.$store.state.isPage(file)) {
+                values.push(file.url)
+              }
+            }
+            console.log('switching sidebar view: ' + values)
+            let href = this.$store.state.getAppHref(...values)
             this.$store.dispatch('navigate', {href: href})
           }
         }
