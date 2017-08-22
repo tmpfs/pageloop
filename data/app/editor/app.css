@@ -465,7 +465,7 @@ iframe.publish-preview {
 input[type="text"], input[type="submit"], input[type="reset"], button {
   font-family: SourceSans;
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 input[type="text"] {
