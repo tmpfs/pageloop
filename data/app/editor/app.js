@@ -414,6 +414,7 @@ class EditorApplication {
         if (container !== data.container || (container === data.container && application !== data.application)) {
           this.load(match.map.container, match.map.application)
             .then(() => {
+              store.commit('main-view', 'edit')
               store.commit('sidebar-view', action)
             })
         } else {
@@ -501,8 +502,6 @@ class EditorApplication {
           set: function (val) {
             var values = [val]
             var file = this.$store.state.getFile()
-            console.log('setting sidebarview')
-            console.log(file)
             if (file !== null) {
               if (val === 'files') {
                 values.push(file.url)
@@ -510,7 +509,6 @@ class EditorApplication {
                 values.push(file.url)
               }
             }
-            console.log('switching sidebar view: ' + values)
             let href = this.$store.state.getAppHref(...values)
             this.$store.dispatch('navigate', {href: href})
           }
