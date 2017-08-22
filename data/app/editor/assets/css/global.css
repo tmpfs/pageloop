@@ -1,3 +1,29 @@
+:root {
+  --base03-color: #002b36;
+  --base02-color: #073642;
+  --base01-color: #586e75;
+  --base00-color: #657b83;
+  --base0-color: #839496;
+  --base1-color: #93a1a1;
+  --base2-color: #eee8d5;
+  --base3-color: #fdf6e3;
+  --yellow-color: #b58900;
+  --orange-color: #cb4b16;
+  --red-color: #dc322f;
+  --magenta-color: #d33682;
+  --violet-color: #6c71c4;
+  --blue-color: #268bd2;
+  --cyan-color: #2aa198;
+  --green-color: #859900;
+
+  /*--link-color: #e30053;*/
+  --background: #073642;
+  --color: #93a1a1;
+  --link-color: #d33682;
+  --border-color: #002b36;
+  --toolbar-link: #839496;
+}
+
 @font-face {
   font-family: 'SourceSerif';
   src: url('/assets/font/sourceserifpro-regular-webfont.woff2') format('woff2'),
@@ -39,7 +65,8 @@ body {
   font-size: 1.8rem;
   line-height: 2.2rem;
   font-family: 'SourceSerif';
-  background: white;
+  background: var(--background);
+  color: var(--color);
 }
 
 header, main, footer {
@@ -92,12 +119,12 @@ textarea {
 }
 
 header {
-  border-bottom: 4px double black;
+  border-bottom: 4px double currentColor;
 }
 
 h2 {
   display: inline-block;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid currentColor;
   text-transform: none;
   margin: 2rem 0 1.5rem 0;
 }
@@ -115,13 +142,13 @@ ul {
 */
 
 p {
-  margin: 0 0 1rem 0;
+  margin: 2rem 0;
 }
 
 a, a:hover, a:visited {
 	display: inline-block;
   text-decoration: none;
-  color: #e30053;
+  color: var(--link-color);
 	line-height: 1em;
 	border-bottom: 2px solid transparent;
 }
