@@ -190,8 +190,8 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	// System applications to mount.
 	var system []Mountpoint
-	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
-	system = append(system, Mountpoint{UrlPath: "/editor/", Path: "data://app/editor/", Description: "Application editor."})
+	//system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
+	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/editor/", Description: "Application editor."})
 	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "Documentation & help files."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe", Description: "API Probe."})
