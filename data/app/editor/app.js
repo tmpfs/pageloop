@@ -409,7 +409,7 @@ class EditorApplication {
         },
         'reload': function (context) {
           return context.dispatch('list-pages')
-            .then(context.dispatch('list-files'))
+            .then(() => context.dispatch('list-files'))
         },
         'get-file-contents': function (context, item) {
           return data.getFileContents(item.url)
@@ -746,9 +746,10 @@ class EditorApplication {
                   this.$store.dispatch('reload')
                     .then(() => {
                       // Open the newly created file
-                      for (let i = 0; i < data.app.files.length; i++) {
-                        if (data.app.files[i].url === this.fileName) {
-                          this.$store.dispatch('open-file', data.app.files[i])
+                      let files = this.$store.state.app.files
+                      for (let i = 0; i < files.length; i++) {
+                        if (files[i].url === this.fileName) {
+                          this.$store.dispatch('open-file', files[i])
                           break
                         }
                       }
