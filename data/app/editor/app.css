@@ -455,13 +455,6 @@ iframe.publish-preview {
   color: var(--red-color);
 }
 
-/*
-.switcher .container {
-  flex: 1 0;
-  flex-direction: row;
-}
-*/
-
 input[type="text"], input[type="submit"], input[type="reset"], button {
   font-family: SourceSans;
   padding: 1rem;
