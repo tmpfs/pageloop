@@ -573,11 +573,14 @@ class EditorApplication {
         pages: {
           template: `
             <div class="pages-list">
-              <a @click="click(item)" class="page" v-for="item in list">
+              <a @click="click(item)" class="page" :class="{selected: currentFile.url === item.url}" v-for="item in list">
                 <span class="name">{{item.url}}</span>
               </a>
             </div>`,
           computed: {
+            currentFile: function () {
+              return this.$store.state.app.current
+            },
             list: function () {
               return this.$store.state.app.pages
             }
@@ -591,11 +594,14 @@ class EditorApplication {
         files: {
           template: `
             <div class="files-list">
-              <a @click="click(item)" class="file" v-for="item in list">
+              <a @click="click(item)" class="file" :class="{selected: currentFile.url === item.url}" v-for="item in list">
                 <span class="name">{{item.url}}</span>
               </a>
             </div>`,
           computed: {
+            currentFile: function () {
+              return this.$store.state.app.current
+            },
             list: function () {
               return this.$store.state.app.files
             }
