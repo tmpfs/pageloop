@@ -846,6 +846,11 @@ class EditorApplication {
       },
       watch: {
         url: function (url) {
+          this.refresh(url)
+        }
+      },
+      methods: {
+        refresh (url) {
           if (url === false) {
             this.path = ''
             this.src = ''
@@ -859,10 +864,8 @@ class EditorApplication {
           }
           this.path = url || '/'
           this.src = this.getPreviewUrl(url)
-        }
-      },
-      methods: {
-        getPreviewUrl: function (url) {
+        },
+        getPreviewUrl (url) {
           if (url) {
             url = url.replace(/^\//, '')
           }
