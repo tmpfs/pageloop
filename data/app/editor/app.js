@@ -443,10 +443,9 @@ class EditorApplication {
                 let msg = doc.error || doc.message
                 msg = `[${res.response.status}] ${msg}`
                 return context.dispatch('log', new Error(msg))
-              } else {
-                if (file === context.state.current) {
-                  context.commit('reset-current-file')
-                }
+              } else if (file === context.state.current) {
+                context.commit('reset-current-file')
+                store.commit('editor-view', 'welcome')
               }
               return context.dispatch('reload')
             })
