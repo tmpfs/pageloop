@@ -439,6 +439,35 @@ class EditorApplication {
         'preview-refresh': function (context) {
           context.commit('preview-url', true)
         },
+        'new-file': function (context, {name, template, action}) {
+          if (!/^\//.test(name)) {
+            name = '/' + name
+          }
+          return context.state.createNewFile(name, template)
+            .then((res) => {
+              // Show error response
+              if (res.response.status !== 201) {
+                let doc = res.document
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                return context.dispatch('log', new Error(msg))
+              }
+
+              context.dispatch('log', `Created ${name}`)
+
+              context.dispatch('reload')
+                .then(() => {
+                  // Open the newly created file
+                  let files = context.state.app.files
+                  for (let i = 0; i < files.length; i++) {
+                    if (files[i].url === name) {
+                      context.dispatch(action, files[i])
+                      break
+                    }
+                  }
+                })
+            })
+        },
         'delete-file': function (context, file) {
           return context.state.deleteFile(file)
             .then((res) => {
@@ -448,6 +477,7 @@ class EditorApplication {
                 msg = `[${res.response.status}] ${msg}`
                 return context.dispatch('log', new Error(msg))
               } else if (file === context.state.current) {
+                // TODO: select next nearest file
                 context.commit('reset-current-file')
                 store.commit('editor-view', 'welcome')
               }
@@ -746,36 +776,12 @@ class EditorApplication {
             },
             createNewFile: function (e) {
               e.preventDefault()
-
-              let name = this.fileName
-              if (!/^\//.test(name)) {
-                name = '/' + name
+              let action = 'go-file'
+              if (this.$parent.previousView === 'pages') {
+                action = 'go-page'
               }
-
-              return data.createNewFile(name, this.template)
-                .then((res) => {
-                  // Show error response
-                  if (res.response.status !== 201) {
-                    let doc = res.document
-                    let msg = doc.error || doc.message
-                    msg = `[${res.response.status}] ${msg}`
-                    return this.$store.dispatch('log', new Error(msg))
-                  }
-
-                  this.$store.dispatch('log', `Created ${this.fileName}`)
-
-                  this.$store.dispatch('reload')
-                    .then(() => {
-                      // Open the newly created file
-                      let files = this.$store.state.app.files
-                      for (let i = 0; i < files.length; i++) {
-                        if (files[i].url === this.fileName) {
-                          this.$store.dispatch('go-file', files[i])
-                          break
-                        }
-                      }
-                    })
-
+              return this.$store.dispatch('new-file', {name: this.fileName, template: this.template, action: action})
+                .then(() => {
                   this.$parent.closeNewFileView()
                 })
             }
