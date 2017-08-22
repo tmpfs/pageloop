@@ -117,10 +117,18 @@ class Log {
   }
 
   get last () {
+    let m = null
     if (this.messages.length) {
-      return this.messages[this.messages.length - 1]
+      m = this.messages[this.messages.length - 1]
     }
-    return null
+    return m
+  }
+
+  toString () {
+    let m = this.last
+    if (m instanceof Error) {
+      return m.message || ('' + m)
+    }
   }
 }
 
@@ -132,6 +140,11 @@ class AppDataSource {
 
     this.mainView = ''
     this.sidebarView = ''
+    this.editorView = ''
+
+    this.defaultEditorView = 'source-editor'
+
+    this.defaultFile = {content: ''}
 
     this.log = new Log()
 
@@ -182,7 +195,7 @@ class AppDataSource {
       pages: [],
       files: [],
       // current selected file
-      current: {content: ''}
+      current: this.defaultFile
     }
   }
 
@@ -345,11 +358,17 @@ class EditorApplication {
         'sidebar-view': function (state, view) {
           state.sidebarView = view
         },
+        'editor-view': function (state, view) {
+          state.editorView = view
+        },
         'current-file': function (state, file) {
           state.current = file
         },
         'preview-url': function (state, url) {
           state.app.previewUrl = url
+        },
+        'reset-current-file': function (state, url) {
+          state.app.current = state.defaultFile
         }
       },
       actions: {
@@ -411,6 +430,22 @@ class EditorApplication {
         },
         'preview-refresh': function (context, url) {
           context.commit('preview-url', url)
+        },
+        'delete-file': function (context, file) {
+          return context.state.deleteFile(file)
+            .then((res) => {
+              let doc = res.document
+              if (res.response.status !== 200) {
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                return context.dispatch('log', new Error(msg))
+              } else {
+                if (file === context.state.current) {
+                  context.commit('reset-current-file')
+                }
+              }
+              return context.dispatch('reload')
+            })
         }
       }
     })
@@ -446,6 +481,9 @@ class EditorApplication {
           }
           store.commit('main-view', 'edit')
           store.commit('sidebar-view', action)
+          if (!store.state.editorView || store.state.editorView === 'welcome') {
+            store.commit('editor-view', store.state.defaultEditorView)
+          }
         }
 
         // Need to load application data
@@ -458,7 +496,7 @@ class EditorApplication {
           return trigger()
         }
       })
-    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|components)$/,
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|components|new|del)$/,
       ['section', 'container', 'application', 'action'],
       (match) => {
         let container = match.map.container
@@ -471,9 +509,11 @@ class EditorApplication {
             .then(() => {
               store.commit('main-view', 'edit')
               store.commit('sidebar-view', action)
+              store.commit('editor-view', 'welcome')
             })
         } else {
           store.commit('sidebar-view', action)
+          store.commit('editor-view', 'welcome')
         }
       })
     r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
@@ -488,6 +528,7 @@ class EditorApplication {
               return r.replace(href, true)
             }
             store.commit('main-view', 'edit')
+            store.commit('editor-view', 'welcome')
           })
       })
     r.add(/^(|apps|docs|edit|settings)$/, ['section'], (match) => {
@@ -547,11 +588,11 @@ class EditorApplication {
           </div>
           <nav class="toolbar">
             <a
-              v-bind:class="{disabled: currentView === 'new-file'}"
+              v-bind:class="{disabled: currentView === 'new'}"
               title="Delete File">➖</a>
             <a
               @click="showNewFileView"
-              v-bind:class="{disabled: currentView === 'new-file'}"
+              v-bind:class="{disabled: currentView === 'new'}"
               title="New File">➕</a>
           </nav>
           <div class="scroll">
@@ -585,7 +626,7 @@ class EditorApplication {
           this.currentView = 'new'
         },
         closeNewFileView: function () {
-          this.currentView = this.previousView
+          this.currentView = this.previousView || 'pages'
         }
       },
       components: {
@@ -689,10 +730,10 @@ class EditorApplication {
                     let doc = res.document
                     let msg = doc.error || doc.message
                     msg = `[${res.response.status}] ${msg}`
-                    return this.store.dispatch('log', new Error(msg))
+                    return this.$store.dispatch('log', new Error(msg))
                   }
 
-                  this.store.dispatch('log', `Created ${this.fileName}`)
+                  this.$store.dispatch('log', `Created ${this.fileName}`)
 
                   this.$store.dispatch('reload')
                     .then(() => {
@@ -833,15 +874,15 @@ class EditorApplication {
             <h2>Editor</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a v-bind:class="{selected: currentView === 'file-editor', hidden: currentFile === null}"
+                <a v-bind:class="{selected: currentView === 'file-editor', hidden: hidden}"
                   @click="currentView = 'file-editor'"
-                  href="#" title="Show file editor">File</a>
-                <a v-bind:class="{selected: currentView === 'source-editor', hidden: currentFile === null}"
+                  title="Show file editor">File</a>
+                <a v-bind:class="{selected: currentView === 'source-editor', hidden: hidden}"
                   @click="currentView = 'source-editor'"
-                  href="#" title="Show source editor">Source</a>
-                <a v-bind:class="{selected: currentView === 'visual-editor', hidden: currentFile === null}"
+                  title="Show source editor">Source</a>
+                <a v-bind:class="{selected: currentView === 'visual-editor', hidden: hidden}"
                   @click="currentView = 'visual-editor'"
-                  href="#"  title="Show visual editor">Visual</a>
+                  title="Show visual editor">Visual</a>
               </nav>
             </div>
           </div>
@@ -854,25 +895,29 @@ class EditorApplication {
         </div>
       `,
       computed: {
+        hidden: function () {
+          return !this.$store.state.hasFile()
+        },
         currentFile: function () {
           return this.$store.state.app.current
+        },
+        currentView: {
+          get: function () {
+            return this.$store.state.editorView
+          },
+          set: function (view) {
+            this.$store.commit('editor-view', view)
+          }
         }
       },
       watch: {
         currentFile: function (file) {
-          if (this.currentView === 'welcome') {
-            this.currentView = this.defaultOpenView
-          }
           this.title = file.url
         }
       },
       data: function () {
-        let defaultTitle = ''
         return {
-          title: defaultTitle,
-          defaultTitle: defaultTitle,
-          currentView: 'welcome',
-          defaultOpenView: 'source-editor'
+          title: ''
         }
       },
       methods: {
@@ -948,21 +993,12 @@ class EditorApplication {
           },
           computed: {
             file: function () {
-              return this.$store.state.app.current
+              return this.$store.state.current
             }
           },
           methods: {
             doDelete: function () {
-              return data.deleteFile(this.file)
-                .then((res) => {
-                  let doc = res.document
-                  if (res.response.status !== 200) {
-                    let msg = doc.error || doc.message
-                    msg = `[${res.response.status}] ${msg}`
-                    return this.store.dispatch('log', new Error(msg))
-                  }
-                  this.$store.dispatch('reload')
-                })
+              return this.$store.dispatch('delete-file', this.file)
             }
           }
         },
@@ -982,7 +1018,9 @@ class EditorApplication {
           },
           watch: {
             currentFile: function (file) {
-              this.setCodeMirror({value: file.content, mode: this.getModeForMime(file.mime)})
+              if (file && file.mime) {
+                this.setCodeMirror({value: file.content, mode: this.getModeForMime(file.mime)})
+              }
             }
           },
           methods: {
@@ -1189,10 +1227,10 @@ class EditorApplication {
           `,
           computed: {
             message: function () {
-              return this.$store.state.log.last
+              return this.$store.state.log.toString()
             },
             error: function () {
-              return (this.message instanceof Error)
+              return (this.$store.state.log.last instanceof Error)
             },
             prefix: function () {
               if (this.message && this.error) {
