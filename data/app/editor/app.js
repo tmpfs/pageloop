@@ -66,17 +66,21 @@ class Router {
       return o
     }
 
-    let r, ptn, fn
+    let r, ptn, fn, res
     for (let i = 0; i < this.routes.length; i++) {
       r = this.routes[i]
       ptn = r.ptn
       fn = r.fn
       if (typeof ptn === 'string' && href === ptn) {
-        fn(result(href, r))
-        break
+        res = fn(result(href, r))
+        if (res !== true) {
+          break
+        }
       } else if (ptn instanceof RegExp && ptn.test(href)) {
-        fn(result(href, r))
-        break
+        res = fn(result(href, r))
+        if (res !== true) {
+          break
+        }
       }
     }
   }
@@ -130,6 +134,18 @@ class AppDataSource {
     this.sidebarView = ''
 
     this.log = new Log()
+
+    this._flash = undefined
+  }
+
+  get flash () {
+    let f = this._flash
+    this._flash = undefined
+    return f
+  }
+
+  set flash (msg) {
+    this._flash = msg
   }
 
   getAppHref (...args) {
@@ -301,6 +317,9 @@ class EditorApplication {
     let store = this.store = new Vuex.Store({
       state: this.data,
       mutations: {
+        flash: function (state, message) {
+          state.flash = message
+        },
         log: function (state, message) {
           state.log.add(message)
         },
@@ -404,6 +423,7 @@ class EditorApplication {
         let container = match.map.container
         let application = match.map.application
         let action = match.map.action
+        let file
 
         function findAndOpen (href) {
           let arr = data.app.files
@@ -413,23 +433,29 @@ class EditorApplication {
           for (let i = 0; i < arr.length; i++) {
             if (arr[i].url === href) {
               store.dispatch('open-file', arr[i])
-              break
+              return arr[i]
             }
           }
+        }
+
+        function trigger () {
+          file = findAndOpen(href)
+          if (!file) {
+            // Continue route processing to trigger a 404
+            return true
+          }
+          store.commit('main-view', 'edit')
+          store.commit('sidebar-view', action)
         }
 
         // Need to load application data
         if (container !== data.container || (container === data.container && application !== data.application)) {
           this.load(match.map.container, match.map.application)
             .then(() => {
-              findAndOpen(href)
-              store.commit('main-view', 'edit')
-              store.commit('sidebar-view', action)
+              return trigger()
             })
         } else {
-          findAndOpen(href)
-          store.commit('main-view', 'edit')
-          store.commit('sidebar-view', action)
+          return trigger()
         }
       })
     r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|components)$/,
@@ -485,9 +511,12 @@ class EditorApplication {
       }
       store.commit('main-view', section)
     })
-
+    r.add(/^404$/, (match) => {
+      store.commit('main-view', 'not-found')
+    })
     r.add(/.*/, (match) => {
-      console.log('URL not found!!')
+      store.commit('flash', r.hash)
+      r.replace('404', true)
     })
   }
 
@@ -519,11 +548,11 @@ class EditorApplication {
           <nav class="toolbar">
             <a
               v-bind:class="{disabled: currentView === 'new-file'}"
-              href="#" title="Delete File">➖</a>
+              title="Delete File">➖</a>
             <a
               @click="showNewFileView"
               v-bind:class="{disabled: currentView === 'new-file'}"
-              href="#" title="New File">➕</a>
+              title="New File">➕</a>
           </nav>
           <div class="scroll">
             <component v-bind:is="currentView"></component>
@@ -553,14 +582,14 @@ class EditorApplication {
       methods: {
         showNewFileView: function () {
           this.previousView = this.currentView
-          this.currentView = 'new-file'
+          this.currentView = 'new'
         },
         closeNewFileView: function () {
           this.currentView = this.previousView
         }
       },
       components: {
-        'new-file': {
+        'new': {
           template: `
             <div class="new-page">
               <section>
@@ -1062,6 +1091,23 @@ class EditorApplication {
             }
           },
           components: {
+            'not-found': {
+              template: `
+                <div class="content-main not-found">
+                  <h2>Not Found</h2>
+                  <p>Oops, we could not find a page that matched your request <code>{{flash}}</code></p>
+                </div>
+              `,
+              computed: {
+                flash: function () {
+                  let flash = this.$store.state.flash
+                  if (flash) {
+                    flash = `#${flash}`
+                  }
+                  return flash
+                }
+              }
+            },
             'apps': {
               template: `
                 <div class="content-main">

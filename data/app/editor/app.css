@@ -196,6 +196,15 @@ footer p {
   min-height: 100%;
 }
 
+.not-found {
+  padding: 4rem;
+}
+
+.not-found h2 {
+  display: block;
+  padding: 0;
+}
+
 .containers {
   flex: 1 0;
   padding: 2rem;
