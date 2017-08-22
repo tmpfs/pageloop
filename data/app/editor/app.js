@@ -310,7 +310,6 @@ class EditorApplication {
             })
         },
         'open-file': function (context, file) {
-          console.log('opening file: ' + file.url)
           return context.dispatch('get-file-contents', file)
             .then((content) => {
               file.content = content
@@ -320,7 +319,6 @@ class EditorApplication {
         'go-file': function (context, file) {
           let href = 'apps/' + context.state.container +
             '/' + context.state.application + '/files' + file.url
-          console.log('go to file: ' + href)
           return context.dispatch('navigate', {href: href, state: file})
         },
         'preview-refresh': function (context, url) {
@@ -333,20 +331,13 @@ class EditorApplication {
     r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/files\/(.*)$/,
       ['section', 'container', 'application', 'action'],
       (match) => {
-        console.log('got file route request')
-        console.log(match)
-
         let href = '/' + match.parts.slice(4).join('/')
         let container = match.map.container
         let application = match.map.application
 
-        console.log(href)
-
         function findAndOpen (href) {
           for (let i = 0; i < data.app.files.length; i++) {
-            console.log(data.app.files[i].url)
             if (data.app.files[i].url === href) {
-              console.log('foudn file to load!!: ' + href)
               store.dispatch('open-file', data.app.files[i])
               break
             }
@@ -357,7 +348,6 @@ class EditorApplication {
         if (container !== data.container || (container === data.container && application !== data.application)) {
           this.load(match.map.container, match.map.application)
             .then(() => {
-              console.log('app loaded: ' + data.app.files.length)
               findAndOpen(href)
               store.commit('main-view', 'edit')
             })
@@ -373,7 +363,6 @@ class EditorApplication {
           .then(() => {
             let index = store.state.getIndexFile()
             if (index) {
-              console.log(match)
               let href = match.href + '/files' + index.url
               // Redirect to index page if there is one
               return r.replace(href, true)
@@ -440,26 +429,16 @@ class EditorApplication {
           </div>
         </div>
       `,
-      /*
-      data: function () {
-        return {
-          currentView: ''
-        }
-      },
-      */
       computed: {
-        currentView: function () {
-          return this.$store.state.sidebarView
+        currentView: {
+          get: function () {
+            return this.$store.state.sidebarView
+          },
+          set: function (val) {
+            this.$store.state.sidebarView = val
+          }
         }
       },
-      /*
-      created: function () {
-        // bus.$on('sidebar:reload', this.reload)
-        bus.$on('sidebar:select', (view) => {
-          this.currentView = view
-        })
-      },
-      */
       methods: {
         showNewFileView: function () {
           this.previousView = this.currentView
@@ -468,12 +447,6 @@ class EditorApplication {
         closeNewFileView: function () {
           this.currentView = this.previousView
         }
-        /*
-        reload: function (next) {
-          this.$store.dispatch('reload')
-            .then(next)
-        }
-        */
       },
       components: {
         'new-file': {
@@ -954,14 +927,6 @@ class EditorApplication {
                 </div>
               </header>
             `,
-
-          /*
-          data: function () {
-            return {
-              selectedView: ''
-            }
-          },
-          */
           computed: {
             name: function () {
               return this.$store.state.app.identifier
@@ -970,14 +935,6 @@ class EditorApplication {
               return this.$store.state.mainView
             }
           }
-
-          /*
-          created: function () {
-            bus.$on('view:select', (view) => {
-              this.selectedView = view
-            })
-          }
-          */
         },
         'app-main': {
           template: `
@@ -988,14 +945,6 @@ class EditorApplication {
               return this.$store.state.mainView
             }
           },
-
-          /*
-          created: function () {
-            bus.$on('view:select', (view) => {
-              this.currentView = view
-            })
-          },
-          */
           components: {
             'apps': {
               template: `
