@@ -146,6 +146,8 @@ class AppDataSource {
 
     this.defaultFile = {content: ''}
 
+    this.previewUrl = ''
+
     this.log = new Log()
 
     this._flash = undefined
@@ -365,10 +367,11 @@ class EditorApplication {
           state.current = file
         },
         'preview-url': function (state, url) {
-          state.app.previewUrl = url
+          state.previewUrl = url
         },
         'reset-current-file': function (state, url) {
-          state.app.current = state.defaultFile
+          state.current = state.defaultFile
+          state.previewUrl = false
         }
       },
       actions: {
@@ -418,6 +421,7 @@ class EditorApplication {
             .then((content) => {
               file.content = content
               context.commit('current-file', file)
+              context.commit('preview-url', file.uri)
             })
         },
         'go-page': function (context, file) {
@@ -507,11 +511,13 @@ class EditorApplication {
         if (container !== data.container || (container === data.container && application !== data.application)) {
           this.load(match.map.container, match.map.application)
             .then(() => {
+              store.commit('reset-current-file')
               store.commit('main-view', 'edit')
               store.commit('sidebar-view', action)
               store.commit('editor-view', 'welcome')
             })
         } else {
+          store.commit('reset-current-file')
           store.commit('sidebar-view', action)
           store.commit('editor-view', 'welcome')
         }
@@ -527,6 +533,7 @@ class EditorApplication {
               // Redirect to index page if there is one
               return r.replace(href, true)
             }
+            store.commit('reset-current-file')
             store.commit('main-view', 'edit')
             store.commit('editor-view', 'welcome')
           })
@@ -823,32 +830,27 @@ class EditorApplication {
             <a @click="refresh(true)"
                :class="{hidden: path == ''}">Reload</a>
           </nav>
-          <iframe :src="url" class="publish-preview"></iframe>
+          <iframe :src="src" class="publish-preview"></iframe>
         </div>
       `,
       data: function () {
         return {
-          url: '',
-          path: ''
+          path: '',
+          src: ''
         }
       },
       computed: {
-        currentFile: function () {
-          return this.$store.state.app.current
+        url: function () {
+          return this.$store.state.previewUrl
         }
       },
       watch: {
-        currentFile: function (file) {
-          let url = file.uri
-          let all = /\.html?$/
-          // Refresh preview when switching on page types
-          if (all.test(url)) {
-            this.refresh(url)
+        url: function (url) {
+          if (url === false) {
+            this.path = ''
+            this.src = ''
+            return
           }
-        }
-      },
-      methods: {
-        refresh (url) {
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
           if (url === true || url === this.path) {
@@ -856,8 +858,10 @@ class EditorApplication {
             return frame.contentDocument.location.reload()
           }
           this.path = url || '/'
-          this.url = this.getPreviewUrl(url)
-        },
+          this.src = this.getPreviewUrl(url)
+        }
+      },
+      methods: {
         getPreviewUrl: function (url) {
           if (url) {
             url = url.replace(/^\//, '')
