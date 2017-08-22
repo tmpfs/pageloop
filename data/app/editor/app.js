@@ -141,7 +141,6 @@ class AppDataSource {
     this.mainView = ''
     this.sidebarView = ''
     this.editorView = ''
-
     this.defaultEditorView = 'source-editor'
 
     this.defaultFile = {content: ''}
@@ -424,6 +423,9 @@ class EditorApplication {
               file.content = content
               context.commit('current-file', file)
               context.commit('preview-url', file.uri)
+              if (context.state.editorView === 'welcome') {
+                context.commit('editor-view', context.state.defaultEditorView)
+              }
             })
         },
         'go-page': function (context, file) {
@@ -749,7 +751,7 @@ class EditorApplication {
                       let files = this.$store.state.app.files
                       for (let i = 0; i < files.length; i++) {
                         if (files[i].url === this.fileName) {
-                          this.$store.dispatch('open-file', files[i])
+                          this.$store.dispatch('go-file', files[i])
                           break
                         }
                       }
