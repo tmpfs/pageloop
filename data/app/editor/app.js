@@ -369,6 +369,7 @@ class EditorApplication {
           state.current = file
         },
         'preview-url': function (state, url) {
+          console.log('setting preview url: ' + url)
           state.previewUrl = url
         },
         'reset-current-file': function (state, url) {
@@ -441,7 +442,7 @@ class EditorApplication {
           return context.dispatch('navigate', {href: href, state: file})
         },
         'preview-refresh': function (context) {
-          context.commit('preview-url', '')
+          context.commit('preview-url', context.state.previewUrl)
         },
         'new-file': function (context, {name, template, action}) {
           if (!/^\//.test(name)) {
@@ -926,30 +927,35 @@ class EditorApplication {
             this.$store.commit('maximize-column', val)
           }
         },
-        url: function () {
-          return this.$store.state.previewUrl
+        url: {
+          get: function () {
+            return this.$store.state.previewUrl
+          },
+          set: function (val) {
+            return this.$store.commit('preview-url', val)
+          }
         }
       },
       watch: {
         url: function (url) {
+          console.log('url watcher called: ' + url)
           this.refresh(url)
         }
       },
       methods: {
         refresh (url) {
-          console.log('refresh: ' + url)
-          if (url === false) {
+          if (url === '') {
             this.path = ''
             this.src = ''
             return
           }
           // If the src attribute will not change the page
           // won't be refreshed so we need to call reload()
-          if (!url || url === this.path) {
+          if (url === this.path) {
             let frame = document.querySelector('.publish-preview')
             return frame.contentDocument.location.reload()
           }
-          this.path = url || '/'
+          this.path = url
           this.src = this.getPreviewUrl(url)
         },
         getPreviewUrl (url) {
@@ -1041,7 +1047,6 @@ class EditorApplication {
             .then((res) => {
               let doc = res.document
               if (doc.ok) {
-                console.log('refreshing preview')
                 this.$store.dispatch('preview-refresh')
               }
             })

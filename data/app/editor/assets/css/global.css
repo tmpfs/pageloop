@@ -16,10 +16,8 @@
   --cyan-color: #2aa198;
   --green-color: #859900;
 
-  /*--link-color: #e30053;*/
   --background: #073642;
   --color: #93a1a1;
-  --link-color: #d33682;
   --border-color: #002b36;
   --toolbar-link: #839496;
 }
@@ -148,7 +146,7 @@ p {
 a, a:hover, a:visited {
 	display: inline-block;
   text-decoration: none;
-  color: var(--link-color);
+  color: var(--blue-color);
 	line-height: 1em;
 	border-bottom: 2px solid transparent;
 }
