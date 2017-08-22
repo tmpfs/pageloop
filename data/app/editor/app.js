@@ -406,13 +406,13 @@ class EditorApplication {
             <nav class="tabs">
               <a v-bind:class="{selected: currentView === 'pages'}"
                 @click="currentView = 'pages'"
-                href="#" title="Show pages">Pages</a>
+                href="#pages" title="Show pages">Pages</a>
               <a v-bind:class="{selected: currentView === 'files'}"
                 @click="currentView = 'files'"
-                href="#"  title="Show files">Files</a>
+                href="#files"  title="Show files">Files</a>
               <a v-bind:class="{selected: currentView === 'components'}"
-                @click="currentView = 'components'" href="#"
-                title="Show components">Components</a>
+                @click="currentView = 'components'"
+                href="#components" title="Show components">Components</a>
             </nav>
           </div>
           <nav class="toolbar">
