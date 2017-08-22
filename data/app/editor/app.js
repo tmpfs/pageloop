@@ -115,7 +115,6 @@ class AppDataSource {
       // got a published index page whether the source is
       // HTML or markdown
       if (files[i].uri === '/index.html') {
-        console.log('got matching index file to open')
         return files[i]
       }
     }
@@ -265,8 +264,6 @@ class EditorApplication {
           state.sidebarView = view
         },
         'current-file': function (state, file) {
-          console.log('committing current file: ' + file)
-          console.log(file)
           state.app.current = file
         },
         'preview-url': function (state, url) {
@@ -304,20 +301,6 @@ class EditorApplication {
         'reload': function (context) {
           return context.dispatch('list-pages')
             .then(context.dispatch('list-files'))
-        },
-        'index-page-select': function (context) {
-          console.log('selecting index page: ' + context.state.hasFile())
-          if (!context.state.hasFile()) {
-            let files = context.state.app.files
-            for (let i = 0; i < files.length; i++) {
-              // got a published index page whether the source is
-              // HTML or markdown
-              if (files[i].uri === '/index.html') {
-                console.log('got matching index file to open')
-                return context.dispatch('open-file', files[i])
-              }
-            }
-          }
         },
         'get-file-contents': function (context, item) {
           return data.getFileContents(item.url)
