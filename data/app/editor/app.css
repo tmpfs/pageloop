@@ -114,10 +114,14 @@ header nav.home {
 }
 
 nav.home > a.home {
-  /*background: var(--base03-color);*/
   color: var(--base3-color) !important;
   text-decoration: none;
 }
+/*
+a.home.selected {
+  background: var(--base03-color);
+}
+*/
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
@@ -163,6 +167,10 @@ main > .content-main {
   flex: 1 1;
   height: calc(100% - 6rem);
   max-height: calc(100% - 6rem);
+}
+
+.content-main.home {
+  padding: 2rem;
 }
 
 footer {
@@ -513,6 +521,10 @@ header > nav > a:hover, header > nav > a.selected {
   text-decoration: underline;
   color: white !important;
   background: var(--blue-color);
+}
+
+header > nav > a.selected {
+  background: var(--base03-color);
 }
 
 .maximized {

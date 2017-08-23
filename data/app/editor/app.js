@@ -510,7 +510,7 @@ class EditorApplication {
       }
     })
 
-    let r = this.router = new Router('apps', true)
+    let r = this.router = new Router('home', true)
     r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(pages|files)\/(.*)$/,
       ['section', 'container', 'application', 'action'],
       (match) => {
@@ -594,12 +594,12 @@ class EditorApplication {
             store.commit('editor-view', 'welcome')
           })
       })
-    r.add(/^(|apps|docs|edit|settings)$/, ['section'], (match) => {
+    r.add(/^(|home|apps|docs|edit|settings)$/, ['section'], (match) => {
       let section = match.map.section
 
       // Request with just the #
       if (section === '') {
-        return r.replace('apps', true)
+        return r.replace('home', true)
       } else if (section === 'apps') {
         return this.store.dispatch('containers')
           .then(() => {
@@ -1223,6 +1223,13 @@ class EditorApplication {
         'app-header': {
           template: `
               <header class="clearfix">
+                <nav class="home">
+                  <a
+                    @click="$store.dispatch('navigate', {href: 'home'})"
+                    class="home"
+                    :class="{selected: selectedView === 'home'}"
+                    title="Home page">Ꝏ </a>
+                </nav>
                 <nav class="main">
                   <a
                     @click="$store.dispatch('navigate', {href: 'apps'})"
@@ -1240,12 +1247,6 @@ class EditorApplication {
                     @click="$store.dispatch('navigate', {href: 'settings'})"
                     :class="{selected: selectedView === 'settings'}"
                     title="Settings">Settings</a>
-                </nav>
-                <nav class="home">
-                  <a
-                    @click="$store.dispatch('navigate', {href: '/'})"
-                    class="home"
-                    title="Home page">Ꝏ </a>
                 </nav>
               </header>
             `,
@@ -1284,6 +1285,16 @@ class EditorApplication {
                   return flash
                 }
               }
+            },
+            'home': {
+              template: `
+                <div class="content-main home">
+                  <div class="scroll">
+                    <h1>Pageloop</h1>
+                    <p>Web based document manager designed for rapid creation, editing and publishing of static websites.</p>
+                  </div>
+                </div>
+              `
             },
             'apps': {
               template: `
