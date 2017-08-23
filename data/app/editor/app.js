@@ -990,6 +990,9 @@ class EditorApplication {
                 <a v-bind:class="{selected: currentView === 'file-editor', hidden: hidden}"
                   @click="currentView = 'file-editor'"
                   title="Show file editor">File</a>
+                <a v-bind:class="{selected: currentView === 'data-editor', hidden: dataHidden}"
+                  @click="currentView = 'data-editor'"
+                  title="Show data editor">Data</a>
                 <a v-bind:class="{selected: currentView === 'source-editor', hidden: hidden}"
                   @click="currentView = 'source-editor'"
                   title="Show source editor">Code</a>
@@ -1023,6 +1026,9 @@ class EditorApplication {
           set: function (val) {
             this.$store.commit('maximize-column', val)
           }
+        },
+        dataHidden: function () {
+          return !this.$store.state.hasFile() || !this.$store.state.current.page
         },
         hidden: function () {
           return !this.$store.state.hasFile()
@@ -1130,6 +1136,10 @@ class EditorApplication {
               return this.$store.dispatch('delete-file', this.file)
             }
           }
+        },
+        'data-editor': {
+          template: `<div class="data-editor">
+            </div>`
         },
         'source-editor': {
           template: `<div class="source-editor">
