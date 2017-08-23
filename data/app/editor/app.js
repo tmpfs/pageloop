@@ -1302,13 +1302,16 @@ class EditorApplication {
                   <div class="content scroll">
                     <div class="new-app">
                       <h2>New Application</h2>
-                      <form>
-                        <p>Choose an application name:</p>
-                        <input type="text" name="name" value="new-app" />
-                        <p>Enter a publish URL:</p>
-                        <input type="text" name="url" value="/new-app" />
-                        <p>Short description:</p>
-                        <input type="text" name="description" value="" />
+                      <form @submit="createApplication">
+                        <p class="small">Choose an application name:</p>
+                        <input type="text" name="name"
+                          :value="applicationName" v-model="applicationName" />
+                        <p class="small">Enter a publish URL:</p>
+                        <input @change="urlChanged = true" type="text" name="url"
+                          :value="applicationUrl" v-model="applicationUrl" />
+                        <p class="small">Short description:</p>
+                        <input type="text" name="description"
+                          :value="applicationDescription" v-model="applicationDescription" />
                         <div class="form-actions">
                           <input type="submit" value="Create" />
                         </div>
@@ -1324,7 +1327,9 @@ class EditorApplication {
                             <span class="name">{{app.name}}</span>
                             <p class="small">URL: {{app.url}}<br />{{app.description}}
                               <p class="app-actions">
-                                <a class="name" @click="$store.dispatch('navigate', {href: linkify(container, app)})" :title="title(app, 'Edit')">Edit</a>
+                                <a class="name"
+                                  @click="$store.dispatch('navigate', {href: linkify(container, app)})"
+                                  :title="title(app, 'Edit')">Edit</a>
                                 <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
                               </p>
                             </p>
@@ -1334,12 +1339,33 @@ class EditorApplication {
                   </div>
                 </div>
               `,
+              data: function () {
+                return {
+                  urlChanged: false,
+                  applicationName: 'new-app',
+                  applicationUrl: '/new-app',
+                  applicationDescription: ''
+                }
+              },
+              watch: {
+                applicationName: function (val) {
+                  if (!this.urlChanged) {
+                    this.applicationUrl = '/' + val
+                  }
+                }
+              },
               computed: {
                 list: function () {
                   return this.$store.state.containers
                 }
               },
               methods: {
+                createApplication: function (e) {
+                  e.preventDefault()
+                  console.log('create application: ' + this.applicationName)
+                  console.log('create application: ' + this.applicationUrl)
+                  console.log('create application: ' + this.applicationDescription)
+                },
                 linkify: function (c, a, open) {
                   if (open) {
                     return a.url

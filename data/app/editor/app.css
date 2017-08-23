@@ -464,11 +464,17 @@ iframe.publish-preview {
   color: var(--red-color);
 }
 
+form > p {
+  margin-bottom: 0.5rem;
+}
+
 input[type="text"], input[type="submit"], input[type="reset"], button {
   font-size: 1.6rem;
   font-family: SourceSans;
   padding: 0.6rem;
   border-radius: 4px;
+  background: var(--base2-color);
+  color: var(--base03-color);
 }
 
 input[type="text"] {
