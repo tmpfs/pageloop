@@ -1177,6 +1177,7 @@ class EditorApplication {
                 } else {
                   let v = h('span', {class: 'data-value'}, ['' + value])
                   li.children.push(v)
+                  // console.log(v)
                 }
                 el.children.push(li)
               })
@@ -1184,7 +1185,6 @@ class EditorApplication {
             }
 
             let children = list(this.pageData)
-
             let el = h('div', {class: 'data-editor'}, children)
             return el
           }

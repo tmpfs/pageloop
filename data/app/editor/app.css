@@ -554,7 +554,13 @@ header > nav > a.selected {
   pointer-events: none;
 }
 
-.data-editor ul {
+.data-editor {
+  font-size: 1.4rem;
+  user-select: none;
+  padding-right: 1rem;
+}
+
+.data-editor ul, .data-editor ol {
   list-style-type: none;
   margin-left: 1rem;
   padding: 0;
@@ -563,4 +569,14 @@ header > nav > a.selected {
 .data-editor .data-key::after {
   content: ':';
   margin-right: 1rem;
+}
+
+.data-editor .data-key, .data-editor .data-value {
+  padding: 0.1rem 0.3rem;
+}
+
+.data-editor .data-value {
+  background: var(--base03-color);
+  color: var(--base2-color);
+  border-radius: 2px;
 }

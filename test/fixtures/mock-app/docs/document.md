@@ -1,6 +1,11 @@
 ---
 title: Foo Bar Mock
 layout: false
+nil: null
+map:
+  foo: bar
+  baz: quz
+num: 1.618
 list:
   - a
   - b
