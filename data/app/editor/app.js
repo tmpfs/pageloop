@@ -992,7 +992,7 @@ class EditorApplication {
                   title="Show file editor">File</a>
                 <a v-bind:class="{selected: currentView === 'source-editor', hidden: hidden}"
                   @click="currentView = 'source-editor'"
-                  title="Show source editor">Source</a>
+                  title="Show source editor">Code</a>
                 <a v-bind:class="{selected: currentView === 'visual-editor', hidden: hidden}"
                   @click="currentView = 'visual-editor'"
                   title="Show visual editor">Visual</a>

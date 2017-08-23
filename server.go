@@ -161,7 +161,7 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	// Configure application containers.
 	sys := model.NewContainer("system", "System applications.", true)
-	tpl := model.NewContainer("template", "Application templates.", true)
+	tpl := model.NewContainer("template", "Application & document templates.", true)
 	usr := model.NewContainer("user", "User applications.", false)
 	snx := model.NewContainer("sandbox", "Playground.", false)
 
@@ -199,8 +199,8 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 
 	// Template applications to mount.
 	var template []Mountpoint
-	template = append(template, Mountpoint{UrlPath: "/template/files/", Path: "data://app/template/files", Description: "File templates."})
-	template = append(template, Mountpoint{UrlPath: "/template/apps/", Path: "data://app/template/apps", Description: "Application templates."})
+	template = append(template, Mountpoint{UrlPath: "/template/documents/", Path: "data://app/template/documents", Description: "Document templates."})
+	template = append(template, Mountpoint{UrlPath: "/template/applications/", Path: "data://app/template/applications", Description: "Application templates."})
 
   if err = l.LoadMountpoints(system, sys); err != nil {
     return nil, err
