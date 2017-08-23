@@ -872,7 +872,7 @@ class EditorApplication {
             }
           }
         },
-        components: {
+        media: {
           template: `
             <div class="media-list">
             </div>`,
