@@ -566,16 +566,21 @@ header > nav > a.selected {
   padding: 0;
 }
 
-.data-editor .data-key::after {
+.data-key::after {
   content: ':';
   margin-right: 1rem;
 }
 
-.data-editor .data-key, .data-editor .data-value {
+.data-key {
+  display: inline-block;
+  min-width: 6rem;
+}
+
+.data-key, .data-value {
   padding: 0.1rem 0.3rem;
 }
 
-.data-editor .data-value {
+.data-value {
   background: var(--base03-color);
   color: var(--base2-color);
   border-radius: 2px;
