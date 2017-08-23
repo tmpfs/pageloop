@@ -133,7 +133,7 @@ h1 {
   font-size: 2.2rem;
 }
 
-h2 {
+.column-header h2 {
   font-size: 1.4rem;
   text-transform: uppercase;
   padding: 0 1rem;
@@ -186,7 +186,7 @@ footer p {
   margin: 0 2rem;
 }
 
-.name.container {
+.name.container, .new-app h2 {
   font-size: 1.4rem;
   text-decoration: underline;
   text-transform: uppercase;
@@ -354,8 +354,10 @@ iframe.publish-preview {
 }
 
 .toolbar h2 {
+  font-size: 1.4rem;
   text-transform: none;
   display: inline-block;
+  padding: 0 2rem;
   float: left;
 }
 
@@ -463,8 +465,9 @@ iframe.publish-preview {
 }
 
 input[type="text"], input[type="submit"], input[type="reset"], button {
+  font-size: 1.6rem;
   font-family: SourceSans;
-  padding: 1rem;
+  padding: 0.6rem;
   border-radius: 4px;
 }
 
@@ -489,6 +492,7 @@ input[type="submit"], input[type="reset"] {
 
 .form-actions {
 	text-align: right;
+  margin-top: 1rem;
 }
 
 .form-actions > * {
@@ -525,6 +529,12 @@ header > nav > a:hover, header > nav > a.selected {
 
 header > nav > a.selected {
   background: var(--base03-color);
+}
+
+.new-app {
+  padding: 2rem;
+  width: 20%;
+  border-right: 1px solid var(--border-color)
 }
 
 .maximized {

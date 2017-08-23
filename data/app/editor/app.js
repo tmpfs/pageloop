@@ -1299,7 +1299,21 @@ class EditorApplication {
             'apps': {
               template: `
                 <div class="content-main">
-                  <div class="content">
+                  <div class="content scroll">
+                    <div class="new-app">
+                      <h2>New Application</h2>
+                      <form>
+                        <p>Choose an application name:</p>
+                        <input type="text" name="name" value="new-app" />
+                        <p>Enter a publish URL:</p>
+                        <input type="text" name="url" value="/new-app" />
+                        <p>Short description:</p>
+                        <input type="text" name="description" value="" />
+                        <div class="form-actions">
+                          <input type="submit" value="Create" />
+                        </div>
+                      </form>
+                    </div>
                     <div class="containers" v-for="container in list">
                       <span :class="{hidden: !container.protected}">🔒&nbsp;</span>
                       <span class="name container">{{container.name}}</span>
