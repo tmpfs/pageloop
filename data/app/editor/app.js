@@ -146,6 +146,7 @@ class AppDataSource {
     this.defaultFile = {content: ''}
 
     this.previewUrl = ''
+    this.previewRefresh = false
 
     // State for maximized column in edit mode
     this.maximizedColumn = ''
@@ -369,12 +370,14 @@ class EditorApplication {
           state.current = file
         },
         'preview-url': function (state, url) {
-          console.log('setting preview url: ' + url)
           state.previewUrl = url
+        },
+        'preview-refresh': function (state, toggle) {
+          state.previewRefresh = toggle
         },
         'reset-current-file': function (state, url) {
           state.current = state.defaultFile
-          state.previewUrl = false
+          state.previewUrl = ''
         },
         'maximize-column': function (state, info) {
           state.maximizedColumn = info
@@ -442,7 +445,7 @@ class EditorApplication {
           return context.dispatch('navigate', {href: href, state: file})
         },
         'preview-refresh': function (context) {
-          context.commit('preview-url', context.state.previewUrl)
+          context.commit('preview-refresh', true)
         },
         'new-file': function (context, {name, template, action}) {
           if (!/^\//.test(name)) {
@@ -898,7 +901,7 @@ class EditorApplication {
           </div>
           <nav class="toolbar clearfix">
             <h2>{{path}}</h2>
-            <a @click="refresh()"
+            <a @click="refresh(path)"
                :class="{hidden: path == ''}">Reload</a>
             <a
               @click="maximized = 'preview'"
@@ -927,6 +930,9 @@ class EditorApplication {
             this.$store.commit('maximize-column', val)
           }
         },
+        previewRefresh: function () {
+          return this.$store.state.previewRefresh
+        },
         url: {
           get: function () {
             return this.$store.state.previewUrl
@@ -938,8 +944,13 @@ class EditorApplication {
       },
       watch: {
         url: function (url) {
-          console.log('url watcher called: ' + url)
           this.refresh(url)
+        },
+        previewRefresh: function (val) {
+          if (val === true) {
+            this.refresh(this.path)
+          }
+          this.$store.commit('preview-refresh', false)
         }
       },
       methods: {
