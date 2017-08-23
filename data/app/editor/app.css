@@ -85,11 +85,11 @@ a, a:visited, a:hover {
 }
 
 p a{
-  border-bottom: 2px solid transparent;
+  border-bottom: 1px solid transparent;
 }
 
 p a:hover {
-  border-bottom: 2px solid currentColor;
+  border-bottom: 1px solid currentColor;
 }
 
 header {

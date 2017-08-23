@@ -148,11 +148,11 @@ a, a:hover, a:visited {
   text-decoration: none;
   color: var(--blue-color);
 	line-height: 1em;
-	border-bottom: 2px solid transparent;
+	border-bottom: 1px solid transparent;
 }
 
 a:hover {
-	border-bottom: 2px solid currentColor;
+	border-bottom: 1px solid currentColor;
 	transition: all 0.4s ease-out;
 }
 
