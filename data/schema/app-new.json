@@ -1,7 +1,9 @@
 {
 	"properties": {
-		"name": {"type": "string"}
+		"name": {"type": "string"},
+		"url": {"type": "string"},
+		"description": {"type": "string"}
 	},
-	"required": ["name"],
+	"required": ["name", "url", "description"],
 	"additionalProperties": false
 }
