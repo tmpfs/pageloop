@@ -556,7 +556,7 @@ class EditorApplication {
           return trigger()
         }
       })
-    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|components|new|del)$/,
+    r.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|media|new|del)$/,
       ['section', 'container', 'application', 'action'],
       (match) => {
         let container = match.map.container
@@ -645,9 +645,9 @@ class EditorApplication {
               <a v-bind:class="{selected: currentView === 'files'}"
                 @click="currentView = 'files'"
                 title="Show files">Files</a>
-              <a v-bind:class="{selected: currentView === 'components'}"
-                @click="currentView = 'components'"
-                title="Show components">Components</a>
+              <a v-bind:class="{selected: currentView === 'media'}"
+                @click="currentView = 'media'"
+                title="Show media files">Media</a>
             </nav>
           </div>
           <nav class="toolbar">
@@ -874,11 +874,11 @@ class EditorApplication {
         },
         components: {
           template: `
-            <div class="components-list">
+            <div class="media-list">
             </div>`,
           computed: {
             list: function () {
-              return this.$store.state.app.components
+              return this.$store.state.app.media
             }
           }
         }
