@@ -553,3 +553,14 @@ header > nav > a.selected {
   opacity: 0;
   pointer-events: none;
 }
+
+.data-editor ul {
+  list-style-type: none;
+  margin-left: 1rem;
+  padding: 0;
+}
+
+.data-editor .data-key::after {
+  content: ':';
+  margin-right: 1rem;
+}

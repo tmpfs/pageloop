@@ -1138,13 +1138,62 @@ class EditorApplication {
           }
         },
         'data-editor': {
-          template: `<div class="data-editor">
-            </div>`
+          computed: {
+            pageDataJson: function () {
+              return JSON.stringify(this.pageData, undefined, 2)
+            },
+            pageData: {
+              get: function () {
+                return this.$store.state.current.data
+              },
+              set: function (val) {
+                //
+              }
+            }
+          },
+          render: function (h) {
+            function list (target) {
+              let isArr = Array.isArray(target)
+              function it (o, fn) {
+                if (Array.isArray(o)) {
+                  o.forEach(fn)
+                } else {
+                  for (let k in o) {
+                    fn(o[k], k)
+                  }
+                }
+              }
+
+              let el = h(isArr ? 'ol' : 'ul', null, [])
+              it(target, (value, key) => {
+                let li = h('li', {'data-type': typeof (value), 'data-key': key}, [])
+                if (!isArr) {
+                  let k = h('span', {class: 'data-key'}, ['' + key])
+                  li.children.push(k)
+                }
+                if (Array.isArray(value) || value && typeof (value) === 'object') {
+                  let nodes = list(value)
+                  li.children.push(...nodes)
+                } else {
+                  let v = h('span', {class: 'data-value'}, ['' + value])
+                  li.children.push(v)
+                }
+                el.children.push(li)
+              })
+              return [el]
+            }
+
+            let children = list(this.pageData)
+
+            let el = h('div', {class: 'data-editor'}, children)
+            return el
+          }
         },
         'source-editor': {
           template: `<div class="source-editor">
               <div class="text-editor"></div>
-            </div>`,
+            </div>
+          `,
           data: function () {
             return {
               mirror: null

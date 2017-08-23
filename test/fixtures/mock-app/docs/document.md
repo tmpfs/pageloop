@@ -1,6 +1,10 @@
 ---
 title: Foo Bar Mock
 layout: false
+list:
+  - a
+  - b
+  - c
 ---
 ## Mock document
 
