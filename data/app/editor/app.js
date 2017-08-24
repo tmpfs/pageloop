@@ -1144,7 +1144,10 @@ class EditorApplication {
             },
             pageData: {
               get: function () {
-                return this.$store.state.current.data
+                if (!this.$store.state.current || !this.$store.state.current.page) {
+                  return {}
+                }
+                return this.$store.state.current.page.data
               },
               set: function (val) {
                 //
@@ -1183,6 +1186,8 @@ class EditorApplication {
               })
               return [el]
             }
+
+            // console.log(this.pageData)
 
             let children = list(this.pageData)
             let el = h('div', {class: 'data-editor'}, children)
