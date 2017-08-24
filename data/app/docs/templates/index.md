@@ -105,7 +105,18 @@ Returns a  URL relative to the root of the application, for example:
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
 
-## Delimiters
+## Template Configuration
+
+If you need to disable template parsing for a page set the `template`
+page data option:
+
+```html
+<?`---
+template: false
+---` | html ?>
+```
+
+### Delimiters
 
 Sometimes you may want to switch the template left and right delimiters
 usually when you want to show examples using the default delimiters.
