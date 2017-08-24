@@ -984,16 +984,16 @@ class EditorApplication {
             <h2>Editor</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a v-bind:class="{selected: currentView === 'file-editor', hidden: fileHidden}"
+                <a v-bind:class="{selected: currentView === 'file-editor', disabled: fileHidden}"
                   @click="currentView = 'file-editor'"
                   title="Show file editor">File</a>
-                <a v-bind:class="{selected: currentView === 'data-editor', hidden: dataHidden}"
+                <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
                   @click="currentView = 'data-editor'"
                   title="Show data editor">Data</a>
-                <a v-bind:class="{selected: currentView === 'source-editor', hidden: hidden}"
+                <a v-bind:class="{selected: currentView === 'source-editor', disabled: hidden}"
                   @click="currentView = 'source-editor'"
                   title="Show source editor">Code</a>
-                <a v-bind:class="{selected: currentView === 'visual-editor', hidden: hidden}"
+                <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
                   @click="currentView = 'visual-editor'"
                   title="Show visual editor">Visual</a>
               </nav>
