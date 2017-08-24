@@ -1144,6 +1144,7 @@ class EditorApplication {
           },
           methods: {
             doDelete: function () {
+              this.confirmDelete = false
               return this.$store.dispatch('delete-file', this.file)
             }
           }
