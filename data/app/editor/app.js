@@ -1097,13 +1097,15 @@ class EditorApplication {
                   <p>Choose a new name for your file.</p>
                   <form class="rename">
                     <input type="text" name="fileName" :value="file.name" />
-                    <input type="submit" name="Rename" value="Rename" />
+                    <div class="form-actions">
+                      <input type="submit" name="Rename" value="Rename" />
+                    </div>
                   </form>
                 </section>
                 <section>
                   <h3>Delete File</h3>
                   <p v-bind:class="{hidden: confirmDelete}">Danger zone: be careful!</p>
-                  <div>
+                  <div class="form-actions">
                     <button @click="confirmDelete = true"
                       v-bind:class="{hidden: confirmDelete}"
                       class="danger">Delete {{file.url}}</button>
@@ -1275,7 +1277,7 @@ class EditorApplication {
           mounted: function () {
             let item = this.currentFile
             // Handles setting file content when switching tabs
-            if (item && item.content) {
+            if (item && item.mime) {
               this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
             }
           }
