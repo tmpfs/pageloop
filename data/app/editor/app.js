@@ -984,7 +984,7 @@ class EditorApplication {
             <h2>Editor</h2>
             <div class="column-options">
               <nav class="tabs">
-                <a v-bind:class="{selected: currentView === 'file-editor', hidden: hidden}"
+                <a v-bind:class="{selected: currentView === 'file-editor', hidden: fileHidden}"
                   @click="currentView = 'file-editor'"
                   title="Show file editor">File</a>
                 <a v-bind:class="{selected: currentView === 'data-editor', hidden: dataHidden}"
@@ -1025,10 +1025,13 @@ class EditorApplication {
           }
         },
         dataHidden: function () {
-          return !this.$store.state.hasFile() || !this.$store.state.current.page
+          return this.hidden || !this.$store.state.current.page
+        },
+        fileHidden: function () {
+          return !this.$store.state.hasFile()
         },
         hidden: function () {
-          return !this.$store.state.hasFile()
+          return !this.$store.state.hasFile() || this.$store.state.isDirectory()
         },
         currentFile: function () {
           return this.$store.state.app.current
@@ -1045,6 +1048,9 @@ class EditorApplication {
       watch: {
         currentFile: function (file) {
           this.title = file.url
+          if (file && file.dir) {
+            this.currentView = 'file-editor'
+          }
         }
       },
       data: function () {
