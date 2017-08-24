@@ -53,6 +53,21 @@ lang: en
 <p>Page content.</p>` | html ?>
 ```
 
+If you need to disable layouts for a page you can set `layout`
+in the page data:
+
+```html
+<?`---
+title: Standalone Page
+lang: en
+layout: false
+---
+<html><!-- ... --></html>` | html ?>
+```
+
+And the page will be treated as standalone so you should supply
+a full HTML document.
+
 ## Helper Functions
 
 Some useful functions are exposed to the templates so that you can
