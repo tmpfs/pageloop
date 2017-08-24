@@ -168,9 +168,13 @@ class AppDataSource {
 
   getAppHref (...args) {
     let p = ['apps', this.container, this.application]
+
+    // TODO: ensure we never get passed undefined / null etc
+    // TODO: and remove this
     args = args.filter((val) => {
       return val
     })
+
     args = args.map((val) => {
       return val.replace(/^\//, '')
     })
