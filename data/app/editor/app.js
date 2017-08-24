@@ -1290,6 +1290,10 @@ class EditorApplication {
                     class="home"
                     :class="{selected: selectedView === 'home'}"
                     title="Home page">Ꝏ </a>
+                  <a
+                    @click="$store.dispatch('navigate', {href: 'edit'})"
+                    :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
+                    title="Edit Current Application">{{name}}</a>
                 </nav>
                 <nav class="main">
                   <a
@@ -1300,10 +1304,6 @@ class EditorApplication {
                     @click="$store.dispatch('navigate', {href: 'docs'})"
                     :class="{selected: selectedView === 'docs'}"
                     title="Documentation">Docs</a>
-                  <a
-                    @click="$store.dispatch('navigate', {href: 'edit'})"
-                    :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
-                    title="Edit Current Application">{{name}}</a>
                   <a
                     @click="$store.dispatch('navigate', {href: 'settings'})"
                     :class="{selected: selectedView === 'settings'}"
