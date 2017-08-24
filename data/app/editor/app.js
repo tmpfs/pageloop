@@ -225,15 +225,12 @@ class AppDataSource {
     return this.container && this.application
   }
 
-  hasFile () {
-    return this.app.current.url !== undefined
+  isDirectory () {
+    return this.hasFile() && this.current.dir
   }
 
-  getFile () {
-    if (this.hasFile()) {
-      return this.app.current
-    }
-    return null
+  hasFile () {
+    return this.app.current.url !== undefined
   }
 
   isPage (file) {
@@ -704,7 +701,7 @@ class EditorApplication {
           },
           set: function (val) {
             var values = [val]
-            var file = this.$store.state.getFile()
+            var file = this.$store.state.current
             if (file !== null) {
               if (val === 'files') {
                 values.push(file.url)
