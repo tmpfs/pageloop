@@ -129,6 +129,7 @@ class Log {
     if (m instanceof Error) {
       return m.message || ('' + m)
     }
+    return m
   }
 }
 
@@ -1497,7 +1498,8 @@ class EditorApplication {
               return (this.$store.state.log.last instanceof Error)
             },
             prefix: function () {
-              if (this.message && this.error) {
+              let msg = this.$store.state.log.last
+              if (msg && this.error) {
                 return '! '
               } else if (this.message && !this.error) {
                 return '# '
