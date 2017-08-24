@@ -168,6 +168,9 @@ class AppDataSource {
 
   getAppHref (...args) {
     let p = ['apps', this.container, this.application]
+    args = args.filter((val) => {
+      return val
+    })
     args = args.map((val) => {
       return val.replace(/^\//, '')
     })
@@ -1292,16 +1295,16 @@ class EditorApplication {
               <header class="clearfix">
                 <nav class="home">
                   <a
-                    @click="$store.dispatch('navigate', {href: 'home'})"
-                    class="home"
-                    :class="{selected: selectedView === 'home'}"
-                    title="Home page">Ꝏ </a>
-                  <a
                     @click="$store.dispatch('navigate', {href: 'edit'})"
                     :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
                     title="Edit Current Application">{{name}}</a>
                 </nav>
                 <nav class="main">
+                  <a
+                    @click="$store.dispatch('navigate', {href: 'home'})"
+                    class="home"
+                    :class="{selected: selectedView === 'home'}"
+                    title="Home page">Ꝏ </a>
                   <a
                     @click="$store.dispatch('navigate', {href: 'apps'})"
                     :class="{selected: selectedView === 'apps'}"
