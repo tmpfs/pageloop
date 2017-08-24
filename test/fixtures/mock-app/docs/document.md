@@ -1,6 +1,7 @@
 ---
 title: Foo Bar Mock
 layout: false
+template: true
 nil: null
 map:
   foo: bar

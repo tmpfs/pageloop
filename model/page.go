@@ -282,6 +282,15 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
     return nil, err
   }
 
+  // User data has template flag set, can be used
+  // to disable template parsing
+  if userflag, ok := p.PageData["template"].(bool); ok {
+    // Template parsing disabled!
+    if !userflag {
+      return data, nil
+    }
+  }
+
 	// Do not handle layout files
   /*
 	if p.Name == Layout {
