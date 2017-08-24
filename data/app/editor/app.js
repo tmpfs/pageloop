@@ -960,6 +960,10 @@ class EditorApplication {
       },
       methods: {
         refresh (url) {
+          let allowed = /\.(html?|txt)$/
+          if (!allowed.test(url)) {
+            return
+          }
           if (url === '') {
             this.path = ''
             this.src = ''
