@@ -37,32 +37,12 @@ var mountpoints map[string] http.Handler
 // so they do not collide with application requests.
 var multiplex map[string] bool
 
-type Mountpoint struct {
-	// The URL path component.
-	UrlPath string `json:"url"`
-	// The path to pass to the loader.
-	Path string	`json:"path"`
-	// Description to pass to the application.
-	Description string `json:"description"`
-}
-
 type PageLoop struct {
 	// Underlying HTTP server.
 	Server *http.Server `json:"-"`
 
 	// Application host
 	Host *model.Host
-}
-
-type ServerConfig struct {
-	Addr string
-
-	// List of user application mountpoints.
-  Mountpoints []Mountpoint
-
-	// Load system assets from the file system, don't use
-	// the embedded assets.
-	Dev bool
 }
 
 // Main HTTP server handler.
