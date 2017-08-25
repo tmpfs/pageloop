@@ -40,5 +40,4 @@ func init () {
   if err := yaml.Unmarshal(serverConfigFile, defaultServerConfig); err != nil {
     panic(err)
   }
-  println(defaultServerConfig)
 }
