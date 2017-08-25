@@ -235,11 +235,9 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
   for _, mt := range mountpoints {
-		//var dataScheme bool
 		urlPath := mt.UrlPath
 		path := mt.Path
 		if dataPattern.MatchString(path) {
-			//dataScheme = true
 			path = dataPattern.ReplaceAllString(path, "data/")
 		}
     var p string

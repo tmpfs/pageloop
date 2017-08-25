@@ -1,5 +1,11 @@
 package pageloop
 
+import (
+  "gopkg.in/yaml.v2"
+)
+
+var defaultServerConfig *ServerConfig
+
 // Represents a runtime configuration.
 type ServerConfig struct {
 
@@ -27,3 +33,12 @@ type Mountpoint struct {
   Description string `json:"description" yaml:"description"`
 }
 
+// Load system configuration
+func init () {
+  serverConfigFile := MustAsset("config.yml")
+  defaultServerConfig = &ServerConfig{Addr: ":3577"}
+  if err := yaml.Unmarshal(serverConfigFile, defaultServerConfig); err != nil {
+    panic(err)
+  }
+  println(defaultServerConfig)
+}
