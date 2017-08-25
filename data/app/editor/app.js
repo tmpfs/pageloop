@@ -960,7 +960,7 @@ class EditorApplication {
       },
       methods: {
         refresh (url) {
-          let allowed = /\.(html?|txt)$/
+          let allowed = /\.(html?)$/
           if (!allowed.test(url)) {
             return
           }
