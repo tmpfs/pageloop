@@ -1371,9 +1371,11 @@ class EditorApplication {
             'home': {
               template: `
                 <div class="content-main home">
-                  <div class="scroll">
-                    <h1>Pageloop</h1>
-                    <p>Web based document manager designed for rapid creation, editing and publishing of static websites.</p>
+                  <div class="scroll center">
+                    <section class="document">
+                      <h1><span>Ꝏ</span>&nbsp;Pageloop</h1>
+                      <p>Web based document manager designed for rapid creation, editing and publishing of static websites.</p>
+                    </section>
                   </div>
                 </div>
               `
