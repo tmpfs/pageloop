@@ -85,6 +85,8 @@ a, a:visited, a:hover {
 }
 
 p a{
+  display: inline-block;
+  line-height: 1.8rem;
   border-bottom: 1px solid transparent;
 }
 
