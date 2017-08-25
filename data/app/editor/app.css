@@ -130,6 +130,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 section.document {
+  font-family: SourceSerif;
   text-align: left;
   display: inline-block;
   margin: auto 0;
@@ -138,6 +139,7 @@ section.document {
 }
 
 h1 {
+  font-family: SourceSans;
   text-align: center;
 	margin: 3rem 0 0 0;
 	font-size: 2.6rem;
@@ -193,6 +195,14 @@ main > .content-main {
 
 .content-main.home {
   padding: 0 2rem 2rem 2rem;
+}
+
+p.leader {
+  font-size: 2.4rem;
+  line-height: 3rem;
+  text-align: center;
+  margin: 3rem 0;
+  padding: 0 3rem;
 }
 
 footer {
