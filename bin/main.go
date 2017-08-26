@@ -31,7 +31,7 @@ func main() {
   loop := &pageloop.PageLoop{}
   conf := pageloop.DefaultServerConfig()
 
-  if configPath != nil {
+  if *configPath != "" {
     // Merge user supplied config with the defaults
     if err = conf.Merge(*configPath); err != nil {
       log.Fatal(err)
