@@ -1,6 +1,7 @@
 package pageloop
 
 import (
+  "io/ioutil"
   "gopkg.in/yaml.v2"
 )
 
@@ -25,6 +26,8 @@ type ServerConfig struct {
 // for an application and a URL that the application should
 // be mounted at.
 type Mountpoint struct {
+  // Name of the parent container for the application.
+  Container string
 	// The URL path component.
   UrlPath string `json:"url" yaml:"url"`
 	// The path to pass to the loader.
@@ -33,8 +36,46 @@ type Mountpoint struct {
   Description string `json:"description" yaml:"description"`
 }
 
-// Load system configuration
-func init () {
+// Public access to the default server config.
+func DefaultServerConfig() *ServerConfig {
+  return defaultServerConfig
+}
+
+// Load and merge a user supplied configuration file.
+//
+// Mountpoints are appended to the defaults and each mountpoint
+// in the user configuration is added to the user container.
+//
+// User supplied configurations can currently only specify Addr
+// and Mountpoints.
+func (c *ServerConfig) Merge(path string) error {
+  var err error
+  var content []byte
+
+  if content, err = ioutil.ReadFile(path); err != nil {
+    return err
+  }
+
+  tempServerConfig := &ServerConfig{}
+  if err := yaml.Unmarshal(content, tempServerConfig); err != nil {
+    return err
+  }
+
+  if tempServerConfig.Addr != "" {
+    c.Addr = tempServerConfig.Addr
+  }
+
+  for _, m := range tempServerConfig.Mountpoints {
+    // Force user supplied applications into particular container
+    m.Container = "user"
+    c.Mountpoints = append(c.Mountpoints, m)
+  }
+
+  return nil
+}
+
+// Load system server configuration.
+func init() {
   serverConfigFile := MustAsset("config.yml")
   defaultServerConfig = &ServerConfig{Addr: ":3577"}
   if err := yaml.Unmarshal(serverConfigFile, defaultServerConfig); err != nil {

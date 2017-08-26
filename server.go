@@ -134,8 +134,8 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 }
 
 // Creates an HTTP server.
-func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
-  var err error
+func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
+  //var err error
 
 	l.Host = model.NewHost()
 
@@ -169,8 +169,10 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	multiplex[rest.Url] = true
 
 	// System applications to mount.
-	var system []Mountpoint
+	// var system []Mountpoint
 	//system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
+
+  /*
 	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/editor/", Description: "Application editor."})
 	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "Documentation & help files."})
 	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
@@ -181,7 +183,9 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
 	var template []Mountpoint
 	template = append(template, Mountpoint{UrlPath: "/template/documents/", Path: "data://app/template/documents", Description: "Document templates."})
 	template = append(template, Mountpoint{UrlPath: "/template/applications/", Path: "data://app/template/applications", Description: "Application templates."})
+  */
 
+  /*
   if err = l.LoadMountpoints(system, sys); err != nil {
     return nil, err
   }
@@ -189,11 +193,14 @@ func (l *PageLoop) NewServer(config ServerConfig) (*http.Server, error) {
   if err = l.LoadMountpoints(template, tpl); err != nil {
     return nil, err
   }
+  */
 
 	// Add user applications from configuration mountpoints.
+  /*
   if err = l.LoadMountpoints(config.Mountpoints, usr); err != nil {
     return nil, err
   }
+  */
 
 	l.MountContainer(sys)
 	l.MountContainer(tpl)

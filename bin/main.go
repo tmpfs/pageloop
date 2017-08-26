@@ -15,6 +15,7 @@ func printHelp () {
 }
 
 func main() {
+  var err error
   var help *bool
   var configPath *string
 
@@ -23,19 +24,23 @@ func main() {
 
   flag.Parse()
 
-  println("config path: " + *configPath)
-
   if *help {
     printHelp()
   }
 
-  var apps []pageloop.Mountpoint
-  apps = append(apps, pageloop.Mountpoint{Path: "test/fixtures/mock-app", Description: "Mock application."})
   loop := &pageloop.PageLoop{}
-  conf := pageloop.ServerConfig{Mountpoints: apps, Addr: ":3577", Dev: true}
+  conf := pageloop.DefaultServerConfig()
+
+  if configPath != nil {
+    // Merge user supplied config with the defaults
+    if err = conf.Merge(*configPath); err != nil {
+      log.Fatal(err)
+    }
+  }
+
   server, err := loop.NewServer(conf)
   if err != nil {
-    log.Fatal(err)
+    panic(err)
   }
   loop.Listen(server)
 }

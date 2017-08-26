@@ -1,0 +1,7 @@
+addr: :3577
+mountpoints:
+  -
+    path: test/fixtures/mock-app
+    url: /mock-app/
+    description: |
+      Mock Application
