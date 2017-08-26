@@ -19,6 +19,9 @@ const(
 	HTML_MIME = "text/html; charset=utf-8"
 )
 
+var Name string = "pageloop"
+var Version string = "1.0"
+
 var config ServerConfig
 var mux *http.ServeMux
 

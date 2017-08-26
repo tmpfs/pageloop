@@ -1,0 +1,24 @@
+#compdef pageloop
+_pageloop(){
+  typeset -A opt_args;
+  local context state state_descr line ret=1;
+  local actions options commands;
+
+  options=(
+    "--config=[Load server configuration from a YAML file]:file:_files" 
+    "--addr=[Set the bind address]" 
+    "(-h --help)"{-h,--help}"[Display help and exit]" 
+    "--version[Print the version and exit]"
+  )
+
+  _arguments \
+    $options \
+    $actions && ret=0;
+
+  (( $ret == 1 )) && _arguments \
+    $options \
+    $actions && ret=0;
+  return $ret;
+}
+
+_pageloop "$@"

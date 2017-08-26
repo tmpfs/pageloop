@@ -1,0 +1,13 @@
+Usage: pageloop [-h] [--help] [--version] [--config=<file>] [--addr=<val>]
+
+  Collaborative realtime server.
+
+  Web server that serves system applications and
+  those specified in the supplied configuration file.
+
+Options
+  --config=[file]         Load server configuration from a YAML file
+  --addr=[val]            Set the bind address (default: :3577)
+  -h, --help              Display help and exit
+  --version               Print the version and exit
+

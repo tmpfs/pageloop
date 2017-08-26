@@ -15,6 +15,9 @@ build: bindata/
 test:
 	@go test $(PACKAGES)
 
+cli:
+	@mkcli -T data -J cli/def -M cli/man -Z cli/zsh cli/pageloop.md
+
 cover:
 	@go test -cover $(PACKAGES)
 
@@ -23,4 +26,4 @@ coverage:
 	@go test -coverprofile=coverage.out
 	@go tool cover -html=coverage.out
 
-.PHONY: bindata test
+.PHONY: build bindata bindata-dev test cli

@@ -1,0 +1,58 @@
+{
+  "description": "Web server that serves system applications and\nthose specified in the supplied configuration file.",
+  "names": [
+    "pageloop"
+  ],
+  "type": "program",
+  "name": "pageloop",
+  "summary": "collaborative realtime server",
+  "synopsis": [
+    "[flags] [options]"
+  ],
+  "options": {
+    "config": {
+      "key": "config",
+      "description": "Load server configuration from a YAML file",
+      "names": [
+        "--config"
+      ],
+      "type": "option",
+      "extra": "=[file]",
+      "required": false,
+      "multiple": false,
+      "name": "--config"
+    },
+    "addr": {
+      "key": "addr",
+      "description": "Set the bind address",
+      "names": [
+        "--addr"
+      ],
+      "type": "option",
+      "extra": "=[val]",
+      "required": false,
+      "multiple": false,
+      "value": ":3577",
+      "name": "--addr"
+    },
+    "help": {
+      "key": "help",
+      "description": "Display help and exit",
+      "names": [
+        "-h",
+        "--help"
+      ],
+      "type": "flag",
+      "name": "--help"
+    },
+    "version": {
+      "key": "version",
+      "description": "Print the version and exit",
+      "names": [
+        "--version"
+      ],
+      "type": "flag",
+      "name": "--version"
+    }
+  }
+}

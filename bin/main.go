@@ -8,32 +8,55 @@ import (
   "github.com/tmpfs/pageloop"
 )
 
+var helpText []byte
+
 func printHelp () {
-  fmt.Println("pageloop")
-  flag.PrintDefaults()
+  os.Stdout.Write(helpText)
+  os.Exit(0)
+}
+
+func printVersion () {
+  fmt.Printf("%s %s\n", pageloop.Name, pageloop.Version)
   os.Exit(0)
 }
 
 func main() {
   var err error
+  var h *bool
   var help *bool
-  var configPath *string
+  var version *bool
 
-  configPath = flag.String("config", "", "path to a yaml configuration file")
-  help = flag.Bool("help", false, "print help")
+  var config *string
+  var addr *string
+
+  addr = flag.String("addr", "", "")
+  config = flag.String("config", "", "")
+
+  h = flag.Bool("h", false, "")
+  help = flag.Bool("help", false, "")
+  version = flag.Bool("version", false, "")
 
   flag.Parse()
 
-  if *help {
+  if *h || *help {
     printHelp()
+  }
+
+  if *version {
+    printVersion()
   }
 
   loop := &pageloop.PageLoop{}
   conf := pageloop.DefaultServerConfig()
 
-  if *configPath != "" {
+  if *addr != "" {
+    println("setting addr: " + *addr)
+    conf.Addr = *addr
+  }
+
+  if *config != "" {
     // Merge user supplied config with the defaults
-    if err = conf.Merge(*configPath); err != nil {
+    if err = conf.Merge(*config); err != nil {
       log.Fatal(err)
     }
   }
@@ -45,4 +68,8 @@ func main() {
     panic(err)
   }
   loop.Listen(server)
+}
+
+func init() {
+  helpText = pageloop.MustAsset("pageloop.txt")
 }
