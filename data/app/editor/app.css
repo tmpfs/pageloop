@@ -511,6 +511,11 @@ input[type="text"], input[type="submit"], input[type="reset"], button {
   color: var(--base03-color);
 }
 
+.CodeMirror-dialog input {
+  padding: 0.2rem;
+  border-radius: 0;
+}
+
 input[type="text"] {
 	width: 100%;
 }

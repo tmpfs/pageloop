@@ -1420,6 +1420,7 @@ class EditorApplication {
                                   @click="$store.dispatch('navigate', {href: linkify(container, app)})"
                                   :title="title(app, 'Edit')">Edit</a>
                                 <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
+                                <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Stop')">Stop ⏏</a>
                               </p>
                             </p>
                         </div>
