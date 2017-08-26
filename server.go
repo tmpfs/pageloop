@@ -45,6 +45,14 @@ type PageLoop struct {
 	Host *model.Host
 }
 
+// Temporary map used when initializing loaded mountpoint definitions
+// containing a container reference which was declared by string name
+// in the mountpoint definition.
+type MountpointMap struct {
+  Container *model.Container
+  Mountpoints []Mountpoint
+}
+
 // Main HTTP server handler.
 type ServerHandler struct {}
 
@@ -185,6 +193,28 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	template = append(template, Mountpoint{UrlPath: "/template/applications/", Path: "data://app/template/applications", Description: "Application templates."})
   */
 
+  //var system []Mountpoint
+	//var template []Mountpoint
+
+  var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
+
+  for _, m := range config.Mountpoints {
+    c := l.Host.GetByName(m.Container)
+    if c == nil {
+      return nil, fmt.Errorf("Unknown container %s", m.Container)
+    }
+    if collection[m.Container] == nil {
+      collection[m.Container] = &MountpointMap{Container: c}
+    }
+    collection[m.Container].Mountpoints = append(collection[m.Container].Mountpoints, m)
+    println(m.Path)
+    println(m.Url)
+  }
+
+  for _, c := range collection {
+    println(c.Container.Name)
+  }
+
   /*
   if err = l.LoadMountpoints(system, sys); err != nil {
     return nil, err
@@ -242,7 +272,7 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 	dataPattern := regexp.MustCompile(`^data://`)
   // iterate apps and configure paths
   for _, mt := range mountpoints {
-		urlPath := mt.UrlPath
+		urlPath := mt.Url
 		path := mt.Path
 		if dataPattern.MatchString(path) {
 			path = dataPattern.ReplaceAllString(path, "data/")

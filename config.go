@@ -13,7 +13,7 @@ type ServerConfig struct {
   // Address for the web server to bind to.
 	Addr string `json:"addr" yaml:"addr"`
 
-	// List of system application mountpoints.
+	// List of application mountpoints.
   Mountpoints []Mountpoint `json:"mountpoints" yaml:"mountpoints"`
 
 	// Load system assets from the file system, don't use
@@ -27,9 +27,9 @@ type ServerConfig struct {
 // be mounted at.
 type Mountpoint struct {
   // Name of the parent container for the application.
-  Container string
-	// The URL path component.
-  UrlPath string `json:"url" yaml:"url"`
+  Container string `json:"container" yaml:"container"`
+	// The URL location for the application mountpoint.
+  Url string `json:"url" yaml:"url"`
 	// The path to pass to the loader.
   Path string	`json:"path" yaml:"path"`
 	// Description to pass to the application.
