@@ -26,8 +26,8 @@ func main() {
   var help *bool
   var version *bool
 
-  var config *string
   var addr *string
+  var config *string
 
   addr = flag.String("addr", "", "")
   config = flag.String("config", "", "")
@@ -49,16 +49,16 @@ func main() {
   loop := &pageloop.PageLoop{}
   conf := pageloop.DefaultServerConfig()
 
-  if *addr != "" {
-    println("setting addr: " + *addr)
-    conf.Addr = *addr
-  }
-
   if *config != "" {
     // Merge user supplied config with the defaults
     if err = conf.Merge(*config); err != nil {
       log.Fatal(err)
     }
+  }
+
+  // Must be after the merge, overrides all config files
+  if *addr != "" {
+    conf.Addr = *addr
   }
 
   server, err := loop.NewServer(conf)
