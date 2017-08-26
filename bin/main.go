@@ -40,6 +40,8 @@ func main() {
 
   server, err := loop.NewServer(conf)
   if err != nil {
+    //log.Fatal(err)
+    //fmt.Errorf(err)
     panic(err)
   }
   loop.Listen(server)

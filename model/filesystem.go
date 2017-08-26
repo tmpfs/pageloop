@@ -282,7 +282,7 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 
 	// Now update the Stat() info
 	if fh, err = os.Open(f.Path); err != nil {
-		return err	
+		return err
 	}
 	defer fh.Close()
 	if stat, err = fh.Stat(); err != nil {

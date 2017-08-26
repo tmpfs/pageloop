@@ -143,8 +143,9 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 
 // Creates an HTTP server.
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
-  //var err error
+  var err error
 
+  // Set up a host for our containers
 	l.Host = model.NewHost()
 
 	// Configure application containers.
@@ -176,28 +177,8 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	multiplex[rpc.Url] = true
 	multiplex[rest.Url] = true
 
-	// System applications to mount.
-	// var system []Mountpoint
-	//system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/home", Description: "System home page."})
-
-  /*
-	system = append(system, Mountpoint{UrlPath: "/", Path: "data://app/editor/", Description: "Application editor."})
-	system = append(system, Mountpoint{UrlPath: "/docs/", Path: "data://app/docs/", Description: "Documentation & help files."})
-	system = append(system, Mountpoint{UrlPath: "/tools/api/browser/", Path: "data://app/tools/api/browser", Description: "API Browser."})
-	system = append(system, Mountpoint{UrlPath: "/tools/api/probe/", Path: "data://app/tools/api/probe", Description: "API Probe."})
-
-
-	// Template applications to mount.
-	var template []Mountpoint
-	template = append(template, Mountpoint{UrlPath: "/template/documents/", Path: "data://app/template/documents", Description: "Document templates."})
-	template = append(template, Mountpoint{UrlPath: "/template/applications/", Path: "data://app/template/applications", Description: "Application templates."})
-  */
-
-  //var system []Mountpoint
-	//var template []Mountpoint
-
+  // Collect mountpoints by container name
   var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
-
   for _, m := range config.Mountpoints {
     c := l.Host.GetByName(m.Container)
     if c == nil {
@@ -207,31 +188,16 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
       collection[m.Container] = &MountpointMap{Container: c}
     }
     collection[m.Container].Mountpoints = append(collection[m.Container].Mountpoints, m)
-    println(m.Path)
-    println(m.Url)
   }
 
+  // Load mountpoints
   for _, c := range collection {
-    println(c.Container.Name)
+    if err = l.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+      return nil, err
+    }
   }
 
-  /*
-  if err = l.LoadMountpoints(system, sys); err != nil {
-    return nil, err
-  }
-
-  if err = l.LoadMountpoints(template, tpl); err != nil {
-    return nil, err
-  }
-  */
-
-	// Add user applications from configuration mountpoints.
-  /*
-  if err = l.LoadMountpoints(config.Mountpoints, usr); err != nil {
-    return nil, err
-  }
-  */
-
+  // Mount containers and the applications within them
 	l.MountContainer(sys)
 	l.MountContainer(tpl)
 	l.MountContainer(usr)
@@ -268,8 +234,9 @@ func (l *PageLoop) Listen(server *http.Server) error {
 // and adds it to the given container.
 func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) error {
   var err error
-	// Application endpoints
+	// Bundled application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
+
   // iterate apps and configure paths
   for _, mt := range mountpoints {
 		urlPath := mt.Url
@@ -289,8 +256,6 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		if urlPath == "" {
 			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
 		}
-
-		//app := model.Application{Url: urlPath, Description: mt.Description}
 
 		app := model.NewApplication(urlPath, mt.Description)
 		fs := model.NewUrlFileSystem(app)
@@ -323,7 +288,11 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 	}
 }
 
-// Mount an application from Public to Url.
+// Mount an application such that it's published and source
+// files are accessible over HTTP. This serves the published files
+// as static files and serves two versions of the source file
+// from in memory data. The src version is the file with any frontmatter
+// stripped and the raw version includes frontmatter.
 func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the static build files from the mountpoint path.
 	url := app.Url
@@ -337,16 +306,8 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 
 	// Serve the raw source files.
 	url = "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
-	log.Printf("Serving src %s from %s", url, app.Path)
+	log.Printf("Serving raw %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
-
-  /*
-	// Serve the editor application for each app
-	url = "/apps/edit/" + app.Container.Name + "/" + app.Name + "/"
-	log.Printf("Serving editor at %s", url)
-	editor := l.Host.GetByName("system").GetByName("editor")
-	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(editor.Public)))
-  */
 }
 
 func init() {
@@ -356,5 +317,4 @@ func init() {
 	mime.AddExtensionType(".yaml", "text/x-yaml")
 	mime.AddExtensionType(".md", "text/x-markdown")
 	mime.AddExtensionType(".markdown", "text/x-markdown")
-// text/x-markdown
 }

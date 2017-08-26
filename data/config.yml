@@ -2,37 +2,37 @@ addr: :3577
 mountpoints:
   -
     container: system
-    path: /
-    url: data://app/editor/
+    url: /
+    path: data://app/editor/
     description: |
       Application editor
   -
     container: system
-    path: /docs/
-    url: data://app/docs/
+    url: /docs/
+    path: data://app/docs/
     description: |
       Documentation & help files
   -
     container: system
-    path: /tools/api/browser/
-    url: data://app/tools/api/browser/
+    url: /tools/api/browser/
+    path: data://app/tools/api/browser/
     description: |
       API Browser
   -
     container: system
-    path: /tools/api/probe/
-    url: data://app/tools/api/probe/
+    url: /tools/api/probe/
+    path: data://app/tools/api/probe/
     description: |
       API Probe
   -
     container: template
-    path: /template/documents/
-    url: data://app/template/documents/
+    url: /template/documents/
+    path: data://app/template/documents/
     description: |
       Document templates
   -
     container: template
-    path: /template/applications/
-    url: data://app/template/applications/
+    url: /template/applications/
+    path: data://app/template/applications/
     description: |
       Application templates
