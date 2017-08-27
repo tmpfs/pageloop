@@ -15,7 +15,7 @@ those specified in the supplied configuration file.
 
 # Options
 
-+ `--config=[file]` Load server configuration from a YAML file
-+ `--addr=[val] {=:3577}` Set the bind address
++ `-c, --config=[file]` Load server configuration from a YAML file
++ `-a, --addr=[val] {=:3577}` Set the bind address
 + `-h, --help` Display help and exit
 + `--version` Print the version and exit
