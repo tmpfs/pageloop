@@ -89,7 +89,7 @@ Web server that serves system applications and those specified in the supplied c
 .nl
 .h1 "CONFIGURATION"
 .P
-Use a YAML configuration file to control the service behaviour.
+Use a YAML configuration file to control the service behaviour. The configuration file should be writable so that new applications created using the user interface can be persisted.
 .nl
 .P
 The \fBaddr\fR configuration field sets the server bind address, it may be a port in the form :8080 or fully qualified host or IP address such as 0.0.0.0:8080.
@@ -108,4 +108,7 @@ Define a \fBmountpoints\fR list in the configuration file to specify application
 .nl
 .TP
 \fBdescription\fR A short description of the application
+.nl
+.P
+Note that applications mounted from a user configuration file are appended to the list of system mountpoints, you cannot control system applications.
 .nl

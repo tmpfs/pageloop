@@ -24,6 +24,8 @@ those specified in the supplied configuration file.
 # Configuration
 
 Use a YAML configuration file to control the service behaviour.
+The configuration file should be writable so that new applications
+created using the user interface can be persisted.
 
 The `addr` configuration field sets the server bind address, it may
 be a port in the form :8080 or fully qualified host or IP address such as
@@ -40,3 +42,6 @@ to load when the server starts. Each entry can contain the fields:
 + `url` Public URL mountpoint
 + `path` Path to the source files
 + `description` A short description of the application
+
+Note that applications mounted from a user configuration file are appended
+to the list of system mountpoints, you cannot control system applications.
