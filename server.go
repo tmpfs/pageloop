@@ -321,6 +321,16 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
 }
 
+// Create and persist a mountpoint for a userspace application.
+func (l *PageLoop) CreateMountpoint(a *model.Application) error {
+  // TODO: work out source filesystem path
+  var m Mountpoint = Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
+  fmt.Printf("%#v\n", m)
+  var conf *ServerConfig = l.Config.AddMountpoint(m)
+  l.Config.WriteFile(conf, "")
+  return nil
+}
+
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")

@@ -184,7 +184,7 @@ class AppDataSource {
   }
 
   getIndexFile () {
-    let files = this.app.files
+    let files = this.app.files || []
     for (let i = 0; i < files.length; i++) {
       // got a published index page whether the source is
       // HTML or markdown
@@ -249,6 +249,24 @@ class AppDataSource {
     return fetch(url, options)
       .then((res) => res.json())
       .catch((err) => err)
+  }
+
+  createNewApp (app) {
+    let url = this.api + 'user/'
+    let opts = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(app)
+    }
+
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
   }
 
   getContainers () {
@@ -399,6 +417,40 @@ class EditorApplication {
           return data.getContainers()
             .then((list) => {
               context.commit('containers', list)
+            })
+        },
+        'new-app': function (context, app) {
+          console.log('create application: ' + app.name)
+          console.log('create application: ' + app.url)
+          console.log('create application: ' + app.description)
+
+          return context.state.createNewApp(app)
+            .then((res) => {
+              // Show error response
+              if (res.response.status !== 201) {
+                let doc = res.document
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                return context.dispatch('log', new Error(msg))
+              }
+
+              console.log(res.document)
+
+              /*
+              context.dispatch('log', `Created ${name}`)
+
+              context.dispatch('reload')
+                .then(() => {
+                  // Open the newly created file
+                  let files = context.state.app.files
+                  for (let i = 0; i < files.length; i++) {
+                    if (files[i].url === name) {
+                      context.dispatch(action, files[i])
+                      break
+                    }
+                  }
+                })
+              */
             })
         },
         'app': function (context) {
@@ -1452,9 +1504,8 @@ class EditorApplication {
               methods: {
                 createApplication: function (e) {
                   e.preventDefault()
-                  console.log('create application: ' + this.applicationName)
-                  console.log('create application: ' + this.applicationUrl)
-                  console.log('create application: ' + this.applicationDescription)
+                  let app = {name: this.applicationName, url: this.applicationUrl, description: this.applicationDescription}
+                  this.$store.dispatch('new-app', app)
                 },
                 linkify: function (c, a, open) {
                   if (open) {

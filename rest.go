@@ -238,6 +238,12 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
+        // Create and save a mountpoint for an application.
+        if err = h.Root.CreateMountpoint(input); err != nil {
+					ex(res, http.StatusInternalServerError, nil, err)
+					return
+        }
+
 				// Add the application to the container.
 				if err = h.Container.Add(input); err != nil {
 					ex(res, http.StatusPreconditionFailed, nil, err)
