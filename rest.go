@@ -284,16 +284,18 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
           }
         }
 
+        var app *model.Application
+
         // Load and publish the app source files
-        if err = h.Root.LoadMountpoint(*mountpoint, h.Container); err != nil {
+        if app, err = h.Root.LoadMountpoint(*mountpoint, h.Container); err != nil {
           ex(res, http.StatusInternalServerError, nil, err)
           return
         }
 
-        println(input.Container)
+        println(app.Container)
 
         // Mount the application
-        h.Root.MountApplication(input)
+        h.Root.MountApplication(app)
 
 				created(res, OK)
 				return

@@ -197,7 +197,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   // Load mountpoints
   for _, c := range collection {
-    if err = l.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+    if _, err = l.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
       return nil, err
     }
   }
@@ -236,18 +236,25 @@ func (l *PageLoop) Listen(server *http.Server) error {
 }
 
 // Load a single mountpoint.
-func (l *PageLoop) LoadMountpoint(mountpoint Mountpoint, container *model.Container) error {
+func (l *PageLoop) LoadMountpoint(mountpoint Mountpoint, container *model.Container) (*model.Application, error) {
+  var err error
+  var apps []*model.Application
   var list []Mountpoint
   list = append(list, mountpoint)
-  return l.LoadMountpoints(list, container)
+  if apps, err = l.LoadMountpoints(list, container); err != nil {
+    return nil, err
+  }
+  return apps[0], nil
 }
 
 // Iterates a list of mountpoints and creates an application for each mountpoint
 // and adds it to the given container.
-func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) error {
+func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) ([]*model.Application, error) {
   var err error
 	// Bundled application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
+
+  var apps []*model.Application
 
   // iterate apps and configure paths
   for _, mt := range mountpoints {
@@ -259,7 +266,7 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
-      return err
+      return nil, err
     }
 		name := filepath.Base(path)
 
@@ -275,12 +282,12 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 
     // Load the application files into memory
 		if err = app.Load(p); err != nil {
-			return err
+			return nil, err
 		}
 
     var publishPath string = filepath.Clean(l.Config.PublishDirectory)
     if publishPath, err = filepath.Abs(publishPath); err != nil {
-      return err
+      return nil, err
     }
 
     // Publish apps relative to a parent container directory
@@ -290,15 +297,17 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 
     // Publish the application files to a build directory
     if err = app.Publish(publishPath); err != nil {
-      return err
+      return nil, err
     }
 
 		// Add to the container
 		if err = container.Add(app); err != nil {
-			return err
+			return nil, err
 		}
+
+    apps = append(apps, app)
   }
-	return nil
+	return apps, nil
 }
 
 // Mount all applications in a container.
