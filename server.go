@@ -9,6 +9,7 @@ import (
 	"mime"
 	"strings"
 	"strconv"
+  "io/ioutil"
   "net/http"
   "path/filepath"
 	"regexp"
@@ -234,9 +235,16 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	return nil
 }
 
+// Load a single mountpoint.
+func (l *PageLoop) LoadMountpoint(mountpoint Mountpoint, container *model.Container) error {
+  var list []Mountpoint
+  list = append(list, mountpoint)
+  return l.LoadMountpoints(list, container)
+}
+
 // Iterates a list of mountpoints and creates an application for each mountpoint
 // and adds it to the given container.
-func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) error {
+func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) error {
   var err error
 	// Bundled application endpoints
 	dataPattern := regexp.MustCompile(`^data://`)
@@ -381,14 +389,19 @@ func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Applicat
   if app == nil {
     return nil, nil, fmt.Errorf("Template application %s does not exist", t.Application)
   }
-  t.Directory = "/" + strings.TrimSuffix(t.Directory, "/")
-  dir := app.Urls[t.Directory]
-  if dir == nil {
-    return nil, nil, fmt.Errorf("Template directory %s does not exist", t.Directory)
-  }
 
-  if !dir.Directory {
-    return nil, nil, fmt.Errorf("Template target directory %s is not a directory", t.Directory)
+  var dir *model.File
+
+  if t.Directory != "" {
+    t.Directory = "/" + strings.TrimSuffix(t.Directory, "/")
+    dir = app.Urls[t.Directory]
+    if dir == nil {
+      return nil, nil, fmt.Errorf("Template directory %s does not exist", t.Directory)
+    }
+
+    if !dir.Directory {
+      return nil, nil, fmt.Errorf("Template target directory %s is not a directory", t.Directory)
+    }
   }
 
   return app, dir, nil
@@ -396,10 +409,42 @@ func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Applicat
 
 //
 func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *model.Application, dir *model.File) error {
-  println("Copy application template for: " + dest.Name)
-  println("Copy application template for: " + dest.Path)
-  println("Copy application template from: " + dir.Path)
-  println("Copy application template from: " + dir.Name)
+  var err error
+  var files []*model.File
+  var prefix string
+
+  // Collect files in the given directory
+  if dir != nil {
+    prefix = dir.Relative
+    for _, f := range source.Files {
+      if f == dir {
+        continue;
+      }
+      if strings.HasPrefix(f.Relative, dir.Relative) {
+        files = append(files, f)
+      }
+    }
+  // All application files
+  } else {
+    files = source.Files
+  }
+
+  for _, f := range files {
+    if !f.Directory {
+      rel := strings.TrimPrefix(f.Relative, prefix)
+      out := filepath.Join(dest.Path, rel)
+      parent := filepath.Dir(rel)
+      if parent != "/" {
+        parent = filepath.Join(dest.Path, parent)
+        if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
+          return err
+        }
+      }
+      content := f.Source(true)
+      ioutil.WriteFile(out, content, f.Info().Mode())
+    }
+  }
+
   return nil
 }
 

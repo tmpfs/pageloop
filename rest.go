@@ -267,27 +267,33 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
         }
 
-        println(mountpoint)
-
         if input.Template != nil {
           var source *model.Application
           var dir *model.File
+
+          // Find the template app/ directory
           if source, dir, err = h.Root.LookupTemplate(input.Template); err != nil {
             ex(res, http.StatusBadRequest, nil, err);
             return
           }
 
+          // Copy template source files
           if err = h.Root.CopyApplicationTemplate(input, source, dir); err != nil {
             ex(res, http.StatusInternalServerError, nil, err)
             return
           }
         }
 
-				// Add the application to the container.
-				if err = h.Container.Add(input); err != nil {
-					ex(res, http.StatusPreconditionFailed, nil, err)
-					return
-				}
+        // Load and publish the app source files
+        if err = h.Root.LoadMountpoint(*mountpoint, h.Container); err != nil {
+          ex(res, http.StatusInternalServerError, nil, err)
+          return
+        }
+
+        println(input.Container)
+
+        // Mount the application
+        h.Root.MountApplication(input)
 
 				created(res, OK)
 				return

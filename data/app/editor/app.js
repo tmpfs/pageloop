@@ -1490,7 +1490,7 @@ class EditorApplication {
                   urlChanged: false,
                   applicationName: 'new-app',
                   applicationUrl: '/new-app',
-                  applicationDescription: ''
+                  applicationDescription: 'New application'
                 }
               },
               watch: {
