@@ -386,6 +386,11 @@ func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Applicat
   if dir == nil {
     return nil, nil, fmt.Errorf("Template directory %s does not exist", t.Directory)
   }
+
+  if !dir.Directory {
+    return nil, nil, fmt.Errorf("Template target directory %s is not a directory", t.Directory)
+  }
+
   return app, dir, nil
 }
 
