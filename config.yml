@@ -1,4 +1,5 @@
 addr: :3577
+publish: alt-dir
 mountpoints:
   -
     path: test/fixtures/mock-app

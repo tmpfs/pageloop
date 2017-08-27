@@ -9,12 +9,14 @@ var defaultServerConfig *ServerConfig
 
 // Represents a runtime configuration.
 type ServerConfig struct {
-
   // Address for the web server to bind to.
 	Addr string `json:"addr" yaml:"addr"`
 
 	// List of application mountpoints.
   Mountpoints []Mountpoint `json:"mountpoints" yaml:"mountpoints"`
+
+  // Directory for build publish preview
+  PublishDirectory string `json:"publish" yaml:"publish"`
 
 	// Load system assets from the file system, don't use
 	// the embedded assets.
@@ -63,6 +65,10 @@ func (c *ServerConfig) Merge(path string) error {
 
   if tempServerConfig.Addr != "" {
     c.Addr = tempServerConfig.Addr
+  }
+
+  if tempServerConfig.PublishDirectory != "" {
+    c.PublishDirectory = tempServerConfig.PublishDirectory
   }
 
   for _, m := range tempServerConfig.Mountpoints {

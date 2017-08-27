@@ -36,6 +36,9 @@ var mountpoints map[string] http.Handler
 var multiplex map[string] bool
 
 type PageLoop struct {
+  // Server configuration
+  Config *ServerConfig
+
 	// Underlying HTTP server.
 	Server *http.Server `json:"-"`
 
@@ -142,6 +145,8 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 // Creates an HTTP server.
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var err error
+
+  l.Config = config
 
   // Set up a host for our containers
 	l.Host = model.NewHost()
@@ -265,6 +270,15 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 		}
 
 		// TODO: make publishing optional
+
+    var publishPath string = filepath.Clean(l.Config.PublishDirectory)
+    if publishPath, err = filepath.Abs(publishPath); err != nil {
+      return err
+    }
+
+    publishPath = filepath.Join(publishPath, container.Name)
+
+    println("Publish config: " + publishPath)
 
     // Publish the application files to a build directory
     if err = app.Publish("public/" + container.Name); err != nil {
