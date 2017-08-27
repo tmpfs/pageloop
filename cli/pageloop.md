@@ -45,3 +45,13 @@ to load when the server starts. Each entry can contain the fields:
 
 Note that applications mounted from a user configuration file are appended
 to the list of system mountpoints, you cannot control system applications.
+
+# Publish
+
+When applications are published they are written to the publish directory
+with a namespace which is the container name and application name. Such that
+system/editor is the editor application in the system container.
+
+Container and application names must be unique. For applications the name is
+derived from the basename of the path and it is an error if two applications
+in the same container have the same name.

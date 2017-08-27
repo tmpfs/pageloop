@@ -112,3 +112,10 @@ Define a \fBmountpoints\fR list in the configuration file to specify application
 .P
 Note that applications mounted from a user configuration file are appended to the list of system mountpoints, you cannot control system applications.
 .nl
+.h1 "PUBLISH"
+.P
+When applications are published they are written to the publish directory with a namespace which is the container name and application name. Such that system/editor is the editor application in the system container.
+.nl
+.P
+Container and application names must be unique. For applications the name is derived from the basename of the path and it is an error if two applications in the same container have the same name.
+.nl
