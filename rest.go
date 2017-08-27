@@ -259,11 +259,15 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
         }
 
+        var mountpoint *Mountpoint
+
         // Create and save a mountpoint for the application.
-        if err = h.Root.CreateMountpoint(input); err != nil {
+        if mountpoint, err = h.Root.CreateMountpoint(input); err != nil {
 					ex(res, http.StatusInternalServerError, nil, err)
 					return
         }
+
+        println(mountpoint)
 
         if input.Template != nil {
           var dir *model.File

@@ -341,16 +341,16 @@ func (l *PageLoop) HasMountpoint(url string) bool {
 }
 
 // Create and persist a mountpoint for a userspace application.
-func (l *PageLoop) CreateMountpoint(a *model.Application) error {
+func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
 
   // TODO: verify application name against valid pattern
 
   if a.Name == "" {
-    return fmt.Errorf("Cannot create a mountpoint without an application name.")
+    return nil, fmt.Errorf("Cannot create a mountpoint without an application name.")
   }
 
   if !model.ValidName(a.Name) {
-    return fmt.Errorf(
+    return nil, fmt.Errorf(
       "Application name %s is invalid, must match pattern %s.", a.Name, model.NamePattern)
   }
 
@@ -361,13 +361,13 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) error {
 
   // Create source application directory
   if err := os.MkdirAll(a.Path, os.ModeDir | 0755); err != nil {
-		return err
+		return nil, err
 	}
 
-  var m Mountpoint = Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
-  var conf *ServerConfig = l.Config.AddMountpoint(m)
+  var m *Mountpoint = &Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
+  var conf *ServerConfig = l.Config.AddMountpoint(*m)
   l.Config.WriteFile(conf, "")
-  return nil
+  return m, nil
 }
 
 // Find a directory file within an application to use as an application
@@ -381,7 +381,6 @@ func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.File, er
   if app == nil {
     return nil, fmt.Errorf("Template application %s does not exist", t.Application)
   }
-  //fmt.Printf("%#v\n", app.Urls)
   t.Directory = "/" + strings.TrimSuffix(t.Directory, "/")
   dir := app.Urls[t.Directory]
   if dir == nil {
