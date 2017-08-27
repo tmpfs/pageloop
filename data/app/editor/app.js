@@ -1504,7 +1504,16 @@ class EditorApplication {
               methods: {
                 createApplication: function (e) {
                   e.preventDefault()
-                  let app = {name: this.applicationName, url: this.applicationUrl, description: this.applicationDescription}
+                  let app = {}
+                  if (this.applicationName) {
+                    app.name = this.applicationName
+                  }
+                  if (this.applicationUrl) {
+                    app.url = this.applicationUrl
+                  }
+                  if (this.applicationDescription) {
+                    app.description = this.applicationDescription
+                  }
                   this.$store.dispatch('new-app', app)
                 },
                 linkify: function (c, a, open) {

@@ -2,6 +2,7 @@
 package pageloop
 
 import (
+  "os"
 	"fmt"
   "log"
 	"errors"
@@ -341,7 +342,20 @@ func (l *PageLoop) HasMountpoint(url string) bool {
 
 // Create and persist a mountpoint for a userspace application.
 func (l *PageLoop) CreateMountpoint(a *model.Application) error {
-  // TODO: work out source filesystem path
+  if a.Name == "" {
+    return fmt.Errorf("Cannot create a mountpoint without an application name.")
+  }
+
+  // Configure filesystem path for source files
+  if a.Path == "" {
+    a.Path = filepath.Join(l.Config.SourceDirectory, a.Name)
+  }
+
+  // Create source application directory
+  if err := os.MkdirAll(a.Path, os.ModeDir | 0755); err != nil {
+		return err
+	}
+
   var m Mountpoint = Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
   fmt.Printf("%#v\n", m)
   var conf *ServerConfig = l.Config.AddMountpoint(m)

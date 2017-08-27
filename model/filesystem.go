@@ -178,6 +178,7 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 	if !isDir {
 		parent = filepath.Dir(out)
 	}
+
 	if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
 		return err
 	}

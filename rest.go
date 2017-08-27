@@ -484,6 +484,7 @@ func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojs
 	var body []byte
 	var result *gojsonschema.Result
 	body, err = readBody(req)
+  println(string(body))
 	if err != nil {
 		return nil, err
 	}
@@ -493,6 +494,7 @@ func validateRequest(schema []byte, input interface{}, req *http.Request) (*gojs
 	}
 
 	if result, err = validate(schema, body); result != nil {
+    fmt.Println(result)
 		if !result.Valid() {
 			return nil, errors.New(result.Errors()[0].String())
 		}

@@ -1,6 +1,7 @@
 /config.yml
-public
-assets.go
+/public
+/source
+/assets.go
 untitled*
 ref
 *.bak

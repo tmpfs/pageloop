@@ -141,8 +141,10 @@ func (c *ServerConfig) WriteFile(conf *ServerConfig, path string) error {
   if content, err = yaml.Marshal(conf); err != nil {
     return err
   }
-  println("write config file: " + path)
-  println("write config file: " + string(content))
+  // TODO: preserve permissions
+  if err = ioutil.WriteFile(path, content, 0644); err != nil {
+    return err
+  }
   return nil
 }
 
