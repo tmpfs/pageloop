@@ -425,7 +425,6 @@ class EditorApplication {
             application: 'applications',
             directory: 'default'
           }
-          console.log(app)
           return context.state.createNewApp(app)
             .then((res) => {
               // Show error response
@@ -438,21 +437,8 @@ class EditorApplication {
 
               context.dispatch('log', `Created ${app.name}`)
 
+              // Refresh containers list
               return context.dispatch('containers')
-
-              /*
-              context.dispatch('reload')
-                .then(() => {
-                  // Open the newly created file
-                  let files = context.state.app.files
-                  for (let i = 0; i < files.length; i++) {
-                    if (files[i].url === name) {
-                      context.dispatch(action, files[i])
-                      break
-                    }
-                  }
-                })
-              */
             })
         },
         'app': function (context) {
@@ -1519,6 +1505,9 @@ class EditorApplication {
                     app.description = this.applicationDescription
                   }
                   this.$store.dispatch('new-app', app)
+                    .then(() => {
+                      return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
+                    })
                 },
                 linkify: function (c, a, open) {
                   if (open) {
