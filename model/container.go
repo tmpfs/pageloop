@@ -3,7 +3,17 @@ package model
 import (
 	"fmt"
   "errors"
+  "regexp"
 )
+
+var(
+	NamePattern string = `^[a-zA-Z0-9]+[a-zA-Z0-9-]*`
+	NamePatternRe = regexp.MustCompile(NamePattern)
+)
+
+func ValidName(name string) bool {
+  return NamePatternRe.MatchString(name)
+}
 
 // Contains a slice of containers.
 type Host struct {
@@ -58,8 +68,8 @@ func (c *Container) Add(app *Application) error {
 		return errors.New("Application name is required to add to container")
 	}
 
-	if !re.MatchString(app.Name) {
-		return errors.New(fmt.Sprintf("Application name must match pattern %s", ptn))
+	if !NamePatternRe.MatchString(app.Name) {
+		return errors.New(fmt.Sprintf("Application name must match pattern %s", NamePattern))
 	}
 
 	var exists *Application = c.GetByName(app.Name)

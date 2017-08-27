@@ -5,7 +5,6 @@ import (
 	//"log"
   "os"
   "path"
-	"regexp"
   "strings"
   "path/filepath"
 )
@@ -25,8 +24,6 @@ const (
 
 var(
 	types = []string{YAML, JSON}
-	ptn string = `^[a-zA-Z0-9]+[a-zA-Z0-9-]*`
-	re = regexp.MustCompile(ptn)
 )
 
 type StatusError struct {

@@ -342,8 +342,15 @@ func (l *PageLoop) HasMountpoint(url string) bool {
 
 // Create and persist a mountpoint for a userspace application.
 func (l *PageLoop) CreateMountpoint(a *model.Application) error {
+
+  // TODO: verify application name against valid pattern
+
   if a.Name == "" {
     return fmt.Errorf("Cannot create a mountpoint without an application name.")
+  }
+
+  if !model.ValidName(a.Name) {
+    return fmt.Errorf("Application name %s is invalid, must match pattern %s.", a.Name, model.NamePattern)
   }
 
   // Configure filesystem path for source files
@@ -357,7 +364,6 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) error {
 	}
 
   var m Mountpoint = Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
-  fmt.Printf("%#v\n", m)
   var conf *ServerConfig = l.Config.AddMountpoint(m)
   l.Config.WriteFile(conf, "")
   return nil
