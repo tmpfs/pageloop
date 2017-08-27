@@ -269,19 +269,18 @@ func (l*PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Con
 			return err
 		}
 
-		// TODO: make publishing optional
-
     var publishPath string = filepath.Clean(l.Config.PublishDirectory)
     if publishPath, err = filepath.Abs(publishPath); err != nil {
       return err
     }
 
+    // Publish apps relative to a parent container directory
     publishPath = filepath.Join(publishPath, container.Name)
 
-    println("Publish config: " + publishPath)
+    //println("Publish config: " + publishPath)
 
     // Publish the application files to a build directory
-    if err = app.Publish("public/" + container.Name); err != nil {
+    if err = app.Publish(publishPath); err != nil {
       return err
     }
 
