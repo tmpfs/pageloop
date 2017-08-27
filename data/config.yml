@@ -1,5 +1,6 @@
 addr: :3577
 publish: public
+source: source
 mountpoints:
   -
     container: system

@@ -18,6 +18,9 @@ type ServerConfig struct {
 	// List of application mountpoints.
   Mountpoints []Mountpoint `json:"mountpoints" yaml:"mountpoints"`
 
+  // Directory for generated source files
+  SourceDirectory string `json:"source,omitempty" yaml:"source,omitempty"`
+
   // Directory for build publish preview
   PublishDirectory string `json:"publish,omitempty" yaml:"publish,omitempty"`
 
