@@ -270,13 +270,14 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
         println(mountpoint)
 
         if input.Template != nil {
+          var source *model.Application
           var dir *model.File
-          if dir, err = h.Root.LookupTemplate(input.Template); err != nil {
+          if source, dir, err = h.Root.LookupTemplate(input.Template); err != nil {
             ex(res, http.StatusBadRequest, nil, err);
             return
           }
 
-          if err = h.Root.CopyApplicationTemplate(input, dir); err != nil {
+          if err = h.Root.CopyApplicationTemplate(input, source, dir); err != nil {
             ex(res, http.StatusInternalServerError, nil, err)
             return
           }
@@ -287,10 +288,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					ex(res, http.StatusPreconditionFailed, nil, err)
 					return
 				}
-
-				// TODO: create application source file directory - template??
-				// TODO: rewrite mountpoints
-				// TODO: persist application mountpoints
 
 				created(res, OK)
 				return
