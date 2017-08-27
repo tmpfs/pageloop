@@ -9,6 +9,11 @@ var defaultServerConfig *ServerConfig
 
 // Represents a runtime configuration.
 type ServerConfig struct {
+
+  // User configuration merged with this config, only
+  // available if merge has been called.
+  UserConfig *ServerConfig `json:"-" yaml:"-"`
+
   // Address for the web server to bind to.
 	Addr string `json:"addr" yaml:"addr"`
 
@@ -76,6 +81,8 @@ func (c *ServerConfig) Merge(path string) error {
     m.Container = "user"
     c.Mountpoints = append(c.Mountpoints, m)
   }
+
+  c.UserConfig = tempServerConfig
 
   return nil
 }
