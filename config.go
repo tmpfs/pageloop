@@ -70,7 +70,10 @@ func (c *ServerConfig) UserConfig() *ServerConfig {
 // and returns the user configuration.
 func (c *ServerConfig) AddMountpoint(m Mountpoint) *ServerConfig {
   var conf *ServerConfig = c.UserConfig()
+  // Append to the user configuration mountpoints
   conf.Mountpoints = append(conf.Mountpoints, m)
+  // Append to the primary list for easier iteration
+  c.Mountpoints = append(c.Mountpoints, m)
   return conf
 }
 

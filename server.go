@@ -22,9 +22,6 @@ const(
 var Name string = "pageloop"
 var Version string = "1.0"
 
-var config ServerConfig
-var mux *http.ServeMux
-
 // Maps application URLs to HTTP handlers.
 //
 // Because we want to mount and unmount applications and we cannot remove
@@ -34,6 +31,9 @@ var mountpoints map[string] http.Handler
 // We need to know which requests go through the normal serve mux logic
 // so they do not collide with application requests.
 var multiplex map[string] bool
+
+// Primary serve mux handler for built in endpoints.
+var mux *http.ServeMux
 
 type PageLoop struct {
   // Server configuration
@@ -177,8 +177,8 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	rest := NewRestService(l, mux)
 	log.Printf("Serving rest service from %s", API_URL)
 
-	multiplex[rpc.Url] = true
-	multiplex[rest.Url] = true
+	multiplex[strings.TrimSuffix(rpc.Url, "/")] = true
+	multiplex[strings.TrimSuffix(rest.Url, "/")] = true
 
   // Collect mountpoints by container name
   var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
@@ -319,6 +319,24 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	url = "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
 	log.Printf("Serving raw %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
+}
+
+// Test if a mountpoint exists by URL.
+func (l *PageLoop) HasMountpoint(url string) bool {
+  umu := strings.TrimSuffix(url, "/")
+  if _, ok := multiplex[url]; ok {
+    return true
+  }
+  if _, ok := multiplex[umu]; ok {
+    return true
+  }
+  for _, m := range l.Config.Mountpoints {
+    cmu := strings.TrimSuffix(m.Url, "/")
+    if m.Url == url || cmu == umu {
+      return true
+    }
+  }
+  return false
 }
 
 // Create and persist a mountpoint for a userspace application.

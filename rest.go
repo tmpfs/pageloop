@@ -3,12 +3,14 @@
 package pageloop
 
 import (
+  "fmt"
 	"errors"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"net/http"
   "mime"
+  pth "path"
   "path/filepath"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
@@ -237,6 +239,21 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					ex(res, http.StatusBadRequest, nil, err)
 					return
 				}
+
+        input.Url = pth.Clean(input.Url)
+
+        existing := h.Container.GetByName(input.Name)
+        if existing != nil {
+					ex(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Application %s already exists", input.Name))
+					return
+        }
+
+        // mountpoint exists
+        exists := h.Root.HasMountpoint(input.Url)
+        if exists {
+					ex(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Mountpoint URL %s already exists", input.Url))
+					return
+        }
 
         // Create and save a mountpoint for an application.
         if err = h.Root.CreateMountpoint(input); err != nil {
