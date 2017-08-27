@@ -350,7 +350,8 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) error {
   }
 
   if !model.ValidName(a.Name) {
-    return fmt.Errorf("Application name %s is invalid, must match pattern %s.", a.Name, model.NamePattern)
+    return fmt.Errorf(
+      "Application name %s is invalid, must match pattern %s.", a.Name, model.NamePattern)
   }
 
   // Configure filesystem path for source files

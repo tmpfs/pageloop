@@ -7,7 +7,7 @@ import (
 )
 
 var(
-	NamePattern string = `^[a-zA-Z0-9]+[a-zA-Z0-9-]*`
+	NamePattern string = `^[a-zA-Z0-9]+[-a-zA-Z0-9]*$`
 	NamePatternRe = regexp.MustCompile(NamePattern)
 )
 
@@ -69,16 +69,15 @@ func (c *Container) Add(app *Application) error {
 	}
 
 	if !NamePatternRe.MatchString(app.Name) {
-		return errors.New(fmt.Sprintf("Application name must match pattern %s", NamePattern))
+		return fmt.Errorf("Application name %s must match pattern %s", app.Name, NamePattern)
 	}
 
 	var exists *Application = c.GetByName(app.Name)
 	if exists != nil {
-		return errors.New(fmt.Sprintf("Application exists with name %s", app.Name))
+		return fmt.Errorf("Application exists with name %s", app.Name)
 	}
 
 	app.Protected = c.Protected
-
 	app.Container = c
 
 	c.Apps = append(c.Apps, app)

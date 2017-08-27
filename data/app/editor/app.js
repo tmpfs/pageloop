@@ -218,7 +218,7 @@ class AppDataSource {
 
   set current (file) {
     if (file) {
-      let pages = this.app.pages
+      let pages = this.app.pages || []
       for (let i = 0; i < pages.length; i++) {
         if (pages[i].url === file.url) {
           file.page = pages[i]
@@ -420,10 +420,6 @@ class EditorApplication {
             })
         },
         'new-app': function (context, app) {
-          console.log('create application: ' + app.name)
-          console.log('create application: ' + app.url)
-          console.log('create application: ' + app.description)
-
           return context.state.createNewApp(app)
             .then((res) => {
               // Show error response
@@ -434,11 +430,11 @@ class EditorApplication {
                 return context.dispatch('log', new Error(msg))
               }
 
-              console.log(res.document)
+              context.dispatch('log', `Created ${app.name}`)
+
+              return context.dispatch('containers')
 
               /*
-              context.dispatch('log', `Created ${name}`)
-
               context.dispatch('reload')
                 .then(() => {
                   // Open the newly created file
@@ -1472,7 +1468,9 @@ class EditorApplication {
                                   @click="$store.dispatch('navigate', {href: linkify(container, app)})"
                                   :title="title(app, 'Edit')">Edit</a>
                                 <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
-                                <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Stop')">Stop ⏏</a>
+                                <a v-if="!app.protected" class="name"
+                                  :href="linkify(container, app, true)"
+                                  :title="title(app, 'Delete')">Delete</a>
                               </p>
                             </p>
                         </div>
