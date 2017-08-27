@@ -87,3 +87,25 @@ Web server that serves system applications and those specified in the supplied c
 \fB\-\-version\fR
  Print the version and exit
 .nl
+.h1 "CONFIGURATION"
+.P
+Use a YAML configuration file to control the service behaviour.
+.nl
+.P
+The \fBaddr\fR configuration field sets the server bind address, it may be a port in the form :8080 or fully qualified host or IP address such as 0.0.0.0:8080.
+.nl
+.P
+When applications are mounted they are published to a directory which is configured using the \fBpublish\fR field, the directory must be writable. If no publish directory is configured the default location is a \fBpublic\fR directory relative to the current working directory.
+.nl
+.P
+Define a \fBmountpoints\fR list in the configuration file to specify applications to load when the server starts. Each entry can contain the fields:
+.nl
+.TP
+\fBurl\fR Public URL mountpoint
+.nl
+.TP
+\fBpath\fR Path to the source files
+.nl
+.TP
+\fBdescription\fR A short description of the application
+.nl
