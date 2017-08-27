@@ -420,6 +420,12 @@ class EditorApplication {
             })
         },
         'new-app': function (context, app) {
+          app.template = {
+            container: 'template',
+            application: 'applications',
+            directory: 'default'
+          }
+          console.log(app)
           return context.state.createNewApp(app)
             .then((res) => {
               // Show error response

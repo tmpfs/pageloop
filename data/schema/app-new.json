@@ -2,7 +2,8 @@
 	"properties": {
 		"name": {"type": "string"},
 		"url": {"type": "string"},
-		"description": {"type": "string"}
+		"description": {"type": "string"},
+    "template": {"type": "object"}
 	},
 	"required": ["name", "url", "description"],
 	"additionalProperties": false

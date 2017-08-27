@@ -265,7 +265,18 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
         }
 
-        // TODO: copy files from template
+        if input.Template != nil {
+          var dir *model.File
+          if dir, err = h.Root.LookupTemplate(input.Template); err != nil {
+            ex(res, http.StatusBadRequest, nil, err);
+            return
+          }
+
+          if err = h.Root.CopyApplicationTemplate(input, dir); err != nil {
+            ex(res, http.StatusInternalServerError, nil, err)
+            return
+          }
+        }
 
 				// Add the application to the container.
 				if err = h.Container.Add(input); err != nil {

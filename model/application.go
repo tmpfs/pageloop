@@ -63,6 +63,17 @@ type Application struct {
 	Protected bool `json:"protected,omitempty"`
 
 	Container *Container `json:"-"`
+
+	// A source template for this application
+	Template *ApplicationTemplate `json:"template"`
+}
+
+// References an existing mounted application subdirectory
+// used for the intialization of the application files.
+type ApplicationTemplate struct {
+	Container string
+	Application string
+	Directory string
 }
 
 func NewApplication(mountpoint, description string) *Application {

@@ -370,6 +370,34 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) error {
   return nil
 }
 
+// Find a directory file within an application to use as an application
+// template.
+func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.File, error) {
+  container := l.Host.GetByName(t.Container)
+  if container == nil {
+    return nil, fmt.Errorf("Template container %s does not exist", t.Container)
+  }
+  app := container.GetByName(t.Application)
+  if app == nil {
+    return nil, fmt.Errorf("Template application %s does not exist", t.Application)
+  }
+  //fmt.Printf("%#v\n", app.Urls)
+  t.Directory = "/" + strings.TrimSuffix(t.Directory, "/")
+  dir := app.Urls[t.Directory]
+  if dir == nil {
+    return nil, fmt.Errorf("Template directory %s does not exist", t.Directory)
+  }
+  return dir, nil
+}
+
+//
+func (l *PageLoop) CopyApplicationTemplate(a *model.Application, dir *model.File) error {
+  println("Copy application template for: " + a.Name)
+  println("Copy application template for: " + dir.Path)
+  println("Copy application template from: " + dir.Name)
+  return nil
+}
+
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
