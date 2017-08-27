@@ -58,7 +58,9 @@ pageloop \- collaborative realtime server
 .nl
 .h1 "SYNOPSIS"
 .P
-pageloop [\-h] [\-\-help] [\-\-version] [\-\-config=<file>] [\-\-addr=<val>]
+pageloop [\-h] [\-\-help] [\-\-version] [\-\-addr=<val>] [\-\-config=<file>]
+.br
+         [\-\-publish=<dir>]
 .nl
 .h1 "DESCRIPTION"
 .P
@@ -66,12 +68,16 @@ Web server that serves system applications and those specified in the supplied c
 .nl
 .h1 "OPTIONS"
 .TP
-\fB\-\-config\fR=[\fIfile\fR]
+\fB\-a, \-\-addr\fR=[\fIval\fR]
+ Set the bind address
+.nl
+.TP
+\fB\-c, \-\-config\fR=[\fIfile\fR]
  Load server configuration from a YAML file
 .nl
 .TP
-\fB\-\-addr\fR=[\fIval\fR]
- Set the bind address
+\fB\-p, \-\-publish\fR=[\fIdir\fR]
+ Directory for application builds
 .nl
 .TP
 \fB\-h, \-\-help\fR

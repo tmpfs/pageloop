@@ -5,8 +5,9 @@ _pageloop(){
   local actions options commands;
 
   options=(
-    "--config=[Load server configuration from a YAML file]:file:_files" 
-    "--addr=[Set the bind address]" 
+    "(-a --addr)"{-a=,--addr=}"[Set the bind address]" 
+    "(-c --config)"{-c=,--config=}"[Load server configuration from a YAML file]:file:_files" 
+    "(-p --publish)"{-p=,--publish=}"[Directory for application builds]:directory:_directories" 
     "(-h --help)"{-h,--help}"[Display help and exit]" 
     "--version[Print the version and exit]"
   )

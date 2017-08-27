@@ -10,22 +10,11 @@
     "[flags] [options]"
   ],
   "options": {
-    "config": {
-      "key": "config",
-      "description": "Load server configuration from a YAML file",
-      "names": [
-        "--config"
-      ],
-      "type": "option",
-      "extra": "=[file]",
-      "required": false,
-      "multiple": false,
-      "name": "--config"
-    },
     "addr": {
       "key": "addr",
       "description": "Set the bind address",
       "names": [
+        "-a",
         "--addr"
       ],
       "type": "option",
@@ -34,6 +23,33 @@
       "multiple": false,
       "value": ":3577",
       "name": "--addr"
+    },
+    "config": {
+      "key": "config",
+      "description": "Load server configuration from a YAML file",
+      "names": [
+        "-c",
+        "--config"
+      ],
+      "type": "option",
+      "extra": "=[file]",
+      "required": false,
+      "multiple": false,
+      "name": "--config"
+    },
+    "publish": {
+      "key": "publish",
+      "description": "Directory for application builds",
+      "names": [
+        "-p",
+        "--publish"
+      ],
+      "type": "option",
+      "extra": "=[dir]",
+      "required": false,
+      "multiple": false,
+      "value": "public",
+      "name": "--publish"
     },
     "help": {
       "key": "help",

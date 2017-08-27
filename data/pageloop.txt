@@ -1,4 +1,5 @@
-Usage: pageloop [-h] [--help] [--version] [--config=<file>] [--addr=<val>]
+Usage: pageloop [-h] [--help] [--version] [--addr=<val>] [--config=<file>]
+                [--publish=<dir>]
 
   Collaborative realtime server.
 
@@ -6,8 +7,9 @@ Usage: pageloop [-h] [--help] [--version] [--config=<file>] [--addr=<val>]
   those specified in the supplied configuration file.
 
 Options
-  --config=[file]         Load server configuration from a YAML file
-  --addr=[val]            Set the bind address (default: :3577)
+  -a, --addr=[val]        Set the bind address (default: :3577)
+  -c, --config=[file]     Load server configuration from a YAML file
+  -p, --publish=[dir]     Directory for application builds (default: public)
   -h, --help              Display help and exit
   --version               Print the version and exit
 
