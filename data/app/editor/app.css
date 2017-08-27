@@ -521,6 +521,7 @@ input[type="text"] {
 }
 
 button, input[type="submit"], input[type="reset"] {
+  cursor: pointer;
   background: var(--blue-color);
   color: var(--base3-color);
   border: 2px solid var(--base1-color);
