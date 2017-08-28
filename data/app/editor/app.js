@@ -1004,6 +1004,13 @@ class EditorApplication {
           this.$store.commit('preview-refresh', false)
         }
       },
+      mounted: function () {
+        // This catches the case when switching main views
+        // and a refresh is needed
+        if (this.url) {
+          this.refresh(this.url)
+        }
+      },
       methods: {
         refresh (url) {
           let allowed = /\.(html?)$/
