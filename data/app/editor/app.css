@@ -192,7 +192,7 @@ main {
 main > .content-main {
   flex: 1 1;
   height: calc(100% - 6rem);
-  max-height: calc(100% - 6rem);
+  /*max-height: calc(100% - 6rem);*/
 }
 
 .content-main.home {
@@ -546,12 +546,12 @@ input[type="submit"], input[type="reset"] {
 }
 
 .file-editor, .source-editor, .visual-editor {
-  height: 100%;
+  height: calc(100% - 4.6rem);
 }
 
 .text-editor {
   background: #002b36;
-  height: calc(100% - 4.6rem)
+  height: 100%;
 }
 
 .CodeMirror {

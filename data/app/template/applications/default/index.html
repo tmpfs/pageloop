@@ -1,30 +1,59 @@
 ---
-title: Default Application
+title: Acme Portfolio
+organization: Acme Inc
 lang: en
-author:
-description:
-keywords: website, html, page
+author: webmaster@acme.com
+description: Portfolio for Acme Inc
+keywords: website, portfolio
 layout: false
 ---
 <!doctype html>
 <html lang="{{.lang}}">
   <head>
-		<title>{{.title}}</title>
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="author" content="{{.author}}" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/png" href='{{root "favicon.png"}}' />
-		{{if .description}}
-		<meta name="description" content="{{.description}}" />
-		{{end}}
-		<link rel="stylesheet" href='{{root "app.css"}}' />
+    <title>{{.title}}</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="author" content="{{.author}}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href='{{root "favicon.png"}}' />
+    {{if .description}}
+    <meta name="description" content="{{.description}}" />
+    {{end}}
+    <link rel="stylesheet" href='{{root "app.css"}}' />
   </head>
   <body>
+    <header>
+      <h1>Acme Inc</h1>
+      <nav>
+        <a href="#home" title="Home page">Home</a>
+        <a href="#about" title="About us">About</a>
+        <a href="#portfolio" title="Our portfolio">Portfolio</a>
+      </nav>
+    </header>
 		<main>
-			<header>
-			</header>
-      <h1>Default Template</h1>
+      <section id="home">
+        <h2>Home</h2>
+        <p>This is a simple web page created for you to customize to your style!</p>
+
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam quis est gravida elit porta mattis sed id diam. Aliquam id arcu dapibus, consequat augue bibendum, interdum sapien. Curabitur sollicitudin pretium urna, et faucibus ipsum placerat sed. In eu imperdiet ante. Nunc adipiscing semper euismod. Mauris hendrerit nulla non tortor convallis euismod. Donec sagittis magna ligula, vitae aliquet diam hendrerit vitae. Donec magna ipsum, aliquet a dolor et, aliquet molestie nulla. Phasellus metus nibh, scelerisque eu velit a, iaculis porttitor sapien. Nullam pellentesque, lectus eu fermentum gravida, eros tortor elementum orci, non tincidunt diam purus id quam. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque pretium pharetra felis. Nullam dignissim tellus justo. In accumsan velit tellus, non vehicula tortor mollis ac. Sed in sodales ipsum.</p>
+      </section>
+      <section id="about">
+        <h2>About</h2>
+        <p>Mauris pulvinar aliquam adipiscing. Nullam venenatis dui vitae nibh porttitor, at mattis dolor bibendum. Nullam sit amet nibh urna. Nulla interdum lobortis augue, ut pellentesque lacus convallis a. Nulla non dolor eget neque eleifend vehicula. Mauris rutrum quam vel facilisis tincidunt. Fusce vulputate massa eget nulla fermentum pulvinar. Donec eget diam at erat pulvinar ornare. Maecenas vel diam at ipsum pellentesque vestibulum. Nullam metus eros, molestie nec tempus porttitor, posuere eget erat. Cras vehicula nunc in rutrum facilisis. Fusce orci ante, gravida quis tristique eu, hendrerit aliquam tortor.</p>
+
+        <p>In vitae faucibus libero. Nullam eget leo eget tortor tempor luctus. Nam at ante felis. Fusce pellentesque aliquet nisl, at tempus ante imperdiet elementum. Etiam a bibendum justo, ut placerat massa. Mauris mattis tellus ligula, at luctus ante iaculis quis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras eget dui nisl.</p>
+
+      </section>
+      <section id="portfolio">
+        <h2>Portfolio</h2>
+
+        <p>Ut bibendum massa orci, a vestibulum est fermentum quis. Donec a mollis neque. Mauris tempor rutrum mauris, id consectetur est dapibus sed. Suspendisse pharetra laoreet massa, nec egestas nisi placerat quis. Nam fringilla turpis a ligula sollicitudin, ac commodo turpis placerat. Pellentesque cursus eget odio vel condimentum. Fusce venenatis mi auctor, sagittis lacus sit amet, tristique leo. Mauris pretium est nunc, non varius diam facilisis eleifend. Proin eleifend magna venenatis sapien commodo laoreet. Donec malesuada, nulla at pretium sodales, nunc mauris congue risus, vitae posuere turpis arcu in nisi. Maecenas at est ac nunc faucibus sollicitudin. Suspendisse gravida elit ante, non pellentesque metus sollicitudin non. Praesent eu sollicitudin massa. Donec et congue orci.</p>
+
+        <p>Phasellus facilisis eros vel dui lobortis, at posuere neque placerat. Duis vel congue risus. Cras in tincidunt nunc. In lacinia euismod nulla id consequat. Nam enim justo, gravida eu nunc sed, tempus lacinia augue. Vivamus auctor magna convallis nibh adipiscing, quis consectetur enim scelerisque. Integer consequat porta odio, facilisis pulvinar eros tincidunt vitae.</p>
+      </section>
 		</main>
+    <footer>
+      <p>&copy; All rights reserved. <a href="mailto:domain@example.com" title="Send us an email">Email</a></p>
+    </footer>
   </body>
 </html>

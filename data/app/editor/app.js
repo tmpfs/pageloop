@@ -963,7 +963,7 @@ class EditorApplication {
               :class="{hidden: maximized !== 'preview'}"
               title="Minimize">▣</a>
           </nav>
-          <iframe :src="src" class="publish-preview"></iframe>
+          <iframe :src="src" sandbox="allow-same-origin allow-scripts" class="publish-preview"></iframe>
         </div>
       `,
       data: function () {
