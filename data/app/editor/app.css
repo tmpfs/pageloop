@@ -564,12 +564,12 @@ header > nav > a {
   font-size: 1.4rem;
   padding: .3rem 2rem;
   text-transform: uppercase;
-  color: var(--blue-color) !important;
+  color: var(--base2-color) !important;
 }
 
 header > nav > a:hover, header > nav > a.selected {
   text-decoration: underline;
-  color: white !important;
+  color: var(--base3-color) !important;
   background: var(--blue-color);
 }
 
