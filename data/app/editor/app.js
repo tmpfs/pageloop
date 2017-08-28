@@ -432,7 +432,9 @@ class EditorApplication {
                 let doc = res.document
                 let msg = doc.error || doc.message
                 msg = `[${res.response.status}] ${msg}`
-                return context.dispatch('log', new Error(msg))
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
               }
 
               context.dispatch('log', `Created ${app.name}`)
@@ -503,7 +505,9 @@ class EditorApplication {
                 let doc = res.document
                 let msg = doc.error || doc.message
                 msg = `[${res.response.status}] ${msg}`
-                return context.dispatch('log', new Error(msg))
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
               }
 
               context.dispatch('log', `Created ${name}`)
@@ -868,10 +872,12 @@ class EditorApplication {
               if (this.$parent.previousView === 'pages') {
                 action = 'go-page'
               }
-              return this.$store.dispatch('new-file', {name: this.fileName, template: this.template, action: action})
+              return this.$store.dispatch(
+                'new-file', {name: this.fileName, template: this.template, action: action})
                 .then(() => {
                   this.$parent.closeNewFileView()
                 })
+                .catch((e) => console.error(e))
             }
           }
         },
@@ -1508,6 +1514,7 @@ class EditorApplication {
                     .then(() => {
                       return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
                     })
+                    .catch((e) => console.error(e))
                 },
                 linkify: function (c, a, open) {
                   if (open) {
