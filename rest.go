@@ -204,11 +204,13 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				h.Container.Del(app)
+        println("Deleting application: " + name)
 
 				// TODO: rewrite mountpoints
 				// TODO: persist application mountpoints
 				// TODO: unmount application
+
+				//h.Container.Del(app)
 
 				ok(res, OK)
 				return

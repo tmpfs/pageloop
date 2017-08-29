@@ -309,6 +309,20 @@ class AppDataSource {
       })
   }
 
+  deleteApp (container, application) {
+    let url = `${this.api}${container}/${application}/`
+    let opts = {
+      method: 'DELETE'
+    }
+    console.log('Deleting app: ' + application)
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
+
   saveFile (file, value) {
     file.content = value
 
@@ -443,6 +457,25 @@ class EditorApplication {
               return context.dispatch('containers')
             })
         },
+        'del-app': function (context, {container, application}) {
+          return context.state.deleteApp(container, application)
+            .then((res) => {
+              // Show error response
+              if (res.response.status !== 200) {
+                let doc = res.document
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
+              }
+
+              context.dispatch('log', `Created ${app.name}`)
+
+              // Refresh containers list
+              return context.dispatch('containers')
+            })
+        },
         'app': function (context) {
           return data.getApplication()
             .then((doc) => {
@@ -539,7 +572,9 @@ class EditorApplication {
               if (res.response.status !== 200) {
                 let msg = doc.error || doc.message
                 msg = `[${res.response.status}] ${msg}`
-                return context.dispatch('log', new Error(msg))
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
               }
 
               return context.dispatch('reload')
@@ -771,6 +806,7 @@ class EditorApplication {
           e.preventDefault()
           return this.$store.dispatch('delete-file', this.currentFile)
             .then(() => { this.shouldDelete = false })
+            .catch((e) => console.error(e))
         },
         showNewFileView: function () {
           this.previousView = this.currentView
@@ -1472,9 +1508,11 @@ class EditorApplication {
                                 <a class="name"
                                   @click="$store.dispatch('navigate', {href: linkify(container, app)})"
                                   :title="title(app, 'Edit')">Edit</a>
-                                <a class="name" :href="linkify(container, app, true)" :title="title(app, 'Open')">Open</a>
-                                <a v-if="!app.protected" class="name"
+                                <a class="name"
                                   :href="linkify(container, app, true)"
+                                  :title="title(app, 'Open')">Open</a>
+                                <a v-if="!app.protected" class="name"
+                                  @click="deleteApplication(container, app)"
                                   :title="title(app, 'Delete')">Delete</a>
                               </p>
                             </p>
@@ -1522,6 +1560,11 @@ class EditorApplication {
                       return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
                     })
                     .catch((e) => console.error(e))
+                },
+                deleteApplication: function (container, application) {
+                  this.$store.dispatch('del-app', {container: container.name, application: application.name})
+                    .catch((e) => console.error(e))
+                  return false
                 },
                 linkify: function (c, a, open) {
                   if (open) {
