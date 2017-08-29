@@ -1365,6 +1365,10 @@ class EditorApplication {
                 keyMap: 'vim'
               })
               this.mirror.on('changes', this.changes)
+
+              CodeMirror.commands.save = function (cm) {
+                console.log('save called')
+              }
             }
           },
           mounted: function () {
