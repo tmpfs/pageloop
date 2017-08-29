@@ -210,9 +210,18 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
         h.Root.UnmountApplication(app)
 
         // Delete the mountpoint
-        h.Root.DeleteApplicationMountpoint(app)
+        if err = h.Root.DeleteApplicationMountpoint(app); err != nil {
+					ex(res, http.StatusInternalServerError, nil, err)
+					return
+        }
 
         // TODO: delete source and published files
+
+        // Delete the files
+        if err = h.Root.DeleteApplicationFiles(app); err != nil {
+					ex(res, http.StatusInternalServerError, nil, err)
+					return
+        }
 
         // Delete the in-memory application
         h.Container.Del(app)

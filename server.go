@@ -378,6 +378,7 @@ func (l *PageLoop) HasMountpoint(url string) bool {
 
 // Create and persist a mountpoint for a userspace application.
 func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
+  var err error
   if a.Name == "" {
     return nil, fmt.Errorf("Cannot create a mountpoint without an application name")
   }
@@ -399,17 +400,39 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
 
   var m *Mountpoint = &Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
   var conf *ServerConfig = l.Config.AddMountpoint(*m)
-  l.Config.WriteFile(conf, "")
+  if err = l.Config.WriteFile(conf, ""); err != nil {
+    return nil, err
+  }
   return m, nil
 }
 
 // Delete a mountpoint for a userspace application and persist the list of mountpoints.
 func (l *PageLoop) DeleteApplicationMountpoint(a *model.Application) error {
+  var err error
   if a.Url == "" {
     return fmt.Errorf("Cannot delete a mountpoint without an application URL")
   }
   var conf *ServerConfig = l.Config.DeleteMountpoint(a.Url)
-  l.Config.WriteFile(conf, "")
+  if err = l.Config.WriteFile(conf, ""); err != nil {
+    return err
+  }
+  return nil
+}
+
+// Attempt to delete all application source and publish files.
+func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
+  var err error
+
+  // Delete published files
+  if err = os.RemoveAll(a.Public); err != nil {
+    return err
+  }
+
+  // Delete source files
+  if err = os.RemoveAll(a.Path); err != nil {
+    return err
+  }
+
   return nil
 }
 
