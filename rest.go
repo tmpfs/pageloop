@@ -204,8 +204,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-        println("Deleting application: " + name)
-
         // Stop serving files for the application
         h.Root.UnmountApplication(app)
 

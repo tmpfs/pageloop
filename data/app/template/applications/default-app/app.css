@@ -1,3 +1,53 @@
+:root {
+  --base03-color: #002b36;
+  --base02-color: #073642;
+  --base01-color: #586e75;
+  --base00-color: #657b83;
+  --base0-color: #839496;
+  --base1-color: #93a1a1;
+  --base2-color: #eee8d5;
+  --base3-color: #fdf6e3;
+  --yellow-color: #b58900;
+  --orange-color: #cb4b16;
+  --red-color: #dc322f;
+  --magenta-color: #d33682;
+  --violet-color: #6c71c4;
+  --blue-color: #268bd2;
+  --cyan-color: #2aa198;
+  --green-color: #859900;
+
+  --background: #073642;
+  --color: #93a1a1;
+  --border-color: #002b36;
+  --toolbar-link: #839496;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 62.5%
+}
+
+*, *:after, *:before {
+  box-sizing: inherit
+}
+
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  background: white;
+  font-size: 1.8rem;
+  line-height: 2.2rem;
+  font-family: 'SourceSans';
+  background: var(--background);
+  color: var(--color);
+}
+
+header, main, footer {
+  padding: 0 3rem;
 }
