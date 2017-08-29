@@ -379,8 +379,6 @@ func (l *PageLoop) HasMountpoint(url string) bool {
 // Create and persist a mountpoint for a userspace application.
 func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
 
-  // TODO: verify application name against valid pattern
-
   if a.Name == "" {
     return nil, fmt.Errorf("Cannot create a mountpoint without an application name")
   }
@@ -405,6 +403,21 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
   l.Config.WriteFile(conf, "")
   return m, nil
 }
+
+// Delete a mountpoint for a userspace application and persist the list of mountpoints.
+func (l *PageLoop) DeleteApplicationMountpoint(a *model.Application) error {
+
+  if a.Url == "" {
+    return fmt.Errorf("Cannot delete a mountpoint without an application URL")
+  }
+
+  println("Deleting mountpoint: " + a.Url)
+
+  var conf *ServerConfig = l.Config.DeleteMountpoint(a.Url)
+  l.Config.WriteFile(conf, "")
+  return nil
+}
+
 
 // Find a directory file within an application to use as an application
 // template.

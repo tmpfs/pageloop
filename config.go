@@ -72,8 +72,19 @@ func (c *ServerConfig) AddMountpoint(m Mountpoint) *ServerConfig {
   var conf *ServerConfig = c.UserConfig()
   // Append to the user configuration mountpoints
   conf.Mountpoints = append(conf.Mountpoints, m)
-  // Append to the primary list for easier iteration
-  c.Mountpoints = append(c.Mountpoints, m)
+  return conf
+}
+
+// Attempt to delete a user mountpoint for the given URL.
+func (c *ServerConfig) DeleteMountpoint(url string) *ServerConfig {
+  var conf *ServerConfig = c.UserConfig()
+  for i, m := range conf.Mountpoints {
+    if url == m.Url {
+      before := conf.Mountpoints[0:i]
+      after := conf.Mountpoints[i+1:]
+      conf.Mountpoints = append(before, after...)
+    }
+  }
   return conf
 }
 
