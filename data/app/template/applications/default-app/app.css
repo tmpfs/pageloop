@@ -110,3 +110,7 @@ h2 {
   margin-bottom: 1rem;
 }
 
+blockquote {
+  border-left: 4px solid var(--base2-color);
+  padding-left: 1rem;
+}
