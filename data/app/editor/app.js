@@ -314,7 +314,6 @@ class AppDataSource {
     let opts = {
       method: 'DELETE'
     }
-    console.log('Deleting app: ' + application)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -1300,14 +1299,11 @@ class EditorApplication {
                 } else {
                   let v = h('span', {class: 'data-value'}, ['' + value])
                   li.children.push(v)
-                  // console.log(v)
                 }
                 el.children.push(li)
               })
               return [el]
             }
-
-            // console.log(this.pageData)
 
             let children = list(this.pageData)
             let el = h('div', {class: 'data-editor'}, children)
@@ -1360,7 +1356,6 @@ class EditorApplication {
               this.value = this.mirror.getValue()
             },
             save: function () {
-              console.log('saving current file')
               this.$store.dispatch('save-file')
                 .catch((e) => console.error(e))
             },
