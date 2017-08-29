@@ -470,7 +470,7 @@ class EditorApplication {
                 throw err
               }
 
-              context.dispatch('log', `Created ${app.name}`)
+              context.dispatch('log', `Deleted ${application}`)
 
               // Refresh containers list
               return context.dispatch('containers')
