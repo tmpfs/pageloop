@@ -422,8 +422,8 @@ class EditorApplication {
         'new-app': function (context, app) {
           app.template = {
             container: 'template',
-            application: 'applications',
-            directory: 'default'
+            application: 'default-app',
+            directory: ''
           }
           return context.state.createNewApp(app)
             .then((res) => {
