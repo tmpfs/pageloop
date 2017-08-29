@@ -13,11 +13,10 @@ keywords: website, portfolio
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="author" content="{{.author}}" />
+    <meta name="description" content="{{.description}}" />
+    <meta name="keywords" content="{{.keywords}}" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href='{{root "favicon.png"}}' />
-    {{if .description}}
-    <meta name="description" content="{{.description}}" />
-    {{end}}
     <link rel="stylesheet" href='{{root "app.css"}}' />
   </head>
   <body id="top">
