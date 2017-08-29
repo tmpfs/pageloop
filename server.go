@@ -317,6 +317,18 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 	}
 }
 
+func (l *PageLoop) getPublishUrl (app *model.Application) string {
+  return app.Url
+}
+
+func (l *PageLoop) getSourceUrl (app *model.Application) string {
+	return "/apps/source/" + app.Container.Name + "/" + app.Name + "/"
+}
+
+func (l *PageLoop) getRawUrl (app *model.Application) string {
+  return "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
+}
+
 // Mount an application such that it's published and source
 // files are accessible over HTTP. This serves the published files
 // as static files and serves two versions of the source file
@@ -324,19 +336,26 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 // stripped and the raw version includes frontmatter.
 func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the static build files from the mountpoint path.
-	url := app.Url
+	url := l.getPublishUrl(app)
 	log.Printf("Serving app %s from %s", url, app.Public)
 	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Public)))
 
 	// Serve the source files with frontmatter stripped.
-	url = "/apps/source/" + app.Container.Name + "/" + app.Name + "/"
+	url = l.getSourceUrl(app)
 	log.Printf("Serving src %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
 
 	// Serve the raw source files.
-	url = "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
+	url = l.getRawUrl(app)
 	log.Printf("Serving raw %s from %s", url, app.Path)
 	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
+}
+
+// Unmount an application from the web server.
+func (l *PageLoop) UnmountApplication(app *model.Application) {
+  delete(mountpoints, l.getPublishUrl(app))
+  delete(mountpoints, l.getSourceUrl(app))
+  delete(mountpoints, l.getRawUrl(app))
 }
 
 // Test if a mountpoint exists by URL.
@@ -363,12 +382,12 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
   // TODO: verify application name against valid pattern
 
   if a.Name == "" {
-    return nil, fmt.Errorf("Cannot create a mountpoint without an application name.")
+    return nil, fmt.Errorf("Cannot create a mountpoint without an application name")
   }
 
   if !model.ValidName(a.Name) {
     return nil, fmt.Errorf(
-      "Application name %s is invalid, must match pattern %s.", a.Name, model.NamePattern)
+      "Application name %s is invalid, must match pattern %s", a.Name, model.NamePattern)
   }
 
   // Configure filesystem path for source files
