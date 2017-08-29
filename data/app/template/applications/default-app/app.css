@@ -93,3 +93,7 @@ a, a:hover, a:visited {
 abbr {
   border-bottom: 1px dotted currentColor; 
 }
+
+code {
+  font-size: 1.7rem; 
+}
