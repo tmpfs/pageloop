@@ -176,8 +176,6 @@ func (app *Application) Update(file *File, content []byte) error {
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return err
 	}
-  println("Publishing file to: " + app.Public)
-  println("Publishing file to: " + file.Relative)
 	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
 		return err
 	}

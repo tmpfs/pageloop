@@ -1381,6 +1381,10 @@ class EditorApplication {
               this.mirror.setOption('extraKeys', {
                 'Ctrl-S': (cm) => {
                   this.save()
+                },
+                Tab: (cm) => {
+                  var spaces = Array(cm.getOption('indentUnit') + 1).join(' ')
+                  cm.replaceSelection(spaces)
                 }
               })
 

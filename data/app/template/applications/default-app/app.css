@@ -16,10 +16,9 @@
   --cyan-color: #2aa198;
   --green-color: #859900;
 
-  --background: #073642;
-  --color: #93a1a1;
-  --border-color: #002b36;
-  --toolbar-link: #839496;
+  --link-color: #2aa198;
+  --background: #fdf6e3;
+  --color: #657b83;
 }
 
 html {
@@ -31,7 +30,6 @@ html {
   box-sizing: inherit
 }
 
-
 html, body {
   width: 100%;
   height: 100%;
@@ -41,13 +39,44 @@ html, body {
 }
 
 body {
-  font-size: 1.8rem;
-  line-height: 2.2rem;
-  font-family: 'SourceSans';
+  font-size: 1.6rem;
+  line-height: 2rem;
+  font-family: Helvetica, sans;
   background: var(--background);
   color: var(--color);
 }
 
 header, main, footer {
   padding: 0 3rem;
+}
+
+header {
+  padding: 2rem 3rem;
+  display: flex;
+}
+
+header h1 {
+  flex: 1 0; 
+}
+
+header nav a {
+  font-size: 1.4rem;
+  text-transform: uppercase;
+}
+
+header nav a:not(:last-child) {
+  margin-right: 1rem;
+}
+
+footer {
+  margin: 0 0 3rem 0; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0; 
+}
+
+a, a:hover, a:visited {
+  text-decoration: none;
+  color: var(--link-color);
 }
