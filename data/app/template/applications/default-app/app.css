@@ -69,18 +69,17 @@ header, main, footer {
 }
 
 header {
-  display: flex;
   background: rgba(0x2a, 0xa1, 0x98, 1);
-  
   margin-bottom: 2rem;
 }
 
 header h1 {
-  flex: 1 0;
   font-size: 2rem;
   text-transform: uppercase;
-  padding-top: 0.5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
   margin: 0;
+  border-bottom: 1px solid currentColor;
+  background: var(--base2-color);
 }
 
 header nav {
