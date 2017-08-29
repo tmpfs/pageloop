@@ -21,44 +21,48 @@ layout: false
     {{end}}
     <link rel="stylesheet" href='{{root "app.css"}}' />
   </head>
-  <body>
+  <body id="top">
     <header>
       <h1>ᴥ {{.organization}}</h1>
       <nav>
-        <a href="#home" title="Home page">Home</a>
         <a href="#about" title="About us">About</a>
         <a href="#getting-started" title="Getting Started">Getting Started</a>
+        <a href="#documentation" title="Documentation, help & tips">Docs</a>
       </nav>
     </header>
-	<main>
-      <section id="home">
-        <h2>Home</h2>
-        <p>Welcome, this is a web page created from the default template. Customize it to your style!</p>
-        <p>It's intentionally very simple just a 
-          blend of quality <abbr title="Cascading Style Sheets">CSS</abbr> and
-          <abbr title="HyperText Markup Language">HTML</abbr> with a touch of 
-          Javascript for the smooth scroll.</p>
-      </section>
+    <main>
+      <blockquote>Welcome, this is a web page created from the default template. Customize it to your style!</blockquote>
+      <p>It's intentionally very simple just a
+        blend of quality <abbr title="Cascading Style Sheets">CSS</abbr> and
+        <abbr title="HyperText Markup Language">HTML</abbr> with a touch of
+        Javascript for the smooth scroll.</p>
       <section id="about">
-        <h2>About</h2>
-        <p>This template was created using an early prototype of the pageloop editor in vim mode. It is ideal for single page brochure websites to promote an idea, project or service.</p>
-        <p>The philosophy is lean. No custom fonts, fancy animations not even any images or SVG, absolute basics!</p>
-        <p>There is no layout file or markdown in this template if you need those features please choose another template.</p>
-      </section>
-      <section id="getting-started">
-        <h2>Getting Started</h2>
-        <p>Start to customize your new web page by:</p>
-        <ul> 
-          <li>Updating the page meta data with a good title, description and keywords.</li>
-          <li>Uploading a <code>favicon.png</code> file.</li>
-          <li>Changing the text content.</li>
-          <li>Updating the <code>app.css</code> stylesheet.</li>
-          <li>Customizing the scripts in <code>app.js</code>.</li>
-        </ul>
-      </section>
-	</main>
+          <h2>About</h2>
+          <p>This template was created using an early prototype of the pageloop editor in vim mode. It is ideal for single page brochure websites to promote an idea, project or service.</p>
+          <p>The philosophy is lean. No custom fonts, fancy animations not even any images or SVG, absolute basics!</p>
+          <p>There is no layout file or markdown in this template if you need those features please choose another template.</p>
+        </section>
+        <section id="getting-started">
+          <h2>Getting Started</h2>
+          <p>Start to customize your new web page by:</p>
+          <ul>
+            <li>Updating the page meta data with a good title, description and keywords.</li>
+            <li>Uploading a <code>favicon.png</code> file.</li>
+            <li>Changing the text content.</li>
+            <li>Updating the <code>app.css</code> stylesheet.</li>
+            <li>Customizing the scripts in <code>app.js</code>.</li>
+          </ul>
+        </section>
+        <section id="documentation">
+          <h2>Documentation</h2>
+          <p>If your need more information or help please consult the pageloop <a href="/docs/">guide</a>.</p>
+        </section>
+    </main>
     <footer>
-      <p>&copy; {{.organization}}. All rights reserved.</p>
+      <p>&copy; {{.organization}}. All rights reserved.
+       <a href="#top" title="Top of the page">Top</a>
+      </p>
     </footer>
+    <script src="app.js" async></script>
   </body>
 </html>
