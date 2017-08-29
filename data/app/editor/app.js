@@ -558,6 +558,26 @@ class EditorApplication {
                 })
             })
         },
+        'save-file': function (context, file) {
+          if (!file) {
+            file = context.state.current
+          }
+          let value = file.content
+          return context.state.saveFile(file, value)
+            .then((res) => {
+              let doc = res.document
+              if (res.response.status !== 200) {
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
+              }
+              if (doc.ok) {
+                context.dispatch('preview-refresh')
+              }
+            })
+        },
         'delete-file': function (context, file) {
           let list = context.state.app.files
           let ctx = context.state.sidebarView
@@ -1162,15 +1182,8 @@ class EditorApplication {
       methods: {
         saveAndRun: function (e) {
           e.preventDefault()
-          let file = this.currentFile
-          let value = file.content
-          data.saveFile(file, value)
-            .then((res) => {
-              let doc = res.document
-              if (doc.ok) {
-                this.$store.dispatch('preview-refresh')
-              }
-            })
+          this.$store.dispatch('save-file')
+            .catch((e) => console.error(e))
         }
       },
       components: {
@@ -1346,6 +1359,11 @@ class EditorApplication {
             changes: function (cm, changes) {
               this.value = this.mirror.getValue()
             },
+            save: function () {
+              console.log('saving current file')
+              this.$store.dispatch('save-file')
+                .catch((e) => console.error(e))
+            },
             setCodeMirror: function (options) {
               options = options || {}
               let p = document.querySelector('.text-editor')
@@ -1365,9 +1383,14 @@ class EditorApplication {
                 keyMap: 'vim'
               })
               this.mirror.on('changes', this.changes)
+              this.mirror.setOption('extraKeys', {
+                'Ctrl-S': (cm) => {
+                  this.save()
+                }
+              })
 
-              CodeMirror.commands.save = function (cm) {
-                console.log('save called')
+              CodeMirror.commands.save = (cm) => {
+                this.save()
               }
             }
           },
