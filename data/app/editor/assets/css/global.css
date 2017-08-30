@@ -168,6 +168,10 @@ header > h1 > span:first-child {
 	font-size: 2.4rem;
 }
 
+header > nav {
+  text-align: center; 
+}
+
 /*
 header > h3 > a:last-child {
 	display: inline-block;

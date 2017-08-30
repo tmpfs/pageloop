@@ -24,6 +24,11 @@
 						{{.title}}
 					{{end}}
 				</h1>
+                <nav> 
+                  {{if not .home}}
+                  <a href="/docs/" title="Documentation table of contents">Documentation</a>
+                  {{end}}
+                </nav>
 			</header>
 			{{if .leader}}
 			<p>{{.leader}}</p>
