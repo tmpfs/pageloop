@@ -16,15 +16,6 @@
   padding-left: 2rem; 
 }
 
-.tip:before {
-  content: "⍟ ";
-  display: inline-block;
-  float: left;
-  margin-right: 0.5rem;
-  font-size: 3.4rem;
-  color: var(--cyan-color);
-}
-
 .toc li > p:first-child {
   margin-bottom: 0; 
   margin-top: 0.5rem;
