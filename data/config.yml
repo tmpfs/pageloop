@@ -34,7 +34,7 @@ mountpoints:
       Document templates
   -
     container: template
-    url: /template/applications/default-app/
-    path: data://app/template/applications/default-app/
+    url: /template/applications/pure/
+    path: data://app/template/applications/pure/
     description: |
-      Default application template
+      Pure application template
