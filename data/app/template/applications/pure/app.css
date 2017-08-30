@@ -69,8 +69,7 @@ header, main, footer {
 }
 
 header {
-  background: rgba(0x2a, 0xa1, 0x98, 1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 header h1 {
@@ -79,7 +78,6 @@ header h1 {
   padding: 0.5rem 0 0.5rem 0.5rem;
   margin: 0;
   border-bottom: 1px solid currentColor;
-  background: var(--base2-color);
 }
 
 header nav {
