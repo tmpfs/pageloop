@@ -1,5 +1,9 @@
 .api h2 {
   font-family: mono;
+  padding-bottom: 0.2rem;
+  font-size: 1.4rem;
+  margin-bottom: 0;
+  border-bottom: 1px dotted currentColor;
 }
 
 .toc ul {

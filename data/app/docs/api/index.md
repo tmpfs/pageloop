@@ -7,6 +7,8 @@ leader: |
   Here is all the information you need to interact with the REST API.
 ---
 
+<div class="api">
+
 To make requests use your favourite command line program or the [probe](/tools/api/probe/ "API Probe") tool. You can also [browse](/tools/api/browser/ "API Browser") the GET requests.
 
 All requests should have an `application/json` content type header. URLs are shown relative to the base `/api/` path.
@@ -95,3 +97,5 @@ Get the list of pages for an application.
 ## GET /{container}/{application}/pages/{url}
 
 Get page information for the page URL.
+
+</div>
