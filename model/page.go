@@ -2,8 +2,7 @@
 package model
 
 import(
-	//"fmt"
-
+  //"fmt"
   "os"
   "bytes"
 	"strings"
@@ -320,6 +319,30 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		return p.ParseTemplate(p.file.Path, src, p.DefaultFuncMap(), false)
 	}
 
+  doInclude := func(tpl *template.Template) error {
+    var err error
+    var content []byte
+    var partial *template.Template
+    if includes, ok := p.PageData["includes"].([]interface{}); ok {
+      for _, inc := range includes {
+        if includePath, ok := inc.(string); ok {
+          includePath = filepath.Clean(includePath)
+          fullPath := filepath.Join(p.owner.Path, strings.TrimPrefix(includePath, "/"))
+          if content, err = ioutil.ReadFile(fullPath); err != nil {
+            return err
+          }
+          if partial, err = p.ParseTemplate(fullPath, content, p.DefaultFuncMap(), false); err != nil {
+            return err
+          }
+          for _, t := range partial.Templates() {
+            tpl.AddParseTree(t.Name(), t.Tree)
+          }
+        }
+      }
+    }
+    return nil
+  }
+
 	// See if we can find a layout
 	layout := p.FindLayout()
 	if layout != nil {
@@ -354,6 +377,8 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
       }
     }
 
+    doInclude(lyt)
+
 		// Execute the outer layout template
 		if result, err = p.ExecuteTemplate(lyt, p.PageData); err != nil {
 			return nil, err
@@ -364,6 +389,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		if tpl, err = primary(false); err != nil {
 			return nil, err
 		}
+    doInclude(tpl)
 		if result, err = p.ExecuteTemplate(tpl, p.PageData); err != nil {
 			return nil, err
 		}
