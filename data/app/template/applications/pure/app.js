@@ -6,7 +6,6 @@
   }
 
   class Scroll {
-
     constructor (opts = {}) {
       let id = this.onScrollToLink.bind(this)
       let elements = opts.id || []
@@ -32,7 +31,6 @@
 
     onScrollTop (e) {
       e.preventDefault()
-      // window.scrollTo(0,0);
       this.scrollToTop(0)
     }
 

@@ -52,6 +52,10 @@ a, a:hover, a:visited {
   transition: all 0.4s ease-out;
 }
 
+a:hover {
+  text-decoration: underline; 
+}
+
 abbr {
   border-bottom: 1px dotted currentColor; 
 }
@@ -95,10 +99,12 @@ header nav a {
 header nav a:hover {
   background: var(--link-color);
   color: var(--background) !important;
+  text-decoration: none; 
 }
 
 h1, h2, h3, h4, h5, h6 {
   margin-top: 0; 
+  font-weight: normal;
 }
 
 h2 {
