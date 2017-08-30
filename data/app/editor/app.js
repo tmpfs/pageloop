@@ -1008,7 +1008,8 @@ class EditorApplication {
           <nav class="toolbar clearfix">
             <h2>{{path}}</h2>
             <a @click="refresh(path)"
-               :class="{hidden: path == ''}">Reload</a>
+               title="Refresh preview"
+               :class="{hidden: path == ''}">❍ Refresh</a>
             <a
               @click="maximized = 'preview'"
               :class="{hidden: maximized === 'preview'}"
