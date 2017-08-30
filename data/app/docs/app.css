@@ -13,8 +13,16 @@
 }
 
 .toc li {
-  margin: 0;
   padding-left: 2rem; 
+}
+
+.tip:before {
+  content: "⍟ ";
+  display: inline-block;
+  float: left;
+  margin-right: 0.5rem;
+  font-size: 3.4rem;
+  color: var(--cyan-color);
 }
 
 .toc li > p:first-child {

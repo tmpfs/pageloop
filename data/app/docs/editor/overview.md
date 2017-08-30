@@ -8,7 +8,7 @@ keywords: website, html, page
 When editing an application you are presented with the main navigation 
 at the top and three columns; the sidebar, editor and preview.
 
-Tip: Use the ◩ link to maximize a column.
+<div class="tip">Use the ◩ link to maximize a column.</div>
 
 ## Sidebar
 
