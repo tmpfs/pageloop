@@ -4,7 +4,7 @@ lang: en
 description: Describes how page data is parsed.
 keywords: web, editor, page, data
 leader: |
-  Page data is arbitrary data associated with a page.
+  Page meta data is arbitrary data associated with a page.
 ---
 
 Use page data to pass page titles or other information to
