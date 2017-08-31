@@ -1684,6 +1684,10 @@ class EditorApplication {
   }
 
   init () {
+    window.onbeforeunload = function (e) {
+      // TODO: test if we have dirty data!!!
+      return true
+    }
     this.ui()
     this.router.start()
   }
