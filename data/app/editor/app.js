@@ -9,7 +9,8 @@ class Router {
 
   navigate (href, state) {
     let url = this.url(href)
-    history.pushState({href: href, state: state}, '', url)
+    // history.pushState({href: href, state: state}, '', url)
+    history.pushState({href: href, state: null}, '', url)
     this.route(href)
   }
 
@@ -422,6 +423,9 @@ class EditorApplication {
           }
           state.current = file
         },
+        'current-file-dirty': function (state, val) {
+          state.current.dirty = val
+        },
         'preview-url': function (state, url) {
           state.previewUrl = url
         },
@@ -525,6 +529,7 @@ class EditorApplication {
           return context.dispatch('get-file-contents', file)
             .then((content) => {
               file.content = content
+              file.dirty = false
               context.commit('current-file', file)
               if (file.editorView) {
                 context.commit('editor-view', file.editorView)
@@ -593,8 +598,7 @@ class EditorApplication {
                 throw err
               }
               if (doc.ok) {
-                file.dirty = false
-                context.dispatch('preview-refresh')
+                return context.dispatch('preview-refresh')
               }
             })
         },
@@ -1140,7 +1144,7 @@ class EditorApplication {
             </div>
           </div>
           <nav class="toolbar clearfix">
-            <h2>{{title}}</h2>
+            <h2><span :class="{hidden: !dirty}">&#149;</span>{{title}} ({{dirty}})</h2>
             <a @click="saveAndRun"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
             <a
@@ -1156,6 +1160,16 @@ class EditorApplication {
         </div>
       `,
       computed: {
+        dirty: {
+          get: function () {
+            return this.currentFile.dirty
+          },
+          set: function (val) {
+            console.log('setting dirty: ' + val)
+            this.currentFile.dirty = val
+            this.$store.commit('current-file-dirty', val)
+          }
+        },
         maximized: {
           get: function () {
             return this.$store.state.maximizedColumn
@@ -1186,8 +1200,12 @@ class EditorApplication {
         }
       },
       watch: {
+        dirty: function (val) {
+          console.log('dirty changed: ' + val)
+        },
         currentFile: function (file) {
           this.title = file.url
+          this.dirty = file.dirty
           if (file && file.dir) {
             this.currentView = 'file-editor'
           }
@@ -1202,6 +1220,9 @@ class EditorApplication {
         saveAndRun: function (e) {
           e.preventDefault()
           this.$store.dispatch('save-file')
+            .then(() => {
+              this.dirty = false
+            })
             .catch((e) => console.error(e))
         }
       },
@@ -1357,7 +1378,7 @@ class EditorApplication {
           watch: {
             currentFile: function (file) {
               if (file && file.mime) {
-                this.setCodeMirror({value: file.content, mode: this.getModeForMime(file.mime)})
+                this.setCodeMirror(file, {mode: this.getModeForMime(file.mime)})
               }
             }
           },
@@ -1375,13 +1396,16 @@ class EditorApplication {
             },
             changes: function (cm, changes) {
               this.value = this.mirror.getValue()
-              this.currentFile.dirty = true
+              this.$parent.dirty = true
             },
             save: function () {
               this.$store.dispatch('save-file')
+                .then(() => {
+                  this.$parent.dirty = false
+                })
                 .catch((e) => console.error(e))
             },
-            setCodeMirror: function (options) {
+            setCodeMirror: function (file, options) {
               options = options || {}
               let p = document.querySelector('.text-editor')
 
@@ -1392,8 +1416,11 @@ class EditorApplication {
                   p.removeChild(p.firstChild)
                 }
               }
+              if (file.document) {
+                file.document.cm = null
+              }
               this.mirror = CodeMirror(p, {
-                value: options.value || '',
+                value: file.document || file.content || '',
                 mode: options.mode || 'htmlmixed',
                 theme: options.theme || 'solarized dark',
                 lineNumbers: true,
@@ -1410,16 +1437,21 @@ class EditorApplication {
                 }
               })
 
+              // This gives us Ctrl-S (and :w in vim mode) save
               CodeMirror.commands.save = (cm) => {
                 this.save()
+              }
+
+              if (!file.document) {
+                file.document = this.mirror.getDoc()
               }
             }
           },
           mounted: function () {
-            let item = this.currentFile
+            let file = this.currentFile
             // Handles setting file content when switching tabs
-            if (item && item.mime) {
-              this.setCodeMirror({value: item.content, mode: this.getModeForMime(item.mime)})
+            if (file && file.mime) {
+              this.setCodeMirror(file, {mode: this.getModeForMime(file.mime)})
             }
           }
         },
