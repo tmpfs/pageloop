@@ -167,6 +167,17 @@ class AppDataSource {
     this._flash = msg
   }
 
+  isDirty () {
+    if (this.app) {
+      for (let i = 0; i < this.app.files.length; i++) {
+        if (this.app.files[i].dirty) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
   getAppHref (...args) {
     let p = ['apps', this.container, this.application]
 
@@ -367,9 +378,9 @@ class AppDataSource {
 class EditorApplication {
   constructor () {
     this.bus = new Vue()
-    let data = this.data = new AppDataSource()
+    let data = this.state = new AppDataSource()
     let store = this.store = new Vuex.Store({
-      state: this.data,
+      state: this.state,
       mutations: {
         flash: function (state, message) {
           state.flash = message
@@ -433,7 +444,7 @@ class EditorApplication {
           return r.navigate(request.href, request.state)
         },
         'containers': function (context) {
-          return data.getContainers()
+          return context.state.getContainers()
             .then((list) => {
               context.commit('containers', list)
             })
@@ -482,19 +493,19 @@ class EditorApplication {
             })
         },
         'app': function (context) {
-          return data.getApplication()
+          return context.state.getApplication()
             .then((doc) => {
               context.commit('app', doc)
             })
         },
         'list-files': function (context) {
-          return data.getFiles()
+          return context.state.getFiles()
             .then((list) => {
               context.commit('files', list)
             })
         },
         'list-pages': function (context) {
-          return data.getPages()
+          return context.state.getPages()
             .then((list) => {
               context.commit('pages', list)
             })
@@ -504,7 +515,7 @@ class EditorApplication {
             .then(() => context.dispatch('list-files'))
         },
         'get-file-contents': function (context, item) {
-          return data.getFileContents(item.url)
+          return context.state.getFileContents(item.url)
             .then((res) => {
               // TODO: get blob for binary types
               return res.text()
@@ -582,6 +593,7 @@ class EditorApplication {
                 throw err
               }
               if (doc.ok) {
+                file.dirty = false
                 context.dispatch('preview-refresh')
               }
             })
@@ -743,8 +755,6 @@ class EditorApplication {
   }
 
   ui () {
-    let data = this.data
-
     let sidebar = {
       template: `
         <div class="sidebar"
@@ -1100,7 +1110,7 @@ class EditorApplication {
           if (url) {
             url = url.replace(/^\//, '')
           }
-          return document.location.origin + data.app.url + (url || '')
+          return document.location.origin + this.$store.state.app.url + (url || '')
         }
       }
     }
@@ -1284,6 +1294,7 @@ class EditorApplication {
             }
           },
           render: function (h) {
+            // We need recursion to render meta page data
             function list (target) {
               let isArr = Array.isArray(target)
               function it (o, fn) {
@@ -1364,6 +1375,7 @@ class EditorApplication {
             },
             changes: function (cm, changes) {
               this.value = this.mirror.getValue()
+              this.currentFile.dirty = true
             },
             save: function () {
               this.$store.dispatch('save-file')
@@ -1677,11 +1689,8 @@ class EditorApplication {
   }
 
   load (container, application) {
-    let data = this.data
-
-    this.data.setApplication(container, application)
-
-    this.store.dispatch('log', `Loading app from ${data.url}`)
+    this.state.setApplication(container, application)
+    this.store.dispatch('log', `Loading app from ${this.state.url}`)
     return this.store.dispatch('app')
       .then(() => this.store.dispatch('list-files'))
       .then(() => this.store.dispatch('list-pages'))
@@ -1693,9 +1702,10 @@ class EditorApplication {
   }
 
   init () {
-    window.onbeforeunload = function (e) {
-      // TODO: test if we have dirty data!!!
-      return true
+    window.onbeforeunload = (e) => {
+      if (this.state.isDirty()) {
+        return true
+      }
     }
     this.ui()
     this.router.start()
