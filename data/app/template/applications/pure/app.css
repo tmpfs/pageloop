@@ -114,6 +114,13 @@ h2 {
   margin-bottom: 1rem;
 }
 
+h3 {
+  display: inline-block;
+  border-bottom: 1px solid currentColor; 
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 blockquote {
   border-left: 4px solid var(--base2-color);
   padding-left: 1rem;
