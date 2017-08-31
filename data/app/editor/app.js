@@ -1144,7 +1144,7 @@ class EditorApplication {
           </div>
           <nav class="toolbar clearfix">
             <h2><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{title}}</h2>
-            <a @click="saveAndRun"
+            <a @click="save"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
             <a
               @click="maximized = 'editor'"
@@ -1164,6 +1164,11 @@ class EditorApplication {
             return this.currentFile.dirty
           },
           set: function (val) {
+            if (this.changeGeneration > -1 && this.currentFile.document) {
+              if (val === true && this.currentFile.document.isClean(this.changeGeneration)) {
+                val = false
+              }
+            }
             this.$store.commit('current-file-dirty', val)
             this.isDirty = val
           }
@@ -1209,15 +1214,20 @@ class EditorApplication {
       data: function () {
         return {
           title: '',
-          isDirty: false
+          isDirty: false,
+          changeGeneration: -1,
+          codeMirror: null
         }
       },
       methods: {
-        saveAndRun: function (e) {
-          e.preventDefault()
+        save: function (e) {
+          if (e) {
+            e.preventDefault()
+          }
           this.$store.dispatch('save-file')
             .then(() => {
               this.dirty = false
+              this.changeGeneration = this.currentFile.document.changeGeneration()
             })
             .catch((e) => console.error(e))
         }
@@ -1395,11 +1405,7 @@ class EditorApplication {
               this.$parent.dirty = true
             },
             save: function () {
-              this.$store.dispatch('save-file')
-                .then(() => {
-                  this.$parent.dirty = false
-                })
-                .catch((e) => console.error(e))
+              this.$parent.save()
             },
             setCodeMirror: function (file, options) {
               options = options || {}
@@ -1433,14 +1439,17 @@ class EditorApplication {
                 }
               })
 
-              // This gives us Ctrl-S (and :w in vim mode) save
+              // This gives us :w in vim mode
               CodeMirror.commands.save = (cm) => {
                 this.save()
               }
 
               if (!file.document) {
                 file.document = this.mirror.getDoc()
+                this.$parent.changeGeneration = file.document.changeGeneration()
               }
+
+              this.$parent.codeMirror = this.mirror
             }
           },
           mounted: function () {
