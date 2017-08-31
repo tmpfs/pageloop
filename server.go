@@ -157,12 +157,10 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	sys := model.NewContainer("system", "System applications.", true)
 	tpl := model.NewContainer("template", "Application & document templates.", true)
 	usr := model.NewContainer("user", "User applications.", false)
-	snx := model.NewContainer("sandbox", "Playground.", false)
 
 	l.Host.Add(sys)
 	l.Host.Add(tpl)
 	l.Host.Add(usr)
-	l.Host.Add(snx)
 
 	// Initialize mountpoint maps
 	mountpoints = make(map[string] http.Handler)
@@ -206,7 +204,6 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	l.MountContainer(sys)
 	l.MountContainer(tpl)
 	l.MountContainer(usr)
-	l.MountContainer(snx)
 
   s := &http.Server{
     Addr:           config.Addr,

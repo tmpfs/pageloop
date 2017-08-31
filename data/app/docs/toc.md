@@ -39,6 +39,11 @@ layout: false
 * [Templates](/docs/templates/ "Information about page templating")
   
   Information about page templates.
+  
+* [Includes](/docs/templates/includes.html "Including shared templates")
+  
+  Including shared templates.
+
 
 ## API
 
