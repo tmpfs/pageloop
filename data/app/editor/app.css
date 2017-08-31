@@ -625,3 +625,8 @@ header > nav > a.selected {
   color: var(--base2-color);
   border-radius: 2px;
 }
+
+.status-dirty {
+  margin-right: 0.5rem;
+  color: var(--orange-color);
+}

@@ -529,7 +529,6 @@ class EditorApplication {
           return context.dispatch('get-file-contents', file)
             .then((content) => {
               file.content = content
-              file.dirty = false
               context.commit('current-file', file)
               if (file.editorView) {
                 context.commit('editor-view', file.editorView)
@@ -1144,7 +1143,7 @@ class EditorApplication {
             </div>
           </div>
           <nav class="toolbar clearfix">
-            <h2><span :class="{hidden: !dirty}">&#149;</span>{{title}} ({{dirty}})</h2>
+            <h2><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{title}}</h2>
             <a @click="saveAndRun"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
             <a
@@ -1165,9 +1164,8 @@ class EditorApplication {
             return this.currentFile.dirty
           },
           set: function (val) {
-            console.log('setting dirty: ' + val)
-            this.currentFile.dirty = val
             this.$store.commit('current-file-dirty', val)
+            this.isDirty = val
           }
         },
         maximized: {
@@ -1200,9 +1198,6 @@ class EditorApplication {
         }
       },
       watch: {
-        dirty: function (val) {
-          console.log('dirty changed: ' + val)
-        },
         currentFile: function (file) {
           this.title = file.url
           this.dirty = file.dirty
@@ -1213,7 +1208,8 @@ class EditorApplication {
       },
       data: function () {
         return {
-          title: ''
+          title: '',
+          isDirty: false
         }
       },
       methods: {
