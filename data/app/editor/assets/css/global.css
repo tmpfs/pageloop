@@ -172,16 +172,6 @@ header > nav {
   text-align: center;
 }
 
-/*
-header > h3 > a:last-child {
-	display: inline-block;
-  position: absolute;
-  right: 0;
-  top: 1px;
-  color: black;
-}
-*/
-
 header + nav {
 	display: flex;
 	font-size: 1.6rem;
