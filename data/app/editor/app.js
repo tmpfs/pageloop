@@ -401,8 +401,14 @@ class EditorApplication {
         },
         'editor-view': function (state, view) {
           state.editorView = view
+          if (state.hasFile()) {
+            state.current.editorView = view
+          }
         },
         'current-file': function (state, file) {
+          if (!file.editorView) {
+            file.editorView = state.defaultEditorView
+          }
           state.current = file
         },
         'preview-url': function (state, url) {
@@ -509,6 +515,9 @@ class EditorApplication {
             .then((content) => {
               file.content = content
               context.commit('current-file', file)
+              if (file.editorView) {
+                context.commit('editor-view', file.editorView)
+              }
               context.commit('preview-url', file.uri)
               if (context.state.editorView === 'welcome') {
                 context.commit('editor-view', context.state.defaultEditorView)
