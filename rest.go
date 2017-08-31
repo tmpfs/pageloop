@@ -213,8 +213,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
         }
 
-        // TODO: delete source and published files
-
         // Delete the files
         if err = h.Root.DeleteApplicationFiles(app); err != nil {
 					ex(res, http.StatusInternalServerError, nil, err)

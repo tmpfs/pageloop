@@ -31,10 +31,11 @@ An application contains a set of source files that are published to a public loc
 
 Create a new application.
 
-To create a new application you must give it at least a valid name so the request body should be valid JSON such as:
+To create a new application you must give it a valid name, 
+mountpoint URL and description so a request body would look like:
 
-```
-{"name": "application-name"}
+```json
+{"name": "new-app", "url": "/new-app/", "description": "New application"}
 ```
 
 ## GET /{container}/{application}/
@@ -44,6 +45,13 @@ Get an application.
 ## DELETE /{container}/{application}/
 
 Remove an application.
+
+Removing an application indicates a complete deletion, it is 
+irreversible.
+
+The application is unmounted and the application mountpoint is 
+deleted before the updated configuration is written to disc. Finally 
+the published and source files are deleted.
 
 ## GET /{container}/{application}/files/
 
