@@ -801,6 +801,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
+          <div class="column-drag"></div>
         </div>
       `,
       data: function () {
@@ -1156,6 +1157,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
+          <div class="column-drag"></div>
         </div>
       `,
       computed: {

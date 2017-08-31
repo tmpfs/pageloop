@@ -20,6 +20,8 @@
   --color: #93a1a1;
   --border-color: #002b36;
   --toolbar-link: #839496;
+
+  --drag-size: 4px;
 }
 
 @font-face {
@@ -281,6 +283,21 @@ footer p {
   border-right: 1px solid var(--border-color);
   max-width: 32rem;
   width: 20%;
+}
+
+.sidebar, .editor {
+  position: relative;
+  padding-right: var(--drag-size);
+}
+
+.sidebar > .column-drag, .editor > .column-drag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--drag-size);
+  cursor: ew-resize;
+  background: var(--border-color);
 }
 
 .new-page {
