@@ -1,5 +1,9 @@
 /* globals Vue Vuex CodeMirror document fetch document history window */
 
+function doDragColumn (e) {
+
+}
+
 class Router {
   constructor (href, strip) {
     this.defaultHref = href
@@ -801,7 +805,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
-          <div class="column-drag"></div>
+          <div class="column-drag" @click="dragColumn"></div>
         </div>
       `,
       data: function () {
@@ -856,6 +860,9 @@ class EditorApplication {
         },
         closeNewFileView: function () {
           this.currentView = this.previousView || 'pages'
+        },
+        dragColumn: function (e) {
+          doDragColumn(e)
         }
       },
       components: {
@@ -1157,7 +1164,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
-          <div class="column-drag"></div>
+          <div class="column-drag" @click="dragColumn">&nbsp;</div>
         </div>
       `,
       computed: {
@@ -1232,6 +1239,9 @@ class EditorApplication {
               this.changeGeneration = this.currentFile.document.changeGeneration()
             })
             .catch((e) => console.error(e))
+        },
+        dragColumn: function (e) {
+          doDragColumn(e)
         }
       },
       components: {

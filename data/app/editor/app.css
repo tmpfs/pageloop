@@ -291,11 +291,14 @@ footer p {
 }
 
 .sidebar > .column-drag, .editor > .column-drag {
+  display: inline-block;
   position: absolute;
   top: 0;
-  right: 0;
+  left: calc(100% - 4px);
   bottom: 0;
-  width: var(--drag-size);
+  right: 0;
+  /*width: var(--drag-size);*/
+  /*height: 100%;*/
   cursor: ew-resize;
   background: var(--border-color);
 }
