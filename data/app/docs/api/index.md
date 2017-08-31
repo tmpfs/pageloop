@@ -35,7 +35,28 @@ To create a new application you must give it a valid name,
 mountpoint URL and description so a request body would look like:
 
 ```json
-{"name": "new-app", "url": "/new-app/", "description": "New application"}
+{
+  "name": "new-app",
+  "url": "/new-app/",
+  "description": "New application"
+}
+```
+
+You may optionally specify a `template` object to initialize the new 
+application with all the files in the referenced template application.
+
+You need to give the `container` and `application` names for the template:
+
+```json
+{
+  "name": "new-app",
+  "url": "/new-app/",
+  "description": "New application",
+  "template": {
+    "container": "template",
+    "application": "pure"
+  }
+}
 ```
 
 ## GET /{container}/{application}/
@@ -61,7 +82,8 @@ Get the list of files for an application.
 
 Create a file for an application, if the file already exists an
 error is returned. Note that because file extensions can be changed
-when files are published. For example, if you have an existing file
+when files are published conflicts are also detected on the published
+file name. For example, if you have an existing file
 named `document.html` and try to create a file named `document.md`
 it is an error as the published URLs would conflict.
 
