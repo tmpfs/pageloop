@@ -281,10 +281,9 @@ footer p {
 }
 
 .sidebar {
-  border-right: 1px solid var(--border-color);
   max-width: 32rem;
   width: 20%;
-  min-width: 16rem;
+  min-width: var(--drag-size);
 }
 
 .sidebar, .editor {
@@ -305,7 +304,6 @@ footer p {
   left: calc(100% - var(--drag-size));
   bottom: 0;
   right: 0;
-  /*margin-left: calc(100% - var(--drag-size));*/
 	width: var(--drag-size);
 	height: 100%;
   cursor: ew-resize;
@@ -343,10 +341,6 @@ section {
 
 .editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
   border-left: 1px solid var(--border-color);
-}
-
-.editor {
-  border-right: 1px solid var(--border-color);
 }
 
 .preview {

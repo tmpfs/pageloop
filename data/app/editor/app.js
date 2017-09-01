@@ -20,7 +20,7 @@ class ColumnManager {
       }
 
       // Try to stop other events interfering
-      document.querySelector('body').setAttribute('style', 'pointer-events: none; cursor: ew-resize;')
+      document.querySelector('body').setAttribute('style', 'user-select: none; pointer-events: none; cursor: ew-resize;')
 
       // Resize target column by percentage
       let percent = Math.round(((e.clientX - tb.left) / maximum) * 100)
