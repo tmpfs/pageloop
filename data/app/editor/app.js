@@ -140,6 +140,8 @@ class ColumnManager {
       }
       if (this.styles[index]) {
         n.setAttribute('style', this.styles[index])
+      } else {
+        n.removeAttribute('style')
       }
     })
     this.styles = null

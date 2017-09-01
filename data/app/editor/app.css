@@ -274,7 +274,7 @@ footer p {
 }
 
 .sidebar, .editor, .preview {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   opacity: 1;
   transition: all 0.5s ease-out;
 }
