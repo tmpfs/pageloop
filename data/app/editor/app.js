@@ -827,7 +827,6 @@ class EditorApplication {
             })
         },
         'rename-file': function (context, {file, newName}) {
-          console.log('rename file: ' + newName)
           return context.state.renameFile(file, newName)
             .then((res) => {
               let doc = res.document
@@ -839,9 +838,18 @@ class EditorApplication {
                 throw err
               }
 
-              console.log('file rename complee...')
+              if (doc.ok) {
+                context.dispatch('log', `Renamed ${file.url} to ${newName}`)
+                // Update file data
+                if (doc.file) {
+                  file.name = doc.file.name
+                  file.url = doc.file.url
+                  file.uri = doc.file.uri
+                }
+                context.commit('preview-url', file.uri)
+              }
 
-              return context.dispatch('reload')
+              // return context.dispatch('reload')
             })
         }
       }
@@ -1357,7 +1365,7 @@ class EditorApplication {
             </div>
           </div>
           <nav class="toolbar clearfix">
-            <h2><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{title}}</h2>
+            <h2><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{currentFile.name}}</h2>
             <a @click="save"
               v-bind:class="{hidden: currentView != 'source-editor'}" href="#" title="Save & Run">Save & Run</a>
             <a

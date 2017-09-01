@@ -172,7 +172,7 @@ func (app *Application) Move(file *File, newUrl string) error {
   pth := app.GetPathFromUrl(u)
 
   // Move the source and published files
-	if err := app.FileSystem.MoveFile(file, u, nil); err != nil {
+	if err := app.FileSystem.MoveFile(file, u, pth, nil); err != nil {
 		return err
 	}
 
@@ -378,7 +378,7 @@ func (app *Application) GetPathFromUrl(url string) string {
 
 // Extract a name, relative path and URL for a file.
 func (app *Application) getFileFields(file *File, base string) (string, string, string) {
-	name := file.info.Name()
+	name := filepath.Base(file.Path)
 	relative := strings.TrimPrefix(file.Path, base)
   url := app.GetUrlFromPath(file, relative)
 	return name, relative, url

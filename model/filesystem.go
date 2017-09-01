@@ -37,7 +37,7 @@ type ApplicationFileSystem interface {
 	// Save the source file to the underlying file system
 	SaveFile(f *File) error
 
-  MoveFile(f *File, dest string, filter FileFilter) error
+  MoveFile(f *File, url string, target string, filter FileFilter) error
 }
 
 // Default file system that uses the underlying host file system.
@@ -86,29 +86,46 @@ func (fs *UrlFileSystem) Open(url string) (http.File, error) {
 }
 
 // Move a file to the destination URL.
-func (fs *UrlFileSystem) MoveFile(file *File, dest string, filter FileFilter) error {
+func (fs *UrlFileSystem) MoveFile(f *File, url string, target string, filter FileFilter) error {
+	var err error
+  var rel string
+
   if filter == nil {
     filter = &DefaultPublishFilter{}
   }
 
-  base := file.owner.Path
-  parts := strings.Split(dest, SLASH)
+  base := f.owner.Path
+  parts := strings.Split(url, SLASH)
   destPath := filepath.Join(parts...)
   destPath = filepath.Join(base, destPath)
 
   // Move source file
-  if err := os.Rename(file.Path, destPath); err != nil {
+  if err := os.Rename(f.Path, destPath); err != nil {
     return err
   }
 
-  base = file.owner.Public
-  parts = strings.Split(file.Uri, SLASH)
+  base = f.owner.Public
+  parts = strings.Split(f.Uri, SLASH)
   publishPath := filepath.Join(parts...)
   publishPath = filepath.Join(base, publishPath)
 
-  parts = strings.Split(dest, SLASH)
+  // Update path before filter
+  f.Path = target
+  if rel, _, err = fs.FilterAndAssign(f, filter); err != nil {
+    return err
+  }
+
+  // Filter says do nothing
+  if (rel == "") {
+    return nil
+  }
+
+  filteredName := filepath.Base(rel)
+
+  parts = strings.Split(path.Dir(url), SLASH)
   newPath := filepath.Join(parts...)
   newPath = filepath.Join(base, newPath)
+  newPath = filepath.Join(newPath, filteredName)
 
   // Move published file
   if err := os.Rename(publishPath, newPath); err != nil {
@@ -174,13 +191,12 @@ func (fs *UrlFileSystem) Load(dir string) error {
   return err
 }
 
-// Publish a single file relative to the given directory.
-func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) error {
+func (fs *UrlFileSystem) FilterAndAssign (f *File, filter FileFilter) (string, string, error) {
 	app := fs.App()
 	var err error
 	rel, err := filepath.Rel(app.Path, f.Path)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	// Filter relative path
@@ -188,16 +204,33 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 
 	// Ignore publishing this file
 	if rel == "" {
-		return nil
+		return "", "", nil
 	}
 
-	out := filepath.Join(dir, rel)
+	//out := filepath.Join(dir, rel)
 
 	// Update public URI after path filter
 	f.Uri = app.GetUrlFromPath(f, rel)
 	if f.page != nil {
 		f.page.Uri = f.Uri
 	}
+  return rel, f.Uri, nil
+}
+
+// Publish a single file relative to the given directory.
+func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) error {
+	var err error
+  var rel string
+
+  if rel, _, err = fs.FilterAndAssign(f, filter); err != nil {
+    return err
+  }
+
+  if (rel == "") {
+    return nil
+  }
+
+	out := filepath.Join(dir, rel)
 
 	if f.page != nil {
 		if _, err = f.page.Parse(f.source); err != nil {

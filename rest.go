@@ -430,7 +430,7 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
         ex(res, http.StatusInternalServerError, nil, err)
         return
       }
-      ok(res, OK)
+      okFile(res, file)
 
       return
     // Update file content
@@ -452,7 +452,7 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
           ex(res, http.StatusInternalServerError, nil, err)
           return
         }
-        ok(res, OK)
+        okFile(res, file)
         return
       }
 
@@ -527,6 +527,20 @@ func validate(schema []byte, input []byte) (*gojsonschema.Result, error) {
 
 // Send an OK response to the client.
 func ok(res http.ResponseWriter, data []byte) (int, error) {
+	return write(res, http.StatusOK, data)
+}
+
+// Send an OK response to the client with a file.
+func okFile(res http.ResponseWriter, f *model.File) (int, error) {
+  var data []byte
+  var err error
+  if data, err = json.Marshal(f); err != nil {
+    return -1, err
+  }
+  top := []byte(`{"ok":true,"file":`)
+  tail := []byte(`}`)
+  data = append(top, data...)
+  data = append(data, tail...)
 	return write(res, http.StatusOK, data)
 }
 
