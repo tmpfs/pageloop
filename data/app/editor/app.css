@@ -277,6 +277,7 @@ footer p {
   flex: 1 1 auto;
   opacity: 1;
   transition: all 0.5s ease-out;
+  background: var(--background)
 }
 
 .sidebar {
