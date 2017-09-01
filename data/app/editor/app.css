@@ -332,6 +332,7 @@ section {
   flex-wrap: nowrap;
   border-bottom: 1px solid var(--border-color);
   user-select: none;
+  overflow: hidden;
 }
 
 .column-header > * {
@@ -398,6 +399,7 @@ iframe.publish-preview {
 	border-bottom: 1px solid var(--border-color);
   text-align: right;
   user-select: none;
+  overflow: hidden;
 }
 
 .toolbar a {
