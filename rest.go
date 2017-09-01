@@ -425,7 +425,6 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
           fmt.Errorf("Cannot move file, source and destination are equal: %s", url))
         return
       }
-      println("Move file to: " + loc)
 
       if err = app.Move(file, loc); err != nil {
         ex(res, http.StatusInternalServerError, nil, err)

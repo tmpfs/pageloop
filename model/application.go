@@ -176,8 +176,6 @@ func (app *Application) Move(file *File, newUrl string) error {
 		return err
 	}
 
-  // TODO: move published files
-
   file.Path = pth
   delete(app.Urls, file.Url)
   app.setComputedFileFields(file)
