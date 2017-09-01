@@ -3,6 +3,7 @@
 class ColumnManager {
   constructor () {
     this.state = null
+    this.styles = null
 
     this.doDrag = (e) => {
       e.stopImmediatePropagation()
@@ -111,6 +112,30 @@ class ColumnManager {
     window.addEventListener('mouseup', this.stopDrag)
   }
 
+  // Remove inline styles from columns.
+  removeStyles () {
+    let parent = document.querySelector('.content-main > .content')
+    let i, n
+    this.styles = {}
+
+    console.log('remove styles')
+
+    for (i = 0; i < parent.childNodes.length; i++) {
+      n = parent.childNodes[i]
+      if (n.nodeType !== 1) {
+        continue
+      }
+      this.styles[i] = n.getAttribute('style')
+      n.removeAttribute('style')
+    }
+  }
+
+  restoreStyles () {
+    let parent = document.querySelector('.content-main > .content')
+    for (let k in this.styles) {
+      parent.childNodes[k].setAttribute('style', this.styles[k])
+    }
+  }
 }
 
 class Router {
@@ -552,6 +577,13 @@ class EditorApplication {
           state.previewUrl = ''
         },
         'maximize-column': function (state, info) {
+          // Maximizing
+          if (info) {
+            state.columns.removeStyles()
+          // Minimizing
+          } else {
+            state.columns.restoreStyles()
+          }
           state.maximizedColumn = info
         }
       },
