@@ -1,111 +1,116 @@
 /* globals Vue Vuex CodeMirror document fetch document history window */
 
-let currentColumnDrag
+class ColumnManager {
+  constructor () {
+    this.state = null
 
-function startDragColumn (e) {
-  e.stopImmediatePropagation()
+    this.doDrag = (e) => {
+      e.stopImmediatePropagation()
+      let target = this.state.target
+      let parent = this.state.parent
+      let index = this.state.index
+      let maximum = this.state.maximum
+      let tb = target.getBoundingClientRect()
 
-  // Target to reize
-  let target = e.currentTarget.parentNode
+      // Out of bounds cursor
+      if (e.clientX < 0 || e.clientX > maximum) {
+        return
+      }
 
-  // Parent gives overall available width
-  let parent = target.parentNode
+      // Try to stop other events interfering
+      document.querySelector('body').setAttribute('style', 'pointer-events: none; cursor: ew-resize;')
 
-  // Width of all columns to calculate percentage
-  let pb = parent.getBoundingClientRect()
-  let maximum = pb.right - pb.left
+      // Resize target column by percentage
+      let percent = Math.round(((e.clientX - tb.left) / maximum) * 100)
+      target.setAttribute('style', 'max-width: none; width:' + percent + '%')
 
-  currentColumnDrag = {
-    target: target,
-    parent: parent,
-    maximum: maximum,
-    index: undefined,
-    widths: 0,
-    ratios: []
-  }
-
-  // Used to track remaining available pixels
-  let total = 0
-
-  let i, n, b, w, ratio, percent
-  for (i = 0; i < parent.childNodes.length; i++) {
-    n = parent.childNodes[i]
-    if (n.nodeType !== 1) {
-      continue
+      // Columns after the target being resized, they are
+      // compacted but maintain the aspect ratio
+      let taken = this.state.widths + percent
+      let remainder = 100 - taken
+      let i, n
+      for (i = index + 1; i < parent.childNodes.length; i++) {
+        n = parent.childNodes[i]
+        if (n.nodeType === 1) {
+          n.setAttribute('style', 'max-width: none; width: ' + (remainder * this.state.ratios[i]) + '%')
+        }
+      }
     }
 
-    b = n.getBoundingClientRect()
-    w = b.right - b.left
-
-    // Get ratios of subsequent columns
-    if (currentColumnDrag.index !== undefined) {
-      // How much of the remaining space is used by this column
-      ratio = w / (maximum - total)
-      // Sparse array!
-      currentColumnDrag.ratios[i] = ratio
-    }
-
-    ratio = w / maximum
-    percent = Math.round(ratio * 100)
-
-    if (n === target) {
-      currentColumnDrag.index = i
-      total += w
-    }
-
-    // Fix widths of previous columns
-    if (currentColumnDrag.index === undefined) {
-      total += w
-      currentColumnDrag.widths += percent
-      n.setAttribute('style', 'max-width: none; width:' + percent + '%')
+    this.stopDrag = (e) => {
+      e.stopImmediatePropagation()
+      document.querySelector('body').removeAttribute('style')
+      window.removeEventListener('mousemove', this.doDrag)
+      this.state = null
     }
   }
 
-  // Start the drag operation
-  window.addEventListener('mousemove', doDragColumn)
+  startDrag (e) {
+    e.stopImmediatePropagation()
 
-  // Need to capture on the window for mouse up outside
-  window.addEventListener('mouseup', stopDragColumn)
-}
+    // Target to reize
+    let target = e.currentTarget.parentNode
 
-function doDragColumn (e) {
-  e.stopImmediatePropagation()
-  let target = currentColumnDrag.target
-  let parent = currentColumnDrag.parent
-  let index = currentColumnDrag.index
-  let maximum = currentColumnDrag.maximum
-  let tb = target.getBoundingClientRect()
+    // Parent gives overall available width
+    let parent = target.parentNode
 
-  // Out of bounds cursor
-  if (e.clientX < 0 || e.clientX > maximum) {
-    return
-  }
+    // Width of all columns to calculate percentage
+    let pb = parent.getBoundingClientRect()
+    let maximum = pb.right - pb.left
 
-  // Try to stop other events interfering
-  document.querySelector('body').setAttribute('style', 'pointer-events: none; cursor: ew-resize;')
-
-  // Resize target column by percentage
-  let percent = Math.round(((e.clientX - tb.left) / maximum) * 100)
-  target.setAttribute('style', 'max-width: none; width:' + percent + '%')
-
-  // Columns after the target being resized, they are
-  // compacted but maintain the aspect ratio
-  let taken = currentColumnDrag.widths + percent
-  let remainder = 100 - taken
-  let i, n
-  for (i = index + 1; i < parent.childNodes.length; i++) {
-    n = parent.childNodes[i]
-    if (n.nodeType === 1) {
-      n.setAttribute('style', 'max-width: none; width: ' + (remainder * currentColumnDrag.ratios[i]) + '%')
+    this.state = {
+      target: target,
+      parent: parent,
+      maximum: maximum,
+      index: undefined,
+      widths: 0,
+      ratios: []
     }
-  }
-}
 
-function stopDragColumn (e) {
-  e.stopImmediatePropagation()
-  document.querySelector('body').removeAttribute('style')
-  window.removeEventListener('mousemove', doDragColumn)
-  currentColumnDrag = null
+    // Used to track remaining available pixels
+    let total = 0
+
+    let i, n, b, w, ratio, percent
+    for (i = 0; i < parent.childNodes.length; i++) {
+      n = parent.childNodes[i]
+      if (n.nodeType !== 1) {
+        continue
+      }
+
+      b = n.getBoundingClientRect()
+      w = b.right - b.left
+
+      // Get ratios of subsequent columns
+      if (this.state.index !== undefined) {
+        // How much of the remaining space is used by this column
+        ratio = w / (maximum - total)
+        // Sparse array!
+        this.state.ratios[i] = ratio
+      }
+
+      ratio = w / maximum
+      percent = Math.round(ratio * 100)
+
+      if (n === target) {
+        this.state.index = i
+        total += w
+      }
+
+      // Fix widths of previous columns
+      if (this.state.index === undefined) {
+        total += w
+        this.state.widths += percent
+        n.setAttribute('style', 'max-width: none; width:' + percent + '%')
+      }
+    }
+
+    // Start the drag operation
+    window.addEventListener('mousemove', this.doDrag)
+
+    // Need to capture on the window for mouse up outside
+    window.addEventListener('mouseup', this.stopDrag)
+  }
+
 }
 
 class Router {
@@ -264,6 +269,8 @@ class AppDataSource {
     this.log = new Log()
 
     this._flash = undefined
+
+    this.columns = new ColumnManager()
   }
 
   get flash () {
@@ -965,7 +972,9 @@ class EditorApplication {
         closeNewFileView: function () {
           this.currentView = this.previousView || 'pages'
         },
-        startDragColumn: startDragColumn
+        startDragColumn: function (e) {
+          this.$store.state.columns.startDrag(e)
+        }
       },
       components: {
         'new': {
@@ -1342,7 +1351,9 @@ class EditorApplication {
             })
             .catch((e) => console.error(e))
         },
-        startDragColumn: startDragColumn
+        startDragColumn: function (e) {
+          this.$store.state.columns.startDrag(e)
+        }
       },
       components: {
         welcome: {
