@@ -132,6 +132,9 @@ class ColumnManager {
   }
 
   minimize (className) {
+    if (!className) {
+      return
+    }
     const el = document.querySelector('.' + className)
     const parent = el.parentNode
     parent.childNodes.forEach((n, index) => {
@@ -611,6 +614,9 @@ class EditorApplication {
         }
       },
       actions: {
+        'resize-column': function (context, e) {
+          context.state.columns.startDrag(e)
+        },
         'log': function (context, message) {
           context.commit('log', message)
         },
@@ -971,7 +977,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
-          <div class="column-drag" @mousedown="startDragColumn"></div>
+          <div class="column-drag" :class="{disabled: maximized}" @mousedown="resizeColumn"></div>
         </div>
       `,
       data: function () {
@@ -1027,8 +1033,8 @@ class EditorApplication {
         closeNewFileView: function () {
           this.currentView = this.previousView || 'pages'
         },
-        startDragColumn: function (e) {
-          this.$store.state.columns.startDrag(e)
+        resizeColumn: function (e) {
+          this.$store.dispatch('resize-column', e)
         }
       },
       components: {
@@ -1330,7 +1336,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
-          <div class="column-drag" @mousedown="startDragColumn">&nbsp;</div>
+          <div class="column-drag" :class="{disabled: maximized}" @mousedown="resizeColumn">&nbsp;</div>
         </div>
       `,
       computed: {
@@ -1406,8 +1412,8 @@ class EditorApplication {
             })
             .catch((e) => console.error(e))
         },
-        startDragColumn: function (e) {
-          this.$store.state.columns.startDrag(e)
+        resizeColumn: function (e) {
+          this.$store.dispatch('resize-column', e)
         }
       },
       components: {
