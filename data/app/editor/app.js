@@ -488,6 +488,22 @@ class AppDataSource {
       })
   }
 
+  renameFile (file, newName) {
+    let url = this.url + 'files' + file.url
+    let opts = {
+      method: 'POST',
+      headers: {
+        Location: newName
+      }
+    }
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
+
   deleteApp (container, application) {
     let url = `${this.api}${container}/${application}/`
     let opts = {
@@ -808,6 +824,24 @@ class EditorApplication {
                     return context.dispatch('navigate', {href: href})
                   }
                 })
+            })
+        },
+        'rename-file': function (context, {file, newName}) {
+          console.log('rename file: ' + newName)
+          return context.state.renameFile(file, newName)
+            .then((res) => {
+              let doc = res.document
+              if (res.response.status !== 200) {
+                let msg = doc.error || doc.message
+                msg = `[${res.response.status}] ${msg}`
+                let err = new Error(msg)
+                context.dispatch('log', err)
+                throw err
+              }
+
+              console.log('file rename complee...')
+
+              return context.dispatch('reload')
             })
         }
       }
@@ -1431,8 +1465,8 @@ class EditorApplication {
                 <section>
                   <h3>Rename File</h3>
                   <p>Choose a new name for your file.</p>
-                  <form class="rename">
-                    <input type="text" name="fileName" :value="file.name" />
+                  <form @submit="rename" class="rename">
+                    <input type="text" name="fileName" v-model="newName" />
                     <div class="form-actions">
                       <input type="submit" name="Rename" value="Rename" />
                     </div>
@@ -1472,7 +1506,8 @@ class EditorApplication {
             </div>`,
           data: function () {
             return {
-              confirmDelete: false
+              confirmDelete: false,
+              newName: ''
             }
           },
           computed: {
@@ -1480,7 +1515,15 @@ class EditorApplication {
               return this.$store.state.current
             }
           },
+          created: function () {
+            this.newName = this.file.url
+          },
           methods: {
+            rename: function (e) {
+              e.preventDefault()
+              return this.$store.dispatch('rename-file', {file: this.file, newName: this.newName})
+                .catch((e) => console.error(e))
+            },
             doDelete: function () {
               this.confirmDelete = false
               return this.$store.dispatch('delete-file', this.file)

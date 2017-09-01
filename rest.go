@@ -386,50 +386,6 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
   created(res, OK)
   return
 
-	/*
-	// Be certain the file does not exist on disc
-	fh, err := os.Open(output)
-	if err != nil {
-		if os.IsNotExist(err) {
-			// Try to create parent directories
-			if err = os.MkdirAll(dir, os.ModeDir | 0755); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-			// Create the destination file
-			if fh, err = os.Create(output); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-
-			defer fh.Close()
-			var stat os.FileInfo
-
-			if stat, err = fh.Stat(); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-
-			mode := stat.Mode()
-			if mode.IsDir() {
-				ex(res, http.StatusForbidden, nil, errors.New("Attempt to PUT a file to an existing directory"))
-				return
-			} else if mode.IsRegular() {
-				fh, err := os.Create(output)
-				if err == nil {
-					defer fh.Close()
-
-				}
-			}
-		}
-
-		ex(res, http.StatusInternalServerError, nil, err)
-		return
-	}
-	defer fh.Close()
-
-	*/
-
 	if err != nil {
 		ex(res, http.StatusInternalServerError, nil, err)
 		return
@@ -441,43 +397,67 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 // Update file content for an application
 func postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
 	var err error
+	loc := req.Header.Get("Location")
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
-	// No content type header
-	if ct == "" {
-		ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
-		return
-	}
+  if loc == "" {
+    // No content type header
+    if ct == "" {
+      ex(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
+      return
+    }
 
-	// No content length header
-	if cl == "" {
-		ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
-		return
-	}
+    // No content length header
+    if cl == "" {
+      ex(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
+      return
+    }
+  }
 
 	var file *model.File = app.Urls[url]
 	if file != nil {
-		// Strip charset for mime comparison
-		ct = CharsetStrip.ReplaceAllString(ct, "")
-		ft := CharsetStrip.ReplaceAllString(file.Mime, "")
-		if ft != ct {
-			ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
-			return
-		}
 
-		// TODO: fix empty reply when there is no request body
-		// TODO: stream request body to disc
-		var content []byte
-		if content, err = readBody(req); err == nil {
-			// Update the application model
-			if err = app.Update(file, content); err != nil {
-				ex(res, http.StatusInternalServerError, nil, err)
-				return
-			}
-			ok(res, OK)
-			return
-		}
+    // Handle moving the file with Location header
+    if loc != "" {
+      if url == loc {
+        ex(res, http.StatusBadRequest, nil,
+          fmt.Errorf("Cannot move file, source and destination are equal: %s", url))
+        return
+      }
+      println("Move file to: " + loc)
+
+      if err = app.Move(file, loc); err != nil {
+        ex(res, http.StatusInternalServerError, nil, err)
+        return
+      }
+      ok(res, OK)
+
+      return
+    // Update file content
+    } else {
+      // Strip charset for mime comparison
+      ct = CharsetStrip.ReplaceAllString(ct, "")
+      ft := CharsetStrip.ReplaceAllString(file.Mime, "")
+      if ft != ct {
+        ex(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
+        return
+      }
+
+      // TODO: fix empty reply when there is no request body
+      // TODO: stream request body to disc
+      var content []byte
+      if content, err = readBody(req); err == nil {
+        // Update the application model
+        if err = app.Update(file, content); err != nil {
+          ex(res, http.StatusInternalServerError, nil, err)
+          return
+        }
+        ok(res, OK)
+        return
+      }
+
+    }
 	}
 
 	if err != nil {

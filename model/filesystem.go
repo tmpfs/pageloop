@@ -36,6 +36,8 @@ type ApplicationFileSystem interface {
 
 	// Save the source file to the underlying file system
 	SaveFile(f *File) error
+
+  MoveFile(f *File, dest string, filter FileFilter) error
 }
 
 // Default file system that uses the underlying host file system.
@@ -81,6 +83,39 @@ func (fs *UrlFileSystem) Open(url string) (http.File, error) {
 		return nil, errors.New("File not found at url " + url)
 	}
 	return file, nil
+}
+
+// Move a file to the destination URL.
+func (fs *UrlFileSystem) MoveFile(file *File, dest string, filter FileFilter) error {
+  if filter == nil {
+    filter = &DefaultPublishFilter{}
+  }
+
+  base := file.owner.Path
+  parts := strings.Split(dest, SLASH)
+  destPath := filepath.Join(parts...)
+  destPath = filepath.Join(base, destPath)
+
+  // Move source file
+  if err := os.Rename(file.Path, destPath); err != nil {
+    return err
+  }
+
+  base = file.owner.Public
+  parts = strings.Split(file.Uri, SLASH)
+  publishPath := filepath.Join(parts...)
+  publishPath = filepath.Join(base, publishPath)
+
+  parts = strings.Split(dest, SLASH)
+  newPath := filepath.Join(parts...)
+  newPath = filepath.Join(base, newPath)
+
+  // Move published file
+  if err := os.Rename(publishPath, newPath); err != nil {
+    return err
+  }
+
+  return nil
 }
 
 // Loads a file from disc and returns a new file reference
