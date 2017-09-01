@@ -283,11 +283,11 @@ footer p {
 .sidebar {
   max-width: 32rem;
   width: 20%;
-  min-width: var(--drag-size);
 }
 
 .sidebar, .editor {
   position: relative;
+  min-width: var(--drag-size);
 }
 
 .sidebar:not(.maximized) > :not(.column-drag), .editor:not(.maximized) > :not(.column-drag) {

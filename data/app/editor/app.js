@@ -15,7 +15,7 @@ class ColumnManager {
       let tb = target.getBoundingClientRect()
 
       // Out of bounds cursor
-      if (e.clientX < 0 || e.clientX > maximum) {
+      if (e.clientX < 0 || e.clientX > maximum || e.clientX < tb.left) {
         return
       }
 
