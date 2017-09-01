@@ -3,17 +3,19 @@
 let currentColumnDrag
 
 function startDragColumn (e) {
+  e.stopImmediatePropagation()
+
   // Target to reize
   let target = e.currentTarget.parentNode
 
   // Parent gives overall available width
   let parent = target.parentNode
-  console.log('start drag column!!')
   currentColumnDrag = {
     target: target,
     parent: parent
   }
 
+  // Start the drag operation
   window.addEventListener('mousemove', doDragColumn)
 
   // Need to capture on the window for mouse up outside
@@ -21,30 +23,39 @@ function startDragColumn (e) {
 }
 
 function doDragColumn (e) {
+  e.stopImmediatePropagation()
   let target = currentColumnDrag.target
   let parent = currentColumnDrag.parent
-  // let tb = target.getBoundingClientRect()
-  // let pb = parent.getBoundingClientRect()
+  let tb = target.getBoundingClientRect()
+  let pb = parent.getBoundingClientRect()
 
   // Width of all columns to calculate percentage
-  // let maximum = pb.right
-  // let percent = Math.round((e.clientX / maximum) * 100)
+  let maximum = pb.right
 
-  let found = false
+  if (e.clientX < 0 || e.clientX > maximum) {
+    return
+  }
+
+  let percent = Math.round(((e.clientX - tb.left) / maximum) * 100)
+
+  target.setAttribute('style', 'max-width: none; width:' + percent + '%')
+
+  document.querySelector('body').setAttribute('style', 'pointer-events: none; cursor: ew-resize;')
 
   parent.childNodes.forEach((n) => {
     if (n === target) {
-      // target.setAttribute('style', 'max-width: none; width:' + percent + '%')
-      target.setAttribute('style', 'max-width: none; width:' + e.clientX + 'px')
-      found = true
-    } else if (found && n.setAttribute) {
-      n.setAttribute('style', 'width: auto')
+      target.setAttribute('style', 'max-width: none; width:' + percent + '%')
+      // target.setAttribute('style', 'max-width: none; width:' + (e.clientX-tb.left) + 'px')
+    } else if (n.setAttribute) {
+      n.removeAttribute('style')
     }
   })
 }
 
 function stopDragColumn (e) {
-  // console.log('stop drag column')
+  e.stopImmediatePropagation()
+  document.querySelector('body').removeAttribute('style')
+  console.log('stop drag column')
   window.removeEventListener('mousemove', doDragColumn)
   currentColumnDrag = null
 }
@@ -850,7 +861,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
-          <div class="column-drag" @mousedown="startDragColumn" @mouseup="stopDragColumn"></div>
+          <div class="column-drag" @mousedown="startDragColumn"></div>
         </div>
       `,
       data: function () {
@@ -906,8 +917,7 @@ class EditorApplication {
         closeNewFileView: function () {
           this.currentView = this.previousView || 'pages'
         },
-        startDragColumn: startDragColumn,
-        stopDragColumn: stopDragColumn
+        startDragColumn: startDragColumn
       },
       components: {
         'new': {
@@ -1208,7 +1218,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
-          <div class="column-drag" @mousedown="startDragColumn" @mouseup="stopDragColumn">&nbsp;</div>
+          <div class="column-drag" @mousedown="startDragColumn">&nbsp;</div>
         </div>
       `,
       computed: {
@@ -1284,8 +1294,7 @@ class EditorApplication {
             })
             .catch((e) => console.error(e))
         },
-        startDragColumn: startDragColumn,
-        stopDragColumn: stopDragColumn
+        startDragColumn: startDragColumn
       },
       components: {
         welcome: {
