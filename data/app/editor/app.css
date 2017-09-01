@@ -287,16 +287,23 @@ footer p {
 
 .sidebar, .editor {
   position: relative;
+}
+
+.sidebar > :not(.column-drag), .editor :not(.column-drag) {
+  /*
+   * Setting padding on sidebar/editor causes issues when maximizing
+   * so we set on the child elements instead.
+   */
   padding-right: var(--drag-size);
 }
 
 .sidebar > .column-drag, .editor > .column-drag {
   position: absolute;
   top: 0;
-  left: 0;
+  left: calc(100% - var(--drag-size));
   bottom: 0;
   right: 0;
-  margin-left: calc(100% - var(--drag-size));
+  /*margin-left: calc(100% - var(--drag-size));*/
 	width: var(--drag-size);
 	height: 100%;
   cursor: ew-resize;
@@ -650,3 +657,4 @@ header > nav > a.selected {
   margin-right: 0.5rem;
   color: var(--orange-color);
 }
+
