@@ -4,6 +4,7 @@ class ColumnManager {
   constructor () {
     this.state = null
     this.styles = null
+    this.maximized = ''
 
     this.doDrag = (e) => {
       e.stopImmediatePropagation()
@@ -112,28 +113,51 @@ class ColumnManager {
     window.addEventListener('mouseup', this.stopDrag)
   }
 
-  // Remove inline styles from columns.
-  removeStyles () {
+  maximize (className) {
+    const el = document.querySelector('.' + className)
+    const parent = el.parentNode
+    this.styles = {}
+    parent.childNodes.forEach((n, index) => {
+      if (n.nodeType !== 1) {
+        return
+      }
+      this.styles[index] = n.getAttribute('style')
+      if (n === el) {
+        n.setAttribute('style', 'max-width: none; width: 100%;')
+      } else {
+        n.setAttribute('style', 'max-width: none; width: 0%;')
+      }
+    })
+    this.maximized = className
+  }
+
+  minimize (className) {
+    const el = document.querySelector('.' + className)
+    const parent = el.parentNode
+    parent.childNodes.forEach((n, index) => {
+      if (n.nodeType !== 1) {
+        return
+      }
+      if (this.styles[index]) {
+        n.setAttribute('style', this.styles[index])
+      }
+    })
+    this.styles = null
+    this.maximized = ''
+  }
+
+  // Remove inline styles from columns will restore columns
+  // to the defaults declared in the stylesheet.
+  reset () {
     let parent = document.querySelector('.content-main > .content')
     let i, n
     this.styles = {}
-
-    console.log('remove styles')
-
     for (i = 0; i < parent.childNodes.length; i++) {
       n = parent.childNodes[i]
       if (n.nodeType !== 1) {
         continue
       }
-      this.styles[i] = n.getAttribute('style')
       n.removeAttribute('style')
-    }
-  }
-
-  restoreStyles () {
-    let parent = document.querySelector('.content-main > .content')
-    for (let k in this.styles) {
-      parent.childNodes[k].setAttribute('style', this.styles[k])
     }
   }
 }
@@ -288,13 +312,11 @@ class AppDataSource {
     this.previewUrl = ''
     this.previewRefresh = false
 
-    // State for maximized column in edit mode
-    this.maximizedColumn = ''
-
     this.log = new Log()
 
     this._flash = undefined
 
+    // State for edit mode columns
     this.columns = new ColumnManager()
   }
 
@@ -579,12 +601,11 @@ class EditorApplication {
         'maximize-column': function (state, info) {
           // Maximizing
           if (info) {
-            state.columns.removeStyles()
+            state.columns.maximize(info)
           // Minimizing
           } else {
-            state.columns.restoreStyles()
+            state.columns.minimize(state.columns.maximized)
           }
-          state.maximizedColumn = info
         }
       },
       actions: {
@@ -959,7 +980,7 @@ class EditorApplication {
       computed: {
         maximized: {
           get: function () {
-            return this.$store.state.maximizedColumn
+            return this.$store.state.columns.maximized
           },
           set: function (val) {
             this.$store.commit('maximize-column', val)
@@ -1204,7 +1225,7 @@ class EditorApplication {
       computed: {
         maximized: {
           get: function () {
-            return this.$store.state.maximizedColumn
+            return this.$store.state.columns.maximized
           },
           set: function (val) {
             this.$store.commit('maximize-column', val)
@@ -1327,7 +1348,7 @@ class EditorApplication {
         },
         maximized: {
           get: function () {
-            return this.$store.state.maximizedColumn
+            return this.$store.state.columns.maximized
           },
           set: function (val) {
             this.$store.commit('maximize-column', val)
