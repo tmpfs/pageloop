@@ -1,7 +1,52 @@
 /* globals Vue Vuex CodeMirror document fetch document history window */
 
-function doDragColumn (e) {
+let currentColumnDrag
 
+function startDragColumn (e) {
+  // Target to reize
+  let target = e.currentTarget.parentNode
+
+  // Parent gives overall available width
+  let parent = target.parentNode
+  console.log('start drag column!!')
+  currentColumnDrag = {
+    target: target,
+    parent: parent
+  }
+
+  window.addEventListener('mousemove', doDragColumn)
+
+  // Need to capture on the window for mouse up outside
+  window.addEventListener('mouseup', stopDragColumn)
+}
+
+function doDragColumn (e) {
+  let target = currentColumnDrag.target
+  let parent = currentColumnDrag.parent
+  // let tb = target.getBoundingClientRect()
+  // let pb = parent.getBoundingClientRect()
+
+  // Width of all columns to calculate percentage
+  // let maximum = pb.right
+  // let percent = Math.round((e.clientX / maximum) * 100)
+
+  let found = false
+
+  parent.childNodes.forEach((n) => {
+    if (n === target) {
+      // target.setAttribute('style', 'max-width: none; width:' + percent + '%')
+      target.setAttribute('style', 'max-width: none; width:' + e.clientX + 'px')
+      found = true
+    } else if (found && n.setAttribute) {
+      n.setAttribute('style', 'width: auto')
+    }
+  })
+}
+
+function stopDragColumn (e) {
+  // console.log('stop drag column')
+  window.removeEventListener('mousemove', doDragColumn)
+  currentColumnDrag = null
 }
 
 class Router {
@@ -805,7 +850,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
-          <div class="column-drag" @click="dragColumn"></div>
+          <div class="column-drag" @mousedown="startDragColumn" @mouseup="stopDragColumn"></div>
         </div>
       `,
       data: function () {
@@ -861,9 +906,8 @@ class EditorApplication {
         closeNewFileView: function () {
           this.currentView = this.previousView || 'pages'
         },
-        dragColumn: function (e) {
-          doDragColumn(e)
-        }
+        startDragColumn: startDragColumn,
+        stopDragColumn: stopDragColumn
       },
       components: {
         'new': {
@@ -1164,7 +1208,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
-          <div class="column-drag" @click="dragColumn">&nbsp;</div>
+          <div class="column-drag" @mousedown="startDragColumn" @mouseup="stopDragColumn">&nbsp;</div>
         </div>
       `,
       computed: {
@@ -1240,9 +1284,8 @@ class EditorApplication {
             })
             .catch((e) => console.error(e))
         },
-        dragColumn: function (e) {
-          doDragColumn(e)
-        }
+        startDragColumn: startDragColumn,
+        stopDragColumn: stopDragColumn
       },
       components: {
         welcome: {
