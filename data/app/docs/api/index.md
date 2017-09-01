@@ -108,13 +108,18 @@ request body.
 
 ## POST /{container}/{application}/files/{url}
 
-Update file content for a file, the file must already exist.
+Update a file, the file must already exist.
 
-It is an error if the request MIME type does not match the
+If a `Location` header is sent in the request the operation is a rename 
+(the request body is ignored) and the target file is renamed to the URL 
+given in the `Location` header.
+
+Otherwise the operation is to update file content from the request body, 
+in which case it is an error if the request MIME type does not match the
 existing MIME type for the file.
 
-Syncs the source file to disc and publishes an updated
-version of the file to the public URL.
+Syncs the source file to disc and publishes an updated version of the 
+file to the public URL.
 
 ## GET /{container}/{application}/files/{url}
 
