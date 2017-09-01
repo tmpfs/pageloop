@@ -21,7 +21,7 @@
   --border-color: #002b36;
   --toolbar-link: #839496;
 
-  --drag-size: 4px;
+  --drag-size: 6px;
 }
 
 @font-face {
@@ -289,7 +289,7 @@ footer p {
   position: relative;
 }
 
-.sidebar > :not(.column-drag), .editor :not(.column-drag) {
+.sidebar:not(.maximized) > :not(.column-drag), .editor:not(.maximized) > :not(.column-drag) {
   /*
    * Setting padding on sidebar/editor causes issues when maximizing
    * so we set on the child elements instead.

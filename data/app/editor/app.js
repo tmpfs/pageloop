@@ -977,7 +977,7 @@ class EditorApplication {
           <div class="scroll">
             <component v-bind:is="currentView"></component>
           </div>
-          <div class="column-drag" :class="{disabled: maximized}" @mousedown="resizeColumn"></div>
+          <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
         </div>
       `,
       data: function () {
@@ -1336,7 +1336,7 @@ class EditorApplication {
               title="Minimize">▣</a>
           </nav>
           <component v-bind:is="currentView"></component>
-          <div class="column-drag" :class="{disabled: maximized}" @mousedown="resizeColumn">&nbsp;</div>
+          <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn">&nbsp;</div>
         </div>
       `,
       computed: {
