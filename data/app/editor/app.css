@@ -277,13 +277,14 @@ footer p {
   flex: 1 1 auto;
   opacity: 1;
   transition: all 0.5s ease-out;
-  background: var(--background)
+  background: var(--background);
 }
 
 .sidebar {
   border-right: 1px solid var(--border-color);
   max-width: 32rem;
   width: 20%;
+  min-width: 16rem;
 }
 
 .sidebar, .editor {
