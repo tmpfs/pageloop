@@ -74,3 +74,7 @@ Wow, so much to do, here is some stuff:
 
 29) Implement shell/terminal style interface using RPC API over websockets.
 30) Remove support for `directory` when creating apps from templates.
+
+		Implementation: cc7d2dc85ccfd00da4fc181bd9b7cb5d3825a6d8
+
+31) Implement quick app context switching - update app title component to show list of apps.
