@@ -1536,6 +1536,11 @@ class EditorApplication {
               this.confirmDelete = false
               return this.$store.dispatch('delete-file', this.file)
             }
+          },
+          watch: {
+            file: function (file) {
+              this.newName = file.url
+            }
           }
         },
         'data-editor': {
