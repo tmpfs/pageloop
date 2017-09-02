@@ -1910,7 +1910,7 @@ class EditorApplication {
                                   :href="linkify(container, app, true)"
                                   :title="title(app, 'Open')">Open</a>
                                 <a v-if="!app.protected" class="name"
-                                  @click="deleteApplication(container, app)"
+                                  @click="confirmDeleteApplication(container, app)"
                                   :title="title(app, 'Delete')">Delete</a>
                               </p>
                             </p>
@@ -1958,6 +1958,17 @@ class EditorApplication {
                       return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
                     })
                     .catch((e) => console.error(e))
+                },
+                confirmDeleteApplication: function (container, application) {
+                  let details = {
+                    title: `Delete Application (${application.name})`,
+                    message: `Are you sure you want to permanently delete ${application.name}?`,
+                    note: 'Be careful deleting an application will remove all application files forever.',
+                    ok: () => {
+                      this.deleteApplication(container, application)
+                    }
+                  }
+                  this.$store.commit('alert-show', details)
                 },
                 deleteApplication: function (container, application) {
                   this.$store.dispatch('del-app', {container: container.name, application: application.name})
