@@ -746,7 +746,6 @@ a.close:hover {
 .notifications {
   position: absolute;
   z-index: 10001;
-  /*background: rgba(0, 0, 0, 0.3);*/
   right: 0;
   bottom: 0;
   padding: 1rem;
@@ -754,6 +753,7 @@ a.close:hover {
 
 .notify {
   position: relative;
+  left: 100%;
   display: block;
   background: var(--base03-color);
   color: var(--color);
@@ -780,4 +780,5 @@ a.close:hover {
 
 .notify.reveal {
   opacity: 1;
+  left: 0;
 }
