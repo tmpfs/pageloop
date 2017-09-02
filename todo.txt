@@ -84,3 +84,6 @@ Wow, so much to do, here is some stuff:
 		* Translate from primary language
 		* Extract text nodes from HTML documents and strings in the page meta data
 		* Present gettext style primary -> new language editor
+
+33) Generate link reports, broken links etc.
+34) Validate generated markup - java + nu-validator :(
