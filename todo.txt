@@ -1,0 +1,45 @@
+Wow, so much to do, here is some stuff:
+
+1) Fix quick delete in sidebar, requires addition of an Alert component
+   to confirm the file deletion.
+2) Recognise parent directories. When creating or moving files any intermediary
+   parent directories are not shown in the file list, we need to create File
+   instances for intermediary directories.
+3) Add missing documentation files.
+4) Sketch settings/preferences view.
+5) Update apps view to hide system applications by default and allow showing
+   then.
+6) Update new file template API to use an object like creating an app from a
+   template and remove the use of a MIME type.
+7) Add ability to choose application template when creating new apps.
+8) Add confirmation when deleting apps.
+9) Improve home page layout and content.
+10 Investigate resize issues:
+
+   * When dragging the preview pane to zero width and expanding again sometimes
+     the scroll stops working on the iframe - refreshing the iframe content appears
+     to fix the issue but maybe setting window.scrollTo(0,0) might be enough.
+   * Sometimes the codemirror instance scrollbars get stuck after dragging and resizing.
+     Subsequently scrolling the codemirror instance fixes the issue but we should do this
+     automatically after a resize.
+
+11) Support recursively deleting folders - os.RemoveAll().
+12) Consider showing file dirty status in files list.
+13) Design system for multiple open documents - tabs or dropdown quick switcher. Tabs are
+    traditional but we don't have so much screen space so maybe a dropdown is better.
+14) Improve data editor and allow syncing the data source (RPC API?). How to maintain key
+    order when serializing back to YAML/JSON?
+15) Make editing the source code more realtime. Allow the server to make changes to the file
+    in-memory based on the codemirror editor changes and send out push events to those viewing
+    the file so they can see the changes.
+16) Design visual editor - still not sure the best way to do this, but I think it will be a
+    combination or elements and components. Where elements are simple components representing
+    the built in HTML elements and components are custom extensions that can be added to the
+    document. The visual editor would operate on user interfaces exposed by each component to
+    update the component. The visual editor should support an outline of the document in a sidebar
+    to get a glimpse of the document structure and dragging elements/components into the document
+    to add new components.
+17) Support file upload via drag and drop and click to select, requires that we know the target
+    directory. Maybe easiest if they are dragged directly on to a folder in the files list
+    rather than creating a separate view for browsing directories although eventually both
+    should be supported. Can add an upload area to the file info for directories also.
