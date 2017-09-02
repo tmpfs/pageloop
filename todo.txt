@@ -87,3 +87,4 @@ Wow, so much to do, here is some stuff:
 
 33) Generate link reports, broken links etc.
 34) Validate generated markup - java + nu-validator :(
+35) Document size switching component for the preview area, eg: 320x480 ...
