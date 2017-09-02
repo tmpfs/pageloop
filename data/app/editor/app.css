@@ -750,21 +750,26 @@ a.close:hover {
   top: 0;
   right: 0;
   bottom: 0;
-  padding: 2rem;
+  padding: 0.5rem;
 }
 
 .notify {
   position: relative;
-  display: inline-block;
+  display: block;
   background: var(--background);
   color: var(--color);
   font-size: 1.5rem;
-  min-width: 24rem;
+  min-width: 32rem;
   padding: 0 0 1rem 0;
   border-radius: 3px;
+  margin-bottom: 1rem;
 }
 
 .notify p {
   margin-left: 1rem;
+}
+
+.notify p:last-child {
+  margin-bottom: 0;
 }
 
