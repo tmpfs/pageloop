@@ -2,17 +2,23 @@ Wow, so much to do, here is some stuff:
 
 1) Fix quick delete in sidebar, requires addition of an Alert component
    to confirm the file deletion.
+
+	 Implementation: 08f9c5f9921688fcb0f84e1711c05117c50e08d8
+
 2) Recognise parent directories. When creating or moving files any intermediary
    parent directories are not shown in the file list, we need to create File
    instances for intermediary directories.
 3) Add missing documentation files.
 4) Sketch settings/preferences view.
 5) Update apps view to hide system applications by default and allow showing
-   then.
+   them.
 6) Update new file template API to use an object like creating an app from a
    template and remove the use of a MIME type.
 7) Add ability to choose application template when creating new apps.
 8) Add confirmation when deleting apps.
+
+	 Implementation: 08f9c5f9921688fcb0f84e1711c05117c50e08d8
+
 9) Improve home page layout and content.
 10 Investigate resize issues:
 
@@ -59,4 +65,11 @@ Wow, so much to do, here is some stuff:
 26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
 27) Add Docker integration.
 28) Support notifications for better displaying errors and other messages.
+
+		* Requires support for error message/styling
+		* Handle long messages - scroll?
+		* Integrate with all current actions that require notifications
+
+		Implementation: f30d898fb3f05def8f179bfa8ea6511af9154846
+
 29) Implement shell/terminal style interface using RPC API over websockets.
