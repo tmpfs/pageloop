@@ -20,6 +20,7 @@ class ColumnManager {
       }
 
       // Try to stop other events interfering
+      // TODO: work out why cursor is not displaying
       document.querySelector('body').setAttribute('style', 'user-select: none; pointer-events: none; cursor: ew-resize;')
 
       // Resize target column by percentage
@@ -327,7 +328,8 @@ class AppDataSource {
     this.alert = {
       visible: false,
       title: 'Alert',
-      message: 'Are you sure?',
+      message: '',
+      note: '',
       ok: function noop () {}
     }
   }
@@ -1075,10 +1077,10 @@ class EditorApplication {
       methods: {
         confirmDelete: function () {
           let details = {
-            title: 'Delete File',
-            message: `Are you sure you want to delete ${this.currentFile.name}?`,
+            title: `Delete File (${this.currentFile.name})`,
+            message: `Are you sure you want to delete the file ${this.currentFile.url}?`,
+            note: 'Be careful file deletion is irreversible.',
             ok: () => {
-              console.log('do deletion of a file')
               this.doDeleteFile()
             }
           }
@@ -1147,7 +1149,7 @@ class EditorApplication {
                   </div>
                   <nav class="form-actions">
                     <input @click="cancel" type="reset" name="Reset" value="Cancel" />
-                    <input type="submit" name="Create" value="Create" />
+                    <input type="submit" name="Create" value="Create" class="primary" />
                   </nav>
                 </form>
               </section>
@@ -1763,6 +1765,7 @@ class EditorApplication {
                 </h2>
                 <div class="dialog-panel">
                   <p v-if="alert.message">{{alert.message}}</p>
+                  <small v-if="alert.note">{{alert.note}}</small>
                   <div class="form-actions">
                     <button class="sml" @click="dismiss">Cancel</button>
                     <button class="sml primary" @click="ok">OK</button>
@@ -1886,7 +1889,7 @@ class EditorApplication {
                         <input type="text" name="description"
                           :value="applicationDescription" v-model="applicationDescription" />
                         <div class="form-actions">
-                          <input type="submit" value="Create" />
+                          <input type="submit" value="Create" class="primary" />
                         </div>
                       </form>
                     </div>

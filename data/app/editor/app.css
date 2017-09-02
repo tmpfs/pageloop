@@ -549,9 +549,6 @@ button, input[type="submit"], input[type="reset"] {
   cursor: pointer;
   border: 2px solid var(--base1-color);
   border-style: none;
-}
-
-button {
   background: var(--base03-color);
   color: var(--base2-color);
   min-width: 6rem;
@@ -566,7 +563,7 @@ button.sml {
   padding: 0.3rem;
 }
 
-button.primary {
+button.primary, input[type="submit"].primary {
   background: var(--blue-color);
   color: var(--base3-color);
 }

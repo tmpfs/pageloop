@@ -59,3 +59,4 @@ Wow, so much to do, here is some stuff:
 26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
 27) Add Docker integration.
 28) Support notifications for better displaying errors and other messages.
+29) Implement shell/terminal style interface using RPC API over websockets.
