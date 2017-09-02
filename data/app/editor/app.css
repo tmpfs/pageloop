@@ -656,6 +656,24 @@ header > nav > a.selected {
   color: var(--orange-color);
 }
 
+a.close {
+  display: inline-block;
+  color: var(--color);
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+}
+
+a.close::before {
+  content: '🞩';
+  padding-left: 0.5rem;
+}
+
+a.close:hover {
+  color: var(--base3-color);
+  background: var(--base03-color);
+}
+
 .alert {
   position: absolute;
   left: 0;
@@ -687,16 +705,26 @@ header > nav > a.selected {
   margin: 0 auto;
   background: var(--background);
   color: var(--color);
+  font-size: 1.5rem;
   min-width: 32rem;
   min-height: 12rem;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
-  padding: 0 2rem;
+  clear: both;
+}
+
+.alert .dialog-panel {
+  padding: 0 1rem;
 }
 
 .alert > .dialog > h2 {
   font-size: 1.6rem;
-  padding: 1rem 0 0.5rem 0;
+  padding: 0.5rem 0 0.5rem 1rem;
   border-bottom: 1px solid currentColor;
-  color: inherit;
+}
+
+.alert > .dialog > a.close {
+  position: absolute;
+  top: 0;
+  right: 0;
 }

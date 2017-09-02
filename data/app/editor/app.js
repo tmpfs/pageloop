@@ -1737,9 +1737,14 @@ class EditorApplication {
             <div class="alert">
               <div class="background"></div>
               <div class="dialog">
-                <h2>{{title}}</h2>
-                <p v-if="message">{{message}}</p>
-                <slot />
+                <a class="close"></a>
+                <h2>
+                  <span>{{title}}</span>
+                </h2>
+                <div class="dialog-panel">
+                  <p v-if="message">{{message}}</p>
+                  <slot name="alert-content" />
+                </div>
               </div>
             </div>
           `,
@@ -1747,6 +1752,11 @@ class EditorApplication {
             return {
               title: 'Alert',
               message: 'Are you sure?'
+            }
+          },
+          components: {
+            'alert-content': {
+              template: `<p>Foo blah</p>`
             }
           }
         },
