@@ -1724,6 +1724,7 @@ class EditorApplication {
     let app = new Vue({
       template: `
         <main>
+          <app-alert></app-alert>
           <app-header></app-header>
           <app-main></app-main>
           <app-footer></app-footer>
@@ -1731,6 +1732,24 @@ class EditorApplication {
       `,
       store: this.store,
       components: {
+        'app-alert': {
+          template: `
+            <div class="alert">
+              <div class="background"></div>
+              <div class="dialog">
+                <h2>{{title}}</h2>
+                <p v-if="message">{{message}}</p>
+                <slot />
+              </div>
+            </div>
+          `,
+          data: function () {
+            return {
+              title: 'Alert',
+              message: 'Are you sure?'
+            }
+          }
+        },
         'app-header': {
           template: `
               <header class="clearfix">
