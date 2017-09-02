@@ -435,54 +435,24 @@ func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
 
 // Find a directory file within an application to use as an application
 // template.
-func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Application, *model.File, error) {
+func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Application, error) {
   container := l.Host.GetByName(t.Container)
   if container == nil {
-    return nil, nil, fmt.Errorf("Template container %s does not exist", t.Container)
+    return nil, fmt.Errorf("Template container %s does not exist", t.Container)
   }
   app := container.GetByName(t.Application)
   if app == nil {
-    return nil, nil, fmt.Errorf("Template application %s does not exist", t.Application)
+    return nil, fmt.Errorf("Template application %s does not exist", t.Application)
   }
 
-  var dir *model.File
-
-  if t.Directory != "" {
-    t.Directory = "/" + strings.TrimSuffix(t.Directory, "/")
-    dir = app.Urls[t.Directory]
-    if dir == nil {
-      return nil, nil, fmt.Errorf("Template directory %s does not exist", t.Directory)
-    }
-
-    if !dir.Directory {
-      return nil, nil, fmt.Errorf("Template target directory %s is not a directory", t.Directory)
-    }
-  }
-
-  return app, dir, nil
+  return app, nil
 }
 
 //
-func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *model.Application, dir *model.File) error {
+func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *model.Application) error {
   var err error
-  var files []*model.File
+  var files []*model.File = source.Files
   var prefix string
-
-  // Collect files in the given directory
-  if dir != nil {
-    prefix = dir.Relative
-    for _, f := range source.Files {
-      if f == dir {
-        continue;
-      }
-      if strings.HasPrefix(f.Relative, dir.Relative) {
-        files = append(files, f)
-      }
-    }
-  // All application files
-  } else {
-    files = source.Files
-  }
 
   for _, f := range files {
     if !f.Directory {

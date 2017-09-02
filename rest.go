@@ -287,16 +287,15 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
         if input.Template != nil {
           var source *model.Application
-          var dir *model.File
 
           // Find the template app/ directory
-          if source, dir, err = h.Root.LookupTemplate(input.Template); err != nil {
+          if source, err = h.Root.LookupTemplate(input.Template); err != nil {
             ex(res, http.StatusBadRequest, nil, err);
             return
           }
 
           // Copy template source files
-          if err = h.Root.CopyApplicationTemplate(input, source, dir); err != nil {
+          if err = h.Root.CopyApplicationTemplate(input, source); err != nil {
             ex(res, http.StatusInternalServerError, nil, err)
             return
           }

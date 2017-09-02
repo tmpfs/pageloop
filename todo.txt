@@ -73,3 +73,4 @@ Wow, so much to do, here is some stuff:
 		Implementation: f30d898fb3f05def8f179bfa8ea6511af9154846
 
 29) Implement shell/terminal style interface using RPC API over websockets.
+30) Remove support for `directory` when creating apps from templates.
