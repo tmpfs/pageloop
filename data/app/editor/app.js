@@ -699,7 +699,7 @@ class EditorApplication {
                 throw err
               }
 
-              context.dispatch('log', `Created ${app.name}`)
+              context.state.notify({title: 'App Info', message: `Created ${app.name}`})
 
               // Refresh containers list
               return context.dispatch('containers')
@@ -718,7 +718,7 @@ class EditorApplication {
                 throw err
               }
 
-              context.dispatch('log', `Deleted ${application}`)
+              context.state.notify({title: 'App Info', message: `Deleted ${application}`})
 
               // Refresh containers list
               return context.dispatch('containers')
