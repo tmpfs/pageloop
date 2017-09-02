@@ -753,12 +753,12 @@ a.close:hover {
 
 .notify {
   position: relative;
-  left: 100%;
+  left: 32rem;
   display: block;
   background: var(--base03-color);
   color: var(--color);
   font-size: 1.5rem;
-  min-width: 32rem;
+  width: 32rem;
   padding: 0 0 1rem 0;
   border-radius: 3px;
   margin-bottom: 1rem;
@@ -781,4 +781,8 @@ a.close:hover {
 .notify.reveal {
   opacity: 1;
   left: 0;
+}
+
+.notify.rendered {
+  transition: none;
 }

@@ -347,7 +347,8 @@ class AppDataSource {
       return
     }
 
-    // Show last notification first
+    info.reveal = true
+
     this.notifications.unshift(info)
   }
 
@@ -1810,18 +1811,13 @@ class EditorApplication {
         'app-notify': {
           template: `
             <div class="notifications" :class="{hidden: !notifications.length}">
-              <div class="notify" v-for="item in notifications">
+              <div class="notify" :class="{reveal: item.reveal, rendered: item.rendered}" v-for="item in notifications">
                 <a class="close" @click="dismiss(item)"></a>
                 <h2 v-if="item.title">{{item.title}}</h2>
-                <p>{{item.message}}</p>
+                <p>{{item.reveal}}{{item.message}}</p>
               </div>
             </div>
           `,
-          data: function () {
-            return {
-              deleting: false
-            }
-          },
           computed: {
             notifications: function () {
               return this.$store.state.notifications
@@ -1836,15 +1832,14 @@ class EditorApplication {
                 this.$store.state.notify(item, true)
               }
               el.addEventListener('transitionend', cb)
-              el.classList.remove('reveal')
+              item.rendered = false
+              item.reveal = false
             }
           },
           updated: function () {
-            // Delay a little for animation
             setTimeout(() => {
-              let elements = this.$el.querySelectorAll('.notify')
-              elements.forEach((el) => {
-                el.classList.add('reveal')
+              this.notifications.forEach((n) => {
+                n.rendered = true
               })
             }, 50)
           }
