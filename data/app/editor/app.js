@@ -1811,10 +1811,10 @@ class EditorApplication {
         'app-notify': {
           template: `
             <div class="notifications" :class="{hidden: !notifications.length}">
-              <div class="notify" :class="{reveal: item.reveal, rendered: item.rendered}" v-for="item in notifications">
+              <div class="notify" :class="{reveal: item.reveal, rendered: item.rendered}" v-for="item, index in notifications">
                 <a class="close" @click="dismiss(item)"></a>
                 <h2 v-if="item.title">{{item.title}}</h2>
-                <p>{{item.reveal}}{{item.message}}</p>
+                <p>{{item.message}}</p>
               </div>
             </div>
           `,
