@@ -78,3 +78,9 @@ Wow, so much to do, here is some stuff:
 		Implementation: cc7d2dc85ccfd00da4fc181bd9b7cb5d3825a6d8
 
 31) Implement quick app context switching - update app title component to show list of apps.
+32) Consider translation support.
+
+		* Little like gettext without the additional wrapper function
+		* Translate from primary language
+		* Extract text nodes from HTML documents and strings in the page meta data
+		* Present gettext style primary -> new language editor
