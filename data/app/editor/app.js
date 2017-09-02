@@ -332,6 +332,23 @@ class AppDataSource {
       note: '',
       ok: function noop () {}
     }
+
+    this.notifications = []
+  }
+
+  notify (info, del) {
+    if (del) {
+      for (let i = 0; i < this.notifications.length; i++) {
+        if (info === this.notifications[i]) {
+          this.notifications.splice(i, 1)
+          break
+        }
+      }
+      return
+    }
+
+    // Show last notification first
+    this.notifications.unshift(info)
   }
 
   get flash () {
@@ -776,7 +793,7 @@ class EditorApplication {
                 throw err
               }
 
-              context.dispatch('log', `Created ${name}`)
+              context.state.notify({title: 'File Info', message: `Created ${name}`})
 
               context.dispatch('reload')
                 .then(() => {
@@ -829,6 +846,8 @@ class EditorApplication {
                 context.dispatch('log', err)
                 throw err
               }
+
+              context.state.notify({title: 'File Info', message: `Deleted ${file.name}`})
 
               return context.dispatch('reload')
                 .then(() => {
@@ -1747,6 +1766,7 @@ class EditorApplication {
       template: `
         <main>
           <app-alert></app-alert>
+          <app-notify></app-notify>
           <app-header></app-header>
           <app-main></app-main>
           <app-footer></app-footer>
@@ -1760,9 +1780,7 @@ class EditorApplication {
               <div class="background"></div>
               <div class="dialog">
                 <a class="close" @click="dismiss"></a>
-                <h2>
-                  <span>{{alert.title}}</span>
-                </h2>
+                <h2>{{alert.title}}</h2>
                 <div class="dialog-panel">
                   <p v-if="alert.message">{{alert.message}}</p>
                   <small v-if="alert.note">{{alert.note}}</small>
@@ -1786,6 +1804,27 @@ class EditorApplication {
             ok: function () {
               this.alert.ok()
               this.dismiss()
+            }
+          }
+        },
+        'app-notify': {
+          template: `
+            <div class="notifications" :class="{hidden: !notifications.length}">
+              <div class="notify" v-for="item in notifications">
+                <a class="close" @click="dismiss(item)"></a>
+                <h2 v-if="item.title">{{item.title}}</h2>
+                <p>{{item.message}}</p>
+              </div>
+            </div>
+          `,
+          computed: {
+            notifications: function () {
+              return this.$store.state.notifications
+            }
+          },
+          methods: {
+            dismiss: function (item) {
+              this.$store.state.notify(item, true)
             }
           }
         },

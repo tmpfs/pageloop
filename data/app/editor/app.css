@@ -731,14 +731,40 @@ a.close:hover {
   padding: 0 1rem;
 }
 
-.alert > .dialog > h2 {
+.alert > .dialog > h2, .notify > h2 {
   font-size: 1.6rem;
   padding: 0.5rem 0 0.5rem 1rem;
   border-bottom: 1px solid currentColor;
 }
 
-.alert > .dialog > a.close {
+.alert > .dialog > a.close, .notify > a.close {
   position: absolute;
   top: 0;
   right: 0;
 }
+
+.notifications {
+  position: absolute;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.3);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2rem;
+}
+
+.notify {
+  position: relative;
+  display: inline-block;
+  background: var(--background);
+  color: var(--color);
+  font-size: 1.5rem;
+  min-width: 24rem;
+  padding: 0 0 1rem 0;
+  border-radius: 3px;
+}
+
+.notify p {
+  margin-left: 1rem;
+}
+
