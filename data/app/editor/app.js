@@ -1827,6 +1827,9 @@ class EditorApplication {
             dismiss: function (item) {
               let ind = this.notifications.indexOf(item)
               let el = this.$el.childNodes[ind]
+              if (!el) {
+                return
+              }
               let cb = () => {
                 el.removeEventListener('transitionend', cb)
                 this.$store.state.notify(item, true)
@@ -1840,6 +1843,11 @@ class EditorApplication {
             setTimeout(() => {
               this.notifications.forEach((n) => {
                 n.rendered = true
+                if (!n.persist) {
+                  setTimeout(() => {
+                    this.dismiss(n)
+                  }, n.timeout || 5000)
+                }
               })
             }, 50)
           }
