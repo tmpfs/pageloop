@@ -58,3 +58,4 @@ Wow, so much to do, here is some stuff:
 25) Consider `makestatic` integration for optimization and publishing.
 26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
 27) Add Docker integration.
+28) Support notifications for better displaying errors and other messages.
