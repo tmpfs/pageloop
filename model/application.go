@@ -124,9 +124,12 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
   }
 
 	path := app.GetPathFromUrl(url)
+
+  /*
   println("create file: " + url)
   println("create file: " + path)
   println("create file app path: " + app.Path)
+  */
 
 	var err error
 	var fh *os.File
