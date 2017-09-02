@@ -142,6 +142,12 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		if len(parts) > 2 {
 			//item = parts[2]
 			item = "/" + strings.Join(parts[2:], "/")
+
+      // Respect input trailing slash used to indicate
+      // operations on a directory
+      if strings.HasSuffix(path, "/") {
+        item += "/"
+      }
 		}
 		app = h.Container.GetByName(name)
 		// Application must exist
@@ -304,8 +310,6 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
           return
         }
 
-        println(app.Container)
-
         // Mount the application
         h.Root.MountApplication(app)
 
@@ -361,10 +365,13 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
 		return
 	}
 
+  isDir := strings.HasSuffix(url, "/")
+
 	var content []byte
   content = TemplateNewFile[ct]
   // Read content from request body if no template available
-  if content == nil {
+  // and not operating on a directory
+  if !isDir && content == nil {
     // TODO: fix empty reply when there is no request body
     // TODO: stream request body to disc
     if content, err = readBody(req); err != nil {

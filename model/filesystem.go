@@ -330,24 +330,34 @@ func (fs *UrlFileSystem) SaveFile(f *File) error {
 	var fh *os.File
 	var stat os.FileInfo
 
+  var isDir = f.Directory
+  var parent string = filepath.Dir(f.Path)
+
+  // Just creating a directory, use the full file path
+  if isDir {
+    parent = f.Path
+  }
+
 	fh, err = os.Open(f.Path)
   if err != nil {
     if !os.IsNotExist(err) {
       return err
     // Try to make the directory.
     } else {
-      if err = os.MkdirAll(filepath.Dir(f.Path), os.ModeDir | 0755); err != nil {
+      if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
         return err
       }
     }
   }
 	defer fh.Close()
 
-  // Write out the raw file contents
-	if err = ioutil.WriteFile(f.Path, f.Source(true), mode); err != nil {
-		return err
-	}
-
+  // Only write content for non-directories
+  if !isDir {
+    // Write out the raw file contents
+    if err = ioutil.WriteFile(f.Path, f.Source(true), mode); err != nil {
+      return err
+    }
+  }
 
 	// Now update the Stat() info
 	if fh, err = os.Open(f.Path); err != nil {

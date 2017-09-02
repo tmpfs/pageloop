@@ -115,7 +115,6 @@ func (app *Application) ExistsConflict(url string) bool {
 // Create a new file and publish it, the file cannot already exist on disc.
 func (app *Application) Create(url string, content []byte) (*File, error) {
 	var file *File = app.Urls[url]
-	path := app.GetPathFromUrl(url)
 	if file != nil {
 		return nil, NewStatusError(412, "File already exists %s", url)
 	}
@@ -124,6 +123,8 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 		return nil, NewStatusError(412, "File already exists, publish conflict on %s", url)
   }
 
+	path := app.GetPathFromUrl(url)
+  println("create file: " + url)
   println("create file: " + path)
   println("create file app path: " + app.Path)
 
@@ -135,11 +136,17 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 			return nil, err
 		}
 	}
+
 	if fh != nil {
 		defer fh.Close()
 	}
+
+  isDir := strings.HasSuffix(url, SLASH)
+
 	file = app.NewFile(path, nil, content)
-  // TODO: remove file from list on error!
+  if isDir {
+    file.Directory = true
+  }
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return nil, err
 	}
