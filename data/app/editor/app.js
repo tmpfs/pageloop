@@ -1817,6 +1817,11 @@ class EditorApplication {
               </div>
             </div>
           `,
+          data: function () {
+            return {
+              deleting: false
+            }
+          },
           computed: {
             notifications: function () {
               return this.$store.state.notifications
@@ -1824,8 +1829,24 @@ class EditorApplication {
           },
           methods: {
             dismiss: function (item) {
-              this.$store.state.notify(item, true)
+              let ind = this.notifications.indexOf(item)
+              let el = this.$el.childNodes[ind]
+              let cb = () => {
+                el.removeEventListener('transitionend', cb)
+                this.$store.state.notify(item, true)
+              }
+              el.addEventListener('transitionend', cb)
+              el.classList.remove('reveal')
             }
+          },
+          updated: function () {
+            // Delay a little for animation
+            setTimeout(() => {
+              let elements = this.$el.querySelectorAll('.notify')
+              elements.forEach((el) => {
+                el.classList.add('reveal')
+              })
+            }, 50)
           }
         },
         'app-header': {

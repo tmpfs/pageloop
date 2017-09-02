@@ -762,6 +762,8 @@ a.close:hover {
   padding: 0 0 1rem 0;
   border-radius: 3px;
   margin-bottom: 1rem;
+  opacity: 0;
+  transition: all 0.4s ease-in;
 }
 
 .notify:last-child {
@@ -776,3 +778,6 @@ a.close:hover {
   margin-bottom: 0;
 }
 
+.notify.reveal {
+  opacity: 1;
+}
