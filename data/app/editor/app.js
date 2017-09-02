@@ -1679,6 +1679,21 @@ class EditorApplication {
                 }
               })
 
+              /*
+              let wait
+              let opts = {column: 80}
+              let changing = false
+              this.mirror.on('change', function (cm, change) {
+                if (changing) return
+                clearTimeout(wait)
+                wait = setTimeout(function () {
+                  changing = true
+                  cm.wrapParagraphsInRange(change.from, CodeMirror.changeEnd(change), opts)
+                  changing = false
+                }, 200)
+              })
+              */
+
               // This gives us :w in vim mode
               CodeMirror.commands.save = (cm) => {
                 this.save()

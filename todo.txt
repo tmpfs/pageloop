@@ -43,3 +43,18 @@ Wow, so much to do, here is some stuff:
     directory. Maybe easiest if they are dragged directly on to a folder in the files list
     rather than creating a separate view for browsing directories although eventually both
     should be supported. Can add an upload area to the file info for directories also.
+18) Consider bitmap/svg editor interfaces.
+19) Consider how to automatically create thumbnails on image upload.
+20) Consider normalizing file names on upload, most users do unusual stuff like
+    "My Document With Lots of Spaces" which is not conducive to clean URLs, consider
+    normalizing the name for URL reference but maintaining a raw name for display purposes.
+21) Refactor editor code to use webpack, babel and vue components.
+22) [[[Fix golang test specs]]]
+23) Support list of media files in sidebar.
+24) Consider how we can support build tasks, CSS preprocessors and Javascript compilers.
+    The current thinking is that we run a node.js service and invoke that from the main
+    pageloop service to perform conversion/compilation etc as the node.js ecosystem already
+    has all the tools that people are used to.
+25) Consider `makestatic` integration for optimization and publishing.
+26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
+27) Add Docker integration.
