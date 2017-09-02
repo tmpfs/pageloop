@@ -323,6 +323,13 @@ class AppDataSource {
 
     // State for edit mode columns
     this.columns = new ColumnManager()
+
+    this.alert = {
+      visible: false,
+      title: 'Alert',
+      message: 'Are you sure?',
+      ok: function noop () {}
+    }
   }
 
   get flash () {
@@ -627,6 +634,15 @@ class EditorApplication {
           } else {
             state.columns.minimize(state.columns.maximized)
           }
+        },
+        'alert-show': function (state, details) {
+          for (let k in details) {
+            state.alert[k] = details[k]
+          }
+          state.alert.visible = true
+        },
+        'alert-hide': function (state, details) {
+          state.alert.visible = false
         }
       },
       actions: {
@@ -995,12 +1011,7 @@ class EditorApplication {
           </div>
           <nav class="toolbar">
             <a
-              @click="quickDeleteFile"
-              v-bind:class="{hidden: !shouldDelete}"
-              class="danger"
-              title="Confirm file deletion">Delete {{currentFile.name}}</a>
-            <a
-              @click="shouldDelete = true"
+              @click="confirmDelete"
               v-bind:class="{hidden: !canDelete}"
               title="Delete File">➖</a>
             <a
@@ -1062,10 +1073,19 @@ class EditorApplication {
         }
       },
       methods: {
-        quickDeleteFile: function (e) {
-          e.preventDefault()
+        confirmDelete: function () {
+          let details = {
+            title: 'Delete File',
+            message: `Are you sure you want to delete ${this.currentFile.name}?`,
+            ok: () => {
+              console.log('do deletion of a file')
+              this.doDeleteFile()
+            }
+          }
+          this.$store.commit('alert-show', details)
+        },
+        doDeleteFile: function () {
           return this.$store.dispatch('delete-file', this.currentFile)
-            .then(() => { this.shouldDelete = false })
             .catch((e) => console.error(e))
         },
         showNewFileView: function () {
@@ -1734,29 +1754,35 @@ class EditorApplication {
       components: {
         'app-alert': {
           template: `
-            <div class="alert">
+            <div class="alert" :class="{hidden: !alert.visible}">
               <div class="background"></div>
               <div class="dialog">
-                <a class="close"></a>
+                <a class="close" @click="dismiss"></a>
                 <h2>
-                  <span>{{title}}</span>
+                  <span>{{alert.title}}</span>
                 </h2>
                 <div class="dialog-panel">
-                  <p v-if="message">{{message}}</p>
-                  <slot name="alert-content" />
+                  <p v-if="alert.message">{{alert.message}}</p>
+                  <div class="form-actions">
+                    <button class="sml" @click="dismiss">Cancel</button>
+                    <button class="sml primary" @click="ok">OK</button>
+                  </div>
                 </div>
               </div>
             </div>
           `,
-          data: function () {
-            return {
-              title: 'Alert',
-              message: 'Are you sure?'
+          computed: {
+            alert: function () {
+              return this.$store.state.alert
             }
           },
-          components: {
-            'alert-content': {
-              template: `<p>Foo blah</p>`
+          methods: {
+            dismiss: function () {
+              this.$store.commit('alert-hide')
+            },
+            ok: function () {
+              this.alert.ok()
+              this.dismiss()
             }
           }
         },
