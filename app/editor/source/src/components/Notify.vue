@@ -52,7 +52,7 @@ export default {
 <style scoped>
 	.notifications {
 		position: absolute;
-		z-index: 10001;
+		z-index: 10000;
 		right: 0;
 		bottom: 0;
 		padding: 1rem;
