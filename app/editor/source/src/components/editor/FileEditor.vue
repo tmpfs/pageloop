@@ -83,4 +83,7 @@ export default {
 </script>
 
 <style scoped>
+  .file-editor {
+    height: 100%;
+  }
 </style>

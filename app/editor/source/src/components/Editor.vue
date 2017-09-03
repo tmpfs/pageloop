@@ -173,6 +173,10 @@ export default {
     width: 40%;
   }
 
+  .file-editor, .source-editor, .visual-editor {
+    height: calc(100% - 4.6rem);
+  }
+
   .column-header h2 {
     font-size: 1.4rem;
     text-transform: uppercase;
@@ -299,10 +303,6 @@ export default {
   .status-dirty {
     margin-right: 0.5rem;
     color: var(--orange-color);
-  }
-
-  .file-editor, .source-editor, .visual-editor {
-    height: calc(100% - 4.6rem);
   }
 
 </style>
