@@ -1,20 +1,7 @@
 <template>
   <div class="content-main">
     <div class="content scroll">
-      <div class="new-app">
-        <h2>New Application</h2>
-        <form @submit="createApplication">
-          <p class="small">Choose an application name:</p>
-          <input type="text" name="name"
-            :value="applicationName" v-model="applicationName" />
-          <p class="small">Short description:</p>
-          <input type="text" name="description"
-            :value="applicationDescription" v-model="applicationDescription" />
-          <div class="form-actions">
-            <input type="submit" value="Create" class="primary" />
-          </div>
-        </form>
-      </div>
+      <new-app></new-app>
       <div class="containers" v-for="container in list">
         <span :class="{hidden: !container.protected}">🔒&nbsp;</span>
         <span class="name container">{{container.name}}</span>
@@ -44,11 +31,13 @@
 </template>
 
 <script>
+
+import NewApp from '@/components/NewApp'
+
 export default {
   name: 'apps',
   data: function () {
     return {
-      urlChanged: false,
       applicationName: 'new-app',
       applicationDescription: 'New application'
     }
@@ -99,7 +88,8 @@ export default {
     title: function (a, prefix) {
       return `${prefix} ${a.name}`
     }
-  }
+  },
+  components: {NewApp}
 }
 </script>
 

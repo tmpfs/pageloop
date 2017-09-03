@@ -132,4 +132,7 @@ export default {
 </script>
 
 <style scoped>
+  .new-file {
+    padding: 1rem;
+  }
 </style>

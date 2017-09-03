@@ -11,4 +11,7 @@ export default {
 </script>
 
 <style scoped>
+  iframe.docs {
+    height: 100%;
+  }
 </style>

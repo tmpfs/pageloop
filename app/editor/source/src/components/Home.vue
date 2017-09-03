@@ -24,4 +24,12 @@ export default {
 	.scroll {
 		height: 100%;
 	}
+
+  p.leader {
+    font-size: 2.4rem;
+    line-height: 3rem;
+    text-align: center;
+    margin: 3rem 0;
+    padding: 0 3rem;
+  }
 </style>

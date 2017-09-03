@@ -21,5 +21,12 @@ export default {
 </script>
 
 <style scoped>
+  .not-found {
+    padding: 4rem;
+  }
 
+  .not-found h2 {
+    display: block;
+    padding: 0;
+  }
 </style>

@@ -131,4 +131,59 @@ export default {
 </script>
 
 <style scoped>
+  .column-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border-bottom: 1px solid var(--border-color);
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .column-header > * {
+    flex: 1 0;
+  }
+
+  .editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
+    border-left: 1px solid var(--border-color);
+  }
+
+  .preview {
+    position: relative;
+  }
+
+  .sidebar .scroll {
+    /*padding-top: 1rem;*/
+    height: calc(100% - 4.3rem);
+  }
+
+  .welcome.scroll {
+    padding: 0 2rem;
+  }
+
+  .maximized {
+    width: 100%;
+    max-width: none;
+  }
+
+  .minimized {
+    width: 0%;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .status-dirty {
+    margin-right: 0.5rem;
+    color: var(--orange-color);
+  }
+
+  .file-editor, .source-editor, .visual-editor {
+    height: calc(100% - 4.6rem);
+  }
+
+  .text-editor {
+    background: #002b36;
+    height: 100%;
+  }
+
 </style>

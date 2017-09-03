@@ -43,5 +43,20 @@ export default {
 </script>
 
 <style scoped>
+  header > nav > a {
+    font-size: 1.4rem;
+    padding: .3rem 2rem;
+    text-transform: uppercase;
+    color: var(--base2-color) !important;
+  }
 
+  header > nav > a:hover, header > nav > a.selected {
+    text-decoration: underline;
+    color: var(--base3-color) !important;
+    background: var(--blue-color);
+  }
+
+  header > nav > a.selected {
+    background: var(--base03-color);
+  }
 </style>

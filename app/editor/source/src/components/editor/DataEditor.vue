@@ -58,4 +58,35 @@ export default {
 </script>
 
 <style scoped>
+  .data-editor {
+    font-size: 1.4rem;
+    user-select: none;
+    padding-right: 1rem;
+  }
+
+  .data-editor ul, .data-editor ol {
+    list-style-type: none;
+    margin-left: 1rem;
+    padding: 0;
+  }
+
+  .data-key::after {
+    content: ':';
+    margin-right: 1rem;
+  }
+
+  .data-key {
+    display: inline-block;
+    min-width: 6rem;
+  }
+
+  .data-key, .data-value {
+    padding: 0.1rem 0.3rem;
+  }
+
+  .data-value {
+    background: var(--base03-color);
+    color: var(--base2-color);
+    border-radius: 2px;
+  }
 </style>

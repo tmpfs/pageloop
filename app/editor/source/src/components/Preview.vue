@@ -116,4 +116,7 @@ export default {
 </script>
 
 <style scoped>
+  iframe.publish-preview {
+    height: calc(100% - 4.6rem);
+  }
 </style>

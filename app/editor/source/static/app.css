@@ -192,33 +192,6 @@ main > .content-main {
   /*max-height: calc(100% - 6rem);*/
 }
 
-/*
-.content-main.home {
-  padding: 0 2rem 2rem 2rem;
-}
-*/
-
-p.leader {
-  font-size: 2.4rem;
-  line-height: 3rem;
-  text-align: center;
-  margin: 3rem 0;
-  padding: 0 3rem;
-}
-
-footer {
-  font-size: 1.6rem;
-  line-height: 1.6rem;
-  padding: 0.8rem 0;
-  height: 3rem;
-  /*min-height: 3.2rem;*/
-  border-top: 1px solid var(--border-color);
-}
-
-footer p {
-  margin: 0 2rem;
-}
-
 .name.container, .new-app h2 {
   font-size: 1.4rem;
   text-decoration: underline;
@@ -237,15 +210,6 @@ footer p {
   overflow: hidden;
   height: 100%;
   min-height: 100%;
-}
-
-.not-found {
-  padding: 4rem;
-}
-
-.not-found h2 {
-  display: block;
-  padding: 0;
 }
 
 .containers {
@@ -270,51 +234,6 @@ footer p {
   margin-right: 1rem;
 }
 
-.sidebar, .editor, .preview {
-  flex: 1 1 auto;
-  opacity: 1;
-  transition: all 0.5s ease-out;
-  background: var(--background);
-}
-
-.sidebar {
-  max-width: 32rem;
-  width: 20%;
-}
-
-.sidebar, .editor {
-  position: relative;
-  min-width: var(--drag-size);
-}
-
-.sidebar:not(.maximized) > :not(.column-drag), .editor:not(.maximized) > :not(.column-drag) {
-  /*
-   * Setting padding on sidebar/editor causes issues when maximizing
-   * so we set on the child elements instead.
-   */
-  margin-right: var(--drag-size);
-}
-
-.sidebar > .column-drag, .editor > .column-drag {
-  position: absolute;
-  top: 0;
-  left: calc(100% - var(--drag-size));
-  bottom: 0;
-  right: 0;
-	width: var(--drag-size);
-	height: 100%;
-  cursor: ew-resize;
-  background: var(--border-color);
-}
-
-.new-file {
-	padding: 1rem;
-}
-
-.editor, .preview {
-  width: 40%;
-}
-
 .panel {
   padding: 2rem;
 }
@@ -323,40 +242,10 @@ section {
   margin-bottom: 3rem;
 }
 
-.column-header {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  border-bottom: 1px solid var(--border-color);
-  user-select: none;
-  overflow: hidden;
-}
-
-.column-header > * {
-  flex: 1 0;
-}
-
-.editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
-  border-left: 1px solid var(--border-color);
-}
-
-.preview {
-  position: relative;
-}
-
 .scroll {
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100% - 4.6rem);
-}
-
-.sidebar .scroll {
-  /*padding-top: 1rem;*/
-	height: calc(100% - 4.3rem);
-}
-
-.welcome.scroll {
-  padding: 0 2rem;
 }
 
 iframe {
@@ -364,14 +253,6 @@ iframe {
   border: 0;
   margin: 0;
   width: 100%;
-}
-
-iframe.docs {
-  height: 100%;
-}
-
-iframe.publish-preview {
-  height: calc(100% - 4.6rem);
 }
 
 .hidden {
@@ -572,92 +453,6 @@ input[type="submit"], input[type="reset"] {
 	margin-left: 0.5rem;
 }
 
-.file-editor, .source-editor, .visual-editor {
-  height: calc(100% - 4.6rem);
-}
-
-.text-editor {
-  background: #002b36;
-  height: 100%;
-}
-
-.CodeMirror {
-  font-size: 1.6rem;
-  width: 100%;
-  height: 100%;
-}
-
-header > nav > a {
-  font-size: 1.4rem;
-  padding: .3rem 2rem;
-  text-transform: uppercase;
-  color: var(--base2-color) !important;
-}
-
-header > nav > a:hover, header > nav > a.selected {
-  text-decoration: underline;
-  color: var(--base3-color) !important;
-  background: var(--blue-color);
-}
-
-header > nav > a.selected {
-  background: var(--base03-color);
-}
-
-.new-app {
-  padding: 2rem;
-  width: 20%;
-  border-right: 1px solid var(--border-color)
-}
-
-.maximized {
-  width: 100%;
-  max-width: none;
-}
-
-.minimized {
-  width: 0%;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.data-editor {
-  font-size: 1.4rem;
-  user-select: none;
-  padding-right: 1rem;
-}
-
-.data-editor ul, .data-editor ol {
-  list-style-type: none;
-  margin-left: 1rem;
-  padding: 0;
-}
-
-.data-key::after {
-  content: ':';
-  margin-right: 1rem;
-}
-
-.data-key {
-  display: inline-block;
-  min-width: 6rem;
-}
-
-.data-key, .data-value {
-  padding: 0.1rem 0.3rem;
-}
-
-.data-value {
-  background: var(--base03-color);
-  color: var(--base2-color);
-  border-radius: 2px;
-}
-
-.status-dirty {
-  margin-right: 0.5rem;
-  color: var(--orange-color);
-}
-
 a.close {
   display: inline-block;
   color: var(--color);
@@ -674,4 +469,55 @@ a.close::before {
 a.close:hover {
   color: var(--base3-color);
   background: var(--base03-color);
+}
+
+.CodeMirror {
+  font-size: 1.6rem;
+  width: 100%;
+  height: 100%;
+}
+
+
+/**/
+
+
+.sidebar, .editor, .preview {
+  flex: 1 1 auto;
+  opacity: 1;
+  transition: all 0.5s ease-out;
+  background: var(--background);
+}
+
+.sidebar {
+  max-width: 32rem;
+  width: 20%;
+}
+
+.sidebar, .editor {
+  position: relative;
+  min-width: var(--drag-size);
+}
+
+.sidebar:not(.maximized) > :not(.column-drag), .editor:not(.maximized) > :not(.column-drag) {
+  /*
+   * Setting padding on sidebar/editor causes issues when maximizing
+   * so we set on the child elements instead.
+   */
+  margin-right: var(--drag-size);
+}
+
+.sidebar > .column-drag, .editor > .column-drag {
+  position: absolute;
+  top: 0;
+  left: calc(100% - var(--drag-size));
+  bottom: 0;
+  right: 0;
+  width: var(--drag-size);
+  height: 100%;
+  cursor: ew-resize;
+  background: var(--border-color);
+}
+
+.editor, .preview {
+  width: 40%;
 }

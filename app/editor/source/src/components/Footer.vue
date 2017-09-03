@@ -28,5 +28,16 @@ export default {
 </script>
 
 <style scoped>
+  footer {
+    font-size: 1.6rem;
+    line-height: 1.6rem;
+    padding: 0.8rem 0;
+    height: 3rem;
+    /*min-height: 3.2rem;*/
+    border-top: 1px solid var(--border-color);
+  }
 
+  footer p {
+    margin: 0 2rem;
+  }
 </style>
