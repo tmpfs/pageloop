@@ -181,9 +181,4 @@ export default {
     height: calc(100% - 4.6rem);
   }
 
-  .text-editor {
-    background: #002b36;
-    height: 100%;
-  }
-
 </style>

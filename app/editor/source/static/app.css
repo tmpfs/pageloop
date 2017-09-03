@@ -96,32 +96,6 @@ p a:hover {
   border-bottom: 1px solid currentColor;
 }
 
-header {
-  margin: 0;
-  padding: 0;
-  height: 3rem;
-  border-bottom: 1px solid var(--border-color);
-  user-select: none;
-  cursor: default;
-}
-
-header nav {
-  display: flex;
-  flex-direction: row;
-  float: right;
-  margin: 0;
-  padding: 0;
-}
-
-header nav.home {
-  float: left;
-}
-
-nav.home > a.home {
-  color: var(--base3-color) !important;
-  text-decoration: none;
-}
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   margin: 0;
@@ -404,11 +378,6 @@ input[type="text"], input[type="submit"], input[type="reset"], button {
   color: var(--base03-color);
 }
 
-.CodeMirror-dialog input {
-  padding: 0.2rem;
-  border-radius: 0;
-}
-
 input[type="text"] {
 	width: 100%;
 }
@@ -471,15 +440,7 @@ a.close:hover {
   background: var(--base03-color);
 }
 
-.CodeMirror {
-  font-size: 1.6rem;
-  width: 100%;
-  height: 100%;
-}
-
-
-/**/
-
+/* Editor */
 
 .sidebar, .editor, .preview {
   flex: 1 1 auto;
@@ -521,3 +482,20 @@ a.close:hover {
 .editor, .preview {
   width: 40%;
 }
+
+.text-editor {
+  background: #002b36;
+  height: 100%;
+}
+
+.CodeMirror {
+  font-size: 1.6rem;
+  width: 100%;
+  height: 100%;
+}
+
+.CodeMirror-dialog input {
+  padding: 0.2rem;
+  border-radius: 0;
+}
+

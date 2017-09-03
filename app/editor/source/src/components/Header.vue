@@ -43,6 +43,33 @@ export default {
 </script>
 
 <style scoped>
+
+  header {
+    margin: 0;
+    padding: 0;
+    height: 3rem;
+    border-bottom: 1px solid var(--border-color);
+    user-select: none;
+    cursor: default;
+  }
+
+  header nav {
+    display: flex;
+    flex-direction: row;
+    float: right;
+    margin: 0;
+    padding: 0;
+  }
+
+  header nav.home {
+    float: left;
+  }
+
+  nav.home > a.home {
+    color: var(--base3-color) !important;
+    text-decoration: none;
+  }
+
   header > nav > a {
     font-size: 1.4rem;
     padding: .3rem 2rem;
