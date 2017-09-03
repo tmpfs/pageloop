@@ -14,6 +14,9 @@ Wow, so much to do, here is some stuff:
    them.
 6) Update new file template API to use an object like creating an app from a
    template and remove the use of a MIME type.
+
+   Implementation: 88ceed3f8a32fc37121ad2d1e3cc7edd7d8c303d
+
 7) Add ability to choose application template when creating new apps.
 8) Add confirmation when deleting apps.
 
@@ -55,6 +58,9 @@ Wow, so much to do, here is some stuff:
     "My Document With Lots of Spaces" which is not conducive to clean URLs, consider
     normalizing the name for URL reference but maintaining a raw name for display purposes.
 21) Refactor editor code to use webpack, babel and vue components.
+
+    Implementation: vue (tagged after big refactor from the first rapid prototype iteration)
+
 22) [[[Fix golang test specs]]]
 23) Support list of media files in sidebar.
 24) Consider how we can support build tasks, CSS preprocessors and Javascript compilers.
