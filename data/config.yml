@@ -5,7 +5,7 @@ mountpoints:
   -
     container: system
     url: /
-    path: app/editor/dist/
+    path: app/editor/public/
     description: |
       Application editor
   -
