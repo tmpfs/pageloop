@@ -3,9 +3,7 @@
     :class="{maximized: maximized === 'editor', minimized: maximized != '' && maximized !== 'editor'}"
     class="editor">
     <div class="column-header">
-      <div>
-        <h2>Editor</h2>
-      </div>
+      <h2>Editor</h2>
       <nav class="toolbar clearfix">
         <a @click="save"
           v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
