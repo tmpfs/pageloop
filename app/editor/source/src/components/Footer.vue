@@ -1,6 +1,13 @@
 <template>
   <footer>
     <!--<p class="log" v-bind:class="{error: error}">{{prefix}}{{message}}</p>-->
+    <nav>
+      <a
+        class="reset"
+        :class="{hidden: !canReset, disabled: !needsReset}"
+        @click="reset"
+        title="Reset columns"></a>
+    </nav>
   </footer>
 </template>
 
@@ -8,6 +15,14 @@
 export default {
   name: 'app-footer',
   computed: {
+    canReset: function () {
+      let state = this.$store.state
+      return state.mainView === 'edit' && state.hasApplication()
+    },
+    needsReset: function () {
+      let state = this.$store.state
+      return state.columns.custom
+    },
     message: function () {
       return this.$store.state.log.toString()
     },
@@ -23,6 +38,12 @@ export default {
       }
       return ''
     }
+  },
+  methods: {
+    reset (e) {
+      e.preventDefault()
+      this.$store.commit('reset-column')
+    }
   }
 }
 </script>
@@ -31,7 +52,6 @@ export default {
   footer {
     font-size: 1.6rem;
     line-height: 1.6rem;
-    padding: 0.8rem 0;
     height: 3rem;
     /*min-height: 3.2rem;*/
     border-top: 1px solid var(--border-color);
@@ -43,5 +63,29 @@ export default {
 
   .log.error {
     color: var(--red-color);
+  }
+
+  nav {
+    text-align: right;
+    user-select: none;
+  }
+
+  nav a:hover {
+    background: var(--base03-color);
+    color: var(--base3-color);
+  }
+
+  nav a {
+    display: inline-block;
+    width: 3rem;
+    height: 3rem;
+    line-height: 3rem;
+    color: currentColor;
+    text-align: center;
+  }
+
+  a.reset {
+    transform: rotation(90deg);
+    font-size: 2.2rem;
   }
 </style>

@@ -64,6 +64,9 @@ const Mutations = {
       state.columns.minimize(state.columns.maximized)
     }
   },
+  'reset-column': function (state) {
+    state.columns.reset()
+  },
   'alert-show': function (state, details) {
     for (let k in details) {
       state.alert[k] = details[k]

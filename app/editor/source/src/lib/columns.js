@@ -3,6 +3,9 @@ class ColumnManager {
     this.state = null
     this.styles = null
     this.maximized = ''
+    // Keep track of whether a custom column has been set
+    // via a drag operation so we can determine if a reset is needed
+    this.custom = false
 
     this.doDrag = (e) => {
       e.stopImmediatePropagation()
@@ -36,6 +39,8 @@ class ColumnManager {
           n.setAttribute('style', 'max-width: none; width: ' + (remainder * this.state.ratios[i]) + '%')
         }
       }
+
+      this.custom = true
     }
 
     this.stopDrag = (e) => {
@@ -163,6 +168,7 @@ class ColumnManager {
       }
       n.removeAttribute('style')
     }
+    this.custom = false
   }
 }
 
