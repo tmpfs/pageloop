@@ -1,4 +1,7 @@
 <template>
+  <div class="content-main">
+    <h3>Settings</h3>
+  </div>
 </template>
 
 <script>
