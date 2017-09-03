@@ -21,7 +21,7 @@ export default {
     },
     needsReset: function () {
       let state = this.$store.state
-      return state.columns.custom
+      return state.columns.custom || state.columns.maximized
     },
     message: function () {
       return this.$store.state.log.toString()
@@ -85,7 +85,7 @@ export default {
   }
 
   a.reset {
-    transform: rotation(90deg);
+    transform: rotate(90deg);
     font-size: 2.2rem;
   }
 </style>

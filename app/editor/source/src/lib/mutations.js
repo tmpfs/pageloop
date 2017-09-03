@@ -66,6 +66,9 @@ const Mutations = {
   },
   'reset-column': function (state) {
     state.columns.reset()
+    if (state.columns.maximized) {
+      state.columns.minimize(state.columns.maximized)
+    }
   },
   'alert-show': function (state, details) {
     for (let k in details) {
