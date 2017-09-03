@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 
-import Vuex from '../static/vendor/vuex-2.3.1'
+import Vuex from '../vuex-2.3.1'
 
 Vue.config.productionTip = false
 Vue.use(Vuex)
