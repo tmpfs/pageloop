@@ -263,14 +263,6 @@ iframe {
   clear: both;
 }
 
-.float-left {
-  float: left;
-}
-
-.float-right {
-  float: right;
-}
-
 .tabs {
   display: flex;
   flex-direction: row;
