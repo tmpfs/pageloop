@@ -28,6 +28,7 @@ function Actions (router) {
         })
     },
     'new-app': function (context, app) {
+      // TODO: inject this when we have a template selection UI
       app.template = {
         container: 'template',
         application: 'pure'
@@ -64,9 +65,17 @@ function Actions (router) {
             throw err
           }
 
-          context.state.notify({title: 'App Info', message: `Deleted ${application}`})
+          let state = context.state
 
-                  // Refresh containers list
+          if (state.hasApplication()) {
+            if (state.container === container && state.application === application) {
+              context.commit('clear-app')
+            }
+          }
+
+          state.notify({title: 'App Info', message: `Deleted ${application}`})
+
+          // Refresh containers list
           return context.dispatch('containers')
         })
     },

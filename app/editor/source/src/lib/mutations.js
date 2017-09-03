@@ -1,24 +1,27 @@
 const Mutations = {
-  flash: function (state, message) {
+  'flash': function (state, message) {
     state.flash = message
   },
-  log: function (state, message) {
+  'log': function (state, message) {
     state.log.add(message)
   },
-  containers (state, list) {
+  'containers': function (state, list) {
     state.containers = list
   },
-  app (state, app) {
+  'app': function (state, app) {
     // merge properties
     for (let k in app) {
       state.app[k] = app[k]
     }
     state.app.identifier = state.app.owner + ' / ' + state.app.name
   },
-  files: function (state, list) {
+  'clear-app': function (state) {
+    state.clearApplication()
+  },
+  'files': function (state, list) {
     state.app.files = list
   },
-  pages: function (state, list) {
+  'pages': function (state, list) {
     state.app.pages = list
   },
   'main-view': function (state, view) {

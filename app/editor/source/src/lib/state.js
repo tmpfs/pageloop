@@ -100,23 +100,33 @@ class State {
     }
   }
 
-  setApplication (container, application) {
-    this.container = container
-    this.application = application
-
-    // Set up new API client
-    this.client = new ApiClient(container, application)
+  clearApplication () {
+    this.container = ''
+    this.application = ''
 
     // current application
     this.app = {
       url: '',
       identifier: '',
-      owner: container,
+      owner: '',
       pages: [],
       files: [],
       // current selected file
       current: this.defaultFile
     }
+
+    this.client = this.defaultClient
+  }
+
+  setApplication (container, application) {
+    this.clearApplication()
+    this.app.owner = container
+
+    this.container = container
+    this.application = application
+
+    // Set up new API client
+    this.client = new ApiClient(container, application)
   }
 
   get current () {
@@ -125,6 +135,7 @@ class State {
 
   set current (file) {
     if (file) {
+      // TODO: get the server to send the file?
       let pages = this.app.pages || []
       for (let i = 0; i < pages.length; i++) {
         if (pages[i].url === file.url) {
