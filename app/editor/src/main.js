@@ -17,10 +17,9 @@ import Routes from './routes'
 class EditorApplication {
 
   constructor () {
-    let state = new State()
     let router = new Router('home', true)
     let store = new Vuex.Store({
-      state: state,
+      state: new State(),
       mutations: Mutations,
       actions: Actions(router)
     })
