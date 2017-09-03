@@ -4,7 +4,7 @@ import (
   "regexp"
 )
 
-var VENDOR = regexp.MustCompile(`vendor/`)
+var VENDOR = regexp.MustCompile(`(vendor|node_modules)/`)
 var TEMPLATE_FILE = regexp.MustCompile(`\.html?$`)
 var MARKDOWN_FILE = regexp.MustCompile(`\.(md|markdown)?$`)
 var FRONTMATTER = regexp.MustCompile(`^---\n`)

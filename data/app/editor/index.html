@@ -1,28 +1,20 @@
----
-title: Application Editor
-lang: en
-description: Editor inferface for web applications.
-keywords: web, editor, application
-layout: false
----
 <!doctype html>
-<html lang="{{.lang}}">
+<html lang="en">
   <head>
-		<title>{{.title}}</title>
+		<title>Application Editor</title>
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="author" content="muji <https://tmpfs.org>" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="{{.description}}" />
-		<link rel="icon" type="image/png" href="/assets/img/favicon.png?v=5" />
+		<meta name="description" content="Editor inferface for web applications." />
+		<link rel="icon" type="image/png" href="/assets/img/favicon.png" />
 
     <link rel="stylesheet" href="vendor/codemirror/lib/codemirror.css">
     <link rel="stylesheet" href="vendor/codemirror/addon/dialog/dialog.css" />
     <link rel="stylesheet" href="vendor/codemirror/theme/solarized.css">
-    <link rel="stylesheet" href='{{root "app.css"}}' />
+		<link rel="stylesheet" href="/assets/css/app.css" />
 
-    <script src="vendor/vue.js"></script>
-    <script src="vendor/vuex-2.3.1.js"></script>
+		<script src="vendor/vuex-2.3.1.js"></script>
 
     <script src="vendor/codemirror/lib/codemirror.js"></script>
     <script src="vendor/codemirror/addon/mode/overlay.js"></script>
@@ -41,7 +33,6 @@ layout: false
     <script src="vendor/codemirror/mode/htmlmixed/htmlmixed.js"></script>
   </head>
   <body>
-    <main></main>
-    <script src="app.js" async></script>
+    <main id="app"></main>
   </body>
 </html>
