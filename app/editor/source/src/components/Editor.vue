@@ -3,38 +3,39 @@
     :class="{maximized: maximized === 'editor', minimized: maximized != '' && maximized !== 'editor'}"
     class="editor">
     <div class="column-header">
-      <h2>Editor</h2>
-      <div class="column-options">
-        <h3><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{currentFile.name}}</h3>
-
-        <nav class="toolbar clearfix">
-          <a @click="save"
-            v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
-          <a
-            @click="maximized = 'editor'"
-            :class="{hidden: maximized === 'editor'}"
-            title="Maximize">◩</a>
-          <a
-            @click="maximized = ''"
-            :class="{hidden: maximized !== 'editor'}"
-            title="Minimize">▣</a>
-        </nav>
+      <div>
+        <h2>Editor</h2>
       </div>
+      <nav class="toolbar clearfix">
+        <a @click="save"
+          v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
+        <a
+          @click="maximized = 'editor'"
+          :class="{hidden: maximized === 'editor'}"
+          title="Maximize">◩</a>
+        <a
+          @click="maximized = ''"
+          :class="{hidden: maximized !== 'editor'}"
+          title="Minimize">▣</a>
+      </nav>
     </div>
-    <nav class="tabs">
-      <a v-bind:class="{selected: currentView === 'file-editor', disabled: fileHidden}"
-        @click="currentView = 'file-editor'"
-        title="Show file editor">File</a>
-      <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
-        @click="currentView = 'data-editor'"
-        title="Show data editor">Data</a>
-      <a v-bind:class="{selected: currentView === 'code-editor', disabled: hidden}"
-        @click="currentView = 'code-editor'"
-        title="Show source editor">Code</a>
-      <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
-        @click="currentView = 'visual-editor'"
-        title="Show visual editor">Visual</a>
-    </nav>
+    <div class="column-options">
+      <nav class="tabs">
+        <h3><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{currentFile.name}}</h3>
+        <a v-bind:class="{selected: currentView === 'file-editor', disabled: fileHidden}"
+          @click="currentView = 'file-editor'"
+          title="Show file editor">File</a>
+        <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
+          @click="currentView = 'data-editor'"
+          title="Show data editor">Data</a>
+        <a v-bind:class="{selected: currentView === 'code-editor', disabled: hidden}"
+          @click="currentView = 'code-editor'"
+          title="Show source editor">Code</a>
+        <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
+          @click="currentView = 'visual-editor'"
+          title="Show visual editor">Visual</a>
+      </nav>
+    </div>
     <component v-bind:is="currentView"></component>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn">&nbsp;</div>
   </div>
@@ -188,6 +189,7 @@ export default {
     border-bottom: 1px solid var(--border-color);
     user-select: none;
     overflow: hidden;
+    height: 2.2rem;
   }
 
   .column-header > * {
@@ -195,18 +197,23 @@ export default {
   }
 
   .column-header h2 {
+    display: inline-block;
     font-size: 1.4rem;
     text-transform: uppercase;
     padding: 0 1rem;
   }
 
   .column-options {
-    text-align: right;
+    border-bottom: 1px solid var(--border-color);
   }
 
   h2.file-info {
     font-size: 2.2rem;
     padding: 0 0 2rem 0;
+  }
+
+  .column-options > .toolbar {
+    display: inline-block;
   }
 
   .toolbar {
@@ -215,7 +222,6 @@ export default {
     text-transform: uppercase;
     text-align: right;
     /*font-size: 1.4rem;*/
-    border-bottom: 1px solid var(--border-color);
     text-align: right;
     user-select: none;
     overflow: hidden;
@@ -240,12 +246,14 @@ export default {
   h3 {
     font-size: 1.4rem;
     text-transform: none;
-    display: block;
-    padding: 0 1rem;
     float: left;
     border: 0;
     padding: 0;
-    margin-left: 1rem;
+    margin: 0 0 0 1rem;
+  }
+
+  .editor h3 {
+    width: 50%;
   }
 
   .tabs {

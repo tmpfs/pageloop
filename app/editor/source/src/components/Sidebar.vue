@@ -2,6 +2,26 @@
   <div class="sidebar"
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
+      <nav class="toolbar">
+        <a
+          @click="confirmDelete"
+          v-bind:class="{hidden: !canDelete}"
+          title="Delete File">➖</a>
+        <a
+          @click="showNewFileView"
+          v-bind:class="{disabled: currentView === 'new-file'}"
+          title="New File">➕</a>
+        <a
+          @click="maximized = 'sidebar'"
+          :class="{hidden: maximized === 'sidebar'}"
+          title="Maximize">◩</a>
+        <a
+          @click="maximized = ''"
+          :class="{hidden: maximized !== 'sidebar'}"
+          title="Minimize">▣</a>
+      </nav>
+    </div>
+    <div class="column-options">
       <nav class="tabs">
         <a v-bind:class="{selected: currentView === 'pages'}"
           @click="currentView = 'pages'"
@@ -14,24 +34,6 @@
           title="Show media files">Media</a>
       </nav>
     </div>
-    <nav class="toolbar">
-      <a
-        @click="confirmDelete"
-        v-bind:class="{hidden: !canDelete}"
-        title="Delete File">➖</a>
-      <a
-        @click="showNewFileView"
-        v-bind:class="{disabled: currentView === 'new-file'}"
-        title="New File">➕</a>
-      <a
-        @click="maximized = 'sidebar'"
-        :class="{hidden: maximized === 'sidebar'}"
-        title="Maximize">◩</a>
-      <a
-        @click="maximized = ''"
-        :class="{hidden: maximized !== 'sidebar'}"
-        title="Minimize">▣</a>
-    </nav>
     <div class="scroll">
       <component v-bind:is="currentView"></component>
     </div>

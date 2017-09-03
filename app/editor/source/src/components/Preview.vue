@@ -4,27 +4,23 @@
     class="preview">
     <div class="column-header">
       <h2>Preview</h2>
-      <div class="column-options">
-        <nav class="tabs">
-          <!-- <a href="#preview" title="Publish preview">Preview</a> -->
-          <!-- <a href="#docs" title="Browse the help & documentation">Docs</a> -->
+        <nav class="toolbar clearfix">
+          <a @click="refresh(path)"
+             title="Refresh preview"
+             :class="{hidden: path == ''}">Refresh</a>
+          <a
+            @click="maximized = 'preview'"
+            :class="{hidden: maximized === 'preview'}"
+            title="Maximize">◩</a>
+          <a
+            @click="maximized = ''"
+            :class="{hidden: maximized !== 'preview'}"
+            title="Minimize">▣</a>
         </nav>
-      </div>
     </div>
-    <nav class="toolbar clearfix">
+    <div class="column-options">
       <h3>{{path}}</h3>
-      <a @click="refresh(path)"
-         title="Refresh preview"
-         :class="{hidden: path == ''}">Refresh</a>
-      <a
-        @click="maximized = 'preview'"
-        :class="{hidden: maximized === 'preview'}"
-        title="Maximize">◩</a>
-      <a
-        @click="maximized = ''"
-        :class="{hidden: maximized !== 'preview'}"
-        title="Minimize">▣</a>
-    </nav>
+    </div>
     <iframe :src="src" sandbox="allow-same-origin allow-scripts" class="publish-preview"></iframe>
   </div>
 </template>
