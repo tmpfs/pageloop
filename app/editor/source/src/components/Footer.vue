@@ -1,6 +1,6 @@
 <template>
   <footer>
-    <p class="log" v-bind:class="{error: error}">{{prefix}}{{message}}</p>
+    <!--<p class="log" v-bind:class="{error: error}">{{prefix}}{{message}}</p>-->
   </footer>
 </template>
 

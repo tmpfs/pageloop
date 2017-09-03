@@ -1,5 +1,24 @@
+function error (res) {
+  let doc = res.document
+  let msg = doc.error || doc.message
+  msg = `${msg}`
+  let err = new Error(msg)
+  err.status = res.response.status
+  err.response = res
+  err.document = doc
+  return err
+}
+
 function Actions (router) {
   return {
+    'error': function (context, err) {
+      // Log the error
+      context.dispatch('log', err)
+      // Notify the user
+      context.state.notify({error: err})
+      // Return the error to pass back to calling code
+      return err
+    },
     'load': function (context, {container, application}) {
       context.state.setApplication(container, application)
       context.dispatch('log', `Loading app from ${context.state.url}`)
@@ -10,7 +29,12 @@ function Actions (router) {
           context.commit('sidebar-view', 'pages')
           context.dispatch('log', 'Done')
         })
-        .catch((err) => context.dispatch('log', err))
+        .catch((err) => {
+          return context.dispatch('error', err)
+            .then((err) => {
+              throw err
+            })
+        })
     },
     'resize-column': function (context, e) {
       context.state.columns.startDrag(e)
@@ -37,18 +61,15 @@ function Actions (router) {
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
-            let doc = res.document
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            context.state.notify({error: err})
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
 
           context.state.notify({title: 'App Info', message: `Created ${app.name}`})
 
-                  // Refresh containers list
+          // Refresh containers list
           return context.dispatch('containers')
         })
     },
@@ -57,12 +78,10 @@ function Actions (router) {
         .then((res) => {
           // Show error response
           if (res.response.status !== 200) {
-            let doc = res.document
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
 
           let state = context.state
@@ -141,12 +160,10 @@ function Actions (router) {
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
-            let doc = res.document
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
 
           context.state.notify({title: 'File Info', message: `Created ${name}`})
@@ -173,11 +190,10 @@ function Actions (router) {
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
           if (doc.ok) {
             return context.dispatch('preview-refresh')
@@ -194,13 +210,11 @@ function Actions (router) {
       let len = list.length
       return context.state.client.deleteFile(file)
         .then((res) => {
-          let doc = res.document
           if (res.response.status !== 200) {
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
 
           context.state.notify({title: 'File Info', message: `Deleted ${file.name}`})
@@ -224,15 +238,14 @@ function Actions (router) {
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
-            let msg = doc.error || doc.message
-            msg = `[${res.response.status}] ${msg}`
-            let err = new Error(msg)
-            context.dispatch('log', err)
-            throw err
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
           }
 
           if (doc.ok) {
-            context.dispatch('log', `Renamed ${file.url} to ${newName}`)
+            context.state.notify({title: 'File Info', message: `Renamed ${file.url} to ${newName}`})
             // Update file data
             if (doc.file) {
               file.name = doc.file.name
