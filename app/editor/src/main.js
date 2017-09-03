@@ -13,7 +13,7 @@ import Mutations from './lib/mutations'
 import Actions from './lib/actions'
 
 let state = new State()
-let router = new Router()
+let router = new Router('home', true)
 
 let store = new Vuex.Store({
   state: state,
@@ -113,7 +113,7 @@ router.add(/^(|home|apps|docs|edit|settings)$/, ['section'], (match) => {
   if (section === '') {
     return router.replace('home', true)
   } else if (section === 'apps') {
-    return this.store.dispatch('containers')
+    return store.dispatch('containers')
       .then(() => {
         store.commit('main-view', section)
       })
@@ -136,6 +136,8 @@ router.add(/.*/, (match) => {
   store.commit('flash', router.hash)
   router.replace('404', true)
 })
+
+router.start()
 
 Vue.config.productionTip = false
 
