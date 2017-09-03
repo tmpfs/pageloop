@@ -21,7 +21,7 @@
         title="Delete File">➖</a>
       <a
         @click="showNewFileView"
-        v-bind:class="{disabled: currentView === 'new'}"
+        v-bind:class="{disabled: currentView === 'new-file'}"
         title="New File">➕</a>
       <a
         @click="maximized = 'sidebar'"
@@ -105,7 +105,7 @@ export default {
     },
     showNewFileView: function () {
       this.previousView = this.currentView
-      this.currentView = 'new'
+      this.currentView = 'new-file'
     },
     closeNewFileView: function () {
       this.currentView = this.previousView || 'pages'

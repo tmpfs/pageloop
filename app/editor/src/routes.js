@@ -47,7 +47,7 @@ function Routes (router, store) {
       }
     })
 
-  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|media|new|del)$/,
+  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|media|new-file)$/,
     ['section', 'container', 'application', 'action'],
     (match) => {
       let container = match.map.container

@@ -104,7 +104,7 @@ class State {
     this.container = container
     this.application = application
     this.url = `${this.api}${container}/${application}/`
-    this.raw = `/apps/raw/${container}/${application}`
+    this.raw = `${this.host}/apps/raw/${container}/${application}`
 
     // current application
     this.app = {

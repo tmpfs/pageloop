@@ -64,6 +64,8 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var handler http.Handler
 	var path string = req.URL.Path
 
+  res.Header().Set("Access-Control-Allow-Origin", "*")
+
 	// Look for serve mux mappings first
 	for k, _ := range multiplex {
 		if strings.HasPrefix(path, k) {
