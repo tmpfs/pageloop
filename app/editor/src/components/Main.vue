@@ -7,6 +7,7 @@
 import NotFound from '@/components/NotFound'
 import Home from '@/components/Home'
 import Apps from '@/components/Apps'
+import Edit from '@/components/Edit'
 import Docs from '@/components/Docs'
 import Settings from '@/components/Settings'
 
@@ -17,7 +18,7 @@ export default {
       return this.$store.state.mainView
     }
   },
-  components: {NotFound, Home, Apps, Docs, Settings}
+  components: {NotFound, Home, Apps, Edit, Docs, Settings}
 }
 </script>
 

@@ -67,6 +67,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	url := req.URL
 	path := url.Path
 
+  // TODO: only allow this in Dev mode?
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// List host containers

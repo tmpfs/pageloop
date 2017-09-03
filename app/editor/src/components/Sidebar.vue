@@ -1,0 +1,122 @@
+<template>
+  <div class="sidebar"
+    :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
+    <div class="column-header">
+      <nav class="tabs">
+        <a v-bind:class="{selected: currentView === 'pages'}"
+          @click="currentView = 'pages'"
+          title="Show pages">Pages</a>
+        <a v-bind:class="{selected: currentView === 'files'}"
+          @click="currentView = 'files'"
+          title="Show files">Files</a>
+        <a v-bind:class="{selected: currentView === 'media'}"
+          @click="currentView = 'media'"
+          title="Show media files">Media</a>
+      </nav>
+    </div>
+    <nav class="toolbar">
+      <a
+        @click="confirmDelete"
+        v-bind:class="{hidden: !canDelete}"
+        title="Delete File">➖</a>
+      <a
+        @click="showNewFileView"
+        v-bind:class="{disabled: currentView === 'new'}"
+        title="New File">➕</a>
+      <a
+        @click="maximized = 'sidebar'"
+        :class="{hidden: maximized === 'sidebar'}"
+        title="Maximize">◩</a>
+      <a
+        @click="maximized = ''"
+        :class="{hidden: maximized !== 'sidebar'}"
+        title="Minimize">▣</a>
+    </nav>
+    <div class="scroll">
+      <component v-bind:is="currentView"></component>
+    </div>
+    <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
+  </div>
+</template>
+
+<script>
+
+import NewFile from '@/components/NewFile'
+import Pages from '@/components/Pages'
+import Files from '@/components/Files'
+import Media from '@/components/Media'
+
+export default {
+  name: 'sidebar',
+  data: function () {
+    return {
+      shouldDelete: false
+    }
+  },
+  computed: {
+    maximized: {
+      get: function () {
+        return this.$store.state.columns.maximized
+      },
+      set: function (val) {
+        this.$store.commit('maximize-column', val)
+      }
+    },
+    canDelete: function () {
+      return this.$store.state.hasFile()
+    },
+    currentFile: function () {
+      return this.$store.state.current
+    },
+    currentView: {
+      get: function () {
+        return this.$store.state.sidebarView
+      },
+      set: function (val) {
+        var values = [val]
+        var file = this.$store.state.current
+        if (file !== null) {
+          if (val === 'files') {
+            values.push(file.url)
+          } else if (val === 'pages' && this.$store.state.isPage(file)) {
+            values.push(file.url)
+          }
+        }
+        let href = this.$store.state.getAppHref(...values)
+        this.$store.dispatch('navigate', {href: href})
+      }
+    }
+  },
+  methods: {
+    confirmDelete: function () {
+      let details = {
+        title: `Delete File (${this.currentFile.name})`,
+        message: `Are you sure you want to delete the file ${this.currentFile.url}?`,
+        note: 'Be careful file deletion is irreversible.',
+        ok: () => {
+          this.doDeleteFile()
+        }
+      }
+      this.$store.commit('alert-show', details)
+    },
+    doDeleteFile: function () {
+      return this.$store.dispatch('delete-file', this.currentFile)
+        .catch((e) => console.error(e))
+    },
+    showNewFileView: function () {
+      this.previousView = this.currentView
+      this.currentView = 'new'
+    },
+    closeNewFileView: function () {
+      this.currentView = this.previousView || 'pages'
+    },
+    resizeColumn: function (e) {
+      this.$store.dispatch('resize-column', e)
+    }
+  },
+  components: {NewFile, Pages, Files, Media}
+}
+</script>
+
+<style scoped>
+</style>
