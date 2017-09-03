@@ -95,7 +95,6 @@ function Routes (router, store) {
     } else if (section === 'apps') {
       return store.dispatch('containers')
         .then(() => {
-          console.log('loaded containers!!!')
           store.commit('main-view', section)
         })
     } else if (section === 'edit') {

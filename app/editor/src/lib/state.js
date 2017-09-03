@@ -4,7 +4,7 @@ import ColumnManager from './columns'
 class State {
   constructor () {
     this.host = 'http://localhost:3577'
-    this.api = `${this.host}/api/`
+    this.api = `/api/`
     this.containers = []
     this.setApplication('', '')
 
@@ -104,7 +104,7 @@ class State {
     this.container = container
     this.application = application
     this.url = `${this.api}${container}/${application}/`
-    this.raw = `${this.host}/apps/raw/${container}/${application}`
+    this.raw = `/apps/raw/${container}/${application}`
 
     // current application
     this.app = {
