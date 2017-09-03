@@ -118,5 +118,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+  .files-list a, .pages-list a {
+    color: currentColor;
+  }
 </style>

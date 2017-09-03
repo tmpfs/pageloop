@@ -249,10 +249,6 @@ iframe {
   float: left;
 }
 
-.files-list a, .pages-list a {
-  color: currentColor;
-}
-
 .small, small {
   font-size: 1.4rem;
 }
