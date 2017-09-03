@@ -14,7 +14,7 @@ import Mutations from './lib/mutations'
 import Actions from './lib/actions'
 import Routes from './routes'
 
-class EditorApplication {
+class Application {
 
   constructor () {
     let router = new Router('home', true)
@@ -46,5 +46,5 @@ class EditorApplication {
   }
 }
 
-let app = new EditorApplication()
+let app = new Application()
 app.init()
