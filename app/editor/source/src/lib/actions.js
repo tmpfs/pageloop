@@ -22,7 +22,7 @@ function Actions (router) {
       return router.navigate(request.href, request.state)
     },
     'containers': function (context) {
-      return context.state.getContainers()
+      return context.state.client.getContainers()
         .then((list) => {
           context.commit('containers', list)
         })
@@ -32,7 +32,7 @@ function Actions (router) {
         container: 'template',
         application: 'pure'
       }
-      return context.state.createNewApp(app)
+      return context.state.client.createNewApp(app)
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
@@ -52,7 +52,7 @@ function Actions (router) {
         })
     },
     'del-app': function (context, {container, application}) {
-      return context.state.deleteApp(container, application)
+      return context.state.client.deleteApp(container, application)
         .then((res) => {
           // Show error response
           if (res.response.status !== 200) {
@@ -71,19 +71,19 @@ function Actions (router) {
         })
     },
     'app': function (context) {
-      return context.state.getApplication()
+      return context.state.client.getApplication()
         .then((doc) => {
           context.commit('app', doc)
         })
     },
     'list-files': function (context) {
-      return context.state.getFiles()
+      return context.state.client.getFiles()
         .then((list) => {
           context.commit('files', list)
         })
     },
     'list-pages': function (context) {
-      return context.state.getPages()
+      return context.state.client.getPages()
         .then((list) => {
           context.commit('pages', list)
         })
@@ -93,7 +93,7 @@ function Actions (router) {
         .then(() => context.dispatch('list-files'))
     },
     'get-file-contents': function (context, item) {
-      return context.state.getFileContents(item.url)
+      return context.state.client.getFileContents(item.url)
         .then((res) => {
           // TODO: get blob for binary types
           return res.text()
@@ -128,7 +128,7 @@ function Actions (router) {
       if (!/^\//.test(name)) {
         name = '/' + name
       }
-      return context.state.createNewFile(name, template)
+      return context.state.client.createNewFile(name, template)
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
@@ -160,7 +160,7 @@ function Actions (router) {
         file = context.state.current
       }
       let value = file.content
-      return context.state.saveFile(file, value)
+      return context.state.client.saveFile(file, value)
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
@@ -183,7 +183,7 @@ function Actions (router) {
       }
       let index = list.indexOf(file)
       let len = list.length
-      return context.state.deleteFile(file)
+      return context.state.client.deleteFile(file)
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
@@ -211,7 +211,7 @@ function Actions (router) {
         })
     },
     'rename-file': function (context, {file, newName}) {
-      return context.state.renameFile(file, newName)
+      return context.state.client.renameFile(file, newName)
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
