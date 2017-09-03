@@ -41,6 +41,7 @@ function Actions (router) {
             msg = `[${res.response.status}] ${msg}`
             let err = new Error(msg)
             context.dispatch('log', err)
+            context.state.notify({error: err})
             throw err
           }
 
