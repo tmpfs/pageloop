@@ -11,7 +11,7 @@ class State {
     this.mainView = ''
     this.sidebarView = ''
     this.editorView = ''
-    this.defaultEditorView = 'source-editor'
+    this.defaultEditorView = 'code-editor'
 
     this.defaultFile = {content: ''}
 

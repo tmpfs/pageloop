@@ -1,9 +1,117 @@
 <template>
+  <div
+    :class="{maximized: maximized === 'preview', minimized: maximized != '' && maximized !== 'preview'}"
+    class="preview">
+    <div class="column-header">
+      <h2>Preview</h2>
+      <div class="column-options">
+        <nav class="tabs">
+          <!-- <a href="#preview" title="Publish preview">Preview</a> -->
+          <!-- <a href="#docs" title="Browse the help & documentation">Docs</a> -->
+        </nav>
+      </div>
+    </div>
+    <nav class="toolbar clearfix">
+      <h2>{{path}}</h2>
+      <a @click="refresh(path)"
+         title="Refresh preview"
+         :class="{hidden: path == ''}">Refresh</a>
+      <a
+        @click="maximized = 'preview'"
+        :class="{hidden: maximized === 'preview'}"
+        title="Maximize">◩</a>
+      <a
+        @click="maximized = ''"
+        :class="{hidden: maximized !== 'preview'}"
+        title="Minimize">▣</a>
+    </nav>
+    <iframe :src="src" sandbox="allow-same-origin allow-scripts" class="publish-preview"></iframe>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'preview'
+  name: 'preview',
+  data: function () {
+    return {
+      path: '',
+      src: ''
+    }
+  },
+  computed: {
+    maximized: {
+      get: function () {
+        return this.$store.state.columns.maximized
+      },
+      set: function (val) {
+        this.$store.commit('maximize-column', val)
+      }
+    },
+    previewRefresh: function () {
+      return this.$store.state.previewRefresh
+    },
+    url: {
+      get: function () {
+        return this.$store.state.previewUrl
+      },
+      set: function (val) {
+        return this.$store.commit('preview-url', val)
+      }
+    }
+  },
+  watch: {
+    url: function (url) {
+      this.refresh(url)
+    },
+    previewRefresh: function (val) {
+      if (val === true) {
+        this.refresh(this.path)
+      }
+      this.$store.commit('preview-refresh', false)
+    }
+  },
+  mounted: function () {
+    // This catches the case when switching main views
+    // and a refresh is needed
+    if (this.url) {
+      this.refresh(this.url)
+    }
+  },
+  methods: {
+    refresh (url) {
+      let allowed = /\.(html?)$/
+      if (!allowed.test(url)) {
+        return
+      }
+      if (url === '') {
+        this.path = ''
+        this.src = ''
+        return
+      }
+      // If the src attribute will not change the page
+      // won't be refreshed so we need to call reload()
+      if (url === this.path) {
+        let frame = document.querySelector('.publish-preview')
+        return frame.contentDocument.location.reload()
+      }
+      this.path = url
+      this.src = this.getPreviewUrl(url)
+    },
+    getPreviewUrl (url) {
+      if (url) {
+        url = url.replace(/^\//, '')
+      }
+
+      let state = this.$store.state
+      let host = state.host
+
+      if (!host) {
+        host = document.location.origin
+      }
+
+      return host + this.$store.state.app.url + (url || '')
+    }
+  }
 }
 </script>
 
