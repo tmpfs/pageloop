@@ -21,5 +21,7 @@ export default {
 </script>
 
 <style scoped>
-
+	.scroll {
+		height: 100%;
+	}
 </style>

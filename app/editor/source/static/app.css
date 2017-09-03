@@ -121,11 +121,6 @@ nav.home > a.home {
   color: var(--base3-color) !important;
   text-decoration: none;
 }
-/*
-a.home.selected {
-  background: var(--base03-color);
-}
-*/
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
@@ -197,9 +192,11 @@ main > .content-main {
   /*max-height: calc(100% - 6rem);*/
 }
 
+/*
 .content-main.home {
   padding: 0 2rem 2rem 2rem;
 }
+*/
 
 p.leader {
   font-size: 2.4rem;
