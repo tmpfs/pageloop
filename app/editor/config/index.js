@@ -29,13 +29,13 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api/': {
-        target: 'http://localhost:3577', // target host
-        changeOrigin: true,               // needed for virtual hosted sites
+        target: 'http://localhost:3577',
+        changeOrigin: true,
         ws: true
       },
-      '/apps/raw/': {
-        target: 'http://localhost:3577', // target host
-        changeOrigin: true,               // needed for virtual hosted sites
+      '/apps/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true,
         ws: true
       }
     },
