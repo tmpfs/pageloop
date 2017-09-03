@@ -36,10 +36,7 @@ class ApiClient {
     return this.json(this.api)
   }
 
-  getApplication (loc) {
-    if (!loc) {
-      loc = this.loc
-    }
+  getApplication () {
     return this.json(this.url)
   }
 
