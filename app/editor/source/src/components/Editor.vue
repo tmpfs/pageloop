@@ -184,7 +184,6 @@ export default {
     padding: 0 0 2rem 0;
   }
 
-
   .toolbar {
     height: 2.3rem;
     font-size: 1.3rem;
@@ -201,8 +200,10 @@ export default {
     display: inline-block;
     text-align: center;
     color: var(--toolbar-link);
+    /*
     width: 2.3rem;
     height: 2.3rem;
+    */
     padding: 0 0.5rem;
   }
 
