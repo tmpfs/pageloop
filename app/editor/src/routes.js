@@ -38,7 +38,7 @@ function Routes (router, store) {
 
       // Need to load application data
       if (container !== state.container || (container === state.container && application !== state.application)) {
-        this.load(match.map.container, match.map.application)
+        store.dispatch('load', {container: match.map.container, application: match.map.application})
           .then(() => {
             return trigger()
           })
@@ -56,7 +56,7 @@ function Routes (router, store) {
 
       // Need to load application data
       if (container !== state.container || (container === state.container && application !== state.application)) {
-        this.load(match.map.container, match.map.application)
+        store.dispatch('load', {container: match.map.container, application: match.map.application})
           .then(() => {
             store.commit('reset-current-file')
             store.commit('main-view', 'edit')
@@ -73,7 +73,7 @@ function Routes (router, store) {
   router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
     ['section', 'container', 'application'],
     (match) => {
-      this.load(match.map.container, match.map.application)
+      store.dispatch('load', {container: match.map.container, application: match.map.application})
         .then(() => {
           let index = store.state.getIndexFile()
           if (index) {

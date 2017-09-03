@@ -1,5 +1,17 @@
 function Actions (router) {
   return {
+    'load': function (context, {container, application}) {
+      context.state.setApplication(container, application)
+      context.dispatch('log', `Loading app from ${context.state.url}`)
+      return context.dispatch('app')
+        .then(() => context.dispatch('list-files'))
+        .then(() => context.dispatch('list-pages'))
+        .then(() => {
+          context.commit('sidebar-view', 'pages')
+          context.dispatch('log', 'Done')
+        })
+        .catch((err) => context.dispatch('log', err))
+    },
     'resize-column': function (context, e) {
       context.state.columns.startDrag(e)
     },
