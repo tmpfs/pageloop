@@ -12,7 +12,7 @@
       </div>
     </div>
     <nav class="toolbar clearfix">
-      <h2>{{path}}</h2>
+      <h3>{{path}}</h3>
       <a @click="refresh(path)"
          title="Refresh preview"
          :class="{hidden: path == ''}">Refresh</a>

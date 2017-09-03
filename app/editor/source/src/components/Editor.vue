@@ -5,34 +5,35 @@
     <div class="column-header">
       <h2>Editor</h2>
       <div class="column-options">
-        <nav class="tabs">
-          <a v-bind:class="{selected: currentView === 'file-editor', disabled: fileHidden}"
-            @click="currentView = 'file-editor'"
-            title="Show file editor">File</a>
-          <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
-            @click="currentView = 'data-editor'"
-            title="Show data editor">Data</a>
-          <a v-bind:class="{selected: currentView === 'code-editor', disabled: hidden}"
-            @click="currentView = 'code-editor'"
-            title="Show source editor">Code</a>
-          <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
-            @click="currentView = 'visual-editor'"
-            title="Show visual editor">Visual</a>
+        <h3><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{currentFile.name}}</h3>
+
+        <nav class="toolbar clearfix">
+          <a @click="save"
+            v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
+          <a
+            @click="maximized = 'editor'"
+            :class="{hidden: maximized === 'editor'}"
+            title="Maximize">◩</a>
+          <a
+            @click="maximized = ''"
+            :class="{hidden: maximized !== 'editor'}"
+            title="Minimize">▣</a>
         </nav>
       </div>
     </div>
-    <nav class="toolbar clearfix">
-      <h2><span class="status-dirty" :class="{hidden: !isDirty}">✺</span>{{currentFile.name}}</h2>
-      <a @click="save"
-        v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
-      <a
-        @click="maximized = 'editor'"
-        :class="{hidden: maximized === 'editor'}"
-        title="Maximize">◩</a>
-      <a
-        @click="maximized = ''"
-        :class="{hidden: maximized !== 'editor'}"
-        title="Minimize">▣</a>
+    <nav class="tabs">
+      <a v-bind:class="{selected: currentView === 'file-editor', disabled: fileHidden}"
+        @click="currentView = 'file-editor'"
+        title="Show file editor">File</a>
+      <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
+        @click="currentView = 'data-editor'"
+        title="Show data editor">Data</a>
+      <a v-bind:class="{selected: currentView === 'code-editor', disabled: hidden}"
+        @click="currentView = 'code-editor'"
+        title="Show source editor">Code</a>
+      <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
+        @click="currentView = 'visual-editor'"
+        title="Show visual editor">Visual</a>
     </nav>
     <component v-bind:is="currentView"></component>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn">&nbsp;</div>
@@ -193,11 +194,14 @@ export default {
     flex: 1 0;
   }
 
-
   .column-header h2 {
     font-size: 1.4rem;
     text-transform: uppercase;
     padding: 0 1rem;
+  }
+
+  .column-options {
+    text-align: right;
   }
 
   h2.file-info {
@@ -233,12 +237,15 @@ export default {
     color: var(--base3-color);
   }
 
-  .toolbar h2 {
+  h3 {
     font-size: 1.4rem;
     text-transform: none;
-    display: inline-block;
+    display: block;
     padding: 0 1rem;
     float: left;
+    border: 0;
+    padding: 0;
+    margin-left: 1rem;
   }
 
   .tabs {
