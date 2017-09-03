@@ -146,6 +146,9 @@ export default {
 
   .sidebar, .editor {
     position: relative;
+  }
+
+  .sidebar:not(.minimized), .editor:not(.minimized) {
     min-width: var(--drag-size);
   }
 
@@ -176,6 +179,20 @@ export default {
   .file-editor, .source-editor, .visual-editor {
     height: calc(100% - 4.6rem);
   }
+
+  .column-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border-bottom: 1px solid var(--border-color);
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .column-header > * {
+    flex: 1 0;
+  }
+
 
   .column-header h2 {
     font-size: 1.4rem;
@@ -259,19 +276,6 @@ export default {
 
 <style scoped>
   /* Editor scoped styles */
-  .column-header {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    border-bottom: 1px solid var(--border-color);
-    user-select: none;
-    overflow: hidden;
-  }
-
-  .column-header > * {
-    flex: 1 0;
-  }
-
   .editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
     border-left: 1px solid var(--border-color);
   }
@@ -298,6 +302,10 @@ export default {
     width: 0%;
     opacity: 0;
     pointer-events: none;
+  }
+
+  .minimized > .column-drag {
+    display: none;
   }
 
   .status-dirty {
