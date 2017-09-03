@@ -246,7 +246,6 @@ export default {
   h3 {
     font-size: 1.4rem;
     text-transform: none;
-    float: left;
     border: 0;
     padding: 0;
     margin: 0 0 0 1rem;
