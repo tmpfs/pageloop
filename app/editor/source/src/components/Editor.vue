@@ -130,7 +130,52 @@ export default {
 }
 </script>
 
+<style>
+  /* Editor global styles */
+  .sidebar, .editor, .preview {
+    flex: 1 1 auto;
+    opacity: 1;
+    transition: all 0.5s ease-out;
+    background: var(--background);
+  }
+
+  .sidebar {
+    max-width: 32rem;
+    width: 20%;
+  }
+
+  .sidebar, .editor {
+    position: relative;
+    min-width: var(--drag-size);
+  }
+
+  .sidebar:not(.maximized) > :not(.column-drag), .editor:not(.maximized) > :not(.column-drag) {
+    /*
+     * Setting padding on sidebar/editor causes issues when maximizing
+     * so we set on the child elements instead.
+     */
+    margin-right: var(--drag-size);
+  }
+
+  .sidebar > .column-drag, .editor > .column-drag {
+    position: absolute;
+    top: 0;
+    left: calc(100% - var(--drag-size));
+    bottom: 0;
+    right: 0;
+    width: var(--drag-size);
+    height: 100%;
+    cursor: ew-resize;
+    background: var(--border-color);
+  }
+
+  .editor, .preview {
+    width: 40%;
+  }
+</style>
+
 <style scoped>
+  /* Editor scoped styles */
   .column-header {
     display: flex;
     flex-direction: row;

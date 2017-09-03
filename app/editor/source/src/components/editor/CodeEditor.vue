@@ -122,5 +122,20 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+  .text-editor {
+    background: #002b36;
+    height: 100%;
+  }
+
+  .CodeMirror {
+    font-size: 1.6rem;
+    width: 100%;
+    height: 100%;
+  }
+
+  .CodeMirror-dialog input {
+    padding: 0.2rem;
+    border-radius: 0;
+  }
 </style>
