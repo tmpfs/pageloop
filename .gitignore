@@ -2,6 +2,7 @@
 /public
 /source
 /assets.go
+node_modules
 untitled*
 ref
 *.bak

@@ -10,9 +10,14 @@
 
 <script>
 import AppAlert from '@/components/Alert'
+import AppNotify from '@/components/Notify'
+import AppHeader from '@/components/Header'
+import AppMain from '@/components/Main'
+import AppFooter from '@/components/Footer'
+
 export default {
   name: 'app',
-  components: {AppAlert}
+  components: {AppAlert, AppNotify, AppHeader, AppMain, AppFooter}
 }
 </script>
 
