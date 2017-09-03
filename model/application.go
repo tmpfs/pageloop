@@ -362,8 +362,6 @@ func (app *Application) GetPageByUrl(url string) *Page {
 	return nil
 }
 
-// Private methods
-
 // Determine a URL from a relative path.
 func (app *Application) GetUrlFromPath(file *File, relative string) string {
 	var url string = filepath.ToSlash(relative)
@@ -385,6 +383,17 @@ func (app *Application) GetPathFromUrl(url string) string {
 
 	return base + SLASH + filepath.Join(parts...)
 }
+
+// Build a mountpoint URL by convention based on a container
+// name.
+func (app *Application) MountpointUrl(c *Container) string {
+  if c == nil {
+    c = app.Container
+  }
+  return "/apps/www/" + c.Name + "/" + app.Name + "/"
+}
+
+// Private methods
 
 // Extract a name, relative path and URL for a file.
 func (app *Application) getFileFields(file *File, base string) (string, string, string) {

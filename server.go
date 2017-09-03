@@ -321,7 +321,7 @@ func (l *PageLoop) getPublishUrl (app *model.Application) string {
 }
 
 func (l *PageLoop) getSourceUrl (app *model.Application) string {
-	return "/apps/source/" + app.Container.Name + "/" + app.Name + "/"
+	return "/apps/src/" + app.Container.Name + "/" + app.Name + "/"
 }
 
 func (l *PageLoop) getRawUrl (app *model.Application) string {

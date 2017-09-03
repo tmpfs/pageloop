@@ -10,7 +10,6 @@ import (
 	"strings"
 	"net/http"
   "mime"
-  pth "path"
   "path/filepath"
 	"encoding/json"
   "github.com/tmpfs/pageloop/model"
@@ -261,17 +260,13 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-        input.Url = pth.Clean(input.Url)
-
-        if !strings.HasSuffix(input.Url, "/") {
-          input.Url += "/"
-        }
-
         existing := h.Container.GetByName(input.Name)
         if existing != nil {
 					ex(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Application %s already exists", input.Name))
 					return
         }
+
+        input.Url = input.MountpointUrl(h.Container)
 
         // mountpoint exists
         exists := h.Root.HasMountpoint(input.Url)

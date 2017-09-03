@@ -25,7 +25,6 @@
         :class="{hidden: maximized !== 'preview'}"
         title="Minimize">▣</a>
     </nav>
-    <!-- sandbox="allow-same-origin allow-scripts" -->
     <iframe :src="src" sandbox="allow-same-origin allow-scripts" class="publish-preview"></iframe>
   </div>
 </template>
