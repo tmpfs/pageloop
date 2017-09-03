@@ -73,7 +73,7 @@ type Application struct {
 type ApplicationTemplate struct {
 	Container string
 	Application string
-	Directory string
+	File string
 }
 
 func NewApplication(mountpoint, description string) *Application {

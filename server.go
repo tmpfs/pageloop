@@ -435,8 +435,7 @@ func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
   return nil
 }
 
-// Find a directory file within an application to use as an application
-// template.
+// Find an application from an application template reference.
 func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Application, error) {
   container := l.Host.GetByName(t.Container)
   if container == nil {
@@ -448,6 +447,20 @@ func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Applicat
   }
 
   return app, nil
+}
+
+// Find an application file from an application template reference.
+func (l *PageLoop) LookupTemplateFile(t *model.ApplicationTemplate) (*model.File, error) {
+  var err error
+  var app *model.Application
+  var file *model.File
+  if app, err = l.LookupTemplate(t); err != nil {
+    return nil, err
+  }
+
+  url := t.File
+  file = app.Urls[url]
+  return file, nil
 }
 
 //

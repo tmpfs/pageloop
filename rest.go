@@ -29,7 +29,6 @@ var(
 	OK = []byte(`{"ok": true}`)
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
-  TemplateNewFile map[string] []byte
 )
 
 type RestService struct {
@@ -315,7 +314,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			} else {
 				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
-					putFile(item, app, res, req)
+					h.putFile(item, app, res, req)
 					return
 				}
 
@@ -346,7 +345,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Create a new file for an application
-func putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
+func (h RestAppHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) {
 	var err error
 
 	ct := req.Header.Get("Content-Type")
@@ -365,16 +364,35 @@ func putFile(url string, app *model.Application, res http.ResponseWriter, req *h
   isDir := strings.HasSuffix(url, "/")
 
 	var content []byte
-  content = TemplateNewFile[ct]
-  // Read content from request body if no template available
-  // and not operating on a directory
-  if !isDir && content == nil {
+
+  // Lookup template file
+  if !isDir && ct == JSON_MIME {
     // TODO: fix empty reply when there is no request body
     // TODO: stream request body to disc
     if content, err = readBody(req); err != nil {
       ex(res, http.StatusInternalServerError, nil, err)
       return
     }
+
+    input := &model.ApplicationTemplate{}
+    if err = json.Unmarshal(content, input); err != nil {
+      ex(res, http.StatusInternalServerError, nil, err)
+      return
+    }
+
+    var file *model.File
+
+    if file, err = h.Root.LookupTemplateFile(input); err != nil {
+      ex(res, http.StatusInternalServerError, nil, err)
+      return
+    }
+
+    if file == nil {
+      ex(res, http.StatusNotFound, nil, fmt.Errorf("Template file %s does not exist", input.File))
+      return
+    }
+
+    content = file.Source(true)
   }
 
   // Update the application model
@@ -568,16 +586,4 @@ func isMethodAllowed(method string, methods []string) bool {
 		}
 	}
 	return false
-}
-
-func init() {
-  TemplateNewFile = make(map[string] []byte)
-
-  /*
-  TemplateNewFile["template/markdown+partial"] = MustAsset("app/template/documents/partial-markdown.md")
-  TemplateNewFile["template/markdown+standalone"] = MustAsset("app/template/documents/standalone-markdown.md")
-  TemplateNewFile["template/html+standalone"] = MustAsset("app/template/documents/standalone-html.html")
-  TemplateNewFile["template/html+layout"] = MustAsset("app/template/documents/layout.html")
-  TemplateNewFile["template/html+partial"] = MustAsset("app/template/documents/partial-html.html")
-  */
 }

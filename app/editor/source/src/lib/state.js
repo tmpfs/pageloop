@@ -267,16 +267,18 @@ class State {
     let url = this.url + 'files' + name
     let opts = {
       method: 'PUT',
-      headers: {
-        'Content-Type': template
-      }
+      headers: {},
+      body: ''
     }
 
-    // Create empty file
-    if (template === '') {
-      opts.headers['Content-Length'] = 0
-      opts.body = ''
+    // Create file from template
+    if (template) {
+      opts.body = JSON.stringify(template)
+      opts.headers['Content-Type'] = 'application/json; charset=utf-8'
     }
+
+    opts.headers['Content-Length'] = opts.body.length
+
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {

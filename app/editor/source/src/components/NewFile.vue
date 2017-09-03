@@ -1,5 +1,5 @@
 <template>
-  <div class="new-page">
+  <div class="new-file">
     <section>
       <h3>File Name</h3>
       <form @submit="createNewFile">
@@ -17,27 +17,27 @@
             </li>
             <li>
               <input type="radio" @change="extension = '.md'" v-model="template"
-                id="markdown-partial" name="template" value="template/markdown+partial" />
+                id="markdown-partial" name="template" value="markdown-partial" />
               <label for="markdown-partial">Markdown Partial</label>
             </li>
             <li>
               <input type="radio" @change="extension = '.md'" v-model="template"
-                id="markdown-standalone" name="template" value="template/markdown+standalone" />
+                id="markdown-standalone" name="template" value="markdown-standalone" />
               <label for="markdown-standalone">Markdown Standalone</label>
             </li>
             <li>
               <input type="radio" v-model="template"
-                id="html-layout" @change="extension = '.html'" name="template" value="template/html+layout" />
+                id="html-layout" @change="extension = '.html'" name="template" value="html-layout" />
               <label for="html-layout">HTML Layout</label>
             </li>
             <li>
               <input type="radio" v-model="template"
-                id="html-partial" @change ="extension = '.html'" name="template" value="template/html+partial" />
+                id="html-partial" @change ="extension = '.html'" name="template" value="html-partial" />
               <label for="html-partial">HTML Partial</label>
             </li>
             <li>
               <input type="radio" v-model="template"
-                id="html-standalone" @change="extension = '.html'" name="template" value="template/html+standalone" />
+                id="html-standalone" @change="extension = '.html'" name="template" value="html-standalone" />
               <label for="html-standalone">HTML Standalone</label>
             </li>
           </ul>
@@ -56,6 +56,33 @@ export default {
   name: 'new-file',
   data: function () {
     return {
+      templateMap: {
+        'markdown-partial': {
+          container: 'template',
+          application: 'documents',
+          file: '/markdown-partial.md'
+        },
+        'markdown-standalone': {
+          container: 'template',
+          application: 'documents',
+          file: '/markdown-standalone.md'
+        },
+        'html-layout': {
+          container: 'template',
+          application: 'documents',
+          file: '/layout.html'
+        },
+        'html-partial': {
+          container: 'template',
+          application: 'documents',
+          file: '/html-partial.html'
+        },
+        'html-standalone': {
+          container: 'template',
+          application: 'documents',
+          file: '/html-standalone.html'
+        }
+      },
       fileName: '/untitled.md',
       template: '',
       extension: ''
@@ -94,7 +121,7 @@ export default {
         action = 'go-page'
       }
       return this.$store.dispatch(
-        'new-file', {name: this.fileName, template: this.template, action: action})
+        'new-file', {name: this.fileName, template: this.templateMap[this.template], action: action})
         .then(() => {
           this.$parent.closeNewFileView()
         })
