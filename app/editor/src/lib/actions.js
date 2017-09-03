@@ -30,8 +30,7 @@ function Actions (router) {
     'new-app': function (context, app) {
       app.template = {
         container: 'template',
-        application: 'pure',
-        directory: ''
+        application: 'pure'
       }
       return context.state.createNewApp(app)
         .then((res) => {

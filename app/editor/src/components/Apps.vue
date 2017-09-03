@@ -7,9 +7,6 @@
           <p class="small">Choose an application name:</p>
           <input type="text" name="name"
             :value="applicationName" v-model="applicationName" />
-          <p class="small">Enter a publish URL:</p>
-          <input @change="urlChanged = true" type="text" name="url"
-            :value="applicationUrl" v-model="applicationUrl" />
           <p class="small">Short description:</p>
           <input type="text" name="description"
             :value="applicationDescription" v-model="applicationDescription" />
@@ -53,15 +50,7 @@ export default {
     return {
       urlChanged: false,
       applicationName: 'new-app',
-      applicationUrl: '/new-app',
       applicationDescription: 'New application'
-    }
-  },
-  watch: {
-    applicationName: function (val) {
-      if (!this.urlChanged) {
-        this.applicationUrl = '/' + val
-      }
     }
   },
   computed: {
@@ -75,9 +64,6 @@ export default {
       let app = {}
       if (this.applicationName) {
         app.name = this.applicationName
-      }
-      if (this.applicationUrl) {
-        app.url = this.applicationUrl
       }
       if (this.applicationDescription) {
         app.description = this.applicationDescription
