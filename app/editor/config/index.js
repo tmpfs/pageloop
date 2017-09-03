@@ -7,7 +7,7 @@ module.exports = {
     index: path.resolve(__dirname, '../dist/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '',
     productionSourceMap: true,
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.
@@ -29,6 +29,22 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/assets/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true
+      },
+      '/docs/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true
+      },
+      '/tools/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true
+      },
+      '/template/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true
+      },
+      '/rpc/': {
         target: 'http://localhost:3577',
         changeOrigin: true
       },
