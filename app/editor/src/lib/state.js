@@ -3,7 +3,8 @@ import ColumnManager from './columns'
 
 class State {
   constructor () {
-    this.api = '/api/'
+    this.host = 'http://localhost:3577'
+    this.api = `${this.host}/api/`
     this.containers = []
     this.setApplication('', '')
 

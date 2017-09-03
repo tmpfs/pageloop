@@ -67,6 +67,8 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	url := req.URL
 	path := url.Path
 
+  res.Header().Set("Access-Control-Allow-Origin", "*")
+
 	// List host containers
 	if path == "" {
 		if req.Method != http.MethodGet {
