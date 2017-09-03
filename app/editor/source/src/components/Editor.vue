@@ -146,7 +146,7 @@ export default {
     width: 20%;
   }
 
-  .sidebar, .editor {
+  .sidebar, .editor, .preview {
     position: relative;
   }
 
@@ -187,9 +187,15 @@ export default {
     flex-direction: row;
     flex-wrap: nowrap;
     border-bottom: 1px solid var(--border-color);
+    background: var(--base02-color);
     user-select: none;
     overflow: hidden;
     height: 2.2rem;
+  }
+
+  .column-options {
+    border-bottom: 1px solid var(--border-color);
+    background: var(--base02-color);
   }
 
   .column-header > * {
@@ -201,10 +207,6 @@ export default {
     font-size: 1.4rem;
     text-transform: uppercase;
     padding: 0 1rem;
-  }
-
-  .column-options {
-    border-bottom: 1px solid var(--border-color);
   }
 
   h2.file-info {
@@ -292,10 +294,6 @@ export default {
   /* Editor scoped styles */
   .editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
     border-left: 1px solid var(--border-color);
-  }
-
-  .preview {
-    position: relative;
   }
 
   .sidebar .scroll {
