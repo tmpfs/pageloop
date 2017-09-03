@@ -122,4 +122,25 @@ export default {
   .files-list a, .pages-list a {
     color: currentColor;
   }
+
+  .page, .file {
+    display: block;
+    padding: .2rem 0 .2rem 2rem;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    transition: all 0.3s ease-out;
+  }
+
+  .page, .file {
+    font-size: 1.6rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .file.selected, .page.selected {
+    background: var(--base03-color);
+    color: var(--base3-color);
+  }
 </style>

@@ -1,3 +1,4 @@
+/* Variables */
 :root {
   --base03-color: #002b36;
   --base02-color: #073642;
@@ -24,6 +25,8 @@
   --drag-size: 6px;
 }
 
+/* Fonts */
+
 @font-face {
   font-family: 'SourceSerif';
   src: url('/assets/font/sourceserifpro-regular-webfont.woff2') format('woff2'),
@@ -42,6 +45,8 @@
   text-rendering: optimizeLegibility;
 }
 
+/* Document */
+
 html {
   box-sizing: border-box;
   font-size: 62.5%
@@ -50,7 +55,6 @@ html {
 *, *:after, *:before {
   box-sizing: inherit
 }
-
 
 html, body {
   width: 100%;
@@ -69,15 +73,36 @@ body {
   overflow: hidden;
 }
 
-form, fieldset {
-	margin: 0;
-	padding: 0;
-	border: 0;
+main {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height: 100%;
+  min-height: 100%;
 }
 
-p, section > ul.compact-list {
-  margin: 1rem 0 1rem 0;
+main > .content-main {
+  flex: 1 1;
+  height: calc(100% - 6rem);
 }
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  height: 100%;
+  min-height: 100%;
+}
+
+.scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: calc(100% - 4.6rem);
+}
+
+/* Links */
 
 a, a:visited, a:hover {
   color: var(--blue-color);
@@ -96,19 +121,30 @@ p a:hover {
   border-bottom: 1px solid currentColor;
 }
 
+a.close {
+  display: inline-block;
+  color: var(--color);
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+}
+
+a.close::before {
+  content: '🞩';
+  padding-left: 0.5rem;
+}
+
+a.close:hover {
+  color: var(--base3-color);
+  background: var(--base03-color);
+}
+
+/* Headings */
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   margin: 0;
   padding: 0;
-}
-
-section.document {
-  font-family: SourceSerif;
-  text-align: left;
-  display: inline-block;
-  margin: auto 0;
-  min-width: 480px;
-  max-width: 640px;
 }
 
 h1 {
@@ -126,21 +162,6 @@ h1 > span:first-child {
 	font-size: 2.4rem;
 }
 
-.center {
-  text-align: center;
-}
-
-.column-header h2 {
-  font-size: 1.4rem;
-  text-transform: uppercase;
-  padding: 0 1rem;
-}
-
-h2.file-info {
-  font-size: 2.2rem;
-  padding: 0 0 2rem 0;
-}
-
 h3 {
   display: inline-block;
   font-size: 1.4rem;
@@ -152,182 +173,12 @@ h3 + p {
 	margin-top: 0;
 }
 
-main {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  height: 100%;
-  min-height: 100%;
-}
+/* Forms & Buttons */
 
-main > .content-main {
-  flex: 1 1;
-  height: calc(100% - 6rem);
-}
-
-.name.container, .new-app h2 {
-  font-size: 1.4rem;
-  text-decoration: underline;
-  text-transform: uppercase;
-}
-
-.name + p.small {
-  margin-top: 0.2rem;
-}
-
-.content {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  height: 100%;
-  min-height: 100%;
-}
-
-.panel {
-  padding: 2rem;
-}
-
-section {
-  margin-bottom: 3rem;
-}
-
-.scroll {
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: calc(100% - 4.6rem);
-}
-
-iframe {
-  display: block;
-  border: 0;
-  margin: 0;
-  width: 100%;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.disabled {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.toolbar {
-  height: 2.3rem;
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  text-align: right;
-  /*font-size: 1.4rem;*/
-	border-bottom: 1px solid var(--border-color);
-  text-align: right;
-  user-select: none;
-  overflow: hidden;
-}
-
-.toolbar a {
-  display: inline-block;
-  text-align: center;
-  color: var(--toolbar-link)
-  width: 2.3rem;
-  height: 2.3rem;
-  padding: 0 0.5rem;
-}
-
-.toolbar a:hover {
-  background: var(--base03-color);
-  color: var(--base3-color);
-}
-
-.toolbar h2 {
-  font-size: 1.4rem;
-  text-transform: none;
-  display: inline-block;
-  padding: 0 1rem;
-  float: left;
-}
-
-.small, small {
-  font-size: 1.4rem;
-}
-
-.compact-list {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-.clearfix {
-  clear: both;
-}
-
-.tabs {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  padding: 0;
-  font-size: 1.4rem;
-  text-transform: uppercase;
-  user-select: none;
-}
-
-.tabs > a {
-  flex: 1 0;
-  color: currentColor;
-  text-align: center;
-  background: transparent;
-
-  /*
-  max-width: 12rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  */
-}
-
-.selected {
-  pointer-events: none;
-}
-
-.tabs > .selected {
-  text-decoration: underline;
-}
-
-.tabs > a:not(:first-child) {
-  border-left: 1px solid var(--border-color);
-}
-
-.tabs > a:hover, .tabs > a.selected {
-  background: var(--base03-color);
-  color: var(--base3-color);
-  transition: all 0.5s ease-out;
-}
-
-.page, .file {
-  display: block;
-  padding: .2rem 0 .2rem 2rem;
-  cursor: pointer;
-  user-select: none;
-  background: transparent;
-  transition: all 0.3s ease-out;
-}
-
-.page, .file {
-  font-size: 1.6rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.file.selected, .page.selected {
-  background: var(--base03-color);
-  color: var(--base3-color);
-}
-
-.log.error {
-  color: var(--red-color);
+form, fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
 }
 
 form > p {
@@ -370,12 +221,69 @@ button.primary, input[type="submit"].primary {
   color: var(--base3-color);
 }
 
-.danger {
-  background: var(--red-color);
-}
-
 input[type="submit"], input[type="reset"] {
 	margin-top: 1rem;
+}
+
+/* Rhythm */
+
+section {
+  margin-bottom: 3rem;
+}
+
+p, section > ul.compact-list {
+  margin: 1rem 0;
+}
+
+section.document {
+  font-family: SourceSerif;
+  text-align: left;
+  display: inline-block;
+  margin: auto 0;
+  min-width: 480px;
+  max-width: 640px;
+}
+
+/* Misc Elements */
+
+iframe {
+  display: block;
+  border: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* Utilities */
+
+.hidden {
+  display: none !important;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.small, small {
+  font-size: 1.4rem;
+}
+
+.compact-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.clearfix {
+  clear: both;
+}
+
+.selected {
+  pointer-events: none;
+}
+
+.center {
+  text-align: center;
 }
 
 .form-actions {
@@ -387,21 +295,10 @@ input[type="submit"], input[type="reset"] {
 	margin-left: 0.5rem;
 }
 
-a.close {
-  display: inline-block;
-  color: var(--color);
-  width: 3.2rem;
-  height: 3.2rem;
-  padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+.danger {
+  background: var(--red-color);
 }
 
-a.close::before {
-  content: '🞩';
-  padding-left: 0.5rem;
+.panel {
+  padding: 2rem;
 }
-
-a.close:hover {
-  color: var(--base3-color);
-  background: var(--base03-color);
-}
-

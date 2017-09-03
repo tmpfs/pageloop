@@ -172,6 +172,84 @@ export default {
   .editor, .preview {
     width: 40%;
   }
+
+  .column-header h2 {
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    padding: 0 1rem;
+  }
+
+  h2.file-info {
+    font-size: 2.2rem;
+    padding: 0 0 2rem 0;
+  }
+
+
+  .toolbar {
+    height: 2.3rem;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    text-align: right;
+    /*font-size: 1.4rem;*/
+    border-bottom: 1px solid var(--border-color);
+    text-align: right;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .toolbar a {
+    display: inline-block;
+    text-align: center;
+    color: var(--toolbar-link);
+    width: 2.3rem;
+    height: 2.3rem;
+    padding: 0 0.5rem;
+  }
+
+  .toolbar a:hover {
+    background: var(--base03-color);
+    color: var(--base3-color);
+  }
+
+  .toolbar h2 {
+    font-size: 1.4rem;
+    text-transform: none;
+    display: inline-block;
+    padding: 0 1rem;
+    float: left;
+  }
+
+  .tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 0;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  .tabs > a {
+    flex: 1 0;
+    color: currentColor;
+    text-align: center;
+    background: transparent;
+  }
+
+  .tabs > .selected {
+    text-decoration: underline;
+  }
+
+  .tabs > a:not(:first-child) {
+    border-left: 1px solid var(--border-color);
+  }
+
+  .tabs > a:hover, .tabs > a.selected {
+    background: var(--base03-color);
+    color: var(--base3-color);
+    transition: all 0.5s ease-out;
+  }
+
 </style>
 
 <style scoped>

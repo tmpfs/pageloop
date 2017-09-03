@@ -40,4 +40,8 @@ export default {
   footer p {
     margin: 0 2rem;
   }
+
+  .log.error {
+    color: var(--red-color);
+  }
 </style>

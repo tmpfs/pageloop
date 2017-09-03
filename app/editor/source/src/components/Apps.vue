@@ -117,4 +117,14 @@ export default {
     margin-right: 1rem;
   }
 
+  .name.container, .new-app h2 {
+    font-size: 1.4rem;
+    text-decoration: underline;
+    text-transform: uppercase;
+  }
+
+  .name + p.small {
+    margin-top: 0.2rem;
+  }
+
 </style>
