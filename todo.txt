@@ -69,6 +69,14 @@ Wow, so much to do, here is some stuff:
     has all the tools that people are used to.
 25) Consider `makestatic` integration for optimization and publishing.
 26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
+
+    Implementation: vue
+
+    Moved bundled apps outside of the data directory so they are not included in the executable,
+    still need to work out a good way of distributing/bundling the system applications.
+
+    HTTPS download of .zip archives on first run seems like the best solution.
+
 27) Add Docker integration.
 28) Support notifications for better displaying errors and other messages.
 
