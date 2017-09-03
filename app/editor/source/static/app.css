@@ -295,7 +295,7 @@ footer p {
    * Setting padding on sidebar/editor causes issues when maximizing
    * so we set on the child elements instead.
    */
-  padding-right: var(--drag-size);
+  margin-right: var(--drag-size);
 }
 
 .sidebar > .column-drag, .editor > .column-drag {
