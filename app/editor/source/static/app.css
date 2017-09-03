@@ -163,7 +163,6 @@ main {
 main > .content-main {
   flex: 1 1;
   height: calc(100% - 6rem);
-  /*max-height: calc(100% - 6rem);*/
 }
 
 .name.container, .new-app h2 {
@@ -184,28 +183,6 @@ main > .content-main {
   overflow: hidden;
   height: 100%;
   min-height: 100%;
-}
-
-.containers {
-  flex: 1 0;
-  padding: 2rem;
-}
-
-.containers > ul {
-  margin-left: 2rem;
-}
-
-.app > p.small {
-  margin-bottom: 0;
-}
-
-.app > .app-actions {
-  margin-top: 0;
-  font-size: 1.5rem;
-}
-
-.app-actions > *:not(:last-child) {
-  margin-right: 1rem;
 }
 
 .panel {

@@ -95,4 +95,26 @@ export default {
 
 <style scoped>
 
+  .containers {
+    flex: 1 0;
+    padding: 2rem;
+  }
+
+  .containers > ul {
+    margin-left: 2rem;
+  }
+
+  .app > p.small {
+    margin-bottom: 0;
+  }
+
+  .app > .app-actions {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+
+  .app-actions > *:not(:last-child) {
+    margin-right: 1rem;
+  }
+
 </style>
