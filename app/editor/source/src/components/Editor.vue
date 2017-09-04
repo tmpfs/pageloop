@@ -217,6 +217,8 @@ export default {
   }
 
   .toolbar {
+    display: flex;
+    justify-content: flex-end;
     height: 2.3rem;
     font-size: 1.3rem;
     text-transform: uppercase;
@@ -231,10 +233,6 @@ export default {
     display: inline-block;
     text-align: center;
     color: var(--toolbar-link);
-    /*
-    width: 2.3rem;
-    height: 2.3rem;
-    */
     padding: 0 0.5rem;
   }
 
