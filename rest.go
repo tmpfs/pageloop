@@ -439,7 +439,6 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
 
 	var file *model.File = app.Urls[url]
 	if file != nil {
-
     // Handle moving the file with Location header
     if loc != "" {
       if url == loc {
@@ -556,7 +555,11 @@ func ok(res http.ResponseWriter, data []byte) (int, error) {
 func okFile(res http.ResponseWriter, f *model.File) (int, error) {
   var data []byte
   var err error
-  if data, err = json.Marshal(f); err != nil {
+  var target interface{} = f
+  if f.Page() != nil {
+    target = f.Page()
+  }
+  if data, err = json.Marshal(target); err != nil {
     return -1, err
   }
   top := []byte(`{"ok":true,"file":`)

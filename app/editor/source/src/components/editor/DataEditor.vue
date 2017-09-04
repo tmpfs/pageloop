@@ -2,22 +2,21 @@
 export default {
   name: 'data-editor',
   computed: {
-    pageDataJson: function () {
-      return JSON.stringify(this.pageData, undefined, 2)
-    },
-    pageData: {
-      get: function () {
-        if (!this.$store.state.current || !this.$store.state.current.page) {
-          return {}
-        }
-        return this.$store.state.current.page.data
-      },
-      set: function (val) {
-        //
+    pageData: function () {
+      const state = this.$store.state
+      if (state.current && state.current.data) {
+        return this.$store.state.current.data
       }
+
+      if (state.current.page) {
+        return state.current.page.data
+      }
+
+      return {}
     }
   },
   render: function (h) {
+    console.log('render data editor')
     // We need recursion to render meta page data
     function list (target) {
       let isArr = Array.isArray(target)

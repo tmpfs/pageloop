@@ -196,6 +196,13 @@ function Actions (router) {
               })
           }
           if (doc.ok) {
+            console.log(doc)
+            // Currently YAML is in the source code and
+            // can be edited directly we need to sync
+            // the data in case it changed
+            if (doc.file && doc.file.data) {
+              file.data = doc.file.data
+            }
             return context.dispatch('preview-refresh')
           }
         })

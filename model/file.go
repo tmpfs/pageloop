@@ -68,6 +68,10 @@ func (f *File) Close() error {
 	return nil
 }
 
+func (f *File) Page() *Page {
+  return f.page
+}
+
 // Read only access to the source data outside this package.
 func (f *File) Source(raw bool) []byte {
   if raw && f.frontmatter != nil {
