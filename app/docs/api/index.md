@@ -31,18 +31,16 @@ An application contains a set of source files that are published to a public loc
 
 Create a new application.
 
-To create a new application you must give it a valid name, 
-mountpoint URL and description so a request body would look like:
+To create a new application you must give it a valid name and description.
 
 ```json
 {
   "name": "new-app",
-  "url": "/new-app/",
   "description": "New application"
 }
 ```
 
-You may optionally specify a `template` object to initialize the new 
+You may optionally specify a `template` object to initialize the new
 application with all the files in the referenced template application.
 
 You need to give the `container` and `application` names for the template:
@@ -50,7 +48,6 @@ You need to give the `container` and `application` names for the template:
 ```json
 {
   "name": "new-app",
-  "url": "/new-app/",
   "description": "New application",
   "template": {
     "container": "template",
@@ -67,11 +64,11 @@ Get an application.
 
 Remove an application.
 
-Removing an application indicates a complete deletion, it is 
+Removing an application indicates a complete deletion, it is
 irreversible.
 
-The application is unmounted and the application mountpoint is 
-deleted before the updated configuration is written to disc. Finally 
+The application is unmounted and the application mountpoint is
+deleted before the updated configuration is written to disc. Finally
 the published and source files are deleted.
 
 ## GET /{container}/{application}/files/
@@ -90,36 +87,30 @@ it is an error as the published URLs would conflict.
 If the file is considered to be a page it is also added to the list
 of pages for the application.
 
-Syncs the source file to disc and publishes an updated
-version of the file to the public URL.
-
 You can create a file using the content from an existing file template,
-to do so you should send a `Content-Type` header using one of the following
-MIME types:
+to do so you should send a `Content-Type` header of
+`application/json; charset=utf-8` and a request body that points to a
+container, application and file:
 
-* `template/markdown+partial`
-* `template/markdown+standalone`
-* `template/html+standalone`
-* `template/html+layout`
-* `template/html+partial`
-
-When creating new files from templates there is no need to send a
-request body.
+```json
+{
+  "container": "template",
+  "application": "documents",
+  "file": "markdown-partial.md"
+}
+```
 
 ## POST /{container}/{application}/files/{url}
 
 Update a file, the file must already exist.
 
-If a `Location` header is sent in the request the operation is a rename 
-(the request body is ignored) and the target file is renamed to the URL 
+If a `Location` header is sent in the request the operation is a rename
+(the request body is ignored) and the target file is renamed to the URL
 given in the `Location` header.
 
-Otherwise the operation is to update file content from the request body, 
+Otherwise the operation is to update file content from the request body,
 in which case it is an error if the request MIME type does not match the
 existing MIME type for the file.
-
-Syncs the source file to disc and publishes an updated version of the 
-file to the public URL.
 
 ## GET /{container}/{application}/files/{url}
 
