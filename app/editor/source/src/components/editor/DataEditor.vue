@@ -42,7 +42,8 @@ export default {
           let nodes = list(value)
           li.children.push(...nodes)
         } else {
-          let v = h('span', {class: 'data-value'}, ['' + value])
+          let v = h('span', {class: 'data-value'}, [])
+          v.children.push(h('span', {class: 'data-input'}, ['' + value]))
           li.children.push(v)
         }
         el.children.push(li)
@@ -51,7 +52,7 @@ export default {
     }
 
     let children = list(this.pageData)
-    let el = h('div', {class: 'data-editor'}, children)
+    let el = h('div', {class: 'data-editor scroll'}, children)
     return el
   }
 }
@@ -59,25 +60,36 @@ export default {
 
 <style scoped>
   .data-editor {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     user-select: none;
     padding-right: 1rem;
   }
 
   .data-editor ul, .data-editor ol {
+    display: table;
     list-style-type: none;
     margin-left: 1rem;
     padding: 0;
+    width: 100%;
+  }
+
+  .data-editor ul li, .data-editor ol li {
+    display: table-row;
+  }
+
+  .data-key, .data-value {
+    display: table-cell;
+  }
+
+  .data-key {
+    width: 25%;
+    text-shadow: 1px 1px 1px var(--base03-color);
+    clear: both;
   }
 
   .data-key::after {
     content: ':';
-    margin-right: 1rem;
-  }
-
-  .data-key {
-    display: inline-block;
-    min-width: 6rem;
+    float: right;
   }
 
   .data-key, .data-value {
@@ -85,8 +97,15 @@ export default {
   }
 
   .data-value {
+    width: 75%;
+  }
+
+  .data-value > .data-input {
+    display: inline-block;
     background: var(--base03-color);
-    color: var(--base2-color);
-    border-radius: 2px;
+    border-radius: 0.3rem;
+    color: var(--base1-color);
+    padding: 0.3rem 0.6rem;
+    margin-bottom: 0.3rem;
   }
 </style>
