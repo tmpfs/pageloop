@@ -61,13 +61,12 @@ export default {
   .data-editor {
     font-size: 1.5rem;
     user-select: none;
-    padding-right: 1rem;
   }
 
   .data-editor ul, .data-editor ol {
     display: table;
     list-style-type: none;
-    margin-left: 1rem;
+    padding-left: 1rem;
     padding: 0;
     width: 100%;
   }
@@ -76,23 +75,26 @@ export default {
     display: table-row;
   }
 
+  .data-editor li:hover {
+    background: var(--base03-color);
+  }
+
   .data-key, .data-value {
     display: table-cell;
+    padding: 0.2rem 0 0.2rem 0.2rem;
   }
 
   .data-key {
     width: 25%;
     text-shadow: 1px 1px 1px var(--base03-color);
     clear: both;
+    padding-left: 1rem;
   }
 
   .data-key::after {
     content: ':';
     float: right;
-  }
-
-  .data-key, .data-value {
-    padding: 0.1rem 0.3rem;
+    margin-right: 0.5rem;
   }
 
   .data-value {
@@ -104,7 +106,11 @@ export default {
     background: var(--base03-color);
     border-radius: 0.3rem;
     color: var(--base1-color);
-    padding: 0.3rem 0.6rem;
-    margin-bottom: 0.3rem;
+    margin: 0.1rem 0;
+  }
+
+  .data-input::before, .data-input::after {
+    content: '';
+    margin-right: 0.5rem;
   }
 </style>
