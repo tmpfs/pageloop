@@ -2,11 +2,13 @@
   <footer>
     <!--<p class="log" v-bind:class="{error: error}">{{prefix}}{{message}}</p>-->
     <nav>
+      <!--<a></a>-->
       <a
         class="reset"
         :class="{hidden: !canReset, disabled: !needsReset}"
         @click="reset"
         title="Reset columns"></a>
+
     </nav>
   </footer>
 </template>

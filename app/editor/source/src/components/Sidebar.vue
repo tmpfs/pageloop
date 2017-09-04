@@ -137,10 +137,6 @@ export default {
 </script>
 
 <style>
-  .files-list a, .pages-list a {
-    color: currentColor;
-  }
-
   .page, .file {
     display: block;
     padding: .2rem 0 .2rem 1rem;
@@ -155,6 +151,14 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+  }
+
+  .files-list a, .pages-list a {
+    color: currentColor;
+  }
+
+  .files-list a:hover, .pages-list a:hover {
+    color: var(--base2-color);
   }
 
   .file.selected, .page.selected {
