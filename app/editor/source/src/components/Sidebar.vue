@@ -34,7 +34,12 @@
           title="Show media files">Media</a>
       </nav>
     </div>
-    <div class="scroll">
+    <div
+      class="scroll"
+      @drop="drop"
+      @dragover="noop"
+      @dragend="noop"
+      @dragleave="noop">
       <component v-bind:is="currentView"></component>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
@@ -114,6 +119,17 @@ export default {
     },
     resizeColumn: function (e) {
       this.$store.dispatch('resize-column', e)
+    },
+    drop: function (e) {
+      e.preventDefault()
+      // console.log('drop called')
+      console.log(e.dataTransfer.files)
+      return false
+    },
+    noop: function (e) {
+      e.preventDefault()
+      // console.log('noop called')
+      return false
     }
   },
   components: {NewFile, Pages, Files, Media}
