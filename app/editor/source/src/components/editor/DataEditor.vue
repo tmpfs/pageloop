@@ -68,6 +68,7 @@ export default {
     list-style-type: none;
     padding-left: 1rem;
     padding: 0;
+    margin: 0;
     width: 100%;
   }
 
@@ -106,7 +107,6 @@ export default {
     background: var(--base03-color);
     border-radius: 0.3rem;
     color: var(--base1-color);
-    margin: 0.1rem 0;
   }
 
   .data-input::before, .data-input::after {

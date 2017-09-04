@@ -143,7 +143,7 @@ export default {
 
   .page, .file {
     display: block;
-    padding: .2rem 0 .2rem 2rem;
+    padding: .2rem 0 .2rem 1rem;
     cursor: pointer;
     user-select: none;
     background: transparent;
