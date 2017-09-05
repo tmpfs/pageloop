@@ -37,9 +37,9 @@
     <div
       class="scroll"
       @drop="drop"
-      @dragover="noop"
-      @dragend="noop"
-      @dragleave="noop">
+      @dragover="dragover"
+      @dragend="dragleave"
+      @dragleave="dragleave">
       <div class="uploads" :class="{hidden: !transfers.length}">
         <div class="upload" v-for="file in transfers">
           <div class="info">
@@ -158,9 +158,15 @@ export default {
         })
       return false
     },
-    noop: function (e) {
+    dragover: function (e) {
       e.preventDefault()
-      // console.log('noop called')
+      e.currentTarget.classList.add('droptarget')
+      return false
+    },
+    dragleave: function (e) {
+      e.preventDefault()
+      console.log(e.currentTarget)
+      e.currentTarget.classList.remove('droptarget')
       return false
     }
   },
@@ -176,6 +182,7 @@ export default {
     user-select: none;
     background: transparent;
     transition: all 0.3s ease-out;
+    border-top: 1px solid transparent;
   }
 
   .page, .file {
@@ -237,5 +244,17 @@ export default {
 
   .percent {
     margin-left: auto;
+  }
+
+</style>
+
+<style scoped>
+  .scroll {
+    border-top: 1px solid transparent;
+    transition: all 0.3s ease-out;
+  }
+
+  .scroll.droptarget {
+    border-top: 1px solid var(--base2-color);
   }
 </style>

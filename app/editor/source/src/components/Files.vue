@@ -2,6 +2,8 @@
   <div class="files-list">
     <a
       @click="click(item)"
+      @dragover="dragover"
+      @dragleave="dragleave"
       :data-dir="item.dir ? item.url : ''"
       class="file"
       :class="{selected: currentFile.url === item.url, uploader: item.dir}"
@@ -25,10 +27,31 @@ export default {
   methods: {
     click: function (item) {
       return this.$store.dispatch('go-file', item)
+    },
+    dragover: function (e) {
+      if (!e.currentTarget.getAttribute('data-dir')) {
+        return
+      }
+      e.preventDefault()
+      e.stopImmediatePropagation()
+      e.currentTarget.classList.add('droptarget')
+      return false
+    },
+    dragleave: function (e) {
+      if (!e.currentTarget.getAttribute('data-dir')) {
+        return
+      }
+      e.preventDefault()
+      e.stopImmediatePropagation()
+      e.currentTarget.classList.remove('droptarget')
+      return false
     }
   }
 }
 </script>
 
 <style scoped>
+  .droptarget {
+    border-top: 1px solid var(--base2-color);
+  }
 </style>
