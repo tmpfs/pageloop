@@ -367,7 +367,6 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
 
   // Lookup template file
   if !isDir && ct == JSON_MIME {
-    // TODO: fix empty reply when there is no request body
     // TODO: stream request body to disc
     if content, err = readBody(req); err != nil {
       ex(res, http.StatusInternalServerError, nil, err)
@@ -393,6 +392,13 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
     }
 
     content = file.Source(true)
+  } else {
+    // TODO: stream request body to disc
+    // Read in as file content upload
+    if content, err = readBody(req); err != nil {
+      ex(res, http.StatusInternalServerError, nil, err)
+      return
+    }
   }
 
   // Update the application model

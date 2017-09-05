@@ -122,10 +122,7 @@ class State {
   }
 
   upload () {
-    console.log('state upload called: ' + this.transfers.length)
     if (this.transfers.length) {
-      console.log('state uploading files...')
-      console.log(this.transfers)
       return this.client.upload(this.transfers[0])
     }
   }

@@ -124,6 +124,13 @@ export default {
       e.preventDefault()
       const opts = {files: e.dataTransfer.files}
       this.$store.dispatch('upload', opts)
+        .then(() => {
+          console.log('Sidebar upload completed...')
+        })
+        .catch((e) => {
+          console.log('Sidebar upload failed')
+          console.error(e)
+        })
       return false
     },
     noop: function (e) {
