@@ -262,6 +262,10 @@ function Actions (router) {
             context.commit('preview-url', file.uri)
           }
         })
+    },
+    'upload': function (context, info) {
+      context.commit('transfers', info)
+      return context.state.upload(info.files)
     }
   }
 }

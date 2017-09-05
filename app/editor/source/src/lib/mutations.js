@@ -78,6 +78,18 @@ const Mutations = {
   },
   'alert-hide': function (state, details) {
     state.alert.visible = false
+  },
+  'transfers': function (state, {files, dir}) {
+    if (dir) {
+      files.forEach((f) => {
+        f.dir = dir
+      })
+    }
+    console.log('Got files list length: ' + files.length)
+    const list = Array.prototype.slice.call(files)
+    console.log(list)
+    console.log('Got files list length: ' + Array.isArray(files))
+    state.transfers = state.transfers.concat(list)
   }
 }
 

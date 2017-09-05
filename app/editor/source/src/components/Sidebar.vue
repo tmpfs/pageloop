@@ -122,8 +122,8 @@ export default {
     },
     drop: function (e) {
       e.preventDefault()
-      // console.log('drop called')
-      console.log(e.dataTransfer.files)
+      const opts = {files: e.dataTransfer.files}
+      this.$store.dispatch('upload', opts)
       return false
     },
     noop: function (e) {

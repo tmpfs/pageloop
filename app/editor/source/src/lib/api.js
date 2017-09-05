@@ -8,6 +8,61 @@ class ApiClient {
     this.raw = `/apps/raw/${container}/${application}`
   }
 
+  upload (file) {
+    console.log('api client upload...')
+
+    const resolve = () => {
+      let u = this.url
+
+      if (file.dir) {
+        u += file.dir
+      }
+
+      u += file.name
+
+      console.log('Upload URL: ' + u)
+
+      // Need to use XHR for upload progress :(
+      let xhr = new XMLHttpRequest()
+      xhr.open('PUT', u, true)
+
+      /*
+      xhr.onreadystatechange = function () {
+        console.log('state change: ')
+        console.log(this)
+
+        if (this.readyState === 4) {
+          console.log('status: ' + this.status)
+        }
+      }
+      */
+
+      xhr.onload = function (e) {
+        console.log('loaded...')
+        console.log(this)
+
+        if (this.status !== 201) {
+          console.log('upload failed')
+          const doc = JSON.parse(this.responseText)
+          return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
+        }
+      }
+
+      xhr.onerror = function (err) {
+        reject(err)
+      }
+
+      xhr.send(file)
+    }
+
+    const reject = (e) => {
+      console.log('reject called...')
+      throw e
+    }
+
+    return new Promise(resolve, reject)
+  }
+
   json (url, options) {
     return fetch(url, options)
       .then((res) => res.json())

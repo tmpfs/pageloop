@@ -116,6 +116,18 @@ class State {
     }
 
     this.client = this.defaultClient
+
+    // File upload transfers
+    this.transfers = []
+  }
+
+  upload () {
+    console.log('state upload called: ' + this.transfers.length)
+    if (this.transfers.length) {
+      console.log('state uploading files...')
+      console.log(this.transfers)
+      return this.client.upload(this.transfers[0])
+    }
   }
 
   setApplication (container, application) {
