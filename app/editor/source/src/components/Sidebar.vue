@@ -138,11 +138,17 @@ export default {
     drop: function (e) {
       e.preventDefault()
 
-      // Remove droptarget highlights
-      const targets = document.querySelectorAll('.droptarget')
+      // Remove drop-target highlights
+      const targets = document.querySelectorAll('.drop-target, .drop-disabled')
       targets.forEach((n) => {
-        n.classList.remove('droptarget')
+        n.classList.remove('drop-target')
+        n.classList.remove('drop-disabled')
       })
+
+      // We only accept file transfers
+      if (!e.dataTransfer.files.length) {
+        return false
+      }
 
       // Check if drop occured on a directory
       let dir
@@ -205,12 +211,17 @@ export default {
     },
     dragover: function (e) {
       e.preventDefault()
-      e.currentTarget.classList.add('droptarget')
+      if (e.dataTransfer.files.length) {
+        e.currentTarget.classList.add('drop-target')
+      } else {
+        e.currentTarget.classList.add('drop-disabled')
+      }
       return false
     },
     dragleave: function (e) {
       e.preventDefault()
-      e.currentTarget.classList.remove('droptarget')
+      e.currentTarget.classList.remove('drop-target')
+      e.currentTarget.classList.remove('drop-disabled')
       return false
     }
   },
@@ -298,7 +309,11 @@ export default {
     transition: all 0.3s ease-out;
   }
 
-  .scroll.droptarget {
+  .scroll.drop-target {
     border-top: 1px solid var(--base2-color);
+  }
+
+  .scroll.drop-disabled {
+    cursor: no-drop;
   }
 </style>

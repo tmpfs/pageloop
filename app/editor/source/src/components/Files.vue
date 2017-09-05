@@ -34,7 +34,11 @@ export default {
       }
       e.preventDefault()
       e.stopImmediatePropagation()
-      e.currentTarget.classList.add('droptarget')
+      if (e.dataTransfer.files.length) {
+        e.currentTarget.classList.add('drop-target')
+      } else {
+        e.currentTarget.classList.add('drop-disabled')
+      }
       return false
     },
     dragleave: function (e) {
@@ -43,7 +47,8 @@ export default {
       }
       e.preventDefault()
       e.stopImmediatePropagation()
-      e.currentTarget.classList.remove('droptarget')
+      e.currentTarget.classList.remove('drop-target')
+      e.currentTarget.classList.remove('drop-disabled')
       return false
     }
   }
@@ -51,7 +56,11 @@ export default {
 </script>
 
 <style scoped>
-  .droptarget {
+  .drop-target {
     border-top: 1px solid var(--base2-color);
+  }
+
+  .drop-disabled {
+    cursor: no-drop;
   }
 </style>
