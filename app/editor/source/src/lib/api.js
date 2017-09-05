@@ -10,15 +10,21 @@ class ApiClient {
 
   upload (file) {
     return new Promise((resolve, reject) => {
-      let u = this.url
-
-      if (file.dir) {
-        u += file.dir
+      let u = this.url + 'files'
+      let dir = file.dir
+      console.log('api client upload dir: ' + dir)
+      console.log(file)
+      if (dir) {
+        u += dir
       }
 
-      // This is used to simulate a 405 response
-      // u += file.name
-      u += 'files/' + file.upload.name
+      if (!/\/$/.test(u)) {
+        u += '/'
+      }
+
+      u += file.name
+
+      console.log('Upload url: ' + u)
 
       // Need to use XHR for upload progress :(
       let xhr = new XMLHttpRequest()

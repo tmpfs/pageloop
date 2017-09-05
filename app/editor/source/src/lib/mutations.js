@@ -81,6 +81,7 @@ const Mutations = {
   },
   'transfers': function (state, {files, dir}) {
     let i, f
+    console.log('mutations dir: ' + dir)
     const list = []
     for (i = 0; i < files.length; i++) {
       f = files[i]
@@ -89,9 +90,9 @@ const Mutations = {
         size: f.size,
         upload: f,
         complete: false,
+        dir: dir || '',
         info: {
-          ratio: 0,
-          dir: dir
+          ratio: 0
         }
       })
     }

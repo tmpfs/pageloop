@@ -1,6 +1,10 @@
 <template>
   <div class="pages-list">
-    <a @click="click(item)" class="page" :class="{selected: currentFile.url === item.url}" v-for="item in list">
+    <a
+      @click="click(item)"
+      class="page"
+      :class="{selected: currentFile.url === item.url, uploader: item.dir}"
+      v-for="item in list">
       <span class="name">{{item.url}}</span>
     </a>
   </div>

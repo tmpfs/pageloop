@@ -137,7 +137,18 @@ export default {
     },
     drop: function (e) {
       e.preventDefault()
-      const opts = {files: e.dataTransfer.files}
+
+      // Check if drop occured on a directory
+      let dir
+      if (e.target) {
+        dir = e.target.getAttribute('data-dir')
+        if (!dir && e.target.parentElement && ~e.target.parentElement.className.indexOf('uploader')) {
+          dir = e.target.parentElement.getAttribute('data-dir')
+        }
+      }
+
+      // Start the file upload
+      const opts = {files: e.dataTransfer.files, dir: dir}
       this.$store.dispatch('upload', opts)
         .then(() => {
           console.log('Sidebar upload completed...')
@@ -185,6 +196,8 @@ export default {
   .file.selected, .page.selected {
     background: var(--base03-color);
     color: var(--base3-color);
+    /* Need pointer events for file drag / drop */
+    pointer-events: auto;
   }
 
   .uploads {
@@ -220,5 +233,9 @@ export default {
 
   .upload > .progress.complete {
     background: var(--green-color);
+  }
+
+  .percent {
+    margin-left: auto;
   }
 </style>

@@ -108,3 +108,4 @@ Wow, so much to do, here is some stuff:
 38) Live markdown compilation on the client to update the preview area.
 39) Sort file lists client side to match server listing?
 40) Do not reload the entire pages/file lists on add, update, move etc.
+41) Do not open binary files in source code editor
