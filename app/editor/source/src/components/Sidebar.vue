@@ -40,10 +40,14 @@
       @dragover="noop"
       @dragend="noop"
       @dragleave="noop">
-      <div class="uploads">
+      <div class="uploads" :class="{hidden: !transfers.length}">
         <div class="upload" v-for="file in transfers">
-          <span>Uploading {{file.name}} ({{file.size}} bytes)</span>
-          <span class="progress" :style="progress(file)">&nbsp;</span>
+          <div class="info">
+            <span v-if="!file.complete">Uploading {{file.name}}</span>
+            <span class="percent" v-if="!file.complete">{{Math.round(file.info.ratio * 100)}}%</span>
+            <span class="complete" v-if="file.complete">Uploaded {{file.name}}</span>
+          </div>
+          <div class="progress" :class="{complete: file.complete}" :style="progress(file)"></div>
         </div>
       </div>
       <component v-bind:is="currentView"></component>
@@ -193,12 +197,28 @@ export default {
   .upload {
     padding: 0 1rem;
     height: 2.8rem;
+    overflow: hidden;
+  }
+
+  .upload > .info {
+    display: flex;
+  }
+
+  .upload .percent {
+    align-self: flex-end;
+  }
+
+  .upload .complete {
+    color: var(--green-color);
   }
 
   .upload > .progress {
-    display: block;
     height: 0.6rem;
     width: 100%;
+    background: var(--cyan-color);
+  }
+
+  .upload > .progress.complete {
     background: var(--green-color);
   }
 </style>

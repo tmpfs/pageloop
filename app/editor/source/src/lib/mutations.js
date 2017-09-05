@@ -81,15 +81,20 @@ const Mutations = {
   },
   'transfers': function (state, {files, dir}) {
     let i, f
+    const list = []
     for (i = 0; i < files.length; i++) {
       f = files[i]
-      // Inject into File, we should find a better way :(
-      f.info = {
-        ratio: 0,
-        dir: dir
-      }
+      list.push({
+        name: f.name,
+        size: f.size,
+        upload: f,
+        complete: false,
+        info: {
+          ratio: 0,
+          dir: dir
+        }
+      })
     }
-    const list = Array.prototype.slice.call(files)
     state.transfers = state.transfers.concat(list)
   }
 }

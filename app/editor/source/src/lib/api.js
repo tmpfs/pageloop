@@ -18,7 +18,7 @@ class ApiClient {
 
       // This is used to simulate a 405 response
       // u += file.name
-      u += 'files/' + file.name
+      u += 'files/' + file.upload.name
 
       // Need to use XHR for upload progress :(
       let xhr = new XMLHttpRequest()
@@ -36,6 +36,7 @@ class ApiClient {
           const doc = JSON.parse(this.responseText)
           return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
         }
+        file.complete = true
         resolve(file)
       }
 
@@ -43,7 +44,7 @@ class ApiClient {
         reject(err)
       }
 
-      xhr.send(file)
+      xhr.send(file.upload)
     })
   }
 

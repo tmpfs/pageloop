@@ -121,7 +121,7 @@ class State {
     this.transfers = []
 
     this.concurrentTransfers = 3
-    this.currentTransfer = null
+    this.currentTransfer = []
   }
 
   upload () {
@@ -149,18 +149,25 @@ class State {
             this.client.upload(file)
               .then(() => {
                 loaded++
-                if (loaded === chunk.length) {
-                  // More chunks to process
-                  if (chunks.length) {
-                    this.currentTransfer = chunks.shift()
-                    transfer(this.currentTransfer)
-                  // All done, upload completed
-                  } else {
-                    this.currentTransfer = []
-                    this.transfers = []
-                    resolve()
+
+                // Set a timeout before completion so
+                // progress preloaders are visible on fast
+                // uploads
+                setTimeout(() => {
+                  if (loaded === chunk.length) {
+                    // More chunks to process
+                    if (chunks.length) {
+                      this.currentTransfer = chunks.shift()
+                      transfer(this.currentTransfer)
+                    // All done, upload completed
+                    } else {
+                      this.currentTransfer = []
+                      this.transfers = []
+                      console.log('calling resolve!!!')
+                      resolve()
+                    }
                   }
-                }
+                }, 3000)
               })
               .catch(reject)
           })
