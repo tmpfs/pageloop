@@ -12,8 +12,6 @@ class ApiClient {
     return new Promise((resolve, reject) => {
       let u = this.url + 'files'
       let dir = file.dir
-      console.log('api client upload dir: ' + dir)
-      console.log(file)
       if (dir) {
         u += dir
       }
@@ -26,9 +24,15 @@ class ApiClient {
 
       console.log('Upload url: ' + u)
 
+      const method = file.exists ? 'POST' : 'PUT'
+
       // Need to use XHR for upload progress :(
       let xhr = new XMLHttpRequest()
-      xhr.open('PUT', u, true)
+      xhr.open(method, u, true)
+
+      if (file.exists) {
+        xhr.setRequestHeader('Content-Type', file.exists.mime)
+      }
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -38,7 +42,7 @@ class ApiClient {
       }
 
       xhr.onload = function (e) {
-        if (this.status !== 201) {
+        if (this.status !== 201 && this.status !== 200) {
           const doc = JSON.parse(this.responseText)
           return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
         }

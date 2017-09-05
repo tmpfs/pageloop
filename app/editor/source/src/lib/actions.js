@@ -265,11 +265,41 @@ function Actions (router) {
     },
     'upload': function (context, info) {
       context.commit('transfers', info)
-      return context.state.upload(info.files)
-        .then(() => {
-          // Reload file list for the moment
-          return context.dispatch('reload')
+
+      const existing = context.state.transfers.filter((f) => {
+        return f.exists
+      }).map((f) => {
+        return f.exists
+      })
+
+      console.log(existing)
+
+      function upload () {
+        return context.state.upload(info.files)
+          .then(() => {
+            // Reload file list for the moment
+            return context.dispatch('reload')
+          })
+      }
+
+      if (existing.length) {
+        let details = {
+          title: `Overwrite`,
+          message: `Are you sure you want to overwrite files on upload?`,
+          note: '',
+          ok: () => {
+            return upload()
+          }
+        }
+
+        existing.forEach((f) => {
+          details.note += f.url + '\n'
         })
+
+        return context.commit('alert-show', details)
+      }
+
+      return upload()
     }
   }
 }

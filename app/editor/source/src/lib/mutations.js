@@ -80,17 +80,28 @@ const Mutations = {
     state.alert.visible = false
   },
   'transfers': function (state, {files, dir}) {
-    let i, f
-    console.log('mutations dir: ' + dir)
+    let i, f, j, url, exists
     const list = []
     for (i = 0; i < files.length; i++) {
       f = files[i]
+      if (!dir) {
+        url = '/' + f.name
+      } else {
+        url = dir + '/' + f.name
+      }
+      for (j = 0; j < state.app.files.length; j++) {
+        if (state.app.files[j].url === url) {
+          exists = state.app.files[j]
+          break
+        }
+      }
       list.push({
         name: f.name,
         size: f.size,
         upload: f,
         complete: false,
         dir: dir || '',
+        exists: exists,
         info: {
           ratio: 0
         }

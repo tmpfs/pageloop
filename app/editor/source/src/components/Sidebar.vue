@@ -138,11 +138,18 @@ export default {
     drop: function (e) {
       e.preventDefault()
 
+      // Remove droptarget highlights
+      const targets = document.querySelectorAll('.droptarget')
+      targets.forEach((n) => {
+        n.classList.remove('droptarget')
+      })
+
       // Check if drop occured on a directory
       let dir
       if (e.target) {
         dir = e.target.getAttribute('data-dir')
-        if (!dir && e.target.parentElement && ~e.target.parentElement.className.indexOf('uploader')) {
+        // TOOD: handle deeply nested children in files list
+        if (!dir && e.target.parentElement && e.target.parentElement.getAttribute('data-dir')) {
           dir = e.target.parentElement.getAttribute('data-dir')
         }
       }
