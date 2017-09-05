@@ -241,18 +241,6 @@ export default {
     color: var(--base3-color);
   }
 
-  h3 {
-    font-size: 1.4rem;
-    text-transform: none;
-    border: 0;
-    padding: 0;
-    margin: 0 0 0 1rem;
-  }
-
-  .editor h3 {
-    width: 50%;
-  }
-
   .tabs {
     display: flex;
     flex-direction: row;
@@ -288,6 +276,20 @@ export default {
 
 <style scoped>
   /* Editor scoped styles */
+
+  h3 {
+    font-size: 1.4rem;
+    text-transform: none;
+    border: 0;
+    padding: 0;
+    margin: 0 0 0 1rem;
+  }
+
+  .editor h3 {
+    width: 50%;
+  }
+
+
   .editor > .column-header .tabs > a, .preview > .column-header .tabs > a {
     border-left: 1px solid var(--border-color);
   }

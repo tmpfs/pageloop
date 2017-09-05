@@ -2,6 +2,29 @@
   <div class="file-editor">
     <div class="scroll panel">
       <h2 class="file-info"><span v-bind:class="{hidden: !file.dir}">🗀</span><span v-bind:class="{hidden: file.dir}">🗎</span>&nbsp;{{file.name}}</h2>
+
+      <section v-if="file.dir">
+        <h3>Transfer Files</h3>
+        <div
+          class="uploader">
+          <input type="file" multiple name="files" value="files" @change="change" />
+          <div
+            class="file-upload-input">
+            <p>Tap to select files or drag files here to upload</p>
+          </div>
+          <ul>
+            <li v-for="file in files">
+              <span>{{file.name}}</span>
+            </li>
+          </ul>
+          <div class="form-actions">
+            <input
+              @click="resetFiles"
+              type="reset" name="Reset" value="Reset" :class="{hidden: !files.length}" />
+            <input type="submit" name="Upload" value="Upload" class="primary" :class="{disabled: !files.length}" />
+          </div>
+        </div>
+      </section>
       <section>
         <h3>Rename File</h3>
         <p>Choose a new name for your file.</p>
@@ -52,7 +75,8 @@ export default {
   data: function () {
     return {
       confirmDelete: false,
-      newName: ''
+      newName: '',
+      files: []
     }
   },
   computed: {
@@ -72,6 +96,36 @@ export default {
     doDelete: function () {
       this.confirmDelete = false
       return this.$store.dispatch('delete-file', this.file)
+    },
+    change: function (e) {
+      console.log(e)
+      this.files = e.target.files
+    },
+    drop: function (e) {
+      e.preventDefault()
+
+      console.log('file editor drop')
+
+      // Remove drop-target highlights
+      const targets = document.querySelectorAll('.drop-target')
+      targets.forEach((n) => {
+        n.classList.remove('drop-target')
+      })
+
+      // We only accept file transfers
+      if (!e.dataTransfer.files.length) {
+        return false
+      }
+
+      console.log(this.$parent.$parent.transfer)
+
+      // this.$parent.transfer(e)
+
+      return false
+    },
+    resetFiles: function (e) {
+      e.preventDefault()
+      this.files = []
     }
   },
   watch: {
@@ -85,5 +139,35 @@ export default {
 <style scoped>
   .file-editor {
     height: 100%;
+  }
+
+  .uploader {
+    position: relative;
+  }
+
+  input[type="file"], .file-upload-input {
+    width: 100%;
+    height: 8.2rem;
+    opacity: 0;
+  }
+
+  .file-upload-input {
+    opacity: 1;
+    background: var(--base03-color);
+    padding: 2rem;
+    border-radius: 0.6rem;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .input[type="file"]:hover + .file-upload-input {
+    color: var(--base3-color);
+  }
+
+  .file-upload-input * {
+    pointer-events: none;
   }
 </style>

@@ -154,7 +154,6 @@ export default {
       return false
     },
     dragover: function (e) {
-      console.log('dragover')
       e.preventDefault()
       e.currentTarget.classList.add('drop-target')
       return false
@@ -202,6 +201,18 @@ export default {
     pointer-events: auto;
   }
 
+</style>
+
+<style scoped>
+  .scroll {
+    border-top: 1px solid transparent;
+    transition: all 0.3s ease-out;
+  }
+
+  .scroll.drop-target {
+    border-top: 1px solid var(--base2-color);
+  }
+
   .uploads {
     border-bottom: 1px solid var(--border);
     font-size: 1.4rem;
@@ -241,16 +252,5 @@ export default {
     margin-left: auto;
   }
 
-</style>
-
-<style scoped>
-  .scroll {
-    border-top: 1px solid transparent;
-    transition: all 0.3s ease-out;
-  }
-
-  .scroll.drop-target {
-    border-top: 1px solid var(--base2-color);
-  }
 
 </style>
