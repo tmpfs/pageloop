@@ -1,9 +1,10 @@
 <template>
   <div class="pages-list">
     <a
-      @click="click(item)"
+      @click="click($event, item)"
       class="page"
-      :class="{selected: currentFile.url === item.url}"
+      :data-url="item.url"
+      :class="{selected: ~selection.indexOf(item)}"
       v-for="item in list">
       <span class="name">{{item.url}}</span>
     </a>
@@ -11,19 +12,23 @@
 </template>
 
 <script>
+
+import SelectableFileList from './SelectableFileList'
+
 export default {
   name: 'pages',
+  mixins: [SelectableFileList],
   computed: {
-    currentFile: function () {
-      return this.$store.state.app.current
-    },
     list: function () {
       return this.$store.state.app.pages
     }
   },
   methods: {
-    click: function (item) {
+    go: function (item) {
       return this.$store.dispatch('go-page', item)
+    },
+    getSelectionByUrl: function (url) {
+      return this.$store.state.app.getPageByUrl(url)
     }
   }
 }

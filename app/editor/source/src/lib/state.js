@@ -2,6 +2,37 @@ import Log from './log'
 import ColumnManager from './columns'
 import ApiClient from './api'
 
+class Application {
+  constructor () {
+    this.defaultFile = {content: ''}
+    this.url = ''
+    this.identifier = ''
+    this.owner = ''
+    this.pages = []
+    this.files = []
+    // current selected file
+    this.current = this.defaultFile
+  }
+
+  getFileByUrl (url) {
+    let i
+    for (i = 0; i < this.files.length; i++) {
+      if (this.files[i].url === url) {
+        return this.files[i]
+      }
+    }
+  }
+
+  getPageByUrl (url) {
+    let i
+    for (i = 0; i < this.pages.length; i++) {
+      if (this.pages[i].url === url) {
+        return this.pages[i]
+      }
+    }
+  }
+}
+
 class State {
   constructor () {
     this.client = this.defaultClient = new ApiClient()
@@ -12,8 +43,6 @@ class State {
     this.sidebarView = ''
     this.editorView = ''
     this.defaultEditorView = 'code-editor'
-
-    this.defaultFile = {content: ''}
 
     this.previewUrl = ''
     this.previewRefresh = false
@@ -105,15 +134,7 @@ class State {
     this.application = ''
 
     // current application
-    this.app = {
-      url: '',
-      identifier: '',
-      owner: '',
-      pages: [],
-      files: [],
-      // current selected file
-      current: this.defaultFile
-    }
+    this.app = new Application()
 
     this.client = this.defaultClient
 
@@ -202,6 +223,9 @@ class State {
           break
         }
       }
+    }
+    if (!file) {
+      file = this.app.defaultFile
     }
     this.app.current = file
   }

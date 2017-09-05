@@ -80,7 +80,7 @@ const Mutations = {
     state.alert.visible = false
   },
   'transfers': function (state, {files, dir}) {
-    let i, f, j, url, exists
+    let i, f, url, exists
     const list = []
     for (i = 0; i < files.length; i++) {
       f = files[i]
@@ -89,12 +89,7 @@ const Mutations = {
       } else {
         url = dir + '/' + f.name
       }
-      for (j = 0; j < state.app.files.length; j++) {
-        if (state.app.files[j].url === url) {
-          exists = state.app.files[j]
-          break
-        }
-      }
+      exists = state.app.getFileByUrl(url)
       list.push({
         name: f.name,
         size: f.size,
