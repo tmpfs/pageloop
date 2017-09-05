@@ -154,15 +154,50 @@ export default {
         }
       }
 
-      // Start the file upload
-      const opts = {files: e.dataTransfer.files, dir: dir}
-      this.$store.dispatch('upload', opts)
-        .then(() => {
-          console.log('Sidebar upload completed...')
+      const info = {files: e.dataTransfer.files, dir: dir}
+      const state = this.$store.state
+
+      // Set up file transfer data
+      this.$store.commit('transfers', info)
+
+      const upload = () => {
+        // Start the file upload
+        this.$store.dispatch('upload', info)
+          .then(() => {
+            console.log('Sidebar upload completed...')
+          })
+          .catch((e) => {
+            state.notify({error: e})
+          })
+      }
+
+      // Check for existing files which need POST
+      const existing = state.transfers.filter((f) => {
+        return f.exists
+      }).map((f) => {
+        return f.exists
+      })
+
+      if (existing.length) {
+        let details = {
+          title: `Overwrite`,
+          message: `Are you sure you want to overwrite files on upload?`,
+          note: '',
+          ok: () => {
+            return upload()
+          }
+        }
+
+        existing.forEach((f) => {
+          details.note += f.url + '\n'
         })
-        .catch((e) => {
-          this.$store.state.notify({error: e})
-        })
+
+        return this.$store.commit('alert-show', details)
+      }
+
+      // All new files - upload them
+      upload()
+
       return false
     },
     dragover: function (e) {
@@ -172,7 +207,6 @@ export default {
     },
     dragleave: function (e) {
       e.preventDefault()
-      console.log(e.currentTarget)
       e.currentTarget.classList.remove('droptarget')
       return false
     }

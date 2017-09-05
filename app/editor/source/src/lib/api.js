@@ -22,8 +22,6 @@ class ApiClient {
 
       u += file.name
 
-      console.log('Upload url: ' + u)
-
       const method = file.exists ? 'POST' : 'PUT'
 
       // Need to use XHR for upload progress :(
