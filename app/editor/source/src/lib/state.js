@@ -126,11 +126,8 @@ class State {
 
   upload () {
     if (this.transfers.length) {
-      this.currentTransfer = [this.transfers[0]]
-
-      let amount = this.transfers.length / this.concurrentTransfers
-      if (this.transfers.length > this.concurrentTransfers &&
-          this.transfers.length % this.concurrentTransfers !== 0) {
+      let amount = Math.floor(this.transfers.length / this.concurrentTransfers)
+      if (this.transfers.length % this.concurrentTransfers !== 0) {
         amount++
       }
 
@@ -142,39 +139,37 @@ class State {
         chunks.push(this.transfers.slice(ind, len))
       }
 
-      const transfer = (chunk) => {
+      // Transfer a single chunk
+      const transfer = (chunk, done) => {
         return new Promise((resolve, reject) => {
           let loaded = 0
           chunk.forEach((file) => {
-            this.client.upload(file)
-              .then(() => {
-                loaded++
-
-                // Set a timeout before completion so
-                // progress preloaders are visible on fast
-                // uploads
-                setTimeout(() => {
-                  if (loaded === chunk.length) {
-                    // More chunks to process
-                    if (chunks.length) {
-                      this.currentTransfer = chunks.shift()
-                      transfer(this.currentTransfer)
-                    // All done, upload completed
-                    } else {
-                      this.currentTransfer = []
-                      this.transfers = []
-                      console.log('calling resolve!!!')
-                      resolve()
-                    }
-                  }
-                }, 3000)
-              })
-              .catch(reject)
+            this.client.upload(file).then((file) => {
+              loaded++
+              if (loaded === chunk.length) {
+                // Process next chunk
+                if (chunks.length) {
+                  this.currentTransfer = chunks.shift()
+                  resolve(transfer(this.currentTransfer, done))
+                // All done, upload completed
+                } else {
+                  done(this.transfers)
+                }
+              }
+            })
+            .catch(reject)
           })
         })
       }
       this.currentTransfer = chunks.shift()
-      return transfer(this.currentTransfer)
+      return new Promise((resolve, reject) => {
+        transfer(this.currentTransfer, (files) => {
+          this.transfers = []
+          this.currentTransfer = []
+          resolve(files)
+        })
+        .catch(reject)
+      })
     }
   }
 

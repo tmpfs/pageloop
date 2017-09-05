@@ -107,8 +107,6 @@ export default {
   },
   methods: {
     progress: function (file) {
-      console.log('Calculating file progress: ' + file.info.ratio)
-      console.log(file)
       return `width: ${Math.round(file.info.ratio * 100)}%`
     },
     confirmDelete: function () {
@@ -123,6 +121,7 @@ export default {
       this.$store.commit('alert-show', details)
     },
     doDeleteFile: function () {
+      // TODO: notify on error
       return this.$store.dispatch('delete-file', this.currentFile)
         .catch((e) => console.error(e))
     },
@@ -202,10 +201,11 @@ export default {
 
   .upload > .info {
     display: flex;
+    justify-content: flex-end;
   }
 
-  .upload .percent {
-    align-self: flex-end;
+  .upload > .info:first-child {
+    align-self: flex-start;
   }
 
   .upload .complete {

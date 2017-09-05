@@ -106,3 +106,5 @@ Wow, so much to do, here is some stuff:
 37) Set default stylesheet for markdown documents with no layout, looks pretty ugly
     using the default user agent stylesheet :(
 38) Live markdown compilation on the client to update the preview area.
+39) Sort file lists client side to match server listing?
+40) Do not reload the entire pages/file lists on add, update, move etc.

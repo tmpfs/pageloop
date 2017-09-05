@@ -37,7 +37,13 @@ class ApiClient {
           return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
         }
         file.complete = true
-        resolve(file)
+
+        // Set a timeout before completion so
+        // progress preloaders are visible on fast
+        // uploads
+        setTimeout(() => {
+          resolve(file)
+        }, 3000)
       }
 
       xhr.onerror = function (err) {
