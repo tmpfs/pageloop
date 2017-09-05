@@ -31,7 +31,7 @@
             name="Upload"
             value="Upload"
             class="primary"
-            :class="{disabled: !files.length}" />
+            :class="{disabled: !files.length || transfers.length}" />
         </div>
       </section>
       <section>
@@ -91,10 +91,16 @@ export default {
   computed: {
     file: function () {
       return this.$store.state.current
+    },
+    transfers: function () {
+      return this.$store.state.transfers
     }
   },
   created: function () {
     this.newName = this.file.url
+  },
+  mounted: function () {
+    this.syncHeight()
   },
   methods: {
     rename: function (e) {
@@ -110,6 +116,9 @@ export default {
       setTimeout(() => {
         let mask = this.$el.querySelector('.file-upload-input')
         let input = this.$el.querySelector('input[type="file"]')
+        if (!mask) {
+          return
+        }
         let b = mask.getBoundingClientRect()
         let h = b.bottom - b.top
         input.setAttribute('style', `height: ${h}px`)
@@ -151,7 +160,6 @@ export default {
   input[type="file"], .file-upload-input {
     position: relative;
     width: 100%;
-    min-height: 8.2rem;
     opacity: 0;
   }
 

@@ -168,7 +168,11 @@ class State {
           this.currentTransfer = []
           resolve(files)
         })
-        .catch(reject)
+        .catch((err) => {
+          this.transfers = []
+          this.currentTransfer = []
+          reject(err)
+        })
       })
     }
   }

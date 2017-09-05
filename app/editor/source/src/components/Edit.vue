@@ -28,12 +28,16 @@ export default {
         // Start the file upload
         this.$store.dispatch('upload', info)
           .then((transfers) => {
-            let names = transfers.map((f) => {
+            let names = transfers.filter((f) => {
+              return f.handle
+            }).map((f) => {
               return f.handle.url
-            }).join(' ')
+            })
+            names = names.join(' ')
             state.notify({title: `Transfer Complete (${info.files.length})`, message: `Uploaded ${names}`})
           })
           .catch((e) => {
+            console.error(e)
             state.notify({error: e})
           })
       }
