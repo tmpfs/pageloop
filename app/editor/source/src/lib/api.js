@@ -9,54 +9,42 @@ class ApiClient {
   }
 
   upload (file) {
-    console.log('api client upload...')
+    return new Promise((resolve, reject) => {
+      let u = this.url
 
-    const resolve = () => {
-    }
-
-    const reject = (e) => {
-      throw e
-    }
-
-    let u = this.url
-
-    if (file.dir) {
-      u += file.dir
-    }
-
-    u += 'files/' + file.name
-
-    // console.log('Upload URL: ' + u)
-
-    // Need to use XHR for upload progress :(
-    let xhr = new XMLHttpRequest()
-    xhr.open('PUT', u, true)
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        let ratio = (e.loaded / e.total)
-        console.log('upload progress: ' + ratio)
-        file.progress = {ratio: ratio}
+      if (file.dir) {
+        u += file.dir
       }
-    }
 
-    xhr.onload = function (e) {
-      if (this.status !== 201) {
-        const doc = JSON.parse(this.responseText)
-        return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
+      // This is used to simulate a 405 response
+      // u += file.name
+      u += 'files/' + file.name
+
+      // Need to use XHR for upload progress :(
+      let xhr = new XMLHttpRequest()
+      xhr.open('PUT', u, true)
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          let ratio = (e.loaded / e.total)
+          file.progress = {ratio: ratio}
+        }
       }
-      resolve(file)
-    }
 
-    xhr.onerror = function (err) {
-      reject(err)
-    }
+      xhr.onload = function (e) {
+        if (this.status !== 201) {
+          const doc = JSON.parse(this.responseText)
+          return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
+        }
+        resolve(file)
+      }
 
-    // console.log('sending file: ' + file.name)
+      xhr.onerror = function (err) {
+        reject(err)
+      }
 
-    xhr.send(file)
-
-    return new Promise(resolve, reject)
+      xhr.send(file)
+    })
   }
 
   json (url, options) {

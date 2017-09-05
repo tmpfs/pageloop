@@ -128,8 +128,7 @@ export default {
           console.log('Sidebar upload completed...')
         })
         .catch((e) => {
-          console.log('Sidebar upload failed')
-          console.error(e)
+          this.$store.state.notify({error: e})
         })
       return false
     },

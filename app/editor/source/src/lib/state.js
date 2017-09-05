@@ -119,11 +119,14 @@ class State {
 
     // File upload transfers
     this.transfers = []
+
+    this.currentTransfer = null
   }
 
   upload () {
     if (this.transfers.length) {
-      return this.client.upload(this.transfers[0])
+      this.currentTransfer = this.transfers[0]
+      return this.client.upload(this.currentTransfer)
     }
   }
 
