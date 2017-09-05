@@ -18,24 +18,13 @@ export default {
   name: 'edit',
   components: {Sidebar, Editor, Preview},
   methods: {
-    transfer: function (e) {
-      // Check if drop occured on a directory
-      let dir
-      if (e.target) {
-        dir = e.target.getAttribute('data-dir')
-        // TOOD: handle deeply nested children in files list
-        if (!dir && e.target.parentElement && e.target.parentElement.getAttribute('data-dir')) {
-          dir = e.target.parentElement.getAttribute('data-dir')
-        }
-      }
-
-      const info = {files: e.dataTransfer.files, dir: dir}
+    upload: function (info) {
       const state = this.$store.state
 
       // Set up file transfer data
       this.$store.commit('transfers', info)
 
-      const upload = () => {
+      const uploader = () => {
         // Start the file upload
         this.$store.dispatch('upload', info)
           .then((transfers) => {
@@ -62,7 +51,7 @@ export default {
           message: `Are you sure you want to overwrite files on upload?`,
           note: '',
           ok: () => {
-            return upload()
+            return uploader()
           }
         }
 
@@ -74,7 +63,20 @@ export default {
       }
 
       // All new files - upload them
-      upload()
+      uploader()
+    },
+    transfer: function (e) {
+      // Check if drop occured on a directory
+      let dir
+      if (e.target) {
+        dir = e.target.getAttribute('data-dir')
+        // TOOD: handle deeply nested children in files list
+        if (!dir && e.target.parentElement && e.target.parentElement.getAttribute('data-dir')) {
+          dir = e.target.parentElement.getAttribute('data-dir')
+        }
+      }
+      const info = {files: e.dataTransfer.files, dir: dir}
+      return this.upload(info)
     }
   }
 }

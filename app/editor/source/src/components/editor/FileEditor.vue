@@ -8,21 +8,30 @@
         <div
           class="uploader">
           <input type="file" multiple name="files" value="files" @change="change" />
-          <div
-            class="file-upload-input">
-            <p>Tap to select files or drag files here to upload</p>
+          <div class="file-upload-input">
+            <p v-if="!files.length">Tap to select files or drag files here to upload</p>
+            <ul v-if="files.length">
+              <li v-for="file in files">
+                <span>{{file.name}}</span>
+              </li>
+            </ul>
           </div>
-          <ul>
-            <li v-for="file in files">
-              <span>{{file.name}}</span>
-            </li>
-          </ul>
-          <div class="form-actions">
-            <input
-              @click="resetFiles"
-              type="reset" name="Reset" value="Reset" :class="{hidden: !files.length}" />
-            <input type="submit" name="Upload" value="Upload" class="primary" :class="{disabled: !files.length}" />
-          </div>
+        </div>
+
+        <div class="form-actions">
+          <input
+            @click="resetFiles"
+            type="reset"
+            name="Reset"
+            value="Reset"
+            :class="{hidden: !files.length}" />
+          <input
+            @click="uploadFiles"
+            type="submit"
+            name="Upload"
+            value="Upload"
+            class="primary"
+            :class="{disabled: !files.length}" />
         </div>
       </section>
       <section>
@@ -97,35 +106,29 @@ export default {
       this.confirmDelete = false
       return this.$store.dispatch('delete-file', this.file)
     },
-    change: function (e) {
-      console.log(e)
-      this.files = e.target.files
+    syncHeight: function () {
+      setTimeout(() => {
+        let mask = this.$el.querySelector('.file-upload-input')
+        let input = this.$el.querySelector('input[type="file"]')
+        let b = mask.getBoundingClientRect()
+        let h = b.bottom - b.top
+        input.setAttribute('style', `height: ${h}px`)
+      }, 50)
     },
-    drop: function (e) {
+    change: function (e) {
+      this.files = e.target.files
+      this.syncHeight()
+    },
+    uploadFiles: function (e) {
       e.preventDefault()
-
-      console.log('file editor drop')
-
-      // Remove drop-target highlights
-      const targets = document.querySelectorAll('.drop-target')
-      targets.forEach((n) => {
-        n.classList.remove('drop-target')
-      })
-
-      // We only accept file transfers
-      if (!e.dataTransfer.files.length) {
-        return false
-      }
-
-      console.log(this.$parent.$parent.transfer)
-
-      // this.$parent.transfer(e)
-
+      const info = {files: this.files, dir: this.file.url}
+      this.$parent.$parent.upload(info)
       return false
     },
     resetFiles: function (e) {
       e.preventDefault()
       this.files = []
+      this.syncHeight()
     }
   },
   watch: {
@@ -146,17 +149,18 @@ export default {
   }
 
   input[type="file"], .file-upload-input {
+    position: relative;
     width: 100%;
-    height: 8.2rem;
+    min-height: 8.2rem;
     opacity: 0;
   }
 
   .file-upload-input {
+    position: absolute;
     opacity: 1;
     background: var(--base03-color);
     padding: 2rem;
     border-radius: 0.6rem;
-    position: absolute;
     left: 0;
     top: 0;
     pointer-events: none;
@@ -169,5 +173,13 @@ export default {
 
   .file-upload-input * {
     pointer-events: none;
+  }
+
+  .uploader ul {
+    font-size: 1.4rem;
+    text-align: left;
+    margin: 0;
+    list-style-type: none;
+    padding: 0;
   }
 </style>
