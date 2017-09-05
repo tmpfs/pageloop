@@ -27,7 +27,7 @@ class ApiClient {
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
           let ratio = (e.loaded / e.total)
-          file.progress = {ratio: ratio}
+          file.info.ratio = ratio
         }
       }
 

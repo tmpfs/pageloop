@@ -80,10 +80,14 @@ const Mutations = {
     state.alert.visible = false
   },
   'transfers': function (state, {files, dir}) {
-    if (dir) {
-      files.forEach((f) => {
-        f.dir = dir
-      })
+    let i, f
+    for (i = 0; i < files.length; i++) {
+      f = files[i]
+      // Inject into File, we should find a better way :(
+      f.info = {
+        ratio: 0,
+        dir: dir
+      }
     }
     const list = Array.prototype.slice.call(files)
     state.transfers = state.transfers.concat(list)

@@ -266,6 +266,10 @@ function Actions (router) {
     'upload': function (context, info) {
       context.commit('transfers', info)
       return context.state.upload(info.files)
+        .then(() => {
+          // Reload file list for the moment
+          return context.dispatch('reload')
+        })
     }
   }
 }

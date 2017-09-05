@@ -129,15 +129,17 @@ class State {
       this.currentTransfer = [this.transfers[0]]
 
       let amount = this.transfers.length / this.concurrentTransfers
-      if (this.transfers.length % this.concurrentTransfers !== 0) {
+      if (this.transfers.length > this.concurrentTransfers &&
+          this.transfers.length % this.concurrentTransfers !== 0) {
         amount++
       }
 
       let chunks = []
-      let i, ind
+      let i, ind, len
       for (i = 0; i < amount; i++) {
         ind = i * this.concurrentTransfers
-        chunks.push(this.transfers.slice(ind, ind + this.concurrentTransfers))
+        len = Math.min(this.transfers.length, ind + this.concurrentTransfers)
+        chunks.push(this.transfers.slice(ind, len))
       }
 
       const transfer = (chunk) => {
@@ -154,6 +156,8 @@ class State {
                     transfer(this.currentTransfer)
                   // All done, upload completed
                   } else {
+                    this.currentTransfer = []
+                    this.transfers = []
                     resolve()
                   }
                 }

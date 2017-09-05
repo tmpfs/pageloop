@@ -40,12 +40,13 @@
       @dragover="noop"
       @dragend="noop"
       @dragleave="noop">
-      <component v-bind:is="currentView"></component>
-    </div>
-    <div class="uploads">
-      <div class="upload" v-for="file in transfers">
-        <span>{{file.name}}</span>
+      <div class="uploads">
+        <div class="upload" v-for="file in transfers">
+          <span>Uploading {{file.name}} ({{file.size}} bytes)</span>
+          <span class="progress" :style="progress(file)">&nbsp;</span>
+        </div>
       </div>
+      <component v-bind:is="currentView"></component>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
   </div>
@@ -61,13 +62,11 @@ import Media from '@/components/Media'
 export default {
   name: 'sidebar',
   data: function () {
-    return {
-      shouldDelete: false
-    }
+    return {}
   },
   computed: {
     transfers: function () {
-      return this.$store.state.currentTransfers
+      return this.$store.state.currentTransfer
     },
     maximized: {
       get: function () {
@@ -103,6 +102,11 @@ export default {
     }
   },
   methods: {
+    progress: function (file) {
+      console.log('Calculating file progress: ' + file.info.ratio)
+      console.log(file)
+      return `width: ${Math.round(file.info.ratio * 100)}%`
+    },
     confirmDelete: function () {
       let details = {
         title: `Delete File (${this.currentFile.name})`,
@@ -178,5 +182,23 @@ export default {
   .file.selected, .page.selected {
     background: var(--base03-color);
     color: var(--base3-color);
+  }
+
+  .uploads {
+    border-bottom: 1px solid var(--border);
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload {
+    padding: 0 1rem;
+    height: 2.8rem;
+  }
+
+  .upload > .progress {
+    display: block;
+    height: 0.6rem;
+    width: 100%;
+    background: var(--green-color);
   }
 </style>
