@@ -265,9 +265,10 @@ function Actions (router) {
     },
     'upload': function (context, info) {
       return context.state.upload(info.files)
-        .then(() => {
+        .then((transfers) => {
           // Reload file list for the moment
           return context.dispatch('reload')
+            .then(() => transfers)
         })
     }
   }

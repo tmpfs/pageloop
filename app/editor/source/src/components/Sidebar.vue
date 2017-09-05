@@ -163,8 +163,11 @@ export default {
       const upload = () => {
         // Start the file upload
         this.$store.dispatch('upload', info)
-          .then(() => {
-            console.log('Sidebar upload completed...')
+          .then((transfers) => {
+            let names = transfers.map((f) => {
+              return f.handle.url
+            }).join(' ')
+            state.notify({title: `Transfer Complete (${info.files.length})`, message: `Uploaded ${names}`})
           })
           .catch((e) => {
             state.notify({error: e})

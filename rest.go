@@ -402,7 +402,8 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
   }
 
   // Update the application model
-  if _, err = app.Create(url, content); err != nil {
+  var file *model.File
+  if file, err = app.Create(url, content); err != nil {
     if err, ok := err.(model.StatusError); ok {
       ex(res, err.Status, nil, err)
       return
@@ -411,7 +412,7 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
     ex(res, http.StatusInternalServerError, nil, err)
     return
   }
-  created(res, OK)
+  okFile(http.StatusCreated, res, file)
   return
 
 	if err != nil {
@@ -457,7 +458,7 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
         ex(res, http.StatusInternalServerError, nil, err)
         return
       }
-      okFile(res, file)
+      okFile(http.StatusOK, res, file)
 
       return
     // Update file content
@@ -479,7 +480,7 @@ func postFile(url string, app *model.Application, res http.ResponseWriter, req *
           ex(res, http.StatusInternalServerError, nil, err)
           return
         }
-        okFile(res, file)
+        okFile(http.StatusOK, res, file)
         return
       }
 
@@ -558,7 +559,7 @@ func ok(res http.ResponseWriter, data []byte) (int, error) {
 }
 
 // Send an OK response to the client with a file.
-func okFile(res http.ResponseWriter, f *model.File) (int, error) {
+func okFile(status int, res http.ResponseWriter, f *model.File) (int, error) {
   var data []byte
   var err error
   var target interface{} = f
@@ -572,7 +573,7 @@ func okFile(res http.ResponseWriter, f *model.File) (int, error) {
   tail := []byte(`}`)
   data = append(top, data...)
   data = append(data, tail...)
-	return write(res, http.StatusOK, data)
+	return write(res, status, data)
 }
 
 // Send a created response to the client, typically in reply to a PUT.

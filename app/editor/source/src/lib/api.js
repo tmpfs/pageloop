@@ -40,11 +40,14 @@ class ApiClient {
       }
 
       xhr.onload = function (e) {
+        const doc = JSON.parse(this.responseText)
         if (this.status !== 201 && this.status !== 200) {
-          const doc = JSON.parse(this.responseText)
           return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
         }
         file.complete = true
+
+        // File object returned by the server
+        file.handle = doc.file
 
         // Set a timeout before completion so
         // progress preloaders are visible on fast
