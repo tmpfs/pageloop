@@ -139,10 +139,9 @@ export default {
       e.preventDefault()
 
       // Remove drop-target highlights
-      const targets = document.querySelectorAll('.drop-target, .drop-disabled')
+      const targets = document.querySelectorAll('.drop-target')
       targets.forEach((n) => {
         n.classList.remove('drop-target')
-        n.classList.remove('drop-disabled')
       })
 
       // We only accept file transfers
@@ -150,78 +149,19 @@ export default {
         return false
       }
 
-      // Check if drop occured on a directory
-      let dir
-      if (e.target) {
-        dir = e.target.getAttribute('data-dir')
-        // TOOD: handle deeply nested children in files list
-        if (!dir && e.target.parentElement && e.target.parentElement.getAttribute('data-dir')) {
-          dir = e.target.parentElement.getAttribute('data-dir')
-        }
-      }
-
-      const info = {files: e.dataTransfer.files, dir: dir}
-      const state = this.$store.state
-
-      // Set up file transfer data
-      this.$store.commit('transfers', info)
-
-      const upload = () => {
-        // Start the file upload
-        this.$store.dispatch('upload', info)
-          .then((transfers) => {
-            let names = transfers.map((f) => {
-              return f.handle.url
-            }).join(' ')
-            state.notify({title: `Transfer Complete (${info.files.length})`, message: `Uploaded ${names}`})
-          })
-          .catch((e) => {
-            state.notify({error: e})
-          })
-      }
-
-      // Check for existing files which need POST
-      const existing = state.transfers.filter((f) => {
-        return f.exists
-      }).map((f) => {
-        return f.exists
-      })
-
-      if (existing.length) {
-        let details = {
-          title: `Overwrite`,
-          message: `Are you sure you want to overwrite files on upload?`,
-          note: '',
-          ok: () => {
-            return upload()
-          }
-        }
-
-        existing.forEach((f) => {
-          details.note += f.url + '\n'
-        })
-
-        return this.$store.commit('alert-show', details)
-      }
-
-      // All new files - upload them
-      upload()
+      this.$parent.transfer(e)
 
       return false
     },
     dragover: function (e) {
+      console.log('dragover')
       e.preventDefault()
-      if (e.dataTransfer.files.length) {
-        e.currentTarget.classList.add('drop-target')
-      } else {
-        e.currentTarget.classList.add('drop-disabled')
-      }
+      e.currentTarget.classList.add('drop-target')
       return false
     },
     dragleave: function (e) {
       e.preventDefault()
       e.currentTarget.classList.remove('drop-target')
-      e.currentTarget.classList.remove('drop-disabled')
       return false
     }
   },
@@ -313,7 +253,4 @@ export default {
     border-top: 1px solid var(--base2-color);
   }
 
-  .scroll.drop-disabled {
-    cursor: no-drop;
-  }
 </style>
