@@ -103,3 +103,6 @@ Wow, so much to do, here is some stuff:
 34) Validate generated markup - java + nu-validator :(
 35) Document size switching component for the preview area, eg: 320x480 ...
 36) Handle large files, do not load into memory, mark as external and serve from disc
+37) Set default stylesheet for markdown documents with no layout, looks pretty ugly
+    using the default user agent stylesheet :(
+38) Live markdown compilation on the client to update the preview area.

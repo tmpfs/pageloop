@@ -42,6 +42,11 @@
       @dragleave="noop">
       <component v-bind:is="currentView"></component>
     </div>
+    <div class="uploads">
+      <div class="upload" v-for="file in transfers">
+        <span>{{file.name}}</span>
+      </div>
+    </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
   </div>
 </template>
@@ -61,6 +66,9 @@ export default {
     }
   },
   computed: {
+    transfers: function () {
+      return this.$store.state.currentTransfers
+    },
     maximized: {
       get: function () {
         return this.$store.state.columns.maximized

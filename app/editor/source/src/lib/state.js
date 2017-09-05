@@ -120,13 +120,50 @@ class State {
     // File upload transfers
     this.transfers = []
 
+    this.concurrentTransfers = 3
     this.currentTransfer = null
   }
 
   upload () {
     if (this.transfers.length) {
-      this.currentTransfer = this.transfers[0]
-      return this.client.upload(this.currentTransfer)
+      this.currentTransfer = [this.transfers[0]]
+
+      let amount = this.transfers.length / this.concurrentTransfers
+      if (this.transfers.length % this.concurrentTransfers !== 0) {
+        amount++
+      }
+
+      let chunks = []
+      let i, ind
+      for (i = 0; i < amount; i++) {
+        ind = i * this.concurrentTransfers
+        chunks.push(this.transfers.slice(ind, ind + this.concurrentTransfers))
+      }
+
+      const transfer = (chunk) => {
+        return new Promise((resolve, reject) => {
+          let loaded = 0
+          chunk.forEach((file) => {
+            this.client.upload(file)
+              .then(() => {
+                loaded++
+                if (loaded === chunk.length) {
+                  // More chunks to process
+                  if (chunks.length) {
+                    this.currentTransfer = chunks.shift()
+                    transfer(this.currentTransfer)
+                  // All done, upload completed
+                  } else {
+                    resolve()
+                  }
+                }
+              })
+              .catch(reject)
+          })
+        })
+      }
+      this.currentTransfer = chunks.shift()
+      return transfer(this.currentTransfer)
     }
   }
 
