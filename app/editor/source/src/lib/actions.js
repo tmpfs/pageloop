@@ -227,13 +227,20 @@ function Actions (router) {
               })
           }
 
-          context.state.notify({title: 'File Info', message: `Deleted ${files.join(', ')}`})
+          const urls = files.map((f) => {
+            return f.url
+          })
 
+          context.state.notify({title: 'File Info', message: `Deleted ${urls.join(', ')}`})
           return context.dispatch('reload')
             .then(() => {
-              if (len <= 1) {
+              // Deleted the currently selected file
+              if (context.state.current && ~files.indexOf(context.state.current)) {
                 context.commit('reset-current-file')
                 context.commit('editor-view', 'welcome')
+              }
+
+              if (len <= 1) {
               /*
               } else if (index > -1) {
                 // select next nearest file

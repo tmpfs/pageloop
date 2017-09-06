@@ -81,7 +81,10 @@ export default {
       }
     },
     canDelete: function () {
-      return this.$store.state.sidebar.selection.length
+      if (this.$store.state.sidebar.selection) {
+        return this.$store.state.sidebar.selection.length
+      }
+      return false
     },
     currentFile: function () {
       return this.$store.state.current
@@ -116,7 +119,6 @@ export default {
       if (!selection.length) {
         return
       }
-      console.log(this.$store.state.sidebar.selection)
       // Single file deletion
       if (selection.length === 1) {
         selected = selection[0]
