@@ -102,7 +102,7 @@ const Mutations = {
         }
       })
     }
-    state.transfers = list
+    state.transfer.transfers = list
   }
 }
 

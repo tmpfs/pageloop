@@ -43,7 +43,7 @@ export default {
       }
 
       // Check for existing files which need POST
-      const existing = state.transfers.filter((f) => {
+      const existing = state.transfer.transfers.filter((f) => {
         return f.exists
       }).map((f) => {
         return f.exists

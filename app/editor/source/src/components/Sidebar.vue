@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     transfers: function () {
-      return this.$store.state.currentTransfer
+      return this.$store.state.transfer.currentTransfer
     },
     maximized: {
       get: function () {

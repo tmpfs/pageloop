@@ -10,13 +10,12 @@ import Notifier from './state/notifier'
 import Alert from './state/alert'
 import Flash from './state/flash'
 
+import Transfer from './transfer'
 import Log from './state/log'
 
 class State {
   constructor () {
     this.client = this.defaultClient = new ApiClient()
-    this.containers = []
-    this.setApplication('', '')
 
     this.main = new MainState()
     this.sidebar = new SidebarState()
@@ -27,7 +26,11 @@ class State {
     this.alert = new Alert()
     this.flash = new Flash()
 
+    this.transfer = new Transfer(this.client)
     this.log = new Log()
+
+    this.containers = []
+    this.setApplication('', '')
   }
 
   notify (info, del) {
@@ -79,66 +82,7 @@ class State {
     // current application
     this.app = new Application()
 
-    this.client = this.defaultClient
-
-    // File upload transfers
-    this.transfers = []
-
-    this.concurrentTransfers = 3
-    this.currentTransfer = []
-  }
-
-  upload () {
-    if (this.transfers.length) {
-      let amount = Math.floor(this.transfers.length / this.concurrentTransfers)
-      if (this.transfers.length % this.concurrentTransfers !== 0) {
-        amount++
-      }
-
-      let chunks = []
-      let i, ind, len
-      for (i = 0; i < amount; i++) {
-        ind = i * this.concurrentTransfers
-        len = Math.min(this.transfers.length, ind + this.concurrentTransfers)
-        chunks.push(this.transfers.slice(ind, len))
-      }
-
-      // Transfer a single chunk
-      const transfer = (chunk, done) => {
-        return new Promise((resolve, reject) => {
-          let loaded = 0
-          chunk.forEach((file) => {
-            this.client.upload(file).then((file) => {
-              loaded++
-              if (loaded === chunk.length) {
-                // Process next chunk
-                if (chunks.length) {
-                  this.currentTransfer = chunks.shift()
-                  resolve(transfer(this.currentTransfer, done))
-                // All done, upload completed
-                } else {
-                  done(this.transfers)
-                }
-              }
-            })
-            .catch(reject)
-          })
-        })
-      }
-      this.currentTransfer = chunks.shift()
-      return new Promise((resolve, reject) => {
-        transfer(this.currentTransfer, (files) => {
-          this.transfers = []
-          this.currentTransfer = []
-          resolve(files)
-        })
-        .catch((err) => {
-          this.transfers = []
-          this.currentTransfer = []
-          reject(err)
-        })
-      })
-    }
+    this.client = this.transfer.client = this.defaultClient
   }
 
   setApplication (container, application) {
@@ -149,7 +93,7 @@ class State {
     this.application = application
 
     // Set up new API client
-    this.client = new ApiClient(container, application)
+    this.client = this.transfer.client = new ApiClient(container, application)
   }
 
   get current () {
