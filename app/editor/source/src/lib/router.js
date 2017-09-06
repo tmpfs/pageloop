@@ -1,3 +1,9 @@
+/**
+ *  Lightweight router implementation using regular expressions.
+ *
+ *  The Vue router does not appear to support matching the slash
+ *  character and we need to match URL references (eg: /docs/help/document.html).
+ */
 class Router {
   constructor (href, strip) {
     this.defaultHref = href
