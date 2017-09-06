@@ -136,8 +136,8 @@ function Actions (router) {
             context.commit('editor-view', file.editorView)
           }
           context.commit('preview-url', file.uri)
-          if (context.state.editorView === 'welcome') {
-            context.commit('editor-view', context.state.defaultEditorView)
+          if (context.state.editor.view === 'welcome') {
+            context.commit('editor-view', context.state.editor.defaultView)
           }
         })
     },

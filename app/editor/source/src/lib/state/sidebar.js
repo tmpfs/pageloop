@@ -1,11 +1,11 @@
-/**
- *  Represents the selections in the sidebar file lists.
- */
-class SidebarState {
-  constructor () {
-    // Curent sidebar view
-    this.view = ''
+import ViewState from './view'
 
+/**
+ *  Represents the state of the sidebar.
+ */
+class SidebarState extends ViewState {
+  constructor () {
+    super()
     // List selections
     this.pages = []
     this.files = []

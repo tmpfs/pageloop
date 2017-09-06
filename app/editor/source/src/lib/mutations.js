@@ -25,20 +25,20 @@ const Mutations = {
     state.app.pages = list
   },
   'main-view': function (state, view) {
-    state.mainView = view
+    state.main.view = view
   },
   'sidebar-view': function (state, view) {
     state.sidebar.view = view
   },
   'editor-view': function (state, view) {
-    state.editorView = view
+    state.editor.view = view
     if (state.hasFile()) {
       state.current.editorView = view
     }
   },
   'current-file': function (state, file) {
     if (!file.editorView) {
-      file.editorView = state.defaultEditorView
+      file.editorView = state.editor.defaultView
     }
     state.current = file
   },

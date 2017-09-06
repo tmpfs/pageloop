@@ -15,7 +15,7 @@ export default {
   name: 'app-main',
   computed: {
     currentView: function () {
-      return this.$store.state.mainView
+      return this.$store.state.main.view
     }
   },
   components: {NotFound, Home, Apps, Edit, Docs, Settings}

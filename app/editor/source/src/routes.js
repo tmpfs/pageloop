@@ -31,8 +31,8 @@ function Routes (router, store) {
         }
         store.commit('main-view', 'edit')
         store.commit('sidebar-view', action)
-        if (!store.state.editorView || store.state.editorView === 'welcome') {
-          store.commit('editor-view', store.state.defaultEditorView)
+        if (!store.state.editor.view || store.state.editor.view === 'welcome') {
+          store.commit('editor-view', store.state.editor.defaultView)
         }
       }
 

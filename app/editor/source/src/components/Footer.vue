@@ -19,7 +19,7 @@ export default {
   computed: {
     canReset: function () {
       let state = this.$store.state
-      return state.mainView === 'edit' && state.hasApplication()
+      return state.main.view === 'edit' && state.hasApplication()
     },
     needsReset: function () {
       let state = this.$store.state

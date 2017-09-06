@@ -3,7 +3,9 @@ import Log from './log'
 import ColumnManager from './columns'
 import ApiClient from './api'
 
+import MainState from './state/main'
 import SidebarState from './state/sidebar'
+import EditorState from './state/editor'
 
 class State {
   constructor () {
@@ -11,11 +13,10 @@ class State {
     this.containers = []
     this.setApplication('', '')
 
+    this.main = new MainState()
     this.sidebar = new SidebarState()
+    this.editor = new EditorState()
 
-    this.mainView = ''
-
-    this.editorView = ''
     this.defaultEditorView = 'code-editor'
 
     this.previewUrl = ''

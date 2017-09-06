@@ -36,7 +36,7 @@ export default {
       return this.$store.state.application
     },
     selectedView: function () {
-      return this.$store.state.mainView
+      return this.$store.state.main.view
     }
   }
 }

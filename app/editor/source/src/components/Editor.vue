@@ -86,7 +86,7 @@ export default {
     },
     currentView: {
       get: function () {
-        return this.$store.state.editorView
+        return this.$store.state.editor.view
       },
       set: function (view) {
         this.$store.commit('editor-view', view)
