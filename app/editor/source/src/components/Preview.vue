@@ -75,7 +75,9 @@ export default {
   },
   methods: {
     refresh (url) {
-      let allowed = /\.(html?)$/
+      // TODO: work out how to stop the iframe interpreting
+      // TODO: the pdf as an HTML Document
+      let allowed = /\.(html?|pdf|svg|jpe?g|png|gif)$/
       if (url && !allowed.test(url)) {
         return
       }

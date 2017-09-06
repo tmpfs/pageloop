@@ -130,7 +130,6 @@ function Actions (router) {
     'open-file': function (context, file) {
       return context.dispatch('get-file-contents', file)
         .then((content) => {
-          console.log('open file: ' + file.binary)
           if (!file.binary) {
             file.content = content
           } else {
