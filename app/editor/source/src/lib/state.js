@@ -6,7 +6,7 @@ import SidebarState from './state/sidebar'
 import EditorState from './state/editor'
 
 import Flash from './state/flash'
-import Log from './log'
+import Log from './state/log'
 
 class State {
   constructor () {
