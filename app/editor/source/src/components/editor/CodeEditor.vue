@@ -84,6 +84,9 @@ export default {
         }
       })
 
+      // window.focus(this.$el)
+      // console.log('window focus: ')
+
       /*
       let wait
       let opts = {column: 80}
@@ -123,6 +126,12 @@ export default {
 </script>
 
 <style>
+  /*
+  :focus {
+    border: 1px solid red;
+  }
+  */
+
   .text-editor {
     background: #002b36;
     height: 100%;
