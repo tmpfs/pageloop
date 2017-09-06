@@ -171,9 +171,11 @@ func (app *Application) Move(file *File, newUrl string) error {
     u = "/" + u
   }
 
+  /*
   if strings.HasSuffix(u, "/") {
     u = strings.TrimSuffix(u, "/")
   }
+  */
 
   if app.Urls[u] != nil {
     return fmt.Errorf("Cannot move file, destination %s exists", newUrl)
@@ -409,8 +411,9 @@ func (app *Application) setFileFields(file *File, base string) {
 	file.Name = name
 	file.Relative = relative
 	// Normalize directories for URLs without the /
-	if strings.HasSuffix(url, SLASH) {
-		url = strings.TrimSuffix(url, SLASH)
+	if file.info.IsDir() && !strings.HasSuffix(url, SLASH) {
+		// url = strings.TrimSuffix(url, SLASH)
+    url = url + SLASH
 	}
 	file.Url = url
 	if !file.info.IsDir() {

@@ -10,6 +10,11 @@ function Routes (router, store) {
       let action = match.map.action
       let file
 
+      // Respect trailing slashes in request
+      if (/\/$/.test(match.href)) {
+        href += '/'
+      }
+
       function findAndOpen (href) {
         let arr = state.app.files
         if (action === 'pages') {

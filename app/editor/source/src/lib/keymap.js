@@ -37,10 +37,8 @@ class KeyManager {
   find (e) {
     const key = e.key
     const code = e.code
-
     console.log(key)
     console.log(code)
-
     let i, map, k
     for (i = 0; i < this.maps.length; i++) {
       map = this.maps[i]

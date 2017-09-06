@@ -66,7 +66,6 @@ const Mutations = {
   'reset-current-file': function (state, url) {
     state.current = state.app.defaultFile
     state.preview.url = ''
-    console.log('rest preview url: ' + state.preview.url)
   },
   'maximize-column': function (state, info) {
     // Maximizing
