@@ -24,21 +24,26 @@ class Transfer {
     this.currentTransfer = []
   }
 
+  // Break the transfers list into chunks
+  getChunks () {
+    let amount = Math.floor(this.transfers.length / this.concurrentTransfers)
+    if (this.transfers.length % this.concurrentTransfers !== 0) {
+      amount++
+    }
+    let chunks = []
+    let i, ind, len
+    for (i = 0; i < amount; i++) {
+      ind = i * this.concurrentTransfers
+      len = Math.min(this.transfers.length, ind + this.concurrentTransfers)
+      chunks.push(this.transfers.slice(ind, len))
+    }
+    return chunks
+  }
+
+  // Upload all transfers in chunks
   upload () {
     if (this.transfers.length) {
-      let amount = Math.floor(this.transfers.length / this.concurrentTransfers)
-      if (this.transfers.length % this.concurrentTransfers !== 0) {
-        amount++
-      }
-
-      let chunks = []
-      let i, ind, len
-      for (i = 0; i < amount; i++) {
-        ind = i * this.concurrentTransfers
-        len = Math.min(this.transfers.length, ind + this.concurrentTransfers)
-        chunks.push(this.transfers.slice(ind, len))
-      }
-
+      let chunks = this.getChunks()
       // Transfer a single chunk
       const transfer = (chunk, done) => {
         return new Promise((resolve, reject) => {
@@ -76,7 +81,6 @@ class Transfer {
       })
     }
   }
-
 }
 
 export default Transfer
