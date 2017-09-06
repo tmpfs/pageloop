@@ -188,17 +188,6 @@ export default {
     font-size: 2.4rem;
   }
 
-  h3 {
-    display: inline-block;
-    font-size: 1.4rem;
-    border-bottom: 1px solid currentColor;
-    margin-bottom: 1rem;
-  }
-
-  h3 + p {
-    margin-top: 0;
-  }
-
   /* Forms & Buttons */
 
   form, fieldset {

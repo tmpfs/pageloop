@@ -207,9 +207,12 @@ export default {
     padding: 0 1rem;
   }
 
-  h2.file-info {
-    font-size: 2.2rem;
-    padding: 0 0 2rem 0;
+  h3 {
+    font-size: 1.4rem;
+    text-transform: none;
+    border: 0;
+    padding: 0;
+    margin: 0 0 0 1rem;
   }
 
   .column-options > .toolbar {
@@ -276,14 +279,6 @@ export default {
 
 <style scoped>
   /* Editor scoped styles */
-
-  h3 {
-    font-size: 1.4rem;
-    text-transform: none;
-    border: 0;
-    padding: 0;
-    margin: 0 0 0 1rem;
-  }
 
   .editor h3 {
     width: 50%;

@@ -1,7 +1,7 @@
 <template>
   <div class="file-editor">
     <div class="scroll panel">
-      <h2 class="file-info"><span v-bind:class="{hidden: !file.dir}">🗀</span><span v-bind:class="{hidden: file.dir}">🗎</span>&nbsp;{{file.name}}</h2>
+      <h2><span v-bind:class="{hidden: !file.dir}">🗀</span><span v-bind:class="{hidden: file.dir}">🗎</span>&nbsp;{{file.name}}</h2>
 
       <section v-if="file.dir">
         <h3>Transfer Files</h3>
@@ -151,6 +151,22 @@ export default {
 <style scoped>
   .file-editor {
     height: 100%;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    padding: 0 0 2rem 0;
+  }
+
+  h3 {
+    display: inline-block;
+    font-size: 1.4rem;
+    border-bottom: 1px solid currentColor;
+    margin: 0 0 1rem 0;
+  }
+
+  h3 + p {
+    margin-top: 0;
   }
 
   .uploader {
