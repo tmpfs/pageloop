@@ -24,6 +24,14 @@ export default {
   computed: {
     list: function () {
       return this.$store.state.app.files
+    },
+    selection: {
+      get: function () {
+        return this.$store.state.sidebar.files
+      },
+      set: function (val) {
+        this.$store.state.sidebar.files = val
+      }
     }
   },
   methods: {

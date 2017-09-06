@@ -1,9 +1,4 @@
 export default {
-  data: function () {
-    return {
-      selection: []
-    }
-  },
   computed: {
     currentFile: function () {
       return this.$store.state.app.current

@@ -21,6 +21,14 @@ export default {
   computed: {
     list: function () {
       return this.$store.state.app.pages
+    },
+    selection: {
+      get: function () {
+        return this.$store.state.sidebar.pages
+      },
+      set: function (val) {
+        this.$store.state.sidebar.pages = val
+      }
     }
   },
   methods: {
