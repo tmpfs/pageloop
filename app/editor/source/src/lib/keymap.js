@@ -40,13 +40,9 @@ class Mapping {
 }
 
 // Mapping of key combinations to functions.
-//
-// If element is given the element must be focused
-// for mappings in this key map to be invoked.
 class KeyMap {
-  constructor (keys, element) {
+  constructor (keys) {
     this.keys = keys
-    this.element = element
     this.normalized = this.normalize(keys)
   }
 
@@ -101,28 +97,52 @@ class KeyMap {
 // uppercase.
 //
 // Only a single key name is permitted.
+//
+// The last key map added is the first to execute
+// and key handler functions may defer to previously
+// declared mappings by returning true.
 class KeyManager {
   constructor () {
     this.maps = []
 
     // Test map
+    /*
     this.add(new KeyMap({
-      'Meta+N': () => console.log('Meta+N'),
+      'Meta+N': () => console.log('Deferred called Meta+N'),
       'Shift+J': () => console.log('Shift+J')
     }))
+    this.add(new KeyMap({
+      'Meta+N': () => {
+        return true
+      }
+    }))
+    */
 
-    document.addEventListener('focus', (e) => {
-      // console.log('focus changed')
-      // console.log(e)
-    })
+    /*
+    this.add(new KeyMap({
+      'Enter': () => {
+        console.log('Enter called')
+      },
+      'Esc': () => {
+        console.log('Esc called')
+      }
+    }))
+    */
 
     // NOTE: must use keyup *not* keypress
     window.addEventListener('keyup', (e) => {
       e.preventDefault()
       e.stopImmediatePropagation()
-      const fn = this.find(e)
-      if (typeof (fn) === 'function') {
-        fn(e)
+      let i, fn, val
+      const maps = this.find(e)
+      for (i = 0; i < maps.length; i++) {
+        fn = maps[i].fn
+        if (typeof (fn) === 'function') {
+          val = fn(e)
+          if (val !== true) {
+            break
+          }
+        }
       }
       return false
     })
@@ -130,28 +150,36 @@ class KeyManager {
 
   find (e) {
     let i, j, map, list, mapping
+    const maps = []
     for (i = 0; i < this.maps.length; i++) {
       map = this.maps[i]
       list = map.normalized
       for (j = 0; j < list.length; j++) {
         mapping = list[j]
         if (mapping.modifiers(e) && mapping.hasKeyName(e)) {
-          return mapping.fn
+          maps.push(mapping)
+          break
         }
       }
     }
+    return maps
   }
 
   // Add a key map.
   add (map) {
+    // Support plain object definitions
+    if (map && !(map instanceof KeyMap)) {
+      map = new KeyMap(map)
+    }
     this.maps.unshift(map)
+    return map
   }
 
   // Remove a key map.
   remove (map) {
     const ind = this.maps.indexOf(map)
     if (ind > -1) {
-      this.maps.splice(ind, 1)
+      return this.maps.splice(ind, 1)
     }
   }
 }

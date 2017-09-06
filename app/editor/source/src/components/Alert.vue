@@ -1,5 +1,5 @@
 <template>
-  <div class="alert" :class="{hidden: !alert.visible}">
+  <div class="alert" :class="{hidden: !visible}">
     <div class="background"></div>
     <div class="dialog">
       <a class="close" @click="dismiss"></a>
@@ -19,9 +19,28 @@
 <script>
 export default {
   name: 'app-alert',
+  data: function () {
+    return {
+      show: false,
+      keyMap: {
+        'Enter': () => this.ok(),
+        'Esc': () => this.dismiss()
+      }
+    }
+  },
   computed: {
     alert: function () {
       return this.$store.state.alert
+    },
+    visible: function () {
+      const state = this.$store.state
+      const val = state.alert.visible
+      if (val) {
+        this.keyMap = state.keymap.add(this.keyMap)
+      } else {
+        state.keymap.remove(this.keyMap)
+      }
+      return val
     }
   },
   methods: {
