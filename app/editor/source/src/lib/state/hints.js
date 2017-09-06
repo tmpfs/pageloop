@@ -21,7 +21,7 @@ class Hints {
   }
 
   dismiss (id) {
-    delete this.messages[id]
+    this.messages[id] = null
     localStorage[this.prefix + id] = true
   }
 }
