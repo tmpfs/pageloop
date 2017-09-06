@@ -15,8 +15,6 @@ import Log from './state/log'
 
 class State {
   constructor () {
-    this.client = this.defaultClient = new ApiClient()
-
     this.main = new MainState()
     this.sidebar = new SidebarState()
     this.editor = new EditorState()
@@ -26,11 +24,24 @@ class State {
     this.alert = new Alert()
     this.flash = new Flash()
 
-    this.transfer = new Transfer(this.client)
+    this.transfer = new Transfer()
     this.log = new Log()
+
+    // We use the defaultClient when no application
+    // is selected
+    this.client = this.defaultClient = new ApiClient()
 
     this.containers = []
     this.setApplication('', '')
+  }
+
+  get client () {
+    return this._client
+  }
+
+  set client (val) {
+    this._client = val
+    this.transfer.client = val
   }
 
   notify (info, del) {
@@ -82,7 +93,8 @@ class State {
     // current application
     this.app = new Application()
 
-    this.client = this.transfer.client = this.defaultClient
+    // Reset to default client
+    this.client = this.defaultClient
   }
 
   setApplication (container, application) {
@@ -93,7 +105,7 @@ class State {
     this.application = application
 
     // Set up new API client
-    this.client = this.transfer.client = new ApiClient(container, application)
+    this.client = new ApiClient(container, application)
   }
 
   get current () {

@@ -11,8 +11,9 @@
  *  files are uploaded concurrently.
  */
 class Transfer {
-  constructor (client) {
-    this.client = client
+  constructor () {
+    // Client should be injected
+    this.client = null
 
     // List of all upload transfers
     this.transfers = []
