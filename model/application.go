@@ -299,6 +299,7 @@ func (app *Application) AddFile(file *File) int {
 	app.setComputedFileFields(file)
 	file.owner = app
 	file.Mime = getMimeType(file.Path)
+  file.Binary = isBinaryMime(file.Mime)
 	app.Files = append(app.Files, file)
 	return len(app.Files)
 }
@@ -308,6 +309,7 @@ func (app *Application) AddPage(page *Page) int {
 	app.setComputedPageFields(page)
 	page.owner = app
 	page.Mime = getMimeType(page.Path)
+  page.Binary = isBinaryMime(page.Mime)
 	app.Pages = append(app.Pages, page)
 	return len(app.Pages)
 }

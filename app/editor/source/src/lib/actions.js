@@ -124,13 +124,18 @@ function Actions (router) {
       return context.state.client.getFileContents(item.url)
         .then((res) => {
           // TODO: get blob for binary types
-          return res.text()
+          return item.binary ? res.blob() : res.text()
         })
     },
     'open-file': function (context, file) {
       return context.dispatch('get-file-contents', file)
         .then((content) => {
-          file.content = content
+          console.log('open file: ' + file.binary)
+          if (!file.binary) {
+            file.content = content
+          } else {
+            file.blob = content
+          }
           context.commit('current-file', file)
           if (file.editorView) {
             context.commit('editor-view', file.editorView)

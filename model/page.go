@@ -40,6 +40,7 @@ type Page struct {
   Url string `json:"url"`
   Uri string `json:"uri"`
   Mime string `json:"mime"`
+  Binary bool `json:"binary"`
   Size int64 `json:"size,omitempty"`
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`

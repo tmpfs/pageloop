@@ -3,8 +3,11 @@ package model
 import (
   "os"
 	"mime"
+  "strings"
   "path/filepath"
 )
+
+const OCTET_STREAM = "application/octet-stream"
 
 type File struct {
   Path string `json:"-"`
@@ -26,6 +29,7 @@ type File struct {
   Directory bool `json:"dir,omitempty"`
   Relative string `json:"-"`
   Mime string `json:"mime"`
+  Binary bool `json:"binary"`
 
 	// Owner application
 	owner *Application
@@ -93,8 +97,27 @@ func (f *File) Info() os.FileInfo {
 func getMimeType(path string) string {
 	m := mime.TypeByExtension(filepath.Ext(path))
 	if m == "" {
-		m = "application/octet-stream"
+		m = OCTET_STREAM
 	}
 	return m
 }
 
+func isBinaryMime(mimeType string) bool {
+  if mimeType == OCTET_STREAM {
+    return true
+  }
+
+  // application/ special cases
+  if strings.HasPrefix(mimeType, "application/json") ||
+    strings.HasPrefix(mimeType, "application/javascript") ||
+    strings.HasPrefix(mimeType, "application/xml") ||
+    strings.HasSuffix(mimeType, "+xml") {
+    return false
+  }
+
+  if strings.HasPrefix(mimeType, "text/") {
+    return false
+  }
+
+  return true
+}
