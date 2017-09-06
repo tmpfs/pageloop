@@ -9,7 +9,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'hint',
   props: ['id'],
@@ -21,9 +20,6 @@ export default {
   methods: {
     dismiss: function () {
       this.$store.commit('dismiss-hint', this.id)
-      // FIXME: removing the element is breaking sidebar navigation :(
-      // this.$el.parentNode.removeChild(this.$el)
-      this.$destroy()
     }
   }
 }
