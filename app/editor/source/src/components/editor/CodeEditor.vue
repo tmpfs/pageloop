@@ -126,11 +126,6 @@ export default {
 </script>
 
 <style>
-  /*
-  :focus {
-    border: 1px solid red;
-  }
-  */
 
   .text-editor {
     background: #002b36;
