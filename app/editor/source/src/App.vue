@@ -317,4 +317,24 @@ export default {
   .panel {
     padding: 2rem;
   }
+
+  .hint {
+    background: var(--base03-color);
+    padding: 1rem;
+    font-size: 1.4rem;
+    border-radius: 0.3rem;
+  }
+
+  .hint::before {
+    display: inline-block;
+    content: 'ℹ';
+    color: var(--cyan-color);
+    margin-right: 0.5rem;
+    text-align: center;
+    line-height: 2rem;
+    background: var(--base02-color);
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.9rem;
+  }
 </style>
