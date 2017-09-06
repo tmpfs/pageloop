@@ -41,6 +41,11 @@ class Application {
   }
 
   init () {
+    window.onbeforeunload = (e) => {
+      if (this.store.state.isDirty()) {
+        return true
+      }
+    }
     this.ui(this.store)
     this.router.start()
   }
