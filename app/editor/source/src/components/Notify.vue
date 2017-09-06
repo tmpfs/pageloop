@@ -74,7 +74,8 @@ export default {
 	}
 
 	.notify.error {
-		color: var(--red-color);
+	  background: var(--red-color);
+    color: var(--base2-color);
 	}
 
 	.notify:last-child {
@@ -109,4 +110,8 @@ export default {
 		top: 0;
 		right: 0;
 	}
+
+  .notify.error > a.close:hover {
+	  background: var(--orange-color);
+  }
 </style>

@@ -113,6 +113,28 @@ class ApiClient {
       .catch((err) => err)
   }
 
+  deleteFiles (files) {
+    let urls = files.map((f) => {
+      return f.url
+    })
+    let url = this.url + 'files'
+    let opts = {
+      method: 'DELETE',
+      body: JSON.stringify(urls),
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    }
+    opts.headers['Content-Length'] = opts.body.length
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
+
+  // @deprecated, replaced by deleteFiles
   deleteFile (file) {
     let url = this.url + 'files' + file.url
     let opts = {

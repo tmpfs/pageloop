@@ -207,15 +207,18 @@ function Actions (router) {
           }
         })
     },
-    'delete-file': function (context, file) {
+    'delete-files': function (context, files) {
       let list = context.state.app.files
       let ctx = context.state.sidebar.view
       if (ctx === 'pages') {
         list = context.state.app.pages
       }
-      let index = list.indexOf(file)
+
+      // TODO: restore nearest neighbour selection
+
+      // let index = list.indexOf(file)
       let len = list.length
-      return context.state.client.deleteFile(file)
+      return context.state.client.deleteFiles(files)
         .then((res) => {
           if (res.response.status !== 200) {
             return context.dispatch('error', error(res))
@@ -224,18 +227,20 @@ function Actions (router) {
               })
           }
 
-          context.state.notify({title: 'File Info', message: `Deleted ${file.name}`})
+          context.state.notify({title: 'File Info', message: `Deleted ${files.join(', ')}`})
 
           return context.dispatch('reload')
             .then(() => {
               if (len <= 1) {
                 context.commit('reset-current-file')
                 context.commit('editor-view', 'welcome')
+              /*
               } else if (index > -1) {
                 // select next nearest file
                 let neighbour = list[index - 1] || list[index + 1]
                 let href = context.state.getAppHref(ctx, neighbour.url)
                 return context.dispatch('navigate', {href: href})
+              */
               }
             })
         })

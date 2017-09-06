@@ -125,7 +125,7 @@ export default {
           message: `Are you sure you want to delete the file ${selected.url}?`,
           note: 'Be careful file deletion is irreversible.',
           ok: () => {
-            this.doDeleteFile()
+            this.deleteFiles(selection)
           }
         }
       // Multiple file deletion
@@ -135,16 +135,14 @@ export default {
           message: `Are you sure you want to delete the selected files?`,
           note: 'Be careful file deletion is irreversible.',
           ok: () => {
-            console.log('Delete multiple files...')
-            // this.doDeleteFile()
+            this.deleteFiles(selection)
           }
         }
       }
       this.$store.commit('alert-show', details)
     },
-    doDeleteFile: function () {
-      // TODO: notify on error
-      return this.$store.dispatch('delete-file', this.currentFile)
+    deleteFiles: function (files) {
+      return this.$store.dispatch('delete-files', files)
         .catch((e) => console.error(e))
     },
     showNewFileView: function () {
