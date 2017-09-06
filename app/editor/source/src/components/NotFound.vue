@@ -1,7 +1,7 @@
 <template>
   <div class="content-main not-found">
     <h2>Not Found</h2>
-    <p>Oops, we could not find a page that matched your request <code>{{flash}}</code></p>
+    <p>Oops, we could not find a page that matched your request <code v-if="flash">{{flash}}</code></p>
   </div>
 </template>
 
@@ -10,7 +10,7 @@ export default {
   name: 'not-found',
   computed: {
     flash: function () {
-      let flash = this.$store.state.flash
+      let flash = this.$store.state.flash.message
       if (flash) {
         flash = `#${flash}`
       }

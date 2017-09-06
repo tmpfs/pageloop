@@ -1,6 +1,6 @@
 const Mutations = {
   'flash': function (state, message) {
-    state.flash = message
+    state.flash.message = message
   },
   'log': function (state, message) {
     state.log.add(message)
