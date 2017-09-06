@@ -22,14 +22,13 @@ class KeyManager {
       'Shift+j': () => console.log('Shift + j')
     }))
 
-    document.addEventListener('keypress', (e) => {
+    window.addEventListener('keyup', (e) => {
       e.preventDefault()
       e.stopImmediatePropagation()
-      console.log('keypress: ' + this.normalize(e))
       console.log(e)
       const fn = this.find(e)
       if (typeof (fn) === 'function') {
-        fn()
+        fn(e)
       }
       return false
     })
@@ -41,8 +40,6 @@ class KeyManager {
 
     console.log(key)
     console.log(code)
-
-    console.log(this.pressed)
 
     let i, map, k
     for (i = 0; i < this.maps.length; i++) {
