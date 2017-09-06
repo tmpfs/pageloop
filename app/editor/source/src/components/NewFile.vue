@@ -135,4 +135,12 @@ export default {
   .new-file {
     padding: 1rem;
   }
+
+  h3 {
+    display: inline-block;
+    font-size: 1.4rem;
+    border-bottom: 1px solid currentColor;
+    margin: 0 0 1rem 0;
+  }
+
 </style>
