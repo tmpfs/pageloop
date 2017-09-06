@@ -104,7 +104,7 @@ export default {
 		border-bottom: 1px solid currentColor;
 	}
 
-	.alert > .dialog > a.close, .notify > a.close {
+  .alert > .dialog > a.close, .notify > a.close {
 		position: absolute;
 		top: 0;
 		right: 0;

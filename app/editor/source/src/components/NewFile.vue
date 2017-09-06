@@ -4,7 +4,13 @@
       <h3>File Name</h3>
       <form @submit="createNewFile">
         <input v-model="fileName" type="text" name="name" :value="fileName" />
-        <p class="hint">Use <code>/path/to/file/document.md</code> to create directories when adding new files.</p>
+        <p class="hint">
+
+          Use <code>/path/to/file/document.md</code> to create directories when adding new files.
+
+          To create a directory end the name with a slash (<code>/path/to/dir/</code>).
+          <a class="close minimal" title="Dismiss this hint"></a>
+        </p>
 
         <div class="template-select">
           <h3>Template</h3>

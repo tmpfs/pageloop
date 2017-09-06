@@ -155,6 +155,15 @@ export default {
     padding: 0.7rem 0.5rem 0.5rem 0.5rem;
   }
 
+  a.close.minimal {
+    width: auto;
+    height: auto;
+    padding: 0;
+    text-align: center;
+    line-height: normal;
+    border: 0;
+  }
+
   a.close::before {
     content: '🞩';
     padding-left: 0.5rem;
@@ -163,6 +172,10 @@ export default {
   a.close:hover {
     color: var(--base3-color);
     background: var(--base03-color);
+  }
+
+  a.close.minimal:hover {
+    border: 0;
   }
 
   /* Headings */
@@ -319,6 +332,7 @@ export default {
   }
 
   .hint {
+    position: relative;
     background: var(--base03-color);
     padding: 1rem;
     font-size: 1.4rem;
@@ -336,5 +350,11 @@ export default {
     width: 1.8rem;
     height: 1.8rem;
     border-radius: 0.9rem;
+  }
+
+  .hint > a.close {
+		position: absolute;
+		top: 0.2rem;
+		right: 0.2rem;
   }
 </style>
