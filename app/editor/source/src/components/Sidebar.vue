@@ -81,7 +81,7 @@ export default {
       }
     },
     canDelete: function () {
-      return this.$store.state.hasFile()
+      return this.$store.state.sidebar.selection.length
     },
     currentFile: function () {
       return this.$store.state.current
@@ -110,12 +110,34 @@ export default {
       return `width: ${Math.round(file.info.ratio * 100)}%`
     },
     confirmDelete: function () {
-      let details = {
-        title: `Delete File (${this.currentFile.name})`,
-        message: `Are you sure you want to delete the file ${this.currentFile.url}?`,
-        note: 'Be careful file deletion is irreversible.',
-        ok: () => {
-          this.doDeleteFile()
+      let details, selected
+      let selection = this.$store.state.sidebar.selection
+      // Nothing to do
+      if (!selection.length) {
+        return
+      }
+      console.log(this.$store.state.sidebar.selection)
+      // Single file deletion
+      if (selection.length === 1) {
+        selected = selection[0]
+        details = {
+          title: `Delete File (${selected.name})`,
+          message: `Are you sure you want to delete the file ${selected.url}?`,
+          note: 'Be careful file deletion is irreversible.',
+          ok: () => {
+            this.doDeleteFile()
+          }
+        }
+      // Multiple file deletion
+      } else {
+        details = {
+          title: `Delete Files (${selection.length})`,
+          message: `Are you sure you want to delete the selected files?`,
+          note: 'Be careful file deletion is irreversible.',
+          ok: () => {
+            console.log('Delete multiple files...')
+            // this.doDeleteFile()
+          }
         }
       }
       this.$store.commit('alert-show', details)

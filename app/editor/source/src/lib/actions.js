@@ -139,6 +139,7 @@ function Actions (router) {
           if (context.state.editor.view === 'welcome') {
             context.commit('editor-view', context.state.editor.defaultView)
           }
+          context.commit('selected-file', file)
         })
     },
     'go-page': function (context, file) {

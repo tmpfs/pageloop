@@ -45,6 +45,18 @@ const Mutations = {
   'current-file-dirty': function (state, val) {
     state.current.dirty = val
   },
+  'selected-file': function (state, file) {
+    if (!state.sidebar.selection.length) {
+      const view = state.sidebar.view
+      if (view) {
+        const list = state.app[view]
+        // TODO: check this works for pages too
+        if (~list.indexOf(file)) {
+          state.sidebar.selection = [file]
+        }
+      }
+    }
+  },
   'preview-url': function (state, url) {
     state.preview.url = url
   },

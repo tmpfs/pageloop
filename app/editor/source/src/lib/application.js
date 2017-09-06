@@ -6,6 +6,7 @@ class Application {
     this.owner = ''
     this.pages = []
     this.files = []
+    this.media = []
     // current selected file
     this.current = this.defaultFile
   }
