@@ -13,8 +13,12 @@ import Flash from './state/flash'
 import Transfer from './transfer'
 import Log from './state/log'
 
+import {KeyManager} from './keymap'
+
 class State {
   constructor () {
+    this.keymap = new KeyManager()
+
     this.main = new MainState()
     this.sidebar = new SidebarState()
     this.editor = new EditorState()
