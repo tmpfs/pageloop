@@ -115,6 +115,9 @@ const Mutations = {
       })
     }
     state.transfer.transfers = list
+  },
+  'dismiss-hint': function (state, id) {
+    state.hints.dismiss(id)
   }
 }
 
