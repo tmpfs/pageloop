@@ -7,6 +7,7 @@ import EditorState from './state/editor'
 import PreviewState from './state/preview'
 
 import Notifier from './state/notifier'
+import Alert from './state/alert'
 import Flash from './state/flash'
 
 import Log from './state/log'
@@ -23,18 +24,10 @@ class State {
     this.preview = new PreviewState()
 
     this.notifier = new Notifier()
+    this.alert = new Alert()
     this.flash = new Flash()
 
     this.log = new Log()
-
-    // TODO: migrate to alert state
-    this.alert = {
-      visible: false,
-      title: 'Alert',
-      message: '',
-      note: '',
-      ok: function noop () {}
-    }
   }
 
   notify (info, del) {
