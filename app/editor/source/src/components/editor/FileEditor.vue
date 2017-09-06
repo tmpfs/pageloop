@@ -93,7 +93,7 @@ export default {
       return this.$store.state.current
     },
     transfers: function () {
-      return this.$store.state.transfers
+      return this.$store.state.transfer.transfers
     }
   },
   created: function () {
