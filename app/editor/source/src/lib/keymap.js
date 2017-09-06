@@ -1,15 +1,3 @@
-const ALT = {test: 'Alt'}
-const SHIFT = {test: 'Shift'}
-const META = {test: 'Meta'}
-const CONTROL = {test: 'Control', value: 'Ctrl'}
-
-const normalizations = [
-  ALT,
-  SHIFT,
-  META,
-  CONTROL
-]
-
 // Mapping of key combinations to functions.
 //
 // If element is given the element must be focused
@@ -28,30 +16,16 @@ class KeyManager {
 
   constructor () {
     this.maps = []
-    this.pressed = {}
 
     this.add(new KeyMap({
       'Meta+n': () => console.log('Meta + n'),
       'Shift+j': () => console.log('Shift + j')
     }))
 
-    document.addEventListener('keydown', (e) => {
-      console.log('GOT KEY DOWN: ' + this.normalize(e))
-      console.log(e)
-      this.pressed[this.normalize(e)] = {key: e.key, code: e.code, keyCode: e.keyCode}
-    })
-
-    document.addEventListener('keyup', (e) => {
-      console.log('GOT KEY UP: ' + this.normalize(e))
-      this.pressed[this.normalize(e)] = {key: e.key, code: e.code, keyCode: e.keyCode}
-      delete this.pressed[this.normalize(e)]
-    })
-
     document.addEventListener('keypress', (e) => {
       e.preventDefault()
       e.stopImmediatePropagation()
       console.log('keypress: ' + this.normalize(e))
-      delete this.pressed[this.normalize(e)]
       console.log(e)
       const fn = this.find(e)
       if (typeof (fn) === 'function') {
@@ -59,19 +33,6 @@ class KeyManager {
       }
       return false
     })
-  }
-
-  normalize (e) {
-    let i, n
-    const key = e.key
-    for (i = 0; i < normalizations.length; i++) {
-      n = normalizations[i]
-      if (key.indexOf(n.test) === 0) {
-        return n.value || n.test
-      }
-    }
-
-    return key
   }
 
   find (e) {
