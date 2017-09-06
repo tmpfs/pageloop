@@ -76,7 +76,7 @@ export default {
   methods: {
     refresh (url) {
       let allowed = /\.(html?)$/
-      if (!allowed.test(url)) {
+      if (url && !allowed.test(url)) {
         return
       }
       if (url === '') {
