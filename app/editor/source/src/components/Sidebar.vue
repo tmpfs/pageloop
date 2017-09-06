@@ -74,7 +74,7 @@ export default {
     },
     maximized: {
       get: function () {
-        return this.$store.state.columns.maximized
+        return this.$store.state.editor.columns.maximized
       },
       set: function (val) {
         this.$store.commit('maximize-column', val)

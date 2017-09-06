@@ -23,7 +23,7 @@ export default {
     },
     needsReset: function () {
       let state = this.$store.state
-      return state.columns.custom || state.columns.maximized
+      return state.editor.columns.custom || state.editor.columns.maximized
     },
     message: function () {
       return this.$store.state.log.toString()

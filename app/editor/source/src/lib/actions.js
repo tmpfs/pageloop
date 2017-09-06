@@ -37,7 +37,7 @@ function Actions (router) {
         })
     },
     'resize-column': function (context, e) {
-      context.state.columns.startDrag(e)
+      context.state.editor.columns.startDrag(e)
     },
     'log': function (context, message) {
       context.commit('log', message)

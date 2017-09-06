@@ -1,11 +1,12 @@
 import Application from './application'
-import Log from './log'
-import ColumnManager from './columns'
 import ApiClient from './api'
 
 import MainState from './state/main'
 import SidebarState from './state/sidebar'
 import EditorState from './state/editor'
+
+import Flash from './state/flash'
+import Log from './log'
 
 class State {
   constructor () {
@@ -17,17 +18,11 @@ class State {
     this.sidebar = new SidebarState()
     this.editor = new EditorState()
 
-    this.defaultEditorView = 'code-editor'
-
     this.previewUrl = ''
     this.previewRefresh = false
 
     this.log = new Log()
-
-    this._flash = undefined
-
-    // State for edit mode columns
-    this.columns = new ColumnManager()
+    this.flash = new Flash()
 
     this.alert = {
       visible: false,
@@ -70,16 +65,6 @@ class State {
     info.reveal = true
 
     this.notifications.unshift(info)
-  }
-
-  get flash () {
-    let f = this._flash
-    this._flash = undefined
-    return f
-  }
-
-  set flash (msg) {
-    this._flash = msg
   }
 
   isDirty () {

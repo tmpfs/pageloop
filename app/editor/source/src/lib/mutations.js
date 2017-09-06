@@ -58,16 +58,16 @@ const Mutations = {
   'maximize-column': function (state, info) {
     // Maximizing
     if (info) {
-      state.columns.maximize(info)
+      state.editor.columns.maximize(info)
     // Minimizing
     } else {
-      state.columns.minimize(state.columns.maximized)
+      state.editor.columns.minimize(state.editor.columns.maximized)
     }
   },
   'reset-column': function (state) {
-    state.columns.reset()
-    if (state.columns.maximized) {
-      state.columns.minimize(state.columns.maximized)
+    state.editor.columns.reset()
+    if (state.editor.columns.maximized) {
+      state.editor.columns.minimize(state.editor.columns.maximized)
     }
   },
   'alert-show': function (state, details) {
