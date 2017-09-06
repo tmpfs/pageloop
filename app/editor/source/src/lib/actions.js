@@ -209,7 +209,7 @@ function Actions (router) {
     },
     'delete-file': function (context, file) {
       let list = context.state.app.files
-      let ctx = context.state.sidebarView
+      let ctx = context.state.sidebar.view
       if (ctx === 'pages') {
         list = context.state.app.pages
       }

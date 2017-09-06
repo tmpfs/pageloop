@@ -28,7 +28,7 @@ const Mutations = {
     state.mainView = view
   },
   'sidebar-view': function (state, view) {
-    state.sidebarView = view
+    state.sidebar.view = view
   },
   'editor-view': function (state, view) {
     state.editorView = view

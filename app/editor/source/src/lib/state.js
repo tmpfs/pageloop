@@ -1,37 +1,9 @@
+import Application from './application'
 import Log from './log'
 import ColumnManager from './columns'
 import ApiClient from './api'
 
-class Application {
-  constructor () {
-    this.defaultFile = {content: ''}
-    this.url = ''
-    this.identifier = ''
-    this.owner = ''
-    this.pages = []
-    this.files = []
-    // current selected file
-    this.current = this.defaultFile
-  }
-
-  getFileByUrl (url) {
-    let i
-    for (i = 0; i < this.files.length; i++) {
-      if (this.files[i].url === url) {
-        return this.files[i]
-      }
-    }
-  }
-
-  getPageByUrl (url) {
-    let i
-    for (i = 0; i < this.pages.length; i++) {
-      if (this.pages[i].url === url) {
-        return this.pages[i]
-      }
-    }
-  }
-}
+import SidebarState from './state/sidebar'
 
 class State {
   constructor () {
@@ -39,8 +11,10 @@ class State {
     this.containers = []
     this.setApplication('', '')
 
+    this.sidebar = new SidebarState()
+
     this.mainView = ''
-    this.sidebarView = ''
+
     this.editorView = ''
     this.defaultEditorView = 'code-editor'
 

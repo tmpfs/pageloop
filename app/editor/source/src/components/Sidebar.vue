@@ -88,7 +88,7 @@ export default {
     },
     currentView: {
       get: function () {
-        return this.$store.state.sidebarView
+        return this.$store.state.sidebar.view
       },
       set: function (val) {
         var values = [val]
