@@ -15,7 +15,7 @@ export default {
   name: 'app-notify',
   computed: {
     notifications: function () {
-      return this.$store.state.notifications
+      return this.$store.state.notifier.notifications
     }
   },
   methods: {

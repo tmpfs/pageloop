@@ -1,12 +1,14 @@
+import ApiClient from './client'
 import Application from './application'
-import ApiClient from './api'
 
 import MainState from './state/main'
 import SidebarState from './state/sidebar'
 import EditorState from './state/editor'
 import PreviewState from './state/preview'
 
+import Notifier from './state/notifier'
 import Flash from './state/flash'
+
 import Log from './state/log'
 
 class State {
@@ -20,8 +22,10 @@ class State {
     this.editor = new EditorState()
     this.preview = new PreviewState()
 
-    this.log = new Log()
+    this.notifier = new Notifier()
     this.flash = new Flash()
+
+    this.log = new Log()
 
     // TODO: migrate to alert state
     this.alert = {
@@ -31,9 +35,10 @@ class State {
       note: '',
       ok: function noop () {}
     }
+  }
 
-    // TODO: migrate to notifications state
-    this.notifications = []
+  notify (info, del) {
+    return this.notifier.notify(info, del)
   }
 
   getAppHref (...args) {
@@ -50,22 +55,6 @@ class State {
     })
     p.push(...args)
     return p.join('/')
-  }
-
-  notify (info, del) {
-    if (del) {
-      for (let i = 0; i < this.notifications.length; i++) {
-        if (info === this.notifications[i]) {
-          this.notifications.splice(i, 1)
-          break
-        }
-      }
-      return
-    }
-
-    info.reveal = true
-
-    this.notifications.unshift(info)
   }
 
   isDirty () {
