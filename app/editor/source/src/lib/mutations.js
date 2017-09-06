@@ -46,14 +46,14 @@ const Mutations = {
     state.current.dirty = val
   },
   'preview-url': function (state, url) {
-    state.previewUrl = url
+    state.preview.url = url
   },
   'preview-refresh': function (state, toggle) {
-    state.previewRefresh = toggle
+    state.preview.refresh = toggle
   },
   'reset-current-file': function (state, url) {
-    state.current = state.defaultFile
-    state.previewUrl = ''
+    state.current = state.app.defaultFile
+    state.preview.url = ''
   },
   'maximize-column': function (state, info) {
     // Maximizing

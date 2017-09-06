@@ -44,11 +44,11 @@ export default {
       }
     },
     previewRefresh: function () {
-      return this.$store.state.previewRefresh
+      return this.$store.state.preview.refresh
     },
     url: {
       get: function () {
-        return this.$store.state.previewUrl
+        return this.$store.state.preview.url
       },
       set: function (val) {
         return this.$store.commit('preview-url', val)

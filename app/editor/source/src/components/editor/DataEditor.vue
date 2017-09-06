@@ -16,7 +16,6 @@ export default {
     }
   },
   render: function (h) {
-    console.log('render data editor')
     // We need recursion to render meta page data
     function list (target) {
       let isArr = Array.isArray(target)

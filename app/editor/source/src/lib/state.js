@@ -4,6 +4,7 @@ import ApiClient from './api'
 import MainState from './state/main'
 import SidebarState from './state/sidebar'
 import EditorState from './state/editor'
+import PreviewState from './state/preview'
 
 import Flash from './state/flash'
 import Log from './state/log'
@@ -17,13 +18,12 @@ class State {
     this.main = new MainState()
     this.sidebar = new SidebarState()
     this.editor = new EditorState()
-
-    this.previewUrl = ''
-    this.previewRefresh = false
+    this.preview = new PreviewState()
 
     this.log = new Log()
     this.flash = new Flash()
 
+    // TODO: migrate to alert state
     this.alert = {
       visible: false,
       title: 'Alert',
@@ -32,6 +32,7 @@ class State {
       ok: function noop () {}
     }
 
+    // TODO: migrate to notifications state
     this.notifications = []
   }
 
@@ -39,7 +40,7 @@ class State {
     let p = ['apps', this.container, this.application]
 
     // TODO: ensure we never get passed undefined / null etc
-    // TODO: and remove this
+    // TODO: and remove this call to filter()
     args = args.filter((val) => {
       return val
     })

@@ -196,7 +196,6 @@ function Actions (router) {
               })
           }
           if (doc.ok) {
-            console.log(doc)
             // Currently YAML is in the source code and
             // can be edited directly we need to sync
             // the data in case it changed
