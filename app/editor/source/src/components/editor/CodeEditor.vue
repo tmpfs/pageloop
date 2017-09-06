@@ -1,11 +1,15 @@
 <template>
   <div class="source-editor">
+    <hint id="file-save" class="compact"></hint>
     <div class="text-editor"></div>
   </div>
 </template>
 
 <script>
 /* globals CodeMirror */
+
+import Hint from '@/components/Hint'
+
 export default {
   name: 'code-editor',
   data: function () {
@@ -121,7 +125,8 @@ export default {
     if (file && file.mime) {
       this.setCodeMirror(file, {mode: this.getModeForMime(file.mime)})
     }
-  }
+  },
+  components: {Hint}
 }
 </script>
 
