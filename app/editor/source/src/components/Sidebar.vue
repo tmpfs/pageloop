@@ -50,6 +50,7 @@
           <div class="progress" :class="{complete: file.complete}" :style="progress(file)"></div>
         </div>
       </div>
+      <hint id="drop-upload" class="compact" v-if="currentView !== 'new-file'"></hint>
       <component v-bind:is="currentView"></component>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
@@ -62,6 +63,8 @@ import NewFile from '@/components/NewFile'
 import Pages from '@/components/Pages'
 import Files from '@/components/Files'
 import Media from '@/components/Media'
+
+import Hint from '@/components/Hint'
 
 export default {
   name: 'sidebar',
@@ -192,7 +195,7 @@ export default {
       return false
     }
   },
-  components: {NewFile, Pages, Files, Media}
+  components: {NewFile, Pages, Files, Media, Hint}
 }
 </script>
 
