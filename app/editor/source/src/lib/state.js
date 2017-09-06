@@ -66,11 +66,7 @@ class State {
 
   isDirty () {
     if (this.app) {
-      for (let i = 0; i < this.app.files.length; i++) {
-        if (this.app.files[i].dirty) {
-          return true
-        }
-      }
+      return this.app.isDirty()
     }
     return false
   }

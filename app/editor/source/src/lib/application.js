@@ -10,6 +10,15 @@ class Application {
     this.current = this.defaultFile
   }
 
+  isDirty () {
+    for (let i = 0; i < this.files.length; i++) {
+      if (this.files[i].dirty) {
+        return true
+      }
+    }
+    return false
+  }
+
   getFileByUrl (url) {
     let i
     for (i = 0; i < this.files.length; i++) {
