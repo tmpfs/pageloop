@@ -131,38 +131,25 @@ export default {
 
 <style>
 
-/*
-  .source-editor {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-content: stretch;
-    align-items: stretch;
-  }
-  */
-
-  .source-editor {
-    position: relative;
-  }
-
-  .text-editor {
-    position: relative;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-  }
-
-  .source-editor .hint {
+  .source-editor > .hint {
     height: 4.2rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .hint + .text-editor {
+    height: calc(100% - 4.2rem)
   }
 
   .text-editor {
-    background: #002b36;
+    height: 100%;
   }
 
   .CodeMirror {
     font-size: 1.6rem;
+    height: 100%;
+    /* flex: 1 0 auto; */
   }
 
   .CodeMirror-dialog {
