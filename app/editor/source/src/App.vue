@@ -335,4 +335,36 @@ export default {
     outline: none;
   }
 
+  .tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 0;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  .tabs > a {
+    flex: 1 0;
+    color: currentColor;
+    text-align: center;
+    background: transparent;
+  }
+
+  .tabs > .selected {
+    text-decoration: underline;
+  }
+
+  .tabs > a:not(:first-child) {
+    border-left: 1px solid var(--border-color);
+  }
+
+  .tabs > a:hover, .tabs > a.selected {
+    background: var(--base03-color);
+    color: var(--base3-color);
+    transition: all 0.5s ease-out;
+  }
+
+
 </style>

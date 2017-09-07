@@ -1,7 +1,7 @@
 <template>
   <div class="new-app">
     <h2>New Application</h2>
-    <form @submit="createApplication">
+    <form @submit="chooseTemplate">
       <p class="small">Choose an application name:</p>
       <input type="text" name="name"
         :value="applicationName" v-model="applicationName" />
@@ -9,7 +9,7 @@
       <input type="text" name="description"
         :value="applicationDescription" v-model="applicationDescription" />
       <div class="form-actions">
-        <input type="submit" value="Create" class="primary" />
+        <input type="submit" value="Next: Choose a template" class="primary" />
       </div>
     </form>
   </div>
@@ -25,6 +25,10 @@ export default {
     }
   },
   methods: {
+    chooseTemplate: function (e) {
+      e.preventDefault()
+      console.log('choose template')
+    },
     createApplication: function (e) {
       e.preventDefault()
       let app = {}

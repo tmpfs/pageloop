@@ -219,6 +219,16 @@ class ApiClient {
         })
       })
   }
+
+  listTemplates () {
+    let url = this.api + 'templates'
+    return fetch(url)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
 }
 
 export default ApiClient

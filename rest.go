@@ -83,9 +83,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
   // List available application templates
 	} else if path == "templates" {
-    println("list templates")
-
-    // Get build in templates
+    // Get built in and user templates
     c := h.Root.Host.GetByName("template")
     u := h.Root.Host.GetByName("user")
     list := append(c.Apps, u.Apps...)
