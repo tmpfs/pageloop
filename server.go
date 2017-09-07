@@ -155,28 +155,19 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
-		ext := filepath.Ext(file.Name)
-		ct := mime.TypeByExtension(ext)
 		output := file.Source(h.Raw)
-    if (ext == ".pdf") {
-		  res.Header().Set("Content-Disposition", "inline; filename=" + base)
-    }
-		res.Header().Set("Content-Type", ct)
-		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
-    if (req.Method == http.MethodHead) {
-      return
-    }
-		res.Write(output)
+    send(file, output)
 		return
+  // Handle directory listing
 	} else if file != nil {
     // Build the template data
     d := file.DirectoryListing()
-
-    // Get the directory listing template
+    // Get the directory listing template file
     c := h.Root.Host.GetByName("template")
     a :=  c.GetByName("listing")
     f := a.Urls["/index.html"]
     p := f.Page()
+    // Parse and execute the template
     if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
       internalError(err)
       return
@@ -185,11 +176,7 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
         internalError(err)
         return
       } else {
-        /*
-        println(string(output))
-        fmt.Printf("%#v\n", p)
-        fmt.Printf("%#v\n", d)
-        */
+        // Send the response
         send(file, output)
         return
       }

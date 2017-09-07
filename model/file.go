@@ -52,6 +52,9 @@ type File struct {
 }
 
 type DirectoryListing struct {
+  Directories int
+  Files int
+  Length int
   Parent *File
   Children []*File
 }
@@ -63,9 +66,15 @@ func (f *File) DirectoryListing () *DirectoryListing {
       continue
     }
     if (strings.HasPrefix(child.Url, f.Url)) {
+      if child.Directory {
+        listing.Directories++
+      } else {
+        listing.Files++
+      }
       listing.Children = append(listing.Children, child)
     }
   }
+  listing.Length = len(listing.Children)
   return listing
 }
 

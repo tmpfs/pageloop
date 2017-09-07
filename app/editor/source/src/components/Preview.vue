@@ -6,7 +6,7 @@
     <div class="column-header">
       <h2>Preview</h2>
         <nav class="toolbar clearfix">
-          <a @click="refresh(path)"
+          <a @click="refresh(file)"
              title="Refresh preview"
              :class="{hidden: path == ''}">Refresh</a>
           <a
@@ -22,7 +22,7 @@
     <div class="column-options">
       <h3>{{path}}</h3>
     </div>
-    <iframe :src="src" :sandbox="sandbox" class="publish-preview"></iframe>
+    <iframe :src="src" class="publish-preview"></iframe>
   </div>
 </template>
 
@@ -40,12 +40,12 @@ export default {
     if (/\.pdf/.test(this.url)) {
       frame.removeAttribute('sandbox')
     } else {
-      frame.setAttribute('sandbox', this.sandbox)
+      // frame.setAttribute('sandbox', this.sandbox)
     }
   },
   computed: {
     sandbox: function () {
-      return 'allow-same-origin allow-scripts'
+      // return 'allow-same-origin allow-scripts'
     },
     maximized: {
       get: function () {
@@ -73,7 +73,7 @@ export default {
     },
     previewRefresh: function (val) {
       if (val === true) {
-        this.refresh(this.path)
+        this.refresh(this.file)
       }
       this.$store.commit('preview-refresh', false)
     }
@@ -81,16 +81,20 @@ export default {
   mounted: function () {
     // This catches the case when switching main views
     // and a refresh is needed
-    if (this.url) {
-      this.refresh(this.url)
+    if (this.file) {
+      this.refresh(this.file)
     }
   },
   methods: {
-    refresh (url) {
+    refresh (file) {
+      const url = file.uri
+
+      console.log('refresh with file: ' + file)
+      console.log('refresh with url: ' + url)
       // TODO: work out how to stop the iframe interpreting
       // TODO: the pdf as an HTML Document
       let allowed = /\.(html?|pdf|svg|jpe?g|png|gif)$/
-      if (url && !allowed.test(url)) {
+      if (!file.dir && url && !allowed.test(url)) {
         return
       }
       if (url === '') {
@@ -104,17 +108,24 @@ export default {
         let frame = document.querySelector('.publish-preview')
         return frame.contentDocument.location.reload()
       }
+      this.file = file
       this.path = url
-      this.src = this.getPreviewUrl(url)
+      this.src = this.getPreviewUrl(url, file)
     },
-    getPreviewUrl (url) {
+    getPreviewUrl (url, file) {
       if (url) {
         url = url.replace(/^\//, '')
       }
 
+      console.log('get preview url: ' + url)
+
       let state = this.$store.state
       let host = state.host
       let base = state.app.url
+
+      if (file.dir) {
+        base = state.app.src
+      }
 
       if (!host) {
         host = document.location.origin

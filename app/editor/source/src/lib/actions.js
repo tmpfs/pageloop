@@ -139,7 +139,7 @@ function Actions (router) {
           if (file.editorView) {
             context.commit('editor-view', file.editorView)
           }
-          context.commit('preview-url', file.uri)
+          context.commit('preview-url', file)
           if (context.state.editor.view === 'welcome') {
             if (!file.binary) {
               context.commit('editor-view', context.state.editor.defaultView)
@@ -279,7 +279,7 @@ function Actions (router) {
               file.url = doc.file.url
               file.uri = doc.file.uri
             }
-            context.commit('preview-url', file.uri)
+            context.commit('preview-url', file)
           }
         })
     },

@@ -5,7 +5,25 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- <link rel="icon" type="image/png" href='{{root "favicon.png"}}' /> -->
-    <!-- <link rel="stylesheet" href='{{root "app.css"}}' /> -->
+    <link rel="icon" type="image/png" href='/assets/img/favicon/png' />
+    <link rel="stylesheet" href='/assets/css/listing.css' />
   </head>
+  <body>
+    <main>
+      <h3>
+        <span class="parent">{{.Parent.Name}}</span>
+      </h3>
+      <h4>
+        <span class="length">{{.Length}} total, {{.Directories}} directories, {{.Files}} files</span>
+      </h4>
+      <ul class="directory-listing">
+      {{range $index, $child := .Children}}
+        <li>
+          <a href="{{$child.Name}}" title="{{$child.Name}}">{{$child.Name}}</a>
+          <span>({{$child.Size}} bytes)</span>
+        </li>
+      {{end}}
+      </ul>
+    </main>
+  </body>
 </html>

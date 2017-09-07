@@ -11,6 +11,10 @@ class Application {
     this.current = this.defaultFile
   }
 
+  get src () {
+    return this.url.replace(/\/www\//, '/src/')
+  }
+
   isDirty () {
     for (let i = 0; i < this.files.length; i++) {
       if (this.files[i].dirty) {

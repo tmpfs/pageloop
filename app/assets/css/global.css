@@ -210,3 +210,8 @@ template {
   pointer-events: none;
 }
 
+.directory-listing {
+  list-style-type: none;
+  margin: 2rem;
+  padding: 0;
+}
