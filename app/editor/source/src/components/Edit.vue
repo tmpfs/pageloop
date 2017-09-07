@@ -87,4 +87,8 @@ export default {
 </script>
 
 <style scoped>
+  /* Column focus */
+  > :focus {
+    border-top: 1px solid var(--blue-color);
+  }
 </style>

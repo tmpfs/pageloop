@@ -1,5 +1,7 @@
 <template>
   <div
+    tabindex="-1"
+    @click="focus"
     :class="{maximized: maximized === 'preview', minimized: maximized != '' && maximized !== 'preview'}"
     class="preview">
     <div class="column-header">
@@ -108,6 +110,9 @@ export default {
       }
 
       return host + this.$store.state.app.url + (url || '')
+    },
+    focus: function () {
+      this.$el.focus()
     }
   }
 }

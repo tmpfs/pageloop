@@ -2,25 +2,30 @@
   <header class="clearfix">
     <nav class="home">
       <a
+        tabindex="0"
         @click="$store.dispatch('navigate', {href: 'edit'})"
         :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
         title="Edit Current Application">{{name}}</a>
     </nav>
     <nav class="main">
       <a
+        tabindex="1"
         @click="$store.dispatch('navigate', {href: 'home'})"
         class="home"
         :class="{selected: selectedView === 'home'}"
         title="Home page">Ꝏ </a>
       <a
+        tabindex="2"
         @click="$store.dispatch('navigate', {href: 'apps'})"
         :class="{selected: selectedView === 'apps'}"
         title="View and edit applications">Apps</a>
       <a
+        tabindex="3"
         @click="$store.dispatch('navigate', {href: 'docs'})"
         :class="{selected: selectedView === 'docs'}"
         title="Documentation">Docs</a>
       <a
+        tabindex="4"
         @click="$store.dispatch('navigate', {href: 'settings'})"
         :class="{selected: selectedView === 'settings'}"
         title="Settings">Settings</a>
@@ -48,8 +53,8 @@ export default {
     margin: 0;
     padding: 0;
     height: 3rem;
-    border-bottom: 1px solid var(--border-color);
     user-select: none;
+    border-bottom: 1px solid var(--border-color);
     cursor: default;
   }
 

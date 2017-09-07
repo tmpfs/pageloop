@@ -1,5 +1,7 @@
 <template>
   <div
+    tabindex="-1"
+    @click="focus"
     :class="{maximized: maximized === 'editor', minimized: maximized != '' && maximized !== 'editor'}"
     class="editor">
     <div class="column-header">
@@ -124,6 +126,10 @@ export default {
     },
     resizeColumn: function (e) {
       this.$store.dispatch('resize-column', e)
+    },
+    focus: function (e) {
+      console.log('editor focused')
+      this.$el.focus()
     }
   },
   components: {Welcome, FileEditor, DataEditor, CodeEditor, VisualEditor}
@@ -137,6 +143,7 @@ export default {
     opacity: 1;
     transition: all 0.5s ease-out;
     background: var(--background);
+    border-top: 1px solid var(--border-color);
   }
 
   .sidebar {

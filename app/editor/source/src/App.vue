@@ -331,4 +331,8 @@ export default {
     padding: 2rem;
   }
 
+  :focus {
+    outline: none;
+  }
+
 </style>

@@ -201,10 +201,6 @@ export default {
 
 <style>
 
-  :focus {
-    border: 1px solid red;
-  }
-
   .page, .file {
     display: block;
     padding: .2rem 0 .2rem 1rem;
