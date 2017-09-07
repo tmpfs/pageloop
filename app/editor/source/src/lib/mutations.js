@@ -38,7 +38,11 @@ const Mutations = {
   },
   'current-file': function (state, file) {
     if (!file.editorView) {
-      file.editorView = state.editor.defaultView
+      if (file.binary) {
+        file.editorView = state.editor.defaultBinaryView
+      } else {
+        file.editorView = state.editor.defaultView
+      }
     }
     state.current = file
   },

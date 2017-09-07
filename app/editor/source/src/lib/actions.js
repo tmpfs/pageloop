@@ -137,11 +137,16 @@ function Actions (router) {
           }
           context.commit('current-file', file)
           if (file.editorView) {
+            console.log('using file editor view: ' + file.editorView)
             context.commit('editor-view', file.editorView)
           }
           context.commit('preview-url', file.uri)
           if (context.state.editor.view === 'welcome') {
-            context.commit('editor-view', context.state.editor.defaultView)
+            if (!file.binary) {
+              context.commit('editor-view', context.state.editor.defaultView)
+            } else {
+              context.commit('editor-view', 'visual-editor')
+            }
           }
           context.commit('selected-file', file)
         })

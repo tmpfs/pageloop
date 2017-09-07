@@ -5,6 +5,7 @@ class EditorState extends ViewState {
   constructor () {
     super()
     this.defaultView = 'code-editor'
+    this.defaultBinaryView = 'visual-editor'
 
     // State for edit mode columns
     this.columns = new ColumnManager()

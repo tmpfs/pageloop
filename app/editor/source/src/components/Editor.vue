@@ -27,7 +27,7 @@
         <a v-bind:class="{selected: currentView === 'data-editor', disabled: dataHidden}"
           @click="currentView = 'data-editor'"
           title="Show data editor">Data</a>
-        <a v-bind:class="{selected: currentView === 'code-editor', disabled: hidden}"
+        <a v-bind:class="{selected: currentView === 'code-editor', disabled: codeHidden}"
           @click="currentView = 'code-editor'"
           title="Show source editor">Code</a>
         <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
@@ -78,6 +78,9 @@ export default {
     },
     fileHidden: function () {
       return !this.$store.state.hasFile()
+    },
+    codeHidden: function () {
+      return !this.hidden && this.$store.state.current.binary
     },
     hidden: function () {
       return !this.$store.state.hasFile() || this.$store.state.isDirectory()
