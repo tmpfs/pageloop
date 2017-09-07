@@ -118,3 +118,4 @@ Wow, so much to do, here is some stuff:
 43) Add tips/hints for sidebar file upload
 44) Support deleting multiple selected files
 45) File upload documentation
+46) Standardize public/source directories for all apps

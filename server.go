@@ -110,10 +110,11 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	path := "/" + req.URL.Path
 	clean := strings.TrimSuffix(path, "/")
 	indexPage := clean + "/" + index
+  base := filepath.Base(path)
 
 	// TODO: handle HEAD requests
 
-	if req.Method != http.MethodGet {
+	if req.Method != http.MethodGet && req.Method != http.MethodHead {
 		res.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -137,8 +138,14 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		ext := filepath.Ext(file.Name)
 		ct := mime.TypeByExtension(ext)
 		output := file.Source(h.Raw)
+    if (ext == ".pdf") {
+		  res.Header().Set("Content-Disposition", "inline; filename=" + base)
+    }
 		res.Header().Set("Content-Type", ct)
 		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
+    if (req.Method == http.MethodHead) {
+      return 
+    }
 		res.Write(output)
 		return
 	}
