@@ -14,7 +14,7 @@
           v-for="container in list">{{container.name}} Apps</a>
       </nav>
     </div>
-    <div class="content scroll">
+    <div class="content">
       <component v-bind:is="currentView" :containerName="containerName"></component>
     </div>
   </div>
@@ -56,10 +56,6 @@ export default {
 </script>
 
 <style>
-
-  .apps-nav + .scroll {
-    height: calc(100% - 2.4rem);
-  }
 
   .apps-list {
     display: flex;
@@ -105,6 +101,13 @@ export default {
 
   .apps-nav .tabs {
     max-width: 40%;
+  }
+
+</style>
+
+<style scoped>
+  .scroll {
+    height: calc(100% - 2.4rem);
   }
 
 </style>

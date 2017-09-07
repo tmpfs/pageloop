@@ -14,7 +14,7 @@
         </div>
       </form>
     </div>
-    <div class="new-app-templates">
+    <div class="new-app-templates scroll">
       <h2>Choose Template</h2>
       <div class="templates-list">
         <div
@@ -22,13 +22,15 @@
           class="app-template"
           :class="{selected: applicationTemplate === tpl.url}"
           v-for="tpl, index in templates">
-          <input
-            :id="tpl.name"
-            type="radio"
-            :value="tpl.url"
-            v-model="applicationTemplate"
-            name="template" />
-          <label :for="tpl.name">{{tpl.name}}</label>
+          <span>
+            <input
+              :id="tpl.name"
+              type="radio"
+              :value="tpl.url"
+              v-model="applicationTemplate"
+              name="template" />
+            <label :for="tpl.name">{{tpl.name}}</label>
+          </span>
           <p class="small">{{tpl.description}}</p>
           <p class="small">{{tpl.url}}</p>
           <iframe @load="loaded" :src="tpl.url"></iframe>
@@ -103,18 +105,21 @@ export default {
   .new-app {
     display: flex;
     width: 100%;
-    padding: 2rem 0 2rem 2rem;
+    padding: 0;
     border-right: 1px solid var(--border-color)
   }
 
   .new-app-fields {
     max-width: 20%;
+    padding: 2rem;
   }
 
   input[type="radio"] {
     display: inline-block;
     line-height: 3rem;
     padding-top: 0.4rem;
+    pointer-events: none;
+    vertical-align: middle;
   }
 
   .new-app > * {
@@ -123,6 +128,7 @@ export default {
 
   .new-app-templates {
     margin-left: 2rem;
+    padding: 2rem 0;
   }
 
   iframe {
@@ -134,7 +140,7 @@ export default {
 
   .templates-list {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     margin-top: 2rem;
   }
 
@@ -143,11 +149,17 @@ export default {
     padding: 1rem 0;
     background: var(--base03-color);
     padding: 1rem;
-    border: 2px solid var(--base00-color);
-    margin-right: 2rem;
+    border: 1px solid var(--base00-color);
+    margin: 0 2rem 2rem 0;
+    transition: all 0.3s ease-out;
+    cursor: pointer;
+  }
+
+  .app-template label {
+    vertical-align: middle;
   }
 
   .app-template.selected {
-    border: 2px solid var(--base3-color);
+    border: 1px solid var(--base3-color);
   }
 </style>
