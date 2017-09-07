@@ -80,7 +80,7 @@ export default {
       return !this.$store.state.hasFile()
     },
     codeHidden: function () {
-      return !this.hidden && this.$store.state.current.binary
+      return this.$store.state.isDirectory() || (!this.hidden && this.$store.state.current.binary)
     },
     hidden: function () {
       return !this.$store.state.hasFile() || this.$store.state.isDirectory()
