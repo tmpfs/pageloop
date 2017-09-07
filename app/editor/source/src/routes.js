@@ -16,12 +16,16 @@ function Routes (router, store) {
       }
 
       function findAndOpen (href) {
+        let trailing = href
+        if (!/\/$/.test(href)) {
+          trailing += '/'
+        }
         let arr = state.app.files
         if (action === 'pages') {
           arr = state.app.pages
         }
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].url === href) {
+          if (arr[i].url === href || arr[i].url === trailing) {
             store.dispatch('open-file', arr[i])
             return arr[i]
           }
@@ -32,7 +36,8 @@ function Routes (router, store) {
         file = findAndOpen(href)
         if (!file) {
           // Continue route processing to trigger a 404
-          return true
+          // return true
+          return
         }
         store.commit('main-view', 'edit')
         store.commit('sidebar-view', action)
