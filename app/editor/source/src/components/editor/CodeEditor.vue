@@ -4,7 +4,6 @@
     <div class="text-editor"></div>
   </div>
 </template>
-
 <script>
 /* globals CodeMirror */
 
@@ -132,15 +131,43 @@ export default {
 
 <style>
 
+/*
+  .source-editor {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-content: stretch;
+    align-items: stretch;
+  }
+  */
+
+  .source-editor {
+    position: relative;
+  }
+
+  .text-editor {
+    position: relative;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+
+  .source-editor .hint {
+    height: 4.2rem;
+  }
+
   .text-editor {
     background: #002b36;
-    height: 100%;
   }
 
   .CodeMirror {
     font-size: 1.6rem;
-    width: 100%;
-    height: 100%;
+  }
+
+  .CodeMirror-dialog {
+    font-size: 1.4rem;
+    font-family: inherit;
   }
 
   .CodeMirror-dialog input {
