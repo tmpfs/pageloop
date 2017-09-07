@@ -8,9 +8,11 @@ leader: |
 ---
 
 Select the *apps* link in the main menu at the top of the page and 
-you will see the new application form.
+then click the *New Application* button.
 
-Enter a name for your application and a short description then submit 
-the form and you will be redirected to your new application.
+Enter a name and short description for your application and select a 
+template, if you don't select a template you will create an 
+application with no files.
 
-TODO: implement and document selecting an application template.
+Click the *Create Application* button to be redirected to your 
+new application.

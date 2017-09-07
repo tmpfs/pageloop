@@ -112,8 +112,14 @@ type ApplicationPublicHandler struct {
 
 func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   app := h.App
-  file := app.Urls["/" + req.URL.Path]
-  if file != nil && file.Directory {
+  path := "/" + req.URL.Path
+  file := app.Urls[path]
+	clean := strings.TrimSuffix(path, "/")
+  // FIXME: this is rubbish
+	indexPage := clean + "/index.html"
+	indexMdPage := clean + "/index.md"
+  if file != nil && file.Directory && app.Urls[indexPage] == nil && app.Urls[indexMdPage] == nil {
+
     h.Root.DirectoryListing(file, res, req)
     return
   }
