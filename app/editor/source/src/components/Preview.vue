@@ -22,7 +22,7 @@
     <div class="column-options">
       <h3>{{path}}</h3>
     </div>
-    <iframe :src="src" sandbox="allow-same-origin allow-scripts" class="publish-preview"></iframe>
+    <iframe :src="src" :sandbox="sandbox" class="publish-preview"></iframe>
   </div>
 </template>
 
@@ -35,7 +35,18 @@ export default {
       src: ''
     }
   },
+  updated: function () {
+    const frame = this.$el.querySelector('iframe')
+    if (/\.pdf/.test(this.url)) {
+      frame.removeAttribute('sandbox')
+    } else {
+      frame.setAttribute('sandbox', this.sandbox)
+    }
+  },
   computed: {
+    sandbox: function () {
+      return 'allow-same-origin allow-scripts'
+    },
     maximized: {
       get: function () {
         return this.$store.state.editor.columns.maximized
@@ -103,12 +114,13 @@ export default {
 
       let state = this.$store.state
       let host = state.host
+      let base = state.app.url
 
       if (!host) {
         host = document.location.origin
       }
 
-      return host + this.$store.state.app.url + (url || '')
+      return host + base + (url || '')
     }
   }
 }
