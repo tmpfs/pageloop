@@ -129,6 +129,7 @@ export default {
       this.$store.dispatch('resize-column', e)
     },
     focus: function (e) {
+      // console.log('setting focus')
       this.$el.classList.add('focused')
       if (this.codeMirror) {
         this.codeMirror.on('blur', () => {
@@ -137,6 +138,7 @@ export default {
       }
     },
     blur: function () {
+      // console.log('blur handler called')
       this.$el.classList.remove('focused')
     }
   },

@@ -54,7 +54,6 @@ export default {
     padding: 0;
     height: 3rem;
     user-select: none;
-    border-bottom: 1px solid var(--border-color);
     cursor: default;
   }
 
