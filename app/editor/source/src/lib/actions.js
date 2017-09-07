@@ -290,6 +290,12 @@ function Actions (router) {
           return context.dispatch('reload')
             .then(() => transfers)
         })
+    },
+    'list-templates': function (context) {
+      return context.state.client.listTemplates()
+        .then(({response, document}) => {
+          context.commit('templates', document)
+        })
     }
   }
 }

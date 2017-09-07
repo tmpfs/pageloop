@@ -122,6 +122,9 @@ const Mutations = {
   },
   'dismiss-hint': function (state, id) {
     state.hints.dismiss(id)
+  },
+  'templates': function (state, templates) {
+    state.templates = templates
   }
 }
 

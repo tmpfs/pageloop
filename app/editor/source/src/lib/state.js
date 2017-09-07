@@ -38,6 +38,7 @@ class State {
     this.client = this.defaultClient = new ApiClient()
 
     this.containers = []
+    this.templates = []
     this.setApplication('', '')
   }
 
