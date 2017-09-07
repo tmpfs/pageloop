@@ -1,5 +1,7 @@
 <template>
   <div class="sidebar"
+    tabindex="-1"
+    @click="focus"
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
       <nav class="toolbar">
@@ -146,12 +148,10 @@ export default {
       }
       this.$store.commit('alert-show', details)
     },
-    /*
     focus: function () {
       console.log('focusing')
       this.$el.focus()
     },
-    */
     deleteFiles: function (files) {
       return this.$store.dispatch('delete-files', files)
         .catch((e) => console.error(e))
@@ -201,11 +201,9 @@ export default {
 
 <style>
 
-  /*
   :focus {
     border: 1px solid red;
   }
-  */
 
   .page, .file {
     display: block;
