@@ -103,6 +103,71 @@ type ApplicationSourceHandler struct {
 	Raw bool
 }
 
+// Serves application public files from disc.
+type ApplicationPublicHandler struct {
+  Root *PageLoop
+	App *model.Application
+  FileServer http.Handler
+}
+
+func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+  app := h.App
+  file := app.Urls["/" + req.URL.Path]
+  if file != nil && file.Directory {
+    h.Root.DirectoryListing(file, res, req)
+    return
+  }
+  // Defer to file server for files
+  h.FileServer.ServeHTTP(res, req)
+}
+
+func (l *PageLoop) DirectoryListing (file *model.File, res http.ResponseWriter, req *http.Request) {
+
+  internalError := func (err error) {
+    // TODO: implement internal error handling
+    panic(err)
+  }
+
+  // Build the template data
+  d := file.DirectoryListing()
+  // Get the directory listing template file
+  c := l.Host.GetByName("template")
+  a :=  c.GetByName("listing")
+  f := a.Urls["/index.html"]
+  p := f.Page()
+  // Parse and execute the template
+  if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
+    internalError(err)
+    return
+  } else {
+    if output, err := p.ExecuteTemplate(tpl, d); err != nil {
+      internalError(err)
+      return
+    } else {
+      // Send the response
+      send(res, req, file, output)
+      return
+    }
+  }
+}
+
+func send (res http.ResponseWriter, req *http.Request, file *model.File, output []byte) {
+	path := "/" + req.URL.Path
+  base := filepath.Base(path)
+
+  ext := filepath.Ext(file.Name)
+  ct := mime.TypeByExtension(ext)
+  if (ext == ".pdf") {
+    res.Header().Set("Content-Disposition", "inline; filename=" + base)
+  }
+  res.Header().Set("Content-Type", ct)
+  res.Header().Set("Content-Length", strconv.Itoa(len(output)))
+  if (req.Method == http.MethodHead) {
+    return
+  }
+  res.Write(output)
+}
+
 // Tests the request path and attempts to find a corresponding source file
 // in the application files.
 func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -111,9 +176,6 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	path := "/" + req.URL.Path
 	clean := strings.TrimSuffix(path, "/")
 	indexPage := clean + "/" + index
-  base := filepath.Base(path)
-
-	// TODO: handle HEAD requests
 
 	if req.Method != http.MethodGet && req.Method != http.MethodHead {
 		res.WriteHeader(http.StatusMethodNotAllowed)
@@ -133,54 +195,16 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		file = urls[indexPage]
 	}
 
-  internalError := func (err error) {
-    // TODO: implement internal error handling
-    panic(err)
-  }
-
-  send := func (file *model.File, output []byte) {
-		ext := filepath.Ext(file.Name)
-		ct := mime.TypeByExtension(ext)
-    if (ext == ".pdf") {
-		  res.Header().Set("Content-Disposition", "inline; filename=" + base)
-    }
-		res.Header().Set("Content-Type", ct)
-		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
-    if (req.Method == http.MethodHead) {
-      return
-    }
-		res.Write(output)
-  }
-
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
 		output := file.Source(h.Raw)
-    send(file, output)
+    send(res, req, file, output)
 		return
   // Handle directory listing
 	} else if file != nil {
-    // Build the template data
-    d := file.DirectoryListing()
-    // Get the directory listing template file
-    c := h.Root.Host.GetByName("template")
-    a :=  c.GetByName("listing")
-    f := a.Urls["/index.html"]
-    p := f.Page()
-    // Parse and execute the template
-    if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
-      internalError(err)
-      return
-    } else {
-      if output, err := p.ExecuteTemplate(tpl, d); err != nil {
-        internalError(err)
-        return
-      } else {
-        // Send the response
-        send(file, output)
-        return
-      }
-    }
+    h.Root.DirectoryListing(file, res, req)
+    return
   }
 
 	http.NotFound(res, req)
@@ -332,8 +356,6 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
     // Publish apps relative to a parent container directory
     publishPath = filepath.Join(publishPath, container.Name)
 
-    //println("Publish config: " + publishPath)
-
     // Publish the application files to a build directory
     if err = app.Publish(publishPath); err != nil {
       return nil, err
@@ -377,7 +399,8 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the static build files from the mountpoint path.
 	url := l.getPublishUrl(app)
 	log.Printf("Serving app %s from %s", url, app.Public)
-	mountpoints[url] = http.StripPrefix(url, http.FileServer(http.Dir(app.Public)))
+  fileserver := http.FileServer(http.Dir(app.Public))
+  mountpoints[url] = http.StripPrefix(url, ApplicationPublicHandler{Root:l, App: app, FileServer: fileserver})
 
 	// Serve the source files with frontmatter stripped.
 	url = l.getSourceUrl(app)

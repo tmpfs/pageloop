@@ -50,8 +50,8 @@ html, body {
 }
 
 body {
-  font-size: 1.8rem;
-  line-height: 2.2rem;
+  font-size: 1.6rem;
+  line-height: 2rem;
   font-family: 'SourceSans';
   background: var(--background);
   color: var(--color);

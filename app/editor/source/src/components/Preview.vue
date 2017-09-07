@@ -89,8 +89,6 @@ export default {
     refresh (file) {
       const url = file.uri
 
-      console.log('refresh with file: ' + file)
-      console.log('refresh with url: ' + url)
       // TODO: work out how to stop the iframe interpreting
       // TODO: the pdf as an HTML Document
       let allowed = /\.(html?|pdf|svg|jpe?g|png|gif)$/
@@ -117,15 +115,9 @@ export default {
         url = url.replace(/^\//, '')
       }
 
-      console.log('get preview url: ' + url)
-
       let state = this.$store.state
       let host = state.host
       let base = state.app.url
-
-      if (file.dir) {
-        base = state.app.src
-      }
 
       if (!host) {
         host = document.location.origin
