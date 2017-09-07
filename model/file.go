@@ -51,6 +51,24 @@ type File struct {
 	page *Page
 }
 
+type DirectoryListing struct {
+  Parent *File
+  Children []*File
+}
+
+func (f *File) DirectoryListing () *DirectoryListing {
+  listing := &DirectoryListing{Parent: f}
+  for _, child := range f.owner.Urls {
+    if child == f {
+      continue
+    }
+    if (strings.HasPrefix(child.Url, f.Url)) {
+      listing.Children = append(listing.Children, child)
+    }
+  }
+  return listing
+}
+
 // TODO: http.File implementation
 func (f *File) Seek(offset int64, whence int) (int64, error) {
 	return 0, nil

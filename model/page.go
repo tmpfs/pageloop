@@ -238,7 +238,7 @@ func (p *Page) ParseTemplate(path string, source []byte, funcs template.FuncMap,
 }
 
 // Execute a template with the given data.
-func (p *Page) ExecuteTemplate(tpl *template.Template, data map[string] interface{}) ([]byte, error) {
+func (p *Page) ExecuteTemplate(tpl *template.Template, data interface{}) ([]byte, error) {
 	var err error
 	w := new(bytes.Buffer)
 	if err = tpl.Execute(w, data); err != nil {

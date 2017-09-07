@@ -44,3 +44,9 @@ mountpoints:
     path: app/template/applications/pure/
     description: |
       Pure application template
+  -
+    container: template
+    url: /template/listing/
+    path: app/template/listing/
+    description: |
+      Directory listing

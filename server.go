@@ -98,6 +98,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Serves application source files from memory.
 type ApplicationSourceHandler struct {
+  Root *PageLoop
 	App *model.Application
 	Raw bool
 }
@@ -132,6 +133,25 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		file = urls[indexPage]
 	}
 
+  internalError := func (err error) {
+    // TODO: implement internal error handling
+    panic(err)
+  }
+
+  send := func (file *model.File, output []byte) {
+		ext := filepath.Ext(file.Name)
+		ct := mime.TypeByExtension(ext)
+    if (ext == ".pdf") {
+		  res.Header().Set("Content-Disposition", "inline; filename=" + base)
+    }
+		res.Header().Set("Content-Type", ct)
+		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
+    if (req.Method == http.MethodHead) {
+      return
+    }
+		res.Write(output)
+  }
+
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
@@ -144,11 +164,37 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		res.Header().Set("Content-Type", ct)
 		res.Header().Set("Content-Length", strconv.Itoa(len(output)))
     if (req.Method == http.MethodHead) {
-      return 
+      return
     }
 		res.Write(output)
 		return
-	}
+	} else if file != nil {
+    // Build the template data
+    d := file.DirectoryListing()
+
+    // Get the directory listing template
+    c := h.Root.Host.GetByName("template")
+    a :=  c.GetByName("listing")
+    f := a.Urls["/index.html"]
+    p := f.Page()
+    if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
+      internalError(err)
+      return
+    } else {
+      if output, err := p.ExecuteTemplate(tpl, d); err != nil {
+        internalError(err)
+        return
+      } else {
+        /*
+        println(string(output))
+        fmt.Printf("%#v\n", p)
+        fmt.Printf("%#v\n", d)
+        */
+        send(file, output)
+        return
+      }
+    }
+  }
 
 	http.NotFound(res, req)
 }
@@ -349,12 +395,12 @@ func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the source files with frontmatter stripped.
 	url = l.getSourceUrl(app)
 	log.Printf("Serving src %s from %s", url, app.Path)
-	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
+  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app})
 
 	// Serve the raw source files.
 	url = l.getRawUrl(app)
 	log.Printf("Serving raw %s from %s", url, app.Path)
-	mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
+  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app, Raw: true})
 }
 
 // Unmount an application from the web server.
