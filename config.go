@@ -49,6 +49,8 @@ type Mountpoint struct {
   Path string	`json:"path" yaml:"path"`
 	// Description to pass to the application.
   Description string `json:"description" yaml:"description"`
+  // Mark as a template
+  Template bool `json:"template" yaml:"template"`
 }
 
 // Public access to the default server config.

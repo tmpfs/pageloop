@@ -124,4 +124,8 @@ Get the list of pages for an application.
 
 Get page information for the page URL.
 
+## GET /templates
+
+Get a list of application templates.
+
 </div>

@@ -345,6 +345,7 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 		}
 
 		app := model.NewApplication(urlPath, mt.Description)
+    app.IsTemplate = mt.Template
 		fs := model.NewUrlFileSystem(app)
 		app.FileSystem = fs
 

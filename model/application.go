@@ -57,15 +57,18 @@ type Application struct {
   Base string `json:"-"`
   Urls map[string] *File `json:"-"`
 
-	FileSystem ApplicationFileSystem
+	FileSystem ApplicationFileSystem `json:"-"`
 
 	// A protected application cannot be deleted.
 	Protected bool `json:"protected,omitempty"`
 
+  // Mark this application as a template
+  IsTemplate bool `json:"is-template,omitempty"`
+
 	Container *Container `json:"-"`
 
 	// A source template for this application
-	Template *ApplicationTemplate `json:"template"`
+	Template *ApplicationTemplate `json:"template,omitempty"`
 }
 
 // References an existing mounted application subdirectory

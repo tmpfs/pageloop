@@ -81,7 +81,29 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			ok(res, data)
 			return
 		}
-	}
+  // List available application templates
+	} else if path == "templates" {
+    println("list templates")
+
+    // Get build in templates
+    c := h.Root.Host.GetByName("template")
+    u := h.Root.Host.GetByName("user")
+    list := append(c.Apps, u.Apps...)
+    var apps []*model.Application
+    for _, app := range list {
+      if app.IsTemplate {
+        apps = append(apps, app)
+      }
+    }
+
+    if content, err := json.Marshal(apps); err != nil {
+      ex(res, http.StatusInternalServerError, nil, err)
+      return
+    } else {
+      ok(res, content)
+      return
+    }
+  }
 
 	path = strings.Trim(path, "/")
 	parts := strings.Split(path, "/")
