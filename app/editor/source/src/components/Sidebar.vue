@@ -149,7 +149,6 @@ export default {
       this.$store.commit('alert-show', details)
     },
     focus: function () {
-      console.log('focusing')
       this.$el.focus()
     },
     deleteFiles: function (files) {
