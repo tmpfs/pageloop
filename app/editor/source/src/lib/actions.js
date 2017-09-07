@@ -137,7 +137,6 @@ function Actions (router) {
           }
           context.commit('current-file', file)
           if (file.editorView) {
-            console.log('using file editor view: ' + file.editorView)
             context.commit('editor-view', file.editorView)
           }
           context.commit('preview-url', file.uri)
