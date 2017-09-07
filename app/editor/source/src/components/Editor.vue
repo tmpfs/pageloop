@@ -1,8 +1,6 @@
 <template>
   <div
-    tabindex="-1"
-    @click="focus"
-    @blur="blur"
+    tabindex="6"
     :class="{maximized: maximized === 'editor', minimized: maximized != '' && maximized !== 'editor'}"
     class="editor">
     <div class="column-header">
@@ -127,19 +125,6 @@ export default {
     },
     resizeColumn: function (e) {
       this.$store.dispatch('resize-column', e)
-    },
-    focus: function (e) {
-      // console.log('setting focus')
-      this.$el.classList.add('focused')
-      if (this.codeMirror) {
-        this.codeMirror.on('blur', () => {
-          this.$el.classList.remove('focused')
-        })
-      }
-    },
-    blur: function () {
-      // console.log('blur handler called')
-      this.$el.classList.remove('focused')
     }
   },
   components: {Welcome, FileEditor, DataEditor, CodeEditor, VisualEditor}

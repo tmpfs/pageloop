@@ -1,7 +1,6 @@
 <template>
   <div class="sidebar"
-    tabindex="-1"
-    @click="focus"
+    tabindex="5"
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
       <nav class="toolbar">
@@ -147,9 +146,6 @@ export default {
         }
       }
       this.$store.commit('alert-show', details)
-    },
-    focus: function () {
-      this.$el.focus()
     },
     deleteFiles: function (files) {
       return this.$store.dispatch('delete-files', files)
