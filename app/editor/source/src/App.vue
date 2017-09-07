@@ -224,6 +224,7 @@ export default {
 
   input[type="text"] {
     width: 100%;
+    margin-bottom: 1rem;
   }
 
   button, input[type="submit"], input[type="reset"] {
@@ -249,9 +250,11 @@ export default {
     color: var(--base3-color);
   }
 
+  /*
   input[type="submit"], input[type="reset"] {
     margin-top: 1rem;
   }
+  */
 
   /* Rhythm */
 

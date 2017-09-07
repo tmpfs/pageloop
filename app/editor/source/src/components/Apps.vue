@@ -1,15 +1,21 @@
 <template>
   <div class="content-main">
-    <nav class="tabs">
-      <a
-        @click="currentView = 'new-app'"
-        title="Create a new application">New Application</a>
-      <a
-        @click="currentView = 'apps-list'"
-        title="List application">Show Applications</a>
-    </nav>
+    <div class="apps-nav">
+      <nav class="tabs">
+        <a
+          @click="currentView = 'new-app'"
+          :class="{selected: currentView === 'new-app'}"
+          title="Create a new application">New Application</a>
+
+        <a
+          @click="listApplications(container, $event)"
+          :title="getLinkTitle(container)"
+          :class="{selected: isSelected(container)}"
+          v-for="container in list">{{container.name}} Apps</a>
+      </nav>
+    </div>
     <div class="content scroll">
-      <component v-bind:is="currentView"></component>
+      <component v-bind:is="currentView" :containerName="containerName"></component>
     </div>
   </div>
 </template>
@@ -23,26 +29,50 @@ export default {
   name: 'apps',
   data: function () {
     return {
-      currentView: 'apps-list'
+      currentView: 'apps-list',
+      containerName: 'user'
+    }
+  },
+  computed: {
+    list: function () {
+      return this.$store.state.containers
+    }
+  },
+  methods: {
+    isSelected: function (container) {
+      return this.currentView === 'apps-list' && this.containerName === container.name
+    },
+    listApplications: function (container, e) {
+      e.preventDefault()
+      this.containerName = container.name
+      this.currentView = 'apps-list'
+    },
+    getLinkTitle: function (container) {
+      return `Show applications in ${container.name}`
     }
   },
   components: {NewApp, AppsList}
 }
 </script>
 
-<style scoped>
+<style>
 
-  .containers-list {
+  .apps-nav + .scroll {
+    height: calc(100% - 2.4rem);
+  }
+
+  .apps-list {
     display: flex;
-  }
-
-  .containers {
-    flex: 1 0;
+    justify-content: center;
+    flex-wrap: wrap;
     padding: 2rem;
+    width: 100%;
   }
 
-  .containers > ul {
-    margin-left: 2rem;
+  .app {
+    flex: 1 0;
+    margin-right: 2rem;
+    min-width: 24rem;
   }
 
   .app > p.small {
@@ -66,6 +96,15 @@ export default {
 
   .name + p.small {
     margin-top: 0.2rem;
+  }
+
+  .apps-nav {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .apps-nav .tabs {
+    max-width: 40%;
   }
 
 </style>

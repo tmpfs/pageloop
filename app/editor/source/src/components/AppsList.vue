@@ -1,28 +1,21 @@
 <template>
-  <div class="containers-list">
-    <div class="containers" v-for="container in list">
-      <span :class="{hidden: !container.protected}">🔒&nbsp;</span>
-      <span class="name container">{{container.name}}</span>
-      <p class="small">{{container.description}}</p>
-      <div>
-        <div class="app" v-for="app in container.apps">
-            <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
-            <span class="name">{{app.name}}</span>
-            <p class="small">URL: {{app.url}}<br />{{app.description}}
-              <p class="app-actions">
-                <a class="name"
-                  @click="$store.dispatch('navigate', {href: linkify(container, app)})"
-                  :title="title(app, 'Edit')">Edit</a>
-                <a class="name"
-                  :href="linkify(container, app, true)"
-                  :title="title(app, 'Open')">Open</a>
-                <a v-if="!app.protected" class="name"
-                  @click="confirmDeleteApplication(container, app)"
-                  :title="title(app, 'Delete')">Delete</a>
-              </p>
-            </p>
-        </div>
-      </div>
+  <div class="apps-list">
+   <div class="app" v-for="app in container.apps">
+        <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
+        <span class="name">{{app.name}}</span>
+        <p class="small">URL: {{app.url}}<br />{{app.description}}
+          <p class="app-actions">
+            <a class="name"
+              @click="$store.dispatch('navigate', {href: linkify(container, app)})"
+              :title="title(app, 'Edit')">Edit</a>
+            <a class="name"
+              :href="linkify(container, app, true)"
+              :title="title(app, 'Open')">Open</a>
+            <a v-if="!app.protected" class="name"
+              @click="confirmDeleteApplication(container, app)"
+              :title="title(app, 'Delete')">Delete</a>
+          </p>
+        </p>
     </div>
   </div>
 </template>
@@ -31,9 +24,14 @@
 
 export default {
   name: 'apps-list',
+  props: ['containerName'],
   computed: {
     list: function () {
+      console.log(this.container)
       return this.$store.state.containers
+    },
+    container: function () {
+      return this.$store.state.getContainerByName(this.containerName)
     }
   },
   methods: {

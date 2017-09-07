@@ -41,6 +41,14 @@ class State {
     this.setApplication('', '')
   }
 
+  getContainerByName (name) {
+    for (let i = 0; i < this.containers.length; i++) {
+      if (name === this.containers[i].name) {
+        return this.containers[i]
+      }
+    }
+  }
+
   get client () {
     return this._client
   }

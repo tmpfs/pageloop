@@ -2,10 +2,10 @@
   <div class="new-app">
     <h2>New Application</h2>
     <form @submit="chooseTemplate">
-      <p class="small">Choose an application name:</p>
+      <label class="small">Application name:</label>
       <input type="text" name="name"
         :value="applicationName" v-model="applicationName" />
-      <p class="small">Short description:</p>
+      <label class="small">Short description:</label>
       <input type="text" name="description"
         :value="applicationDescription" v-model="applicationDescription" />
       <div class="form-actions">
