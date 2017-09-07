@@ -1,6 +1,8 @@
 <template>
   <div class="sidebar"
     tabindex="5"
+    @focus="focus"
+    @blur="blur"
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
       <nav class="toolbar">
@@ -113,6 +115,16 @@ export default {
     }
   },
   methods: {
+    focus: function () {
+      this.keyMap = this.$store.state.keymap.add({
+        'Backspace': () => {
+          this.confirmDelete()
+        }
+      })
+    },
+    blur: function () {
+      this.$store.state.keymap.remove(this.keyMap)
+    },
     progress: function (file) {
       return `width: ${Math.round(file.info.ratio * 100)}%`
     },
