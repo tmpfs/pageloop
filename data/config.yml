@@ -47,6 +47,13 @@ mountpoints:
       Pure application template
   -
     container: template
+    url: /template/applications/pure2/
+    path: app/template/applications/pure2/
+    template: true
+    description: |
+      Pure2 application template
+  -
+    container: template
     url: /template/listing/
     path: app/template/listing/
     description: |

@@ -1,0 +1,69 @@
+---
+lang: en
+title: Acme Website
+organization: Acme Inc
+author: webmaster@acme.com
+description: Website for Acme Inc
+keywords: website, portfolio
+---
+<!doctype html>
+<html lang="{{.lang}}">
+  <head>
+    <title>{{.title}}</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="author" content="{{.author}}" />
+    <meta name="description" content="{{.description}}" />
+    <meta name="keywords" content="{{.keywords}}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href='{{root "favicon.png"}}' />
+    <link rel="stylesheet" href='{{root "app.css"}}' />
+  </head>
+  <body id="top">
+    <header>
+      <h1>ᴥ {{.organization}}</h1>
+      <nav>
+        <a href="#about" title="About us">About</a>
+        <a href="#getting-started" title="Getting Started">Getting Started</a>
+        <a href="#documentation" title="Documentation, help & tips">Docs</a>
+      </nav>
+    </header>
+    <main>
+      <blockquote>Welcome to your new web page created from the pure template.</blockquote>
+      <section id="about">
+          <h2>About</h2>
+          <p>The pure template is ideal for sketching layouts or single page brochure websites to promote an idea, project or service.</p>
+          <p>It's intentionally very simple just a
+            blend of quality <abbr title="Cascading Style Sheets">CSS</abbr> and
+            <abbr title="HyperText Markup Language">HTML</abbr> with a touch of
+            Javascript for the smooth scroll.</p>
+          <p>The philosophy is lean. No custom fonts, fancy animations not even any images or SVG, absolute basics!</p>
+          <p>There is no layout file or markdown in this template if you need those features please choose another template.</p>
+        </section>
+        <section id="getting-started">
+          <h2>Getting Started</h2>
+          <p>You can use the visual (or source code) editor to change your new page, we recommend these steps to get started.</p>
+          <h3>Page Meta</h3>
+          <p>Update the page meta data using the data editor or directly in the <code>index.html</code> file.</p>
+          <h3>Favicon</h3>
+          <p>Upload a <code>favicon.png</code> file.</p>
+          <h3>Content</h3>
+          <p>Express yourself, update the headings and text for your project.</p>
+          <h3>Style</h3>
+          <p>Edit the styles in <code>app.css</code> for the look and feel you imagine.</p>
+          <h3>Code</h3>
+          <p>If you need to you can change the scripts in <code>app.js</code>.</p>
+        </section>
+        <section id="documentation">
+          <h2>Documentation</h2>
+          <p>If your need more information or help please consult the pageloop <a href="/docs/">guide</a>.</p>
+        </section>
+    </main>
+    <footer>
+      <p>&copy; {{.organization}}<br />
+       <a href="#top" title="Top of the page">Top</a>
+      </p>
+    </footer>
+    <script src="app.js" async></script>
+  </body>
+</html>

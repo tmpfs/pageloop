@@ -65,6 +65,8 @@ type Application struct {
   // Mark this application as a template
   IsTemplate bool `json:"is-template,omitempty"`
 
+  ContainerName string `json:"container"`
+
 	Container *Container `json:"-"`
 
 	// A source template for this application

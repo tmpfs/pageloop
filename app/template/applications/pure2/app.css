@@ -1,0 +1,132 @@
+:root {
+  --base03-color: #002b36;
+  --base02-color: #073642;
+  --base01-color: #586e75;
+  --base00-color: #657b83;
+  --base0-color: #839496;
+  --base1-color: #93a1a1;
+  --base2-color: #eee8d5;
+  --base3-color: #fdf6e3;
+  --yellow-color: #b58900;
+  --orange-color: #cb4b16;
+  --red-color: #dc322f;
+  --magenta-color: #d33682;
+  --violet-color: #6c71c4;
+  --blue-color: #268bd2;
+  --cyan-color: #2aa198;
+  --green-color: #859900;
+  --link-color: #2aa198;
+  --background: #fdf6e3;
+  --color: #657b83;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+}
+
+*, *:after, *:before {
+  box-sizing: inherit
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 1.6rem;
+  line-height: 2rem;
+  font-family: Helvetica, sans;
+  background: var(--background);
+  color: var(--color);
+  text-align: center;
+}
+
+a, a:hover, a:visited {
+  text-decoration: none;
+  color: var(--link-color);
+  transition: all 0.4s ease-out;
+}
+
+a:hover {
+  text-decoration: underline; 
+}
+
+abbr {
+  border-bottom: 1px dotted currentColor; 
+}
+
+code {
+  font-family: monospace;
+  font-size: 1.7rem; 
+}
+
+header, main, footer {
+  padding: 0 3rem;
+  max-width: 640px;
+  text-align: left;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 1.5rem;
+}
+
+header h1 {
+  font-size: 2rem;
+  text-transform: uppercase;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  margin: 0;
+  border-bottom: 1px solid currentColor;
+}
+
+header nav {
+  display: flex; 
+}
+
+header nav a {
+  flex 1 0;
+  display: inline-block;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  padding: 0.5rem;
+}
+
+header nav a:hover {
+  background: var(--link-color);
+  color: var(--background) !important;
+  text-decoration: none; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0; 
+  font-weight: normal;
+}
+
+h2 {
+  display: inline-block;
+  border-bottom: 4px double currentColor; 
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  display: inline-block;
+  border-bottom: 1px solid currentColor; 
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+blockquote {
+  border-left: 4px solid var(--base2-color);
+  padding-left: 1rem;
+}
+
+footer {
+  text-align: center; 
+  margin-bottom: 3rem;
+}

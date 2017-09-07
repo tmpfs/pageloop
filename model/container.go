@@ -79,6 +79,7 @@ func (c *Container) Add(app *Application) error {
 
 	app.Protected = c.Protected
 	app.Container = c
+  app.ContainerName = c.Name
 
 	c.Apps = append(c.Apps, app)
 	return nil
