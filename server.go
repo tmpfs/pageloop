@@ -175,6 +175,7 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	urls := h.App.Urls
 	path := "/" + req.URL.Path
 	clean := strings.TrimSuffix(path, "/")
+  trailing := clean + "/"
 	indexPage := clean + "/" + index
 
 	if req.Method != http.MethodGet && req.Method != http.MethodHead {
@@ -187,11 +188,15 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	// Exact match
 	if urls[path] != nil {
 		file = urls[path]
+  } else if urls[trailing] != nil && !strings.HasSuffix(path, "/") {
+    redirect := http.RedirectHandler(req.URL.Path + "/", http.StatusMovedPermanently)
+    redirect.ServeHTTP(res, req)
+    return
 	// Normalized without a trailing slash
-	} else if(urls[clean] != nil) {
+	} else if urls[clean] != nil {
 		file = urls[clean]
 	// Check for index page
-	} else if(urls[indexPage] != nil) {
+	} else if urls[indexPage] != nil {
 		file = urls[indexPage]
 	}
 
