@@ -59,19 +59,25 @@ function Routes (router, store) {
       let application = match.map.application
       let action = match.map.action
 
+      let overlay = action === 'new-file'
+
       // Need to load application data
       if (container !== state.container || (container === state.container && application !== state.application)) {
         store.dispatch('load', {container: match.map.container, application: match.map.application})
           .then(() => {
-            store.commit('reset-current-file')
+            if (!overlay) store.commit('reset-current-file')
             store.commit('main-view', 'edit')
             store.commit('sidebar-view', action)
-            store.commit('editor-view', 'welcome')
+            if (!store.state.hasFile()) {
+              store.commit('editor-view', 'welcome')
+            }
           })
       } else {
-        store.commit('reset-current-file')
+        if (!overlay) store.commit('reset-current-file')
         store.commit('sidebar-view', action)
-        store.commit('editor-view', 'welcome')
+        if (!store.state.hasFile()) {
+          store.commit('editor-view', 'welcome')
+        }
       }
     })
 
