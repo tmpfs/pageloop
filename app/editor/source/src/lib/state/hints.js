@@ -18,7 +18,7 @@ class Hints {
     // and not displayed again on subsequent visits
     for (let k in this.messages) {
       if (localStorage[this.prefix + k]) {
-        // delete this.messages[k]
+        delete this.messages[k]
       }
     }
   }
