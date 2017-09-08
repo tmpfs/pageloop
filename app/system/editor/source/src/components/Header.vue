@@ -6,6 +6,7 @@
         @click="$store.dispatch('navigate', {href: 'edit'})"
         :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
         title="Edit Current Application">{{name}}</a>
+        <build-tasks></build-tasks>
     </nav>
     <nav class="main">
       <a
@@ -34,6 +35,8 @@
 </template>
 
 <script>
+import BuildTasks from '@/components/BuildTasks'
+
 export default {
   name: 'app-header',
   computed: {
@@ -43,9 +46,34 @@ export default {
     selectedView: function () {
       return this.$store.state.main.view
     }
-  }
+  },
+  components: {BuildTasks}
 }
 </script>
+
+<style>
+  nav.home > a.home {
+    color: var(--base3-color) !important;
+    text-decoration: none;
+  }
+
+  header a {
+    font-size: 1.4rem;
+    padding: .3rem 2rem;
+    text-transform: uppercase;
+    color: var(--base2-color) !important;
+  }
+
+  header a:hover, header a.selected {
+    text-decoration: underline;
+    color: var(--base3-color) !important;
+    background: var(--blue-color);
+  }
+
+  header a.selected {
+    background: var(--base03-color);
+  }
+</style>
 
 <style scoped>
 
@@ -55,6 +83,8 @@ export default {
     height: 3rem;
     user-select: none;
     cursor: default;
+    position: relative;
+    z-index: 100;
   }
 
   header nav {
@@ -69,25 +99,4 @@ export default {
     float: left;
   }
 
-  nav.home > a.home {
-    color: var(--base3-color) !important;
-    text-decoration: none;
-  }
-
-  header > nav > a {
-    font-size: 1.4rem;
-    padding: .3rem 2rem;
-    text-transform: uppercase;
-    color: var(--base2-color) !important;
-  }
-
-  header > nav > a:hover, header > nav > a.selected {
-    text-decoration: underline;
-    color: var(--base3-color) !important;
-    background: var(--blue-color);
-  }
-
-  header > nav > a.selected {
-    background: var(--base03-color);
-  }
 </style>

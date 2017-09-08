@@ -16,6 +16,10 @@ class Application {
     this._files = []
     // current selected file
     this.current = this.defaultFile
+
+    this.build = {
+      tasks: {}
+    }
   }
 
   get files () {

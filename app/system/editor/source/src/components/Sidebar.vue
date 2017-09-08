@@ -6,7 +6,6 @@
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
       <nav class="toolbar">
-        <build-tasks v-if="hasTasks"></build-tasks>
         <a
           @click="confirmDelete"
           v-bind:class="{disabled: !canDelete}"
@@ -81,11 +80,6 @@ export default {
     }
   },
   computed: {
-    hasTasks: function () {
-      return this.$store.state.hasApplication() &&
-        this.$store.state.app.build &&
-        this.$store.state.app.build.tasks
-    },
     transfers: function () {
       return this.$store.state.transfer.currentTransfer
     },
