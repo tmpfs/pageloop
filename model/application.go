@@ -345,7 +345,7 @@ func (app *Application) Load(path string) error {
   app.publicPath = filepath.Join(path, PUBLIC)
   app.Urls = make(map[string] *File)
 
-  err = app.FileSystem.Load(path)
+  err = app.FileSystem.Load(app.sourcePath)
   if err != nil {
     return err
   }
@@ -449,8 +449,7 @@ func (app *Application) setFileFields(file *File, base string) {
 
 // Set computed fields for files.
 func (app *Application) setComputedFileFields(file *File) {
-	path := app.Path
-	app.setFileFields(file, path)
+	app.setFileFields(file, app.SourceDirectory())
 	app.Urls[file.Url] = file
 }
 

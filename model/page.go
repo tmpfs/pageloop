@@ -133,7 +133,7 @@ func (p *Page) FindLayout() *Page {
   }
 	var path string = p.Path
 	var dir string = filepath.Dir(path)
-	var appRoot string = strings.TrimSuffix(p.owner.Root.Path, "/")
+	var appRoot string = strings.TrimSuffix(p.owner.SourceDirectory(), "/")
 
 	// Do not process layout files
 	//if p.Name == name {
@@ -328,7 +328,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
       for _, inc := range includes {
         if includePath, ok := inc.(string); ok {
           includePath = filepath.Clean(includePath)
-          fullPath := filepath.Join(p.owner.Path, strings.TrimPrefix(includePath, "/"))
+          fullPath := filepath.Join(p.owner.SourceDirectory(), strings.TrimPrefix(includePath, "/"))
           if content, err = ioutil.ReadFile(fullPath); err != nil {
             return err
           }
