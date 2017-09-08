@@ -7,11 +7,19 @@ import(
 	"net/http"
   "path"
   "path/filepath"
+  "regexp"
   "io/ioutil"
 )
 
 // Build directory.
-var public string = "public"
+var(
+  // TODO: use PublicDirectory() on publish
+  public string = "public"
+
+	IgnorePattern string = `(node_modules)`
+	IgnorePatternRe = regexp.MustCompile(IgnorePattern)
+)
+
 
 // Represents types that reference an application.
 type ApplicationReference interface {
@@ -181,6 +189,17 @@ func (fs *UrlFileSystem) Load(dir string) error {
       return err
     }
 
+    // TODO: built in ignores, eg: node_modules
+
+    if IgnorePatternRe.MatchString(path) {
+      return nil
+    }
+
+    // Ignore source directory
+    if dir == path {
+      return nil
+    }
+
     var file *File
 		if file, err = fs.LoadFile(path); err != nil {
 			return err
@@ -194,7 +213,7 @@ func (fs *UrlFileSystem) Load(dir string) error {
 func (fs *UrlFileSystem) FilterAndAssign (f *File, filter FileFilter) (string, string, error) {
 	app := fs.App()
 	var err error
-	rel, err := filepath.Rel(app.Path, f.Path)
+	rel, err := filepath.Rel(app.SourceDirectory(), f.Path)
 	if err != nil {
 		return "", "", err
 	}
