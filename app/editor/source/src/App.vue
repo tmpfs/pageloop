@@ -363,7 +363,7 @@ export default {
     border-left: 1px solid var(--border-color);
   }
 
-  .tabs a:hover, .tabs a.selected {
+  .tabs a:hover, .tabs a.selected, .toolbar a.selected {
     background: var(--base03-color);
     color: var(--base3-color);
     transition: all 0.5s ease-out;

@@ -8,12 +8,13 @@
       <nav class="toolbar">
         <a
           @click="confirmDelete"
-          v-bind:class="{hidden: !canDelete}"
+          v-bind:class="{disabled: !canDelete}"
           title="Delete File">➖</a>
         <a
           @click="showNewFileView"
           v-bind:class="{disabled: currentView === 'new-file'}"
           title="New File">➕</a>
+        <media-filter></media-filter>
         <a
           @click="maximized = 'sidebar'"
           :class="{hidden: maximized === 'sidebar'}"
@@ -32,7 +33,9 @@
         <a v-bind:class="{selected: currentView === 'files'}"
           @click="currentView = 'files'"
           title="Show files">Files</a>
-        <media-filter></media-filter>
+      <a v-bind:class="{selected: currentView === 'media'}"
+        @click="currentView = 'media'"
+        title="Show media files">{{filter}}</a>
       </nav>
     </div>
     <div

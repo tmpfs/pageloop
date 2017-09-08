@@ -1,9 +1,6 @@
 <template>
   <div class="media-filter">
     <div class="toggle">
-      <a v-bind:class="{selected: $parent.currentView === 'media'}"
-        @click="select($event, filter)"
-        title="Show media files">{{label}}</a>
       <a class="select" @click="toggle" title="Show filters">⏷</a>
     </div>
     <div class="filters" :class="{hidden: !show}">
@@ -61,7 +58,6 @@ export default {
 
   .media-filter {
     position: relative;
-    flex: 1 0;
   }
 
   .media-filter .toggle {
@@ -75,19 +71,18 @@ export default {
 
   .filters {
     position: absolute;
-    top: 2.2rem;
-    left: 0;
-    right: 0;
+    top: 2.1rem;
+    right: -2.2rem;
     display: flex;
     flex-direction: column;
     background: var(--base02-color);
     border: 1px solid var(--border-color);
+    min-width: 10rem;
   }
 
   .select {
     display: inline-block;
     flex: none;
-    width: 2.2rem;
     background: var(--base02-color);
   }
 </style>

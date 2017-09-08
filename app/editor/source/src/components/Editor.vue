@@ -192,7 +192,6 @@ export default {
     border-bottom: 1px solid var(--border-color);
     background: var(--base02-color);
     user-select: none;
-    overflow: hidden;
     height: 2.2rem;
   }
 
@@ -234,7 +233,6 @@ export default {
     /*font-size: 1.4rem;*/
     text-align: right;
     user-select: none;
-    overflow: hidden;
   }
 
   .toolbar a {
