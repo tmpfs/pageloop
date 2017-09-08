@@ -345,14 +345,18 @@ func (app *Application) Build() error {
   return app.builder.Build(app)
 }
 
+func (app *Application) SetPath(path string) {
+  app.Path = path
+  app.sourcePath = filepath.Join(path, SOURCE)
+  app.publicPath = filepath.Join(path, PUBLIC)
+}
+
 // Load an application using the file system assigned to this application.
 func (app *Application) Load(path string) error {
   var err error
   var builder *BuildFile
 	app.Name = filepath.Base(path)
-  app.Path = path
-  app.sourcePath = filepath.Join(path, SOURCE)
-  app.publicPath = filepath.Join(path, PUBLIC)
+  app.SetPath(path)
   app.Urls = make(map[string] *File)
 
   if builder, err = ReadBuildFile(app); err != nil {
