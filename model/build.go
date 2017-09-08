@@ -12,6 +12,10 @@ import(
 
 const BuildFileName = "build.yml"
 
+var(
+  defaultTask = "publish"
+)
+
 type Tasks map[string]string
 
 type BuildFile struct {
@@ -43,10 +47,10 @@ func ReadBuildFile (app *Application) (*BuildFile, error) {
       file.Tasks = make(Tasks)
     }
 
-    if file.Command == "" && file.Tasks["publish"] != "" {
-      file.Command = file.Tasks["publish"]
+    if file.Command == "" && file.Tasks[defaultTask] != "" {
+      file.Command = file.Tasks[defaultTask]
     } else if file.Command != "" {
-      file.Tasks["publish"] = file.Command
+      file.Tasks[defaultTask] = file.Command
     }
 
     if file.Command == "" {
