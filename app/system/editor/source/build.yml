@@ -1,4 +1,4 @@
-boot: true
+#boot: true
 #publish: true
 publish: npm run build
 #publish: foobar
