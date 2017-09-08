@@ -32,9 +32,7 @@
         <a v-bind:class="{selected: currentView === 'files'}"
           @click="currentView = 'files'"
           title="Show files">Files</a>
-        <a v-bind:class="{selected: currentView === 'media'}"
-          @click="currentView = 'media'"
-          title="Show media files">Media</a>
+        <media-filter parentView="currentView"></media-filter>
       </nav>
     </div>
     <div
@@ -66,6 +64,7 @@ import NewFile from '@/components/NewFile'
 import Pages from '@/components/Pages'
 import Files from '@/components/Files'
 import Media from '@/components/Media'
+import MediaFilter from '@/components/MediaFilter'
 
 import Hint from '@/components/Hint'
 
@@ -202,7 +201,7 @@ export default {
       return false
     }
   },
-  components: {NewFile, Pages, Files, Media, Hint}
+  components: {NewFile, Pages, Files, Media, Hint, MediaFilter}
 }
 </script>
 

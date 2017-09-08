@@ -1,3 +1,7 @@
+const mediaPattern = /\.(jpe?g|png|gif|aac|mp3|mp4|pdf)$/
+const scriptPattern = /\.(jsx?|ts|coffee|es6)$/
+const stylePattern = /\.(css|sss|scss|less)$/
+
 class Application {
   constructor () {
     this.defaultFile = {content: ''}
@@ -6,16 +10,30 @@ class Application {
     this.owner = ''
     this.pages = []
     this.files = []
-    this.media = []
     // current selected file
     this.current = this.defaultFile
   }
 
-  /*
-  get src () {
-    return this.url.replace(/\/www\//, '/src/')
+  get media () {
+    let list = this.files.filter((f) => {
+      return mediaPattern.test(f.name)
+    })
+    return list
   }
-  */
+
+  get scripts () {
+    let list = this.files.filter((f) => {
+      return scriptPattern.test(f.name)
+    })
+    return list
+  }
+
+  get styles () {
+    let list = this.files.filter((f) => {
+      return stylePattern.test(f.name)
+    })
+    return list
+  }
 
   isDirty () {
     for (let i = 0; i < this.files.length; i++) {

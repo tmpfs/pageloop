@@ -348,7 +348,7 @@ export default {
     user-select: none;
   }
 
-  .tabs > a {
+  .tabs > *, .tabs > div > * {
     flex: 1 0;
     color: currentColor;
     text-align: center;
@@ -359,11 +359,11 @@ export default {
     text-decoration: underline;
   }
 
-  .tabs > a:not(:first-child) {
+  .tabs > :not(:first-child) {
     border-left: 1px solid var(--border-color);
   }
 
-  .tabs > a:hover, .tabs > a.selected {
+  .tabs a:hover, .tabs a.selected {
     background: var(--base03-color);
     color: var(--base3-color);
     transition: all 0.5s ease-out;
