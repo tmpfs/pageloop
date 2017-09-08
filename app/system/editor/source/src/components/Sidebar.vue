@@ -34,7 +34,7 @@
           @click="currentView = 'files'"
           title="Show files">Files</a>
       <a v-bind:class="{selected: currentView === 'media'}"
-        @click="currentView = 'media'"
+        @click="currentView = filter"
         title="Show media files">{{filter}}</a>
       </nav>
     </div>

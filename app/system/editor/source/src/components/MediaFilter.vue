@@ -53,7 +53,7 @@ export default {
       }
     },
     select: function (e, filter) {
-      this.$parent.currentView = 'media'
+      this.$parent.currentView = filter
       this.$parent.filter = filter
       this.filter = filter
       this.label = filter

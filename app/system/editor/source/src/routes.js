@@ -2,6 +2,9 @@ const filters = /(images|text|styles|scripts|audio|video)/
 const filepath = new RegExp(
   `^apps/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+/((pages|files|media)|${filters.source})/(.*)$`)
 
+const section = new RegExp(
+  `^apps/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+/((files|pages|media|new-file)|${filters.source})$`)
+
 function Routes (router, store) {
   let state = store.state
 
@@ -12,6 +15,9 @@ function Routes (router, store) {
       let container = match.map.container
       let application = match.map.application
       let action = match.map.action
+      if (filters.test(action)) {
+        action = 'media'
+      }
       let file
 
       // Respect trailing slashes in request
@@ -44,9 +50,6 @@ function Routes (router, store) {
           return
         }
         store.commit('main-view', 'edit')
-        if (filters.test(action)) {
-          action = 'media'
-        }
         store.commit('sidebar-view', action)
         if (!store.state.editor.view || store.state.editor.view === 'welcome') {
           store.commit('editor-view', store.state.editor.defaultView)
@@ -64,12 +67,15 @@ function Routes (router, store) {
       }
     })
 
-  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(files|pages|media|new-file)$/,
+  router.add(section,
     ['section', 'container', 'application', 'action'],
     (match) => {
       let container = match.map.container
       let application = match.map.application
       let action = match.map.action
+      if (filters.test(action)) {
+        action = 'media'
+      }
 
       let overlay = action === 'new-file'
 
