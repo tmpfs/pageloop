@@ -7,7 +7,7 @@
       :data-url="item.url"
       :class="{selected: ~selection.indexOf(item)}"
       v-for="item in list">
-      <span class="name">{{item.url}}</span>
+      <span class="name">{{item.url.substr(1)}}</span>
     </a>
   </div>
 </template>
