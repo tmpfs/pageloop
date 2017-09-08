@@ -541,7 +541,7 @@ func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *mode
   for _, f := range files {
     if !f.Directory {
       rel := strings.TrimPrefix(f.Relative, prefix)
-      out := filepath.Join(dest.Path, rel)
+      out := filepath.Join(dest.SourceDirectory(), rel)
       parent := filepath.Dir(rel)
       if parent != "/" {
         parent = filepath.Join(dest.Path, parent)
