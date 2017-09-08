@@ -18,9 +18,10 @@ import SelectableFileList from './SelectableFileList'
 export default {
   name: 'media',
   mixins: [SelectableFileList],
+  props: ['filter'],
   computed: {
     list: function () {
-      return this.$store.state.app.media || []
+      return this.$store.state.app[this.filter] || []
     },
     selection: {
       get: function () {

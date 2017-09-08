@@ -2,10 +2,14 @@
   <div class="media-filter">
     <div class="toggle">
       <a v-bind:class="{selected: $parent.currentView === 'media'}"
-        @click="toggle"
-         title="Show media files">{{label}} <span>⏷</span></a>
+        @click="select($event, filter)"
+        title="Show media files">{{label}}</a>
+      <a class="select" @click="toggle" title="Show filters">⏷</a>
     </div>
     <div class="filters" :class="{hidden: !show}">
+      <a v-bind:class="{selected: filter === 'media'}"
+        @click="select($event, 'media')"
+        title="Show all media files">Media</a>
       <a v-bind:class="{selected: filter === 'images'}"
         @click="select($event, 'images')"
         title="Show images">Images</a>
@@ -15,9 +19,6 @@
       <a v-bind:class="{selected: filter === 'scripts'}"
         @click="select($event, 'scripts')"
         title="Show scripts">Scripts</a>
-      <a v-bind:class="{selected: filter === 'media'}"
-        @click="select($event, 'media')"
-        title="Show all media files">Media</a>
     </div>
   </div>
 </template>
@@ -29,7 +30,7 @@ export default {
     return {
       show: false,
       filter: 'media',
-      label: 'filter'
+      label: 'media'
     }
   },
   methods: {
@@ -47,6 +48,7 @@ export default {
     },
     select: function (e, filter) {
       this.$parent.currentView = 'media'
+      this.$parent.filter = filter
       this.filter = filter
       this.label = filter
       console.log('show media filter: ' + filter)
@@ -67,7 +69,7 @@ export default {
     display: flex;
   }
 
-  .media-filter .toggle > a {
+  .media-filter .toggle > a:not(.select) {
     flex: 1 0;
   }
 
@@ -80,5 +82,12 @@ export default {
     flex-direction: column;
     background: var(--base02-color);
     border: 1px solid var(--border-color);
+  }
+
+  .select {
+    display: inline-block;
+    flex: none;
+    width: 2.2rem;
+    background: var(--base02-color);
   }
 </style>

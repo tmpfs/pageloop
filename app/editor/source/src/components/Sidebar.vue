@@ -52,7 +52,7 @@
         </div>
       </div>
       <hint id="drop-upload" class="compact" v-if="currentView !== 'new-file'"></hint>
-      <component v-bind:is="currentView"></component>
+      <component v-bind:is="currentView" :filter="filter"></component>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
   </div>
@@ -71,7 +71,9 @@ import Hint from '@/components/Hint'
 export default {
   name: 'sidebar',
   data: function () {
-    return {}
+    return {
+      filter: 'media'
+    }
   },
   computed: {
     transfers: function () {
