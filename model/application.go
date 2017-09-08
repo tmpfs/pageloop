@@ -20,6 +20,9 @@ const (
   DATA_YAML
   DATA_YAML_FILE
   DATA_JSON_FILE
+
+  SOURCE = "source"
+  PUBLIC = "public"
 )
 
 var(
@@ -71,6 +74,12 @@ type Application struct {
 
 	// A source template for this application
 	Template *ApplicationTemplate `json:"template,omitempty"`
+
+  // Source file path
+  sourcePath string
+
+  // Public publish path
+  publicPath string
 }
 
 // References an existing mounted application subdirectory
@@ -83,6 +92,14 @@ type ApplicationTemplate struct {
 
 func NewApplication(mountpoint, description string) *Application {
 	return &Application{Url: mountpoint, Description: description}
+}
+
+func (app *Application) SourceDirectory() string {
+  return app.sourcePath
+}
+
+func (app *Application) PublicDirectory() string {
+  return app.publicPath
 }
 
 // Determine the page type for an input file path.
@@ -324,6 +341,8 @@ func (app *Application) Load(path string) error {
   var err error
 	app.Name = filepath.Base(path)
   app.Path = path
+  app.sourcePath = filepath.Join(path, SOURCE)
+  app.publicPath = filepath.Join(path, PUBLIC)
   app.Urls = make(map[string] *File)
 
   err = app.FileSystem.Load(path)
