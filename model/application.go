@@ -72,15 +72,15 @@ type Application struct {
 	// A source template for this application
 	Template *ApplicationTemplate `json:"template,omitempty"`
 
+  // An application builder config loaded from build.yml.
+  // For applications with no build file this is nil.
+  Builder *BuildFile `json:"build,omitempty"`
+
   // Source file path
   sourcePath string
 
   // Public publish path
   publicPath string
-
-  // An application builder config loaded from build.yml.
-  // For applications with no build file this is nil.
-  builder *BuildFile
 }
 
 // References an existing mounted application subdirectory
@@ -338,11 +338,11 @@ func (app *Application) AddPage(page *Page) int {
 }
 
 func (app *Application) HasBuilder() bool {
-  return app.builder != nil
+  return app.Builder != nil
 }
 
 func (app *Application) Build() error {
-  return app.builder.Build(app)
+  return app.Builder.Build(app)
 }
 
 func (app *Application) SetPath(path string) {
@@ -364,7 +364,7 @@ func (app *Application) Load(path string) error {
   }
 
   if builder != nil {
-    app.builder = builder
+    app.Builder = builder
   }
 
   if err = app.FileSystem.Load(app.sourcePath); err != nil {
@@ -376,8 +376,8 @@ func (app *Application) Load(path string) error {
 
 // Publish application files to the given directory.
 func (app *Application) Publish(dir string) error {
-  // TODO: fix this - builds will never run ;)
-  if app.HasBuilder() && app.builder.Boot {
+  // Defer to a build task if defined
+  if app.HasBuilder() {
     return app.Build()
   }
   return app.FileSystem.Publish(dir, nil)

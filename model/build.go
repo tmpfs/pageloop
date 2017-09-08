@@ -12,11 +12,17 @@ import(
 
 const BuildFileName = "build.yml"
 
+type Tasks map[string]string
+
 type BuildFile struct {
   // Allows disabling builds when the server boots
-  Boot bool
+  Boot bool `json:"-" yaml:"-"`
+
+  // List of build tasks
+  Tasks Tasks `json:"tasks" yaml:"tasks"`
+
   // Main build command to run
-  Command string `yaml:"build"`
+  Command string `json:"-" yaml:"publish"`
 }
 
 func ReadBuildFile (app *Application) (*BuildFile, error) {
@@ -33,8 +39,18 @@ func ReadBuildFile (app *Application) (*BuildFile, error) {
       return nil, err
     }
 
+    if file.Tasks == nil {
+      file.Tasks = make(Tasks)
+    }
+
+    if file.Command == "" && file.Tasks["publish"] != "" {
+      file.Command = file.Tasks["publish"]
+    } else if file.Command != "" {
+      file.Tasks["publish"] = file.Command
+    }
+
     if file.Command == "" {
-      return nil, fmt.Errorf("Build file %s does not contain a build command", input)
+      return nil, fmt.Errorf("Build file %s does not contain a publish command", input)
     }
     return file, nil
   }

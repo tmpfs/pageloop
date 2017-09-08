@@ -360,9 +360,18 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 			return nil, err
 		}
 
-    // Publish the application files to a build directory
-    if err = app.Publish(app.PublicDirectory()); err != nil {
-      return nil, err
+    // Only publish if the build file has not explicitly
+    // enabled build at boot time
+    var shouldPublish = true
+    if app.HasBuilder() && !app.Builder.Boot {
+      shouldPublish = false
+    }
+
+    if shouldPublish {
+      // Publish the application files to a build directory
+      if err = app.Publish(app.PublicDirectory()); err != nil {
+        return nil, err
+      }
     }
 
 		// Add to the container
