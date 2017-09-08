@@ -4,11 +4,12 @@
       <a class="select" @click="toggle" title="Select a task">⏷ Tasks</a>
     </div>
     <div class="tasks" :class="{hidden: !show}">
-      <div v-for="task, key in tasks">
-        <a
-          @click="select($event, key, task)"
-          title="Run task">{{key}}
-        </a>
+      <div
+        title="Run task"
+        class="task"
+        v-for="task, key in tasks"
+        @click="select($event, key, task)">
+        <span class="name">{{key}}</span>
         <span class="small">{{task}}</span>
       </div>
     </div>
@@ -72,39 +73,46 @@ export default {
     display: flex;
   }
 
-  .build-tasks .toggle > a:not(.select) {
-    flex: 1 0;
-  }
-
   .select {
     display: inline-block;
     background: var(--base03-color);
-    padding: 0 2rem;
-    flex: none;
   }
 
   .tasks {
     position: absolute;
-    top: 3.2rem;
+    top: 2.8rem;
     left: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    background: var(--base02-color);
+    background: var(--base03-color);
     border: 1px solid var(--border-color);
-    min-width: 10rem;
+    width: 24rem;
   }
 
-  a {
-    display: block;
+  .task {
+    padding-left: 2rem;
+    cursor: pointer;
+  }
+
+  .task:hover {
+    color: var(--base2-color);
+  }
+
+  .tasks a {
+    padding: 0;
   }
 
   a:hover {
     text-decoration: none;
   }
 
+  .name {
+    font-size: 1.4rem;
+    text-transform: uppercase;
+  }
+
   .small {
     display: block;
-    text-transform: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 </style>
