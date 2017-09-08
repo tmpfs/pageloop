@@ -104,14 +104,11 @@ export default {
         return this.$store.state.sidebar.view
       },
       set: function (val) {
-        var values = [val]
-        var file = this.$store.state.current
-        if (file !== null) {
-          if (val === 'files') {
-            values.push(file.url)
-          } else if (val === 'pages' && this.$store.state.isPage(file)) {
-            values.push(file.url)
-          }
+        const state = this.$store.state
+        let values = [val]
+        if (state.hasFile()) {
+          let file = state.current
+          values.push(file.url)
         }
         let href = this.$store.state.getAppHref(...values)
         this.$store.dispatch('navigate', {href: href})
