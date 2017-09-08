@@ -1,7 +1,9 @@
+const filters = /(images|text|styles|scripts|audio|video)/
+
 function Routes (router, store) {
   let state = store.state
 
-  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(pages|files)\/(.*)$/,
+  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(pages|files|media|images|text|styles|scripts|audio|video)\/(.*)$/,
     ['section', 'container', 'application', 'action'],
     (match) => {
       let href = '/' + match.parts.slice(4).join('/')
@@ -40,6 +42,9 @@ function Routes (router, store) {
           return
         }
         store.commit('main-view', 'edit')
+        if (filters.test(action)) {
+          action = 'media'
+        }
         store.commit('sidebar-view', action)
         if (!store.state.editor.view || store.state.editor.view === 'welcome') {
           store.commit('editor-view', store.state.editor.defaultView)

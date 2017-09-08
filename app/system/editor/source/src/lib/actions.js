@@ -153,6 +153,10 @@ function Actions (router) {
       let href = context.state.getAppHref('files', file.url)
       return context.dispatch('navigate', {href: href, state: file})
     },
+    'go-media': function (context, {filter, file}) {
+      let href = context.state.getAppHref(filter, file.url)
+      return context.dispatch('navigate', {href: href, state: file})
+    },
     'preview-refresh': function (context) {
       context.commit('preview-refresh', true)
     },

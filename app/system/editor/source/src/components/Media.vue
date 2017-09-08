@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     go: function (item) {
-      return this.$store.dispatch('go-file', item)
+      return this.$store.dispatch('go-media', {file: item, filter: this.filter})
     },
     getSelectionByUrl: function (url) {
       return this.$store.state.app.getFileByUrl(url)
