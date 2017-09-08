@@ -1,9 +1,11 @@
 const filters = /(images|text|styles|scripts|audio|video)/
+const filepath = new RegExp(
+  `^apps/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+/((pages|files|media)|${filters.source})/(.*)$`)
 
 function Routes (router, store) {
   let state = store.state
 
-  router.add(/^apps\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+\/(pages|files|media|images|text|styles|scripts|audio|video)\/(.*)$/,
+  router.add(filepath,
     ['section', 'container', 'application', 'action'],
     (match) => {
       let href = '/' + match.parts.slice(4).join('/')
