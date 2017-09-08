@@ -6,6 +6,7 @@
     :class="{maximized: maximized === 'sidebar', minimized: maximized != '' && maximized !== 'sidebar'}">
     <div class="column-header">
       <nav class="toolbar">
+        <build-tasks v-if="hasTasks"></build-tasks>
         <a
           @click="confirmDelete"
           v-bind:class="{disabled: !canDelete}"
@@ -68,6 +69,7 @@ import Pages from '@/components/Pages'
 import Files from '@/components/Files'
 import Media from '@/components/Media'
 import MediaFilter from '@/components/MediaFilter'
+import BuildTasks from '@/components/BuildTasks'
 
 import Hint from '@/components/Hint'
 
@@ -79,6 +81,11 @@ export default {
     }
   },
   computed: {
+    hasTasks: function () {
+      return this.$store.state.hasApplication() &&
+        this.$store.state.app.build &&
+        this.$store.state.app.build.tasks
+    },
     transfers: function () {
       return this.$store.state.transfer.currentTransfer
     },
@@ -203,7 +210,7 @@ export default {
       return false
     }
   },
-  components: {NewFile, Pages, Files, Media, Hint, MediaFilter}
+  components: {NewFile, Pages, Files, Media, Hint, MediaFilter, BuildTasks}
 }
 </script>
 
