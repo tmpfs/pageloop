@@ -32,13 +32,6 @@ export default {
       return this.$store.state.app.build.tasks
     }
   },
-  watch: {
-    app: function (val) {
-      if (val && val.build && val.build.tasks) {
-        this.tasks = val.build.tasks
-      }
-    }
-  },
   methods: {
     toggle: function (e) {
       e.stopImmediatePropagation()
