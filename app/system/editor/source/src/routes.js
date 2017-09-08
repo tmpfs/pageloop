@@ -31,9 +31,6 @@ function Routes (router, store) {
           trailing += '/'
         }
         let arr = state.app.files
-        if (action === 'pages') {
-          arr = state.app.pages
-        }
         for (let i = 0; i < arr.length; i++) {
           if (arr[i].url === href || arr[i].url === trailing) {
             store.dispatch('open-file', arr[i])
