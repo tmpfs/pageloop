@@ -81,6 +81,12 @@ export default {
         'Ctrl-S': (cm) => {
           this.save()
         },
+        // Useful for debugging, need to refresh a lot
+        // and when the code editor is focused refresh
+        // does not trigger without this
+        'Ctrl-R': (cm) => {
+          document.location.reload()
+        },
         Tab: (cm) => {
           var spaces = Array(cm.getOption('indentUnit') + 1).join(' ')
           cm.replaceSelection(spaces)
