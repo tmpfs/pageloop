@@ -5,31 +5,31 @@ mountpoints:
   -
     container: system
     url: /
-    path: app/editor/
+    path: app/system/editor/
     description: |
       Application editor
   -
     container: system
     url: /assets/
-    path: app/assets/
+    path: app/system/assets/
     description: |
       Common assets
   -
     container: system
     url: /docs/
-    path: app/docs/
+    path: app/system/docs/
     description: |
       Documentation & help files
   -
     container: system
     url: /tools/api/browser/
-    path: app/tools/api/browser/
+    path: app/system/tools/api/browser/
     description: |
       API Browser
   -
     container: system
     url: /tools/api/probe/
-    path: app/tools/api/probe/
+    path: app/system/tools/api/probe/
     description: |
       API Probe
   -

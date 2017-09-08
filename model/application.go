@@ -77,6 +77,10 @@ type Application struct {
 
   // Public publish path
   publicPath string
+
+  // An application builder config loaded from build.yml.
+  // For applications with no build file this is nil.
+  builder *BuildFile
 }
 
 // References an existing mounted application subdirectory
@@ -333,17 +337,33 @@ func (app *Application) AddPage(page *Page) int {
 	return len(app.Pages)
 }
 
+func (app *Application) HasBuilder() bool {
+  return app.builder != nil
+}
+
+func (app *Application) Build() error {
+  return app.builder.Build(app)
+}
+
 // Load an application using the file system assigned to this application.
 func (app *Application) Load(path string) error {
   var err error
+  var builder *BuildFile
 	app.Name = filepath.Base(path)
   app.Path = path
   app.sourcePath = filepath.Join(path, SOURCE)
   app.publicPath = filepath.Join(path, PUBLIC)
   app.Urls = make(map[string] *File)
 
-  err = app.FileSystem.Load(app.sourcePath)
-  if err != nil {
+  if builder, err = ReadBuildFile(app); err != nil {
+    return err
+  }
+
+  if builder != nil {
+    app.builder = builder
+  }
+
+  if err = app.FileSystem.Load(app.sourcePath); err != nil {
     return err
   }
 
@@ -352,24 +372,10 @@ func (app *Application) Load(path string) error {
 
 // Publish application files to the given directory.
 func (app *Application) Publish(dir string) error {
-  var err error
-
-  // Render pages to the file data bytes.
-	/*
-	for _, page := range app.Pages {
-		if err = page.Update(); err != nil {
-			return err
-		}
-	}
-	*/
-
-  println("app publish dir: " + dir)
-
-  if err = app.FileSystem.Publish(dir, nil); err != nil {
-    return err
+  if app.HasBuilder() {
+    return app.Build()
   }
-
-  return nil
+  return app.FileSystem.Publish(dir, nil)
 }
 
 // Get a file pointer by URL.
