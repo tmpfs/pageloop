@@ -337,14 +337,6 @@ func (app *Application) AddPage(page *Page) int {
 	return len(app.Pages)
 }
 
-func (app *Application) HasBuilder() bool {
-  return app.Builder != nil
-}
-
-func (app *Application) Build() error {
-  return app.Builder.Build(app)
-}
-
 func (app *Application) SetPath(path string) {
   app.Path = path
   app.sourcePath = filepath.Join(path, SOURCE)
@@ -374,11 +366,20 @@ func (app *Application) Load(path string) error {
   return nil
 }
 
+func (app *Application) HasBuilder() bool {
+  return app.Builder != nil
+}
+
+func (app *Application) Build(done TaskComplete) {
+  app.Builder.Build(app, done)
+}
+
 // Publish application files to the given directory.
 func (app *Application) Publish(dir string) error {
   // Defer to a build task if defined
   if app.HasBuilder() {
-    return app.Build()
+    app.Build(&DefaultTaskComplete{})
+    return nil
   }
   return app.FileSystem.Publish(dir, nil)
 }
