@@ -306,7 +306,7 @@ func (fs *UrlFileSystem) Publish(dir string, filter FileFilter) error {
   if dir == "" {
     dir = filepath.Join(cwd, public)
   }
-  dir = filepath.Join(dir, filepath.Base(app.Path))
+  // dir = filepath.Join(dir, filepath.Base(app.Path))
   fh, err := os.Open(dir)
   if err != nil {
     if !os.IsNotExist(err) {
