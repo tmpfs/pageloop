@@ -129,7 +129,13 @@ func getMimeType(path string) string {
 	return m
 }
 
-func isBinaryMime(mimeType string) bool {
+func isBinaryMime(name, mimeType string) bool {
+  // This treats .gitignore, .babelrc etc as text
+  ext := filepath.Ext(name)
+  if ext == name {
+    return false
+  }
+
   if mimeType == OCTET_STREAM {
     return true
   }

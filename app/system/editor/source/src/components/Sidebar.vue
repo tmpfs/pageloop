@@ -68,7 +68,6 @@ import Pages from '@/components/Pages'
 import Files from '@/components/Files'
 import Media from '@/components/Media'
 import MediaFilter from '@/components/MediaFilter'
-import BuildTasks from '@/components/BuildTasks'
 
 import Hint from '@/components/Hint'
 
@@ -204,7 +203,7 @@ export default {
       return false
     }
   },
-  components: {NewFile, Pages, Files, Media, Hint, MediaFilter, BuildTasks}
+  components: {NewFile, Pages, Files, Media, Hint, MediaFilter}
 }
 </script>
 

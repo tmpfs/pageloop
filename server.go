@@ -569,6 +569,7 @@ func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *mode
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
+	mime.AddExtensionType(".babelrc", "application/json")
 	mime.AddExtensionType(".yml", "text/x-yaml")
 	mime.AddExtensionType(".yaml", "text/x-yaml")
 	mime.AddExtensionType(".md", "text/x-markdown")
