@@ -48,7 +48,6 @@ export default {
       this.$parent.filter = filter
       this.filter = filter
       this.label = filter
-      console.log('show media filter: ' + filter)
     }
   }
 }
