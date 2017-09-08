@@ -112,7 +112,7 @@ func (fs *UrlFileSystem) MoveFile(f *File, url string, target string, filter Fil
     return err
   }
 
-  base = f.owner.Public
+  base = f.owner.PublicDirectory()
   parts = strings.Split(f.Uri, SLASH)
   publishPath := filepath.Join(parts...)
   publishPath = filepath.Join(base, publishPath)
@@ -260,6 +260,7 @@ func (fs *UrlFileSystem) PublishFile(dir string, f *File, filter FileFilter) err
 		}
 	}
 
+
 	parent := out
 	isDir := f.info.Mode().IsDir()
 	if !isDir {
@@ -318,9 +319,6 @@ func (fs *UrlFileSystem) Publish(dir string, filter FileFilter) error {
     }
   }
   defer fh.Close()
-
-	// TODO: remove this and assign outside the publisher
-  app.Public = dir
 
   for _, f := range app.Files {
     // Ignore the build directory
@@ -397,7 +395,7 @@ func (fs *UrlFileSystem) Remove(f *File) error {
 	app := fs.App()
 	src := f.Path
   uri := filepath.Join(path.Split(f.Uri))
-	pub := filepath.Join(app.Public, uri)
+	pub := filepath.Join(app.PublicDirectory(), uri)
 	if err := os.Remove(pub); err != nil {
 		return err
 	}
@@ -409,7 +407,7 @@ func (fs *UrlFileSystem) Remove(f *File) error {
 func (fs *UrlFileSystem) RemoveAll(f *File) error {
 	app := fs.App()
 	src := f.Path
-	pub := filepath.Join(app.Public, f.Relative)
+	pub := filepath.Join(app.PublicDirectory(), f.Relative)
 	if err := os.RemoveAll(pub); err != nil {
 		return err
 	}

@@ -37,20 +37,6 @@
       "multiple": false,
       "name": "--config"
     },
-    "publish": {
-      "key": "publish",
-      "description": "Directory for application builds",
-      "names": [
-        "-p",
-        "--publish"
-      ],
-      "type": "option",
-      "extra": "=[dir]",
-      "required": false,
-      "multiple": false,
-      "value": "public",
-      "name": "--publish"
-    },
     "help": {
       "key": "help",
       "description": "Display help and exit",

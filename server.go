@@ -360,16 +360,8 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 			return nil, err
 		}
 
-    var publishPath string = filepath.Clean(l.Config.PublishDirectory)
-    if publishPath, err = filepath.Abs(publishPath); err != nil {
-      return nil, err
-    }
-
-    // Publish apps relative to a parent container directory
-    publishPath = filepath.Join(publishPath, container.Name)
-
     // Publish the application files to a build directory
-    if err = app.Publish(publishPath); err != nil {
+    if err = app.Publish(app.PublicDirectory()); err != nil {
       return nil, err
     }
 
@@ -410,18 +402,18 @@ func (l *PageLoop) getRawUrl (app *model.Application) string {
 func (l *PageLoop) MountApplication(app *model.Application) {
 	// Serve the static build files from the mountpoint path.
 	url := l.getPublishUrl(app)
-	log.Printf("Serving app %s from %s", url, app.Public)
-  fileserver := http.FileServer(http.Dir(app.Public))
+	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
+  fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
   mountpoints[url] = http.StripPrefix(url, ApplicationPublicHandler{Root:l, App: app, FileServer: fileserver})
 
 	// Serve the source files with frontmatter stripped.
 	url = l.getSourceUrl(app)
-	log.Printf("Serving src %s from %s", url, app.Path)
+	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
   mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app})
 
 	// Serve the raw source files.
 	url = l.getRawUrl(app)
-	log.Printf("Serving raw %s from %s", url, app.Path)
+	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
   mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app, Raw: true})
 }
 
@@ -498,7 +490,7 @@ func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
   var err error
 
   // Delete published files
-  if err = os.RemoveAll(a.Public); err != nil {
+  if err = os.RemoveAll(a.PublicDirectory()); err != nil {
     return err
   }
 

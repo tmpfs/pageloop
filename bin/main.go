@@ -30,17 +30,12 @@ func main() {
   var addr *string
   var c *string
   var config *string
-  var p *string
-  var publish *string
 
   a = flag.String("a", "", "")
   addr = flag.String("addr", "", "")
 
   c = flag.String("c", "", "")
   config = flag.String("config", "", "")
-
-  p = flag.String("p", "", "")
-  publish = flag.String("publish", "", "")
 
   h = flag.Bool("h", false, "")
   help = flag.Bool("help", false, "")
@@ -76,13 +71,6 @@ func main() {
   } else if *addr != "" {
     conf.Addr = *addr
   }
-
-  if *p != "" {
-    conf.PublishDirectory = *p
-  } else if *publish != "" {
-    conf.PublishDirectory = *publish
-  }
-
 
   server, err := loop.NewServer(conf)
   if err != nil {

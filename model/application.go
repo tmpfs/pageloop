@@ -48,9 +48,6 @@ type Application struct {
 
   Path string `json:"-"`
 
-  // The public file system path for the HTTP server.
-  Public string `json:"-"`
-
   Name string `json:"name"`
   Description string `json:"description"`
   Pages []*Page `json:"-"`
@@ -179,7 +176,7 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
   // Must add before publish for all fields to be available
 	app.Add(file)
 
-	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
+	if err := app.FileSystem.PublishFile(app.PublicDirectory(), file, &DefaultPublishFilter{}); err != nil {
 		return nil, err
 	}
 
@@ -239,7 +236,7 @@ func (app *Application) Update(file *File, content []byte) error {
 	if err := app.FileSystem.SaveFile(file); err != nil {
 		return err
 	}
-	if err := app.FileSystem.PublishFile(app.Public, file, &DefaultPublishFilter{}); err != nil {
+	if err := app.FileSystem.PublishFile(app.PublicDirectory(), file, &DefaultPublishFilter{}); err != nil {
 		return err
 	}
 	return nil
@@ -365,6 +362,8 @@ func (app *Application) Publish(dir string) error {
 		}
 	}
 	*/
+
+  println("app publish dir: " + dir)
 
   if err = app.FileSystem.Publish(dir, nil); err != nil {
     return err

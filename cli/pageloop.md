@@ -17,7 +17,6 @@ those specified in the supplied configuration file.
 
 + `-a, --addr=[val] {=:3577}` Set the bind address
 + `-c, --config=[file]` Load server configuration from a YAML file
-+ `-p, --publish=[dir] {=public}` Directory for application builds
 + `-h, --help` Display help and exit
 + `--version` Print the version and exit
 

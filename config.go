@@ -21,9 +21,6 @@ type ServerConfig struct {
   // Directory for generated source files
   SourceDirectory string `json:"source,omitempty" yaml:"source,omitempty"`
 
-  // Directory for build publish preview
-  PublishDirectory string `json:"publish,omitempty" yaml:"publish,omitempty"`
-
 	// Load system assets from the file system, don't use
 	// the embedded assets.
 	Dev bool `json:"dev,omitempty" yaml:"dev,omitempty"`
@@ -112,10 +109,6 @@ func (c *ServerConfig) Merge(path string) error {
 
   if tempServerConfig.Addr != "" {
     c.Addr = tempServerConfig.Addr
-  }
-
-  if tempServerConfig.PublishDirectory != "" {
-    c.PublishDirectory = tempServerConfig.PublishDirectory
   }
 
   for _, m := range tempServerConfig.Mountpoints {
