@@ -348,15 +348,15 @@ export default {
     user-select: none;
   }
 
-  .tabs > *, .tabs > div > * {
+  .tabs a {
     flex: 1 0;
     color: currentColor;
     text-align: center;
     background: transparent;
   }
 
-  .tabs > .selected {
-    text-decoration: underline;
+  .tabs .selected {
+    pointer-events: auto;
   }
 
   .tabs > :not(:first-child) {

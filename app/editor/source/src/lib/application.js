@@ -1,4 +1,5 @@
 const mediaPattern = /\.(jpe?g|png|gif|aac|mp3|mp4|pdf)$/
+const imagePattern = /\.(jpe?g|png|gif|tiff)$/
 const scriptPattern = /\.(jsx?|ts|coffee|es6)$/
 const stylePattern = /\.(css|sss|scss|less)$/
 
@@ -17,6 +18,13 @@ class Application {
   get media () {
     let list = this.files.filter((f) => {
       return mediaPattern.test(f.name)
+    })
+    return list
+  }
+
+  get images () {
+    let list = this.files.filter((f) => {
+      return imagePattern.test(f.name)
     })
     return list
   }

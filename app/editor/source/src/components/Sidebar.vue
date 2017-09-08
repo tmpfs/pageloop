@@ -32,7 +32,7 @@
         <a v-bind:class="{selected: currentView === 'files'}"
           @click="currentView = 'files'"
           title="Show files">Files</a>
-        <media-filter parentView="currentView"></media-filter>
+        <media-filter></media-filter>
       </nav>
     </div>
     <div
@@ -224,7 +224,7 @@ export default {
     overflow: hidden;
   }
 
-  .files-list a, .pages-list a {
+  .files-list a, .pages-list a, .media-list a {
     color: currentColor;
   }
 
