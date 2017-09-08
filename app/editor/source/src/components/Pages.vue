@@ -1,5 +1,6 @@
 <template>
   <div class="pages-list">
+    <p class="small" v-if="!list.length">No pages found</p>
     <a
       @click="click($event, item)"
       class="page"
@@ -20,7 +21,7 @@ export default {
   mixins: [SelectableFileList],
   computed: {
     list: function () {
-      return this.$store.state.app.pages
+      return this.$store.state.app.pages || []
     },
     selection: {
       get: function () {
@@ -43,4 +44,7 @@ export default {
 </script>
 
 <style scoped>
+  .pages-list p.small {
+    margin-left: 2rem;
+  }
 </style>

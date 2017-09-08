@@ -1,5 +1,6 @@
 <template>
   <div class="media-list">
+    <p class="small" v-if="!list.length">No media files found</p>
     <a
       @click="click($event, item)"
       class="file"
@@ -19,7 +20,7 @@ export default {
   mixins: [SelectableFileList],
   computed: {
     list: function () {
-      return this.$store.state.app.media
+      return this.$store.state.app.media || []
     },
     selection: {
       get: function () {
@@ -42,4 +43,7 @@ export default {
 </script>
 
 <style scoped>
+  .media-list p.small {
+    margin-left: 2rem;
+  }
 </style>

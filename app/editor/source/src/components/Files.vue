@@ -1,5 +1,6 @@
 <template>
   <div class="files-list">
+    <p class="small" v-if="!list.length">No files found</p>
     <a
       @click="click($event, item)"
       @dragover="dragover"
@@ -23,7 +24,7 @@ export default {
   mixins: [SelectableFileList],
   computed: {
     list: function () {
-      return this.$store.state.app.files
+      return this.$store.state.app.files || []
     },
     selection: {
       get: function () {
@@ -66,5 +67,9 @@ export default {
 <style scoped>
   .drop-target {
     border-top: 1px solid var(--base2-color);
+  }
+
+  .files-list p.small {
+    margin-left: 2rem;
   }
 </style>
