@@ -1,7 +1,10 @@
-const mediaPattern = /\.(jpe?g|png|gif|aac|mp3|mp4|pdf)$/
+// TODO: expand and improve these extension matches
+const textPattern = /\.(pdf|doc|docx|txt|md|textile|log)$/
 const imagePattern = /\.(jpe?g|png|gif|tiff)$/
-const scriptPattern = /\.(jsx?|ts|coffee|es6)$/
+const scriptPattern = /\.(jsx?|ts|coffee|es6|sh)$/
 const stylePattern = /\.(css|sss|scss|less)$/
+const audioPattern = /\.(aac|mp3|wav|aiff?)$/
+const videoPattern = /\.(mp4)$/
 
 class Application {
   constructor () {
@@ -33,7 +36,19 @@ class Application {
 
   get media () {
     let list = this.files.filter((f) => {
-      return mediaPattern.test(f.name)
+      return textPattern.test(f.name) ||
+        imagePattern.test(f.name) ||
+        scriptPattern.test(f.name) ||
+        stylePattern.test(f.name) ||
+        audioPattern.test(f.name) ||
+        videoPattern.test(f.name)
+    })
+    return list
+  }
+
+  get text () {
+    let list = this.files.filter((f) => {
+      return textPattern.test(f.name)
     })
     return list
   }
@@ -55,6 +70,20 @@ class Application {
   get styles () {
     let list = this.files.filter((f) => {
       return stylePattern.test(f.name)
+    })
+    return list
+  }
+
+  get audio () {
+    let list = this.files.filter((f) => {
+      return audioPattern.test(f.name)
+    })
+    return list
+  }
+
+  get video () {
+    let list = this.files.filter((f) => {
+      return videoPattern.test(f.name)
     })
     return list
   }

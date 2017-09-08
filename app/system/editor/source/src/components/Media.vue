@@ -1,6 +1,6 @@
 <template>
   <div class="media-list">
-    <p class="small" v-if="!list.length">No media files found</p>
+    <p class="small" v-if="!list.length">No {{filter}} found</p>
     <a
       @click="click($event, item)"
       class="file"

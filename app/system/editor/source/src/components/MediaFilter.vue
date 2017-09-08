@@ -9,13 +9,22 @@
         title="Show all media files">Media</a>
       <a v-bind:class="{selected: filter === 'images'}"
         @click="select($event, 'images')"
-        title="Show images">Images</a>
+        title="Show image files">Images</a>
+      <a v-bind:class="{selected: filter === 'text'}"
+        @click="select($event, 'text')"
+        title="Show text files">text</a>
       <a v-bind:class="{selected: filter === 'styles'}"
         @click="select($event, 'styles')"
-        title="Show styles">Styles</a>
+        title="Show style files">Styles</a>
       <a v-bind:class="{selected: filter === 'scripts'}"
         @click="select($event, 'scripts')"
-        title="Show scripts">Scripts</a>
+        title="Show script files">Scripts</a>
+      <a v-bind:class="{selected: filter === 'audio'}"
+        @click="select($event, 'audio')"
+        title="Show audio files">audio</a>
+      <a v-bind:class="{selected: filter === 'video'}"
+        @click="select($event, 'video')"
+        title="Show video files">video</a>
     </div>
   </div>
 </template>
