@@ -9,10 +9,26 @@ class Application {
     this.url = ''
     this.identifier = ''
     this.owner = ''
-    this.pages = []
-    this.files = []
+    this._pages = []
+    this._files = []
     // current selected file
     this.current = this.defaultFile
+  }
+
+  get files () {
+    return this._files || []
+  }
+
+  set files (val) {
+    this._files = val
+  }
+
+  get pages () {
+    return this._pages || []
+  }
+
+  set pages (val) {
+    this._pages = val
   }
 
   get media () {
