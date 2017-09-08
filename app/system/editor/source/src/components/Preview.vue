@@ -87,6 +87,12 @@ export default {
   },
   methods: {
     refresh (file) {
+      if (file === '') {
+        this.path = ''
+        this.src = ''
+        return
+      }
+
       const url = file.uri
 
       // TODO: work out how to stop the iframe interpreting
@@ -95,11 +101,7 @@ export default {
       if (!file.dir && url && !allowed.test(url)) {
         return
       }
-      if (url === '') {
-        this.path = ''
-        this.src = ''
-        return
-      }
+
       // If the src attribute will not change the page
       // won't be refreshed so we need to call reload()
       if (url === this.path) {
