@@ -119,3 +119,4 @@ Wow, so much to do, here is some stuff:
 44) Support deleting multiple selected files
 45) File upload documentation
 46) Standardize public/source directories for all apps
+47) Add Electron build for the editor, bundle a standalone server executable
