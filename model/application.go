@@ -372,7 +372,8 @@ func (app *Application) Load(path string) error {
 
 // Publish application files to the given directory.
 func (app *Application) Publish(dir string) error {
-  if app.HasBuilder() {
+  // TODO: fix this - builds will never run ;)
+  if app.HasBuilder() && app.builder.Boot {
     return app.Build()
   }
   return app.FileSystem.Publish(dir, nil)

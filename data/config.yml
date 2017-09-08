@@ -1,6 +1,6 @@
 addr: :3577
 publish: public
-source: source
+source: app/user
 mountpoints:
   -
     container: system

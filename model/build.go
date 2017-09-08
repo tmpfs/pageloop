@@ -13,6 +13,9 @@ import(
 const BuildFileName = "build.yml"
 
 type BuildFile struct {
+  // Allows disabling builds when the server boots
+  Boot bool
+  // Main build command to run
   Command string `yaml:"build"`
 }
 

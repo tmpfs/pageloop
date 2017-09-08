@@ -2,6 +2,7 @@
 /source
 /assets.go
 public
+app/user
 node_modules
 untitled*
 ref
