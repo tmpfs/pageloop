@@ -26,6 +26,9 @@ func (s StatusError) Error() string {
 }
 
 func CommandError(status int, message string, a ...interface{}) *StatusError {
+  if message == "" {
+    message = http.StatusText(status)
+  }
 	return &StatusError{Status: status, Message: fmt.Sprintf(message, a...)}
 }
 
@@ -45,7 +48,7 @@ type Command struct {
 }
 
 // Create application.
-func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Application) error {
+func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Application) *StatusError {
   existing := c.GetByName(a.Name)
   if existing != nil {
     return CommandError(http.StatusPreconditionFailed, "Application %s already exists", a.Name)

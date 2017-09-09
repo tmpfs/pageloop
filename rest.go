@@ -31,7 +31,10 @@ var(
 	CharsetStrip = regexp.MustCompile(`;.*$`)
 
   // Allowed methods.
-	RestAllowedMethods []string = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete}
+
+  // TODO: CORS for OPTIONS requests
+	RestAllowedMethods []string = []string{
+    http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}
 )
 
 type TaskJobComplete struct {
@@ -79,6 +82,8 @@ type ApplicationRequestHandler struct {
   Path string
   // Path parts
   Parts []string
+  // Container name or top-level action.
+  BaseName string
   // Application name.
   Name string
   // Action identifier: files|pages|tasks etc.
@@ -94,20 +99,27 @@ func (a *ApplicationRequestHandler) Parse(req *http.Request) {
 	// and extract path parts.
 	if a.Path != "" {
 		a.Parts = strings.Split(strings.TrimSuffix(a.Path, "/"), "/")
-		a.Name = a.Parts[0]
+		a.BaseName = a.Parts[0]
 		if len(a.Parts) > 1 {
-			a.Action = a.Parts[1]
+		  a.Name = a.Parts[1]
+    }
+    if len(a.Parts) > 2 {
+			a.Action = a.Parts[2]
 		}
-		if len(a.Parts) > 2 {
-			//item = parts[2]
-			a.Item = "/" + strings.Join(a.Parts[2:], "/")
+		if len(a.Parts) > 3 {
+			a.Item = "/" + strings.Join(a.Parts[3:], "/")
       // Respect input trailing slash used to indicate
       // operations on a directory
       if strings.HasSuffix(a.Path, "/") {
         a.Item += "/"
       }
 		}
-		a.App = a.Container.GetByName(a.Name)
+
+    // Try to lookup container / application, both may be nil on 404.
+    a.Container = a.Root.Host.GetByName(a.BaseName)
+    if a.Container != nil {
+		  a.App = a.Container.GetByName(a.Name)
+    }
 	}
 }
 
@@ -306,55 +318,42 @@ func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Reque
   return -1, nil
 }
 
-
-// Handles application information (files, pages etc.)
+// Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	var err error
 	var data []byte
   var file *model.File
 
 	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+    return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
   info := &ApplicationRequestHandler{Root: h.Root}
+  info.Parse(req)
+
+  //fmt.Printf("%#v\n", req.URL.Path)
+  //fmt.Printf("%#v\n", info)
 
   // TODO: only allow this in Dev mode?
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
-	// List host containers
-	if info.Path == "" {
-		if req.Method != http.MethodGet {
-			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-		}
-    return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
-  // List available application templates
-	} else if info.Path == TEMPLATES {
-    return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
-  }
+  if (info.Path == "") {
+    // GET / - List host containers.
+    if req.Method == http.MethodGet {
+      return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
+    }
+  } else {
+    // GET /templates - List available application templates.
+    if req.Method == http.MethodGet && info.Path == TEMPLATES {
+      return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
+    }
 
-  path := strings.Trim(info.Path, "/")
-	parts := strings.Split(path, "/")
-
-	if len(parts) > 0 {
-		var c *model.Container = h.Root.Host.GetByName(parts[0])
+    // METHOD /{container} - 404 if container not found.
 		// Container not found
-		if c == nil {
-			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+		if info.Container == nil {
+			return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 		}
-
-    info.Container = c
-
-    // TODO: remove container from handler
-    h.Container = c
-
-		// Rewrite path for app handling
-		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
-		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
 	}
-
-  // Must parse after container available
-  info.Parse(req)
 
   app := info.App
   name := info.Name
@@ -365,13 +364,13 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 	switch req.Method {
 		case http.MethodPut:
 		  // PUT /api/{container}/ - Create a new application.
-			if info.Path == "" {
+			if info.Container != nil && info.Name == "" {
 				var input *model.Application = &model.Application{}
         if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
-          return HttpUtils.ErrorJson(res, http.StatusBadRequest, err)
+          return HttpUtils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
         }
         if err := adapter.CreateApplication(info.Container, input); err != nil {
-          return HttpUtils.ErrorJson(res, http.StatusInternalServerError, err)
+          return HttpUtils.ErrorJson(res, err)
         }
 				return HttpUtils.Created(res, OK)
 			}
@@ -389,7 +388,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 		case http.MethodDelete:
       return info.Delete(res, req)
 		case http.MethodPut:
-      if path != "" {
+      if info.Path != "" {
 				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
 					if file = h.putFile(item, app, res, req); file != nil {

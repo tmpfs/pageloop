@@ -13,17 +13,18 @@ import (
 type HttpUtil struct {}
 
 // Send an error response to the client as JSON.
-func (h HttpUtil) ErrorJson(res http.ResponseWriter, status int, exception error) (int, error) {
+func (h HttpUtil) ErrorJson(res http.ResponseWriter, ex *StatusError) (int, error) {
+  message := ex.Error()
   var m map[string] interface{} = make(map[string] interface{})
-  m["code"] = status
-  m["message"] = http.StatusText(status)
-  if exception != nil {
-    m["error"] = exception.Error()
+  m["code"] = ex.Status
+  m["message"] = http.StatusText(ex.Status)
+  if message != m["message"] {
+    m["error"] = message
   }
   if data, err := json.Marshal(m); err != nil {
     return -1, err
   } else {
-	  return h.Write(res, status, data)
+	  return h.Write(res, ex.Status, data)
   }
 }
 
