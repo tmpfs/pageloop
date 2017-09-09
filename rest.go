@@ -40,9 +40,9 @@ type TaskJobComplete struct {
 }
 
 func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
+  // TODO: send reply to the client over websocket
   Jobs.Stop(t.Job)
   println("Task job completed: " + t.Job.Name)
-
   fmt.Printf("%#v\n", t.Job)
 }
 
@@ -54,12 +54,9 @@ type RestService struct {
 }
 
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
-	var rest *RestService = &RestService{Root: root, Url: API_URL}
-
-	var url string
-	url= API_URL
+  rest := &RestService{Root: root, Url: API_URL}
+  url := API_URL
 	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
-
 	return rest
 }
 
@@ -74,8 +71,12 @@ type RestAppHandler struct {
 	Container *model.Container
 }
 
-// Gets the list of applications for the API root (/api/).
 func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+  h.doServeHttp(res, req)
+}
+
+// Gets the list of applications for the API root (/api/).
+func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	var err error
 	var data []byte
 
@@ -88,13 +89,11 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	// List host containers
 	if path == "" {
 		if req.Method != http.MethodGet {
-			HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-			return
+			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 		}
 
 		if data, err = json.Marshal(h.Root.Host.Containers); err == nil {
-			HttpUtils.Ok(res, data)
-			return
+			return HttpUtils.Ok(res, data)
 		}
   // List available application templates
 	} else if path == "templates" {
@@ -110,11 +109,9 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
     }
 
     if content, err := json.Marshal(apps); err != nil {
-      HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-      return
+      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
     } else {
-      HttpUtils.Ok(res, content)
-      return
+      return HttpUtils.Ok(res, content)
     }
   }
 
@@ -124,8 +121,7 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		var c *model.Container = h.Root.Host.GetByName(parts[0])
 		if c == nil {
 			// Container not found
-			HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-			return
+			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 		}
 
 		// Proxy to the app handler
@@ -136,16 +132,15 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
 		handler.ServeHTTP(res, req)
-		return
+    // TODO: get return value from handler?
+		return -1, nil
 	}
 
 	if err != nil {
-		HttpUtils.Error(res, http.StatusInternalServerError, nil, nil)
-		return
+		return HttpUtils.Error(res, http.StatusInternalServerError, nil, nil)
 	}
 
-	// TODO: log the error from (int, error) return value
-	HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
 
 // Handles application information (files, pages etc.)
