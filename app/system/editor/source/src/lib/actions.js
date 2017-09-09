@@ -51,6 +51,20 @@ function Actions (router) {
           context.commit('containers', list)
         })
     },
+    'run-task': function (context, {app, task}) {
+      return context.state.client.runTask(app, task)
+        .then((res) => {
+          // Show error response
+          if (res.response.status !== 202) {
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
+          }
+          context.state.notify({title: 'Task Info', message: `Task ${task} started in ${app.name}`})
+          return res
+        })
+    },
     'new-app': function (context, app) {
       return context.state.client.createNewApp(app)
         .then((res) => {

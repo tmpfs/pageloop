@@ -46,8 +46,13 @@ export default {
       }
     },
     select: function (e, name, task) {
+      const app = this.$store.state.app
       console.log(name)
       console.log(task)
+      this.$store.dispatch('run-task', {app: app, task: name})
+        .then((res) => {
+          console.log(res)
+        })
     }
   }
 }

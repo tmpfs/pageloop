@@ -71,6 +71,19 @@ class ApiClient {
       .catch((err) => err)
   }
 
+  runTask (app, task) {
+    let url = this.url + `tasks/${task}`
+    let opts = {
+      method: 'PUT'
+    }
+    return fetch(url, opts)
+      .then((res) => {
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
+
   createNewApp (app) {
     let url = this.api + 'user/'
     let opts = {
