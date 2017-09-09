@@ -189,7 +189,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
     }
 
     // Delete the files
-    if err := a.Root.DeleteApplicationFiles(app); err != nil {
+    if err := app.DeleteApplicationFiles(); err != nil {
       return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
     }
 

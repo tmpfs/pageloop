@@ -336,6 +336,20 @@ func (app *Application) SetPath(path string) {
   app.publicPath = filepath.Join(path, PUBLIC)
 }
 
+// Attempt to delete all application source and publish files.
+func (app *Application) DeleteApplicationFiles() error {
+  // Delete published files
+  if err := os.RemoveAll(app.PublicDirectory()); err != nil {
+    return err
+  }
+  // Delete source files, note this is the top-level directory not the
+  // source sub-directory.
+  if err := os.RemoveAll(app.Path); err != nil {
+    return err
+  }
+  return nil
+}
+
 // Copy source files from another source application into this application.
 func (app *Application) CopyApplicationTemplate(source *Application) error {
   var err error

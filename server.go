@@ -496,23 +496,6 @@ func (l *PageLoop) DeleteApplicationMountpoint(a *model.Application) error {
   return nil
 }
 
-// Attempt to delete all application source and publish files.
-func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
-  var err error
-
-  // Delete published files
-  if err = os.RemoveAll(a.PublicDirectory()); err != nil {
-    return err
-  }
-
-  // Delete source files
-  if err = os.RemoveAll(a.Path); err != nil {
-    return err
-  }
-
-  return nil
-}
-
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
