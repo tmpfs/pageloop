@@ -54,8 +54,7 @@ type RestService struct {
 
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
   rest := &RestService{Root: root, Url: API_URL}
-  url := API_URL
-	mux.Handle(url, http.StripPrefix(url, RestHandler{Root: root}))
+	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Root: root}))
 	return rest
 }
 
@@ -78,6 +77,8 @@ type ApplicationRequestHandler struct {
   App * model.Application
   // Request URL path
   Path string
+  // Path parts
+  Parts []string
   // Application name.
   Name string
   // Action identifier: files|pages|tasks etc.
@@ -92,14 +93,14 @@ func (a *ApplicationRequestHandler) Parse(req *http.Request) {
 	// Check if an app exists when referenced as /api/apps/{name}
 	// and extract path parts.
 	if a.Path != "" {
-		parts := strings.Split(strings.TrimSuffix(a.Path, "/"), "/")
-		a.Name = parts[0]
-		if len(parts) > 1 {
-			a.Action = parts[1]
+		a.Parts = strings.Split(strings.TrimSuffix(a.Path, "/"), "/")
+		a.Name = a.Parts[0]
+		if len(a.Parts) > 1 {
+			a.Action = a.Parts[1]
 		}
-		if len(parts) > 2 {
+		if len(a.Parts) > 2 {
 			//item = parts[2]
-			a.Item = "/" + strings.Join(parts[2:], "/")
+			a.Item = "/" + strings.Join(a.Parts[2:], "/")
       // Respect input trailing slash used to indicate
       // operations on a directory
       if strings.HasSuffix(a.Path, "/") {
@@ -316,25 +317,23 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
-	url := req.URL
-	path := url.Path
+  info := &ApplicationRequestHandler{Root: h.Root}
 
   // TODO: only allow this in Dev mode?
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// List host containers
-	if path == "" {
+	if info.Path == "" {
 		if req.Method != http.MethodGet {
 			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 		}
     return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
   // List available application templates
-	} else if path == TEMPLATES {
-    apps := adapter.ListApplicationTemplates()
-    return HttpUtils.Json(res, http.StatusOK, apps)
+	} else if info.Path == TEMPLATES {
+    return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
   }
 
-	path = strings.Trim(path, "/")
+  path := strings.Trim(info.Path, "/")
 	parts := strings.Split(path, "/")
 
 	if len(parts) > 0 {
@@ -344,20 +343,19 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 		}
 
+    info.Container = c
+
+    // TODO: remove container from handler
     h.Container = c
 
-		// Proxy to the app handler
-		// Using http.StripPrefix() here does not invoke
-		// the underlying handler???
-		// handler := RestHandler{Root: h.Root, Container: c}
+		// Rewrite path for app handling
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
 	}
 
-  info := &ApplicationRequestHandler{Root: h.Root, Container: h.Container}
+  // Must parse after container available
   info.Parse(req)
 
-  path = info.Path
   app := info.App
   name := info.Name
   action := info.Action
@@ -366,58 +364,15 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   // Container level endpoints
 	switch req.Method {
 		case http.MethodPut:
-		  // PUT /api/{container}/
-			if path == "" {
+		  // PUT /api/{container}/ - Create a new application.
+			if info.Path == "" {
 				var input *model.Application = &model.Application{}
-				_, err = HttpUtils.ValidateRequest(SchemaAppNew, input, req)
-				if err != nil {
-					return HttpUtils.Error(res, http.StatusBadRequest, nil, err)
-				}
-
-        existing := h.Container.GetByName(input.Name)
-        if existing != nil {
-					return HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Application %s already exists", input.Name))
+        if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
+          return HttpUtils.ErrorJson(res, http.StatusBadRequest, err)
         }
-
-        input.Url = input.MountpointUrl(h.Container)
-
-        // mountpoint exists
-        exists := h.Root.HasMountpoint(input.Url)
-        if exists {
-					return HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Mountpoint URL %s already exists", input.Url))
+        if err := adapter.CreateApplication(info.Container, input); err != nil {
+          return HttpUtils.ErrorJson(res, http.StatusInternalServerError, err)
         }
-
-        var mountpoint *Mountpoint
-
-        // Create and save a mountpoint for the application.
-        if mountpoint, err = h.Root.CreateMountpoint(input); err != nil {
-					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        if input.Template != nil {
-          var source *model.Application
-
-          // Find the template app/ directory
-          if source, err = h.Root.LookupTemplate(input.Template); err != nil {
-            return HttpUtils.Error(res, http.StatusBadRequest, nil, err);
-          }
-
-          // Copy template source files
-          if err = h.Root.CopyApplicationTemplate(input, source); err != nil {
-            return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-          }
-        }
-
-        var app *model.Application
-
-        // Load and publish the app source files
-        if app, err = h.Root.LoadMountpoint(*mountpoint, h.Container); err != nil {
-          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        // Mount the application
-        h.Root.MountApplication(app)
-
 				return HttpUtils.Created(res, OK)
 			}
   }
@@ -427,6 +382,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
   }
 
+  // Application level endpoints
 	switch req.Method {
 		case http.MethodGet:
       return info.Get(res, req)

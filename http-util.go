@@ -12,6 +12,21 @@ import (
 // Utilities for the REST API endpoints.
 type HttpUtil struct {}
 
+// Send an error response to the client as JSON.
+func (h HttpUtil) ErrorJson(res http.ResponseWriter, status int, exception error) (int, error) {
+  var m map[string] interface{} = make(map[string] interface{})
+  m["code"] = status
+  m["message"] = http.StatusText(status)
+  if exception != nil {
+    m["error"] = exception.Error()
+  }
+  if data, err := json.Marshal(m); err != nil {
+    return -1, err
+  } else {
+	  return h.Write(res, status, data)
+  }
+}
+
 // Send an error response to the client.
 func (h HttpUtil) Error(res http.ResponseWriter, code int, data []byte, exception error) (int, error) {
 	var err error
