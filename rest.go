@@ -30,9 +30,8 @@ var(
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
 
-  // Allowed methods.
-
   // TODO: CORS for OPTIONS requests
+  // Allowed methods.
 	RestAllowedMethods []string = []string{
     http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}
 )
@@ -119,7 +118,7 @@ func (a *RequestHandler) Parse(req *http.Request) {
 		}
 
     // Try to lookup container / application, both may be nil on 404.
-    a.Container = a.Root.Host.GetByName(a.BaseName)
+    a.Container = adapter.Host.GetByName(a.BaseName)
     if a.Container != nil {
 		  a.App = a.Container.GetByName(a.Name)
     }
