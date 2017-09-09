@@ -77,9 +77,6 @@ func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Gets the list of applications for the API root (/api/).
 func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	var err error
-	var data []byte
-
 	url := req.URL
 	path := url.Path
 
@@ -91,10 +88,7 @@ func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request)
 		if req.Method != http.MethodGet {
 			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 		}
-
-		if data, err = json.Marshal(h.Root.Host.Containers); err == nil {
-			return HttpUtils.Ok(res, data)
-		}
+    return HttpUtils.Json(res, http.StatusOK, h.Root.Host.Containers)
   // List available application templates
 	} else if path == "templates" {
     // Get built in and user templates
@@ -107,25 +101,20 @@ func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request)
         apps = append(apps, app)
       }
     }
-
-    if content, err := json.Marshal(apps); err != nil {
-      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-    } else {
-      return HttpUtils.Ok(res, content)
-    }
+    return HttpUtils.Json(res, http.StatusOK, apps)
   }
 
 	path = strings.Trim(path, "/")
 	parts := strings.Split(path, "/")
+
 	if len(parts) > 0 {
 		var c *model.Container = h.Root.Host.GetByName(parts[0])
+		// Container not found
 		if c == nil {
-			// Container not found
 			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 		}
 
 		// Proxy to the app handler
-
 		// Using http.StripPrefix() here does not invoke
 		// the underlying handler???
 		handler := RestAppHandler{Root: h.Root, Container: c}
@@ -135,11 +124,6 @@ func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request)
     // TODO: get return value from handler?
 		return -1, nil
 	}
-
-	if err != nil {
-		return HttpUtils.Error(res, http.StatusInternalServerError, nil, nil)
-	}
-
 	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
 
@@ -147,94 +131,117 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   h.doServeHttp(res, req)
 }
 
+// Enapcaulates request information for application API endpoints.
+type ApplicationRequestHandler struct {
+  // The container context for the application.
+  Container *model.Container
+  // Reference to the underlying application, will be nil if not found.
+  App * model.Application
+  // Request URL path
+  Path string
+  // Application name.
+  Name string
+  // Action identifier: files|pages|tasks etc.
+  Action string
+  // Item to operate on, the remaining part of the path, eg: /docs/index.html
+  Item string
+}
+
+// Parse the request path and assign fields to the request handler.
+func (a *ApplicationRequestHandler) Parse(req *http.Request) {
+	a.Path = req.URL.Path
+	// Check if an app exists when referenced as /api/apps/{name}
+	// and extract path parts.
+	if a.Path != "" {
+		parts := strings.Split(strings.TrimSuffix(a.Path, "/"), "/")
+		a.Name = parts[0]
+		if len(parts) > 1 {
+			a.Action = parts[1]
+		}
+		if len(parts) > 2 {
+			//item = parts[2]
+			a.Item = "/" + strings.Join(parts[2:], "/")
+      // Respect input trailing slash used to indicate
+      // operations on a directory
+      if strings.HasSuffix(a.Path, "/") {
+        a.Item += "/"
+      }
+		}
+		a.App = a.Container.GetByName(a.Name)
+	}
+}
+
+func (a *ApplicationRequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, error) {
+  if a.Path == "" {
+    // TODO: check this is necessary
+    // GET /api/
+    return HttpUtils.Json(res, http.StatusOK, a.Container.Apps)
+  } else {
+    if a.Action == "" {
+      // GET /api/{container}/{application}
+      return HttpUtils.Json(res, http.StatusOK, a.App)
+    } else {
+      switch a.Action {
+        case FILES:
+          if a.Item == "" {
+            // GET /api/{container}/{application}/files
+            return HttpUtils.Json(res, http.StatusOK, a.App.Files)
+          } else {
+            // GET /api/{container}/{application}/files/{url}
+            if file := a.App.GetFileByUrl(a.Item); file == nil {
+              return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+            } else {
+              return HttpUtils.Json(res, http.StatusOK, file)
+            }
+          }
+        case PAGES:
+          if a.Item == "" {
+            // GET /api/{container}/{application}/pages
+            return HttpUtils.Json(res, http.StatusOK, a.App.Pages)
+          } else {
+            // GET /api/{container}/{application}/pages/{url}
+            if page := a.App.GetPageByUrl(a.Item); page == nil {
+              return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+            } else {
+              return HttpUtils.Json(res, http.StatusOK, page)
+            }
+          }
+        default:
+          return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+      }
+    }
+  }
+
+  return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+}
+
 // Handles application information (files, pages etc.)
 func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	var err error
 	var data []byte
-	//var body []byte
-	var name string
-	var action string
-	// File or Page
-	var item string
-	var app *model.Application
   var file *model.File
 
 	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
 		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
-	url := req.URL
-	path := url.Path
+  info := &ApplicationRequestHandler{Container: h.Container}
+  info.Parse(req)
 
-	// Check if an app exists when referenced as /api/apps/{name}
-	// and extract path parts.
-	if path != "" {
-		parts := strings.Split(strings.TrimSuffix(path, "/"), "/")
-		name = parts[0]
-		if len(parts) > 1 {
-			action = parts[1]
-		}
-		if len(parts) > 2 {
-			//item = parts[2]
-			item = "/" + strings.Join(parts[2:], "/")
+  // Application must exist
+  if info.App == nil {
+    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  }
 
-      // Respect input trailing slash used to indicate
-      // operations on a directory
-      if strings.HasSuffix(path, "/") {
-        item += "/"
-      }
-		}
-		app = h.Container.GetByName(name)
-		// Application must exist
-		if app == nil {
-			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-		}
-	}
+  app := info.App
+  path := info.Path
+  name := info.Name
+  action := info.Action
+  item := info.Item
 
 	switch req.Method {
 		case http.MethodGet:
-			if path == "" {
-				// GET /api/apps/
-				data, err = json.Marshal(h.Container.Apps)
-			} else {
-				if app != nil {
-					if action == "" {
-						// GET /api/apps/{name}
-						data, err = json.Marshal(app)
-					} else {
-						switch action {
-							case FILES:
-								if item == "" {
-									// GET /api/apps/{name}/files
-									data, err = json.Marshal(app.Files)
-								} else {
-									// GET /api/apps/{name}/files/{url}
-									file := app.GetFileByUrl(item)
-									// Data is nil so we send a 404
-									if file == nil {
-										break
-									}
-									data, err = json.Marshal(file)
-								}
-							case PAGES:
-								if item == "" {
-									// GET /api/apps/{name}/pages
-									data, err = json.Marshal(app.Pages)
-								} else {
-									// GET /api/apps/{name}/pages/{url}
-									page := app.GetPageByUrl(item)
-									// Data is nil so we send a 404
-									if page == nil {
-										break
-									}
-									data, err = json.Marshal(page)
-								}
-							default:
-								return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-						}
-					}
-				}
-			}
+      return info.Get(res, req)
 		// DELETE /api/{container}/{name}/
 		case http.MethodDelete:
 			if name != "" && action == "" {
