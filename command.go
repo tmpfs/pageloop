@@ -142,3 +142,22 @@ func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest stri
   }
   return nil
 }
+
+
+// Create a new file and publish it, the file cannot already exist on disc.
+func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []byte) (*model.File, *StatusError) {
+  var err error
+	var file *model.File = a.Urls[url]
+	if file != nil {
+    return nil, CommandError(http.StatusConflict,"File already exists %s", url)
+	}
+  if a.ExistsConflict(url) {
+    return nil, CommandError(http.StatusConflict,"File already exists, publish conflict on %s", url)
+  }
+
+  if file, err = a.Create(url, content); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  return file, nil
+}

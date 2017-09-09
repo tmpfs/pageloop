@@ -106,9 +106,11 @@ export default {
       set: function (val) {
         const state = this.$store.state
         let values = [val]
-        if (state.hasFile()) {
-          let file = state.current
-          values.push(file.url)
+        if (val !== 'new-file') {
+          if (state.hasFile()) {
+            let file = state.current
+            values.push(file.url)
+          }
         }
         let href = this.$store.state.getAppHref(...values)
         this.$store.dispatch('navigate', {href: href})

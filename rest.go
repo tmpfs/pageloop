@@ -307,7 +307,9 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
   if a.Path != "" {
     // PUT /api/{container}/{application}/files/{url} - Create a new file.
     if a.Action == FILES && a.Item != "" {
-      if file := a.PutFile(res, req); file != nil {
+      if file, err := a.PutFile(res, req); err != nil {
+        return HttpUtils.ErrorJson(res, err)
+      } else {
         return HttpUtils.Json(res, http.StatusCreated, file)
       }
     // PUT /api/{container}/{application}/tasks/ - Run a build task.
@@ -360,10 +362,12 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
 }
 
 // Create a new file for an application
-func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*model.File, *StatusError) {
 	var err error
+	var content []byte
+  var file *model.File
+
   app := a.App
-  url := a.Item
 
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
@@ -374,63 +378,47 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) *mo
 
 	// No content length header
 	if cl == "" {
-		HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
-		return nil
+		return nil, CommandError(http.StatusBadRequest, "Content length header is required")
 	}
 
-  isDir := strings.HasSuffix(url, "/")
-
-	var content []byte
+  isDir := strings.HasSuffix(a.Item, "/")
 
   // Lookup template file
   if !isDir && ct == JSON_MIME {
     // TODO: stream request body to disc
     if content, err = HttpUtils.ReadBody(req); err != nil {
-      HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-      return nil
+		  return nil, CommandError(http.StatusInternalServerError, err.Error())
+    } else {
+
+      input := &model.ApplicationTemplate{}
+      if err = json.Unmarshal(content, input); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      }
+
+      if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      }
+
+      if file == nil {
+        return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", input.File)
+      }
+
+      content = file.Source(true)
     }
-
-    input := &model.ApplicationTemplate{}
-    if err = json.Unmarshal(content, input); err != nil {
-      HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-      return nil
-    }
-
-    var file *model.File
-
-    if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
-      HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-      return nil
-    }
-
-    if file == nil {
-      HttpUtils.Error(res, http.StatusNotFound, nil, fmt.Errorf("Template file %s does not exist", input.File))
-      return nil
-    }
-
-    content = file.Source(true)
   } else {
     // TODO: stream request body to disc
     // Read in as file content upload
     if content, err = HttpUtils.ReadBody(req); err != nil {
-      HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-      return nil
+		  return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
   }
 
   // Update the application model
-  var file *model.File
-  if file, err = app.Create(url, content); err != nil {
-    if err, ok := err.(model.StatusError); ok {
-      HttpUtils.Error(res, err.Status, nil, err)
-      return nil
-    }
-
-    HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-    return nil
+  if file, err := adapter.CreateFile(app, a.Item, content); err != nil {
+    return nil, err
+  } else {
+    return file, nil
   }
-
-  return file
 }
 
 // Handle REST API endpoint requests.
