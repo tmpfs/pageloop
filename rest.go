@@ -5,7 +5,6 @@ package pageloop
 import (
   "fmt"
   "os/exec"
-	"errors"
 	"regexp"
 	"strings"
 	"net/http"
@@ -91,16 +90,7 @@ func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request)
     return HttpUtils.Json(res, http.StatusOK, h.Root.Host.Containers)
   // List available application templates
 	} else if path == "templates" {
-    // Get built in and user templates
-    c := h.Root.Host.GetByName("template")
-    u := h.Root.Host.GetByName("user")
-    list := append(c.Apps, u.Apps...)
-    var apps []*model.Application
-    for _, app := range list {
-      if app.IsTemplate {
-        apps = append(apps, app)
-      }
-    }
+    apps := adapter.ListApplicationTemplates()
     return HttpUtils.Json(res, http.StatusOK, apps)
   }
 
@@ -133,6 +123,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Enapcaulates request information for application API endpoints.
 type ApplicationRequestHandler struct {
+	Root *PageLoop
   // The container context for the application.
   Container *model.Container
   // Reference to the underlying application, will be nil if not found.
@@ -171,6 +162,7 @@ func (a *ApplicationRequestHandler) Parse(req *http.Request) {
 	}
 }
 
+// Handle GET requests.
 func (a *ApplicationRequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, error) {
   if a.Path == "" {
     // TODO: check this is necessary
@@ -211,8 +203,154 @@ func (a *ApplicationRequestHandler) Get(res http.ResponseWriter, req *http.Reque
       }
     }
   }
+  return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+}
+
+// Handle DELETE requests.
+func (a *ApplicationRequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int, error) {
+  app := a.App
+
+	// DELETE /api/{container}/{name} - Delete an application
+  if a.Name != "" && a.Action == "" {
+    if app.Protected {
+      return HttpUtils.Error(res, http.StatusForbidden, nil, fmt.Errorf("Cannot delete protected application"))
+    }
+
+    // Stop serving files for the application
+    a.Root.UnmountApplication(app)
+
+    // Delete the mountpoint
+    if err := a.Root.DeleteApplicationMountpoint(app); err != nil {
+      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    }
+
+    // Delete the files
+    if err := a.Root.DeleteApplicationFiles(app); err != nil {
+      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    }
+
+    // Delete the in-memory application
+    a.Container.Del(app)
+
+    return HttpUtils.Ok(res, OK)
+  // DELETE /api/{container}/{app}/files/ - Bulk file deletion
+  } else if a.Action == FILES && a.Item == "" {
+    var urls UrlList
+
+    if content, err := HttpUtils.ReadBody(req); err != nil {
+      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    } else {
+      if err = json.Unmarshal(content, &urls); err != nil {
+        return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+      }
+
+      for _, url := range urls {
+        if file := a.deleteFile(url, app, res, req); file == nil {
+          // If we got a nil file an error occured and the response
+          // will already have been sent
+          return -1, nil
+        }
+      }
+      // If we made it this far all files were deleted
+      return HttpUtils.Ok(res, OK)
+    }
+
+  // DELETE /api/{container}/{app}/files/{url} - Delete a single file
+  } else if a.Action == FILES && a.Item != "" {
+    if file := a.deleteFile(a.Item, app, res, req); file != nil {
+      return HttpUtils.Ok(res, OK)
+    }
+  } else {
+    return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+  }
 
   return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+}
+
+func (a *ApplicationRequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+  var err error
+  var file *model.File = app.Urls[url]
+  if file == nil {
+    HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+    return nil
+  }
+  if err = app.Del(file); err != nil {
+    HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    return nil
+  }
+  return file
+}
+
+func (a *ApplicationRequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
+  // POST /api/{container}/{app}/files/{url}
+  if a.Name != "" && a.Action == FILES && a.Item != "" {
+    if file := a.postFile(a.Item, a.App, res, req); file != nil {
+      return HttpUtils.Json(res, http.StatusOK, file)
+    }
+  }
+  return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+}
+
+// Update the content of a file.
+func (a *ApplicationRequestHandler) postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+	var err error
+	loc := req.Header.Get("Location")
+	ct := req.Header.Get("Content-Type")
+	cl := req.Header.Get("Content-Length")
+
+  if loc == "" {
+    // No content type header
+    if ct == "" {
+      HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content type header is required"))
+      return nil
+    }
+
+    // No content length header
+    if cl == "" {
+      HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
+      return nil
+    }
+  }
+
+	var file *model.File = app.Urls[url]
+	if file != nil {
+    // Handle moving the file with Location header
+    if loc != "" {
+      if url == loc {
+        HttpUtils.Error(res, http.StatusBadRequest, nil,
+          fmt.Errorf("Cannot move file, source and destination are equal: %s", url))
+        return nil
+      }
+
+      if err = app.Move(file, loc); err != nil {
+        HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+        return nil
+      }
+      return file
+    // Update file content
+    } else {
+      // Strip charset for mime comparison
+      ct = CharsetStrip.ReplaceAllString(ct, "")
+      ft := CharsetStrip.ReplaceAllString(file.Mime, "")
+      if ft != ct {
+        HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Mismatched MIME types attempting to update file"))
+        return nil
+      }
+
+      // TODO: fix empty reply when there is no request body
+      // TODO: stream request body to disc
+      var content []byte
+      if content, err = HttpUtils.ReadBody(req); err == nil {
+        // Update the application model
+        if err = app.Update(file, content); err != nil {
+          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+          return nil
+        }
+      }
+    }
+	}
+
+  return file
 }
 
 // Handles application information (files, pages etc.)
@@ -225,13 +363,8 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
 		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
-  info := &ApplicationRequestHandler{Container: h.Container}
+  info := &ApplicationRequestHandler{Root: h.Root, Container: h.Container}
   info.Parse(req)
-
-  // Application must exist
-  if info.App == nil {
-    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-  }
 
   app := info.App
   path := info.Path
@@ -239,65 +372,10 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
   action := info.Action
   item := info.Item
 
+  // Container level endpoints
 	switch req.Method {
-		case http.MethodGet:
-      return info.Get(res, req)
-		// DELETE /api/{container}/{name}/
-		case http.MethodDelete:
-			if name != "" && action == "" {
-				if app.Protected {
-					return HttpUtils.Error(res, http.StatusForbidden, nil, errors.New("Cannot delete protected application"))
-				}
-
-        // Stop serving files for the application
-        h.Root.UnmountApplication(app)
-
-        // Delete the mountpoint
-        if err = h.Root.DeleteApplicationMountpoint(app); err != nil {
-					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        // Delete the files
-        if err = h.Root.DeleteApplicationFiles(app); err != nil {
-					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        // Delete the in-memory application
-        h.Container.Del(app)
-
-				return HttpUtils.Ok(res, OK)
-      // DELETE /api/{container}/{app}/files/ - Bulk file deletion
-      } else if action == FILES && item == "" {
-        var urls UrlList
-        var content []byte
-
-        if content, err = HttpUtils.ReadBody(req); err != nil {
-          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        if err = json.Unmarshal(content, &urls); err != nil {
-          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        }
-
-        for _, url := range urls {
-          if file = h.deleteFile(url, app, res, req); file == nil {
-            // If we got a nil file an error occured and the response
-            // will already have been sent
-            return -1, nil
-          }
-        }
-
-        // If we made it this far all files were deleted
-        return HttpUtils.Ok(res, OK)
-			} else if action == FILES && item != "" {
-        if file = h.deleteFile(item, app, res, req); file != nil {
-          return HttpUtils.Ok(res, OK)
-        }
-			} else {
-				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-			}
-		// PUT /api/{container}/
 		case http.MethodPut:
+		  // PUT /api/{container}/
 			if path == "" {
 				var input *model.Application = &model.Application{}
 				_, err = HttpUtils.ValidateRequest(SchemaAppNew, input, req)
@@ -350,7 +428,21 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
         h.Root.MountApplication(app)
 
 				return HttpUtils.Created(res, OK)
-			} else {
+			}
+  }
+
+  // Application must exist
+  if info.App == nil {
+    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  }
+
+	switch req.Method {
+		case http.MethodGet:
+      return info.Get(res, req)
+		case http.MethodDelete:
+      return info.Delete(res, req)
+		case http.MethodPut:
+      if path != "" {
 				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
 					if file = h.putFile(item, app, res, req); file != nil {
@@ -391,13 +483,7 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
 				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 			}
 		case http.MethodPost:
-			// POST /api/{container}/{app}/files/{url}
-			if name != "" && action == FILES && item != "" {
-				if file = h.postFile(item, app, res, req); file != nil {
-          return HttpUtils.OkFile(http.StatusOK, res, file)
-        }
-			}
-			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+      return info.Post(res, req)
 	}
 
 	if err != nil {
@@ -409,22 +495,6 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
   }
 
 	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-}
-
-func (h RestAppHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
-  var err error
-  var file *model.File = app.Urls[url]
-  if file == nil {
-    HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-    return nil
-  }
-
-  if err = app.Del(file); err != nil {
-    HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-    return nil
-  }
-
-  return file
 }
 
 // Create a new file for an application
@@ -440,7 +510,7 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
 
 	// No content length header
 	if cl == "" {
-		HttpUtils.Error(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
+		HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
 		return nil
 	}
 
@@ -495,70 +565,6 @@ func (h RestAppHandler) putFile(url string, app *model.Application, res http.Res
     HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
     return nil
   }
-
-  return file
-}
-
-// Update file content for an application
-func (h RestAppHandler) postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
-	var err error
-	loc := req.Header.Get("Location")
-	ct := req.Header.Get("Content-Type")
-	cl := req.Header.Get("Content-Length")
-
-  if loc == "" {
-    // No content type header
-    if ct == "" {
-      HttpUtils.Error(res, http.StatusBadRequest, nil, errors.New("Content type header is required"))
-      return nil
-    }
-
-    // No content length header
-    if cl == "" {
-      HttpUtils.Error(res, http.StatusBadRequest, nil, errors.New("Content length header is required"))
-      return nil
-    }
-  }
-
-	var file *model.File = app.Urls[url]
-	if file != nil {
-    // Handle moving the file with Location header
-    if loc != "" {
-      if url == loc {
-        HttpUtils.Error(res, http.StatusBadRequest, nil,
-          fmt.Errorf("Cannot move file, source and destination are equal: %s", url))
-        return nil
-      }
-
-      if err = app.Move(file, loc); err != nil {
-        HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-        return nil
-      }
-      // okFile(http.StatusOK, res, file)
-
-      return file
-    // Update file content
-    } else {
-      // Strip charset for mime comparison
-      ct = CharsetStrip.ReplaceAllString(ct, "")
-      ft := CharsetStrip.ReplaceAllString(file.Mime, "")
-      if ft != ct {
-        HttpUtils.Error(res, http.StatusBadRequest, nil, errors.New("Mismatched MIME types attempting to update file"))
-        return nil
-      }
-
-      // TODO: fix empty reply when there is no request body
-      // TODO: stream request body to disc
-      var content []byte
-      if content, err = HttpUtils.ReadBody(req); err == nil {
-        // Update the application model
-        if err = app.Update(file, content); err != nil {
-          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-          return nil
-        }
-      }
-    }
-	}
 
   return file
 }

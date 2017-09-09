@@ -225,6 +225,9 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var err error
 
+  // Initialize the command adapter
+  adapter = &CommandAdapter{Root: l}
+
   l.Config = config
 
   // Set up a host for our containers

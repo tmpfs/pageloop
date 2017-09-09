@@ -217,15 +217,13 @@ function Actions (router) {
                 throw err
               })
           }
-          if (doc.ok) {
-            // Currently YAML is in the source code and
-            // can be edited directly we need to sync
-            // the data in case it changed
-            if (doc.file && doc.file.data) {
-              file.data = doc.file.data
-            }
-            return context.dispatch('preview-refresh')
+          // Currently YAML is in the source code and
+          // can be edited directly we need to sync
+          // the data in case it changed
+          if (doc.file && doc.file.data) {
+            file.data = doc.file.data
           }
+          return context.dispatch('preview-refresh')
         })
     },
     'delete-files': function (context, files) {
@@ -284,16 +282,14 @@ function Actions (router) {
               })
           }
 
-          if (doc.ok) {
-            context.state.notify({title: 'File Info', message: `Renamed ${file.url} to ${newName}`})
-            // Update file data
-            if (doc.file) {
-              file.name = doc.file.name
-              file.url = doc.file.url
-              file.uri = doc.file.uri
-            }
-            context.commit('preview-url', file)
+          context.state.notify({title: 'File Info', message: `Renamed ${file.url} to ${newName}`})
+          // Update file data
+          if (doc.file) {
+            file.name = doc.file.name
+            file.url = doc.file.url
+            file.uri = doc.file.uri
           }
+          context.commit('preview-url', file)
         })
     },
     'upload': function (context, info) {
