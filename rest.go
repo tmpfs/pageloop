@@ -25,7 +25,7 @@ const(
 )
 
 var(
-  HttpUtils = HttpUtil{}
+  utils = HttpUtil{}
 	OK = []byte(`{"ok": true}`)
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
@@ -129,43 +129,43 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
   if a.Path == "" {
     // TODO: check this is necessary
     // GET /api/
-    return HttpUtils.Json(res, http.StatusOK, a.Container.Apps)
+    return utils.Json(res, http.StatusOK, a.Container.Apps)
   } else {
     if a.Action == "" {
       // GET /api/{container}/{application}
-      return HttpUtils.Json(res, http.StatusOK, a.App)
+      return utils.Json(res, http.StatusOK, a.App)
     } else {
       switch a.Action {
         case FILES:
           if a.Item == "" {
             // GET /api/{container}/{application}/files
-            return HttpUtils.Json(res, http.StatusOK, a.App.Files)
+            return utils.Json(res, http.StatusOK, a.App.Files)
           } else {
             // GET /api/{container}/{application}/files/{url}
             if file := a.App.GetFileByUrl(a.Item); file == nil {
-              return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+              return utils.Error(res, http.StatusNotFound, nil, nil)
             } else {
-              return HttpUtils.Json(res, http.StatusOK, file)
+              return utils.Json(res, http.StatusOK, file)
             }
           }
         case PAGES:
           if a.Item == "" {
             // GET /api/{container}/{application}/pages
-            return HttpUtils.Json(res, http.StatusOK, a.App.Pages)
+            return utils.Json(res, http.StatusOK, a.App.Pages)
           } else {
             // GET /api/{container}/{application}/pages/{url}
             if page := a.App.GetPageByUrl(a.Item); page == nil {
-              return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+              return utils.Error(res, http.StatusNotFound, nil, nil)
             } else {
-              return HttpUtils.Json(res, http.StatusOK, page)
+              return utils.Json(res, http.StatusOK, page)
             }
           }
         default:
-          return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+          return utils.Error(res, http.StatusNotFound, nil, nil)
       }
     }
   }
-  return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  return utils.Error(res, http.StatusNotFound, nil, nil)
 }
 
 // Handle DELETE requests.
@@ -175,19 +175,19 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
     if err := adapter.DeleteApplication(a.Container, a.App); err != nil {
-      return HttpUtils.ErrorJson(res, err)
+      return utils.ErrorJson(res, err)
     }
 
-    return HttpUtils.Ok(res, OK)
+    return utils.Ok(res, OK)
   // DELETE /api/{container}/{app}/files/ - Bulk file deletion
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
 
-    if content, err := HttpUtils.ReadBody(req); err != nil {
-      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    if content, err := utils.ReadBody(req); err != nil {
+      return utils.Error(res, http.StatusInternalServerError, nil, err)
     } else {
       if err = json.Unmarshal(content, &urls); err != nil {
-        return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+        return utils.Error(res, http.StatusInternalServerError, nil, err)
       }
 
       for _, url := range urls {
@@ -198,30 +198,30 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
         }
       }
       // If we made it this far all files were deleted
-      return HttpUtils.Ok(res, OK)
+      return utils.Ok(res, OK)
     }
 
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
     if file := a.deleteFile(a.Item, app, res, req); file != nil {
-      return HttpUtils.Ok(res, OK)
+      return utils.Ok(res, OK)
     }
   } else {
-    return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+    return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
   }
 
-  return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  return utils.Error(res, http.StatusNotFound, nil, nil)
 }
 
 func (a *RequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
   var err error
   var file *model.File = app.Urls[url]
   if file == nil {
-    HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+    utils.Error(res, http.StatusNotFound, nil, nil)
     return nil
   }
   if err = app.Del(file); err != nil {
-    HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+    utils.Error(res, http.StatusInternalServerError, nil, err)
     return nil
   }
   return file
@@ -231,10 +231,10 @@ func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, 
   // POST /api/{container}/{app}/files/{url}
   if a.Name != "" && a.Action == FILES && a.Item != "" {
     if file := a.PostFile(res, req); file != nil {
-      return HttpUtils.Json(res, http.StatusOK, file)
+      return utils.Json(res, http.StatusOK, file)
     }
   }
-  return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+  return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 }
 
 // Update the content of a file.
@@ -250,13 +250,13 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
   if loc == "" {
     // No content type header
     if ct == "" {
-      HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content type header is required"))
+      utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content type header is required"))
       return nil
     }
 
     // No content length header
     if cl == "" {
-      HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
+      utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
       return nil
     }
   }
@@ -266,13 +266,13 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
     // Handle moving the file with Location header
     if loc != "" {
       if url == loc {
-        HttpUtils.ErrorJson(res,
+        utils.ErrorJson(res,
           CommandError(http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url))
         return nil
       }
 
       if err := adapter.MoveFile(app, file, loc); err != nil {
-        HttpUtils.ErrorJson(res, err)
+        utils.ErrorJson(res, err)
         return nil
       }
     // Update file content
@@ -281,17 +281,17 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
       ct = CharsetStrip.ReplaceAllString(ct, "")
       ft := CharsetStrip.ReplaceAllString(file.Mime, "")
       if ft != ct {
-        HttpUtils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Mismatched MIME types attempting to update file"))
+        utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Mismatched MIME types attempting to update file"))
         return nil
       }
 
       // TODO: fix empty reply when there is no request body
       // TODO: stream request body to disc
       var content []byte
-      if content, err = HttpUtils.ReadBody(req); err == nil {
+      if content, err = utils.ReadBody(req); err == nil {
         // Update the application model
         if err = app.Update(file, content); err != nil {
-          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+          utils.Error(res, http.StatusInternalServerError, nil, err)
           return nil
         }
       }
@@ -306,9 +306,9 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
     // PUT /api/{container}/{application}/files/{url} - Create a new file.
     if a.Action == FILES && a.Item != "" {
       if file, err := a.PutFile(res, req); err != nil {
-        return HttpUtils.ErrorJson(res, err)
+        return utils.ErrorJson(res, err)
       } else {
-        return HttpUtils.Json(res, http.StatusCreated, file)
+        return utils.Json(res, http.StatusCreated, file)
       }
     // PUT /api/{container}/{application}/tasks/ - Run a build task.
     } else if (a.Action == TASKS && a.Item != "") {
@@ -317,13 +317,13 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
 
       // No build configuration of missing build task
       if !a.App.HasBuilder() || a.App.Builder.Tasks[taskName] == "" {
-        return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+        return utils.Error(res, http.StatusNotFound, nil, nil)
       }
 
       fullName := fmt.Sprintf("%s/%s:%s", a.App.Container.Name, a.App.Name, taskName)
 
       if Jobs.GetRunningJob(fullName) != nil {
-        return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
+        return utils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
       }
 
       // Set up a new job for the task
@@ -339,10 +339,10 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       fmt.Printf("%#v\n", job)
 
       // TODO: send job information to the client
-      return HttpUtils.Write(res, http.StatusAccepted, OK)
+      return utils.Write(res, http.StatusAccepted, OK)
     }
 
-    return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+    return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
   }
   return -1, nil
 }
@@ -350,13 +350,13 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
 
 func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
   var input *model.Application = &model.Application{}
-  if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
-    return HttpUtils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
+  if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
+    return utils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
   }
   if err := adapter.CreateApplication(a.Container, input); err != nil {
-    return HttpUtils.ErrorJson(res, err)
+    return utils.ErrorJson(res, err)
   }
-  return HttpUtils.Created(res, OK)
+  return utils.Created(res, OK)
 }
 
 // Create a new file for an application
@@ -384,7 +384,7 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
   // Lookup template file
   if !isDir && ct == JSON_MIME {
     // TODO: stream request body to disc
-    if content, err = HttpUtils.ReadBody(req); err != nil {
+    if content, err = utils.ReadBody(req); err != nil {
 		  return nil, CommandError(http.StatusInternalServerError, err.Error())
     } else {
 
@@ -406,7 +406,7 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
   } else {
     // TODO: stream request body to disc
     // Read in as file content upload
-    if content, err = HttpUtils.ReadBody(req); err != nil {
+    if content, err = utils.ReadBody(req); err != nil {
 		  return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
   }
@@ -426,8 +426,8 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-    return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
+	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
+    return utils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
   info := &RequestHandler{Root: h.Root}
@@ -436,17 +436,17 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   if (info.Path == "") {
     // GET / - List host containers.
     if req.Method == http.MethodGet {
-      return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
+      return utils.Json(res, http.StatusOK, adapter.ListContainers())
     }
   } else {
     // GET /templates - List available application templates.
     if req.Method == http.MethodGet && info.Path == TEMPLATES {
-      return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
+      return utils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
     }
 
     // METHOD /{container} - 404 if container not found.
 		if info.Container == nil {
-			return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+			return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 		}
 	}
 
@@ -461,7 +461,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
   // Application must exist
   if info.App == nil {
-    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+    return utils.Error(res, http.StatusNotFound, nil, nil)
   }
 
   // Application level endpoints
@@ -476,5 +476,5 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return info.Post(res, req)
 	}
 
-	return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+	return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
