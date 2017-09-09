@@ -31,6 +31,10 @@ type Command struct {
   Root *PageLoop
 }
 
+func (b *CommandAdapter) ListContainers() []*model.Container {
+  return b.Root.Host.Containers
+}
+
 // List all system templates and user applications
 // that have been marked as a template.
 func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {

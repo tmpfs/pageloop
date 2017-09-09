@@ -1,5 +1,4 @@
 // Exposes a REST API to the application model.
-
 package pageloop
 
 import (
@@ -328,7 +327,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 		if req.Method != http.MethodGet {
 			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 		}
-    return HttpUtils.Json(res, http.StatusOK, h.Root.Host.Containers)
+    return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
   // List available application templates
 	} else if path == TEMPLATES {
     apps := adapter.ListApplicationTemplates()
