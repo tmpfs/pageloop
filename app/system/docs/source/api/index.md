@@ -124,6 +124,15 @@ Get the list of pages for an application.
 
 Get page information for the page URL.
 
+## PUT /{container}/{application}/tasks/{name}
+
+Starts a task for the given application. The task must be defined 
+in the application build file and the task may not already be 
+running. If the job is running a conflict status response error 
+code is sent.
+
+An accepted response is sent on success.
+
 ## GET /templates
 
 Get a list of application templates.
