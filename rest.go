@@ -72,7 +72,7 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 // Enapcaulates request information for application API endpoints.
-type ApplicationRequestHandler struct {
+type RequestHandler struct {
 	Root *PageLoop
   // The container context for the application.
   Container *model.Container
@@ -93,7 +93,7 @@ type ApplicationRequestHandler struct {
 }
 
 // Parse the request path and assign fields to the request handler.
-func (a *ApplicationRequestHandler) Parse(req *http.Request) {
+func (a *RequestHandler) Parse(req *http.Request) {
 	a.Path = req.URL.Path
 	// Check if an app exists when referenced as /api/apps/{name}
 	// and extract path parts.
@@ -124,7 +124,7 @@ func (a *ApplicationRequestHandler) Parse(req *http.Request) {
 }
 
 // Handle GET requests.
-func (a *ApplicationRequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, error) {
+func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, error) {
   if a.Path == "" {
     // TODO: check this is necessary
     // GET /api/
@@ -168,7 +168,7 @@ func (a *ApplicationRequestHandler) Get(res http.ResponseWriter, req *http.Reque
 }
 
 // Handle DELETE requests.
-func (a *ApplicationRequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int, error) {
+func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int, error) {
   app := a.App
 
 	// DELETE /api/{container}/{name} - Delete an application
@@ -228,7 +228,7 @@ func (a *ApplicationRequestHandler) Delete(res http.ResponseWriter, req *http.Re
   return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
 
-func (a *ApplicationRequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
   var err error
   var file *model.File = app.Urls[url]
   if file == nil {
@@ -242,7 +242,7 @@ func (a *ApplicationRequestHandler) deleteFile(url string, app *model.Applicatio
   return file
 }
 
-func (a *ApplicationRequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
+func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
   // POST /api/{container}/{app}/files/{url}
   if a.Name != "" && a.Action == FILES && a.Item != "" {
     if file := a.postFile(a.Item, a.App, res, req); file != nil {
@@ -253,7 +253,7 @@ func (a *ApplicationRequestHandler) Post(res http.ResponseWriter, req *http.Requ
 }
 
 // Update the content of a file.
-func (a *ApplicationRequestHandler) postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) postFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
 	loc := req.Header.Get("Location")
 	ct := req.Header.Get("Content-Type")
@@ -314,7 +314,7 @@ func (a *ApplicationRequestHandler) postFile(url string, app *model.Application,
   return file
 }
 
-func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, error) {
+func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, error) {
   if a.Path != "" {
     // PUT /api/{container}/{application}/files/{url} - Create a new file.
     if a.Action == FILES && a.Item != "" {
@@ -359,7 +359,7 @@ func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Reque
 }
 
 
-func (a *ApplicationRequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
+func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
   var input *model.Application = &model.Application{}
   if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
     return HttpUtils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
@@ -371,7 +371,7 @@ func (a *ApplicationRequestHandler) PutApplication(res http.ResponseWriter, req 
 }
 
 // Create a new file for an application
-func (a *ApplicationRequestHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
 
 	ct := req.Header.Get("Content-Type")
@@ -448,7 +448,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  info := &ApplicationRequestHandler{Root: h.Root}
+  info := &RequestHandler{Root: h.Root}
   info.Parse(req)
 
   //fmt.Printf("%#v\n", req.Method)
