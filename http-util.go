@@ -29,6 +29,8 @@ func (h HttpUtil) ErrorJson(res http.ResponseWriter, ex *StatusError) (int, erro
 }
 
 // Send an error response to the client.
+
+// TODO: deprecate in favour of ErrorJson
 func (h HttpUtil) Error(res http.ResponseWriter, code int, data []byte, exception error) (int, error) {
 	var err error
 	if data == nil {

@@ -448,13 +448,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   info := &RequestHandler{Root: h.Root}
   info.Parse(req)
 
-  //fmt.Printf("%#v\n", req.Method)
-  //fmt.Printf("%#v\n", req.URL.Path)
-  //fmt.Printf("%#v\n", info)
-
-  // TODO: only allow this in Dev mode?
-  res.Header().Set("Access-Control-Allow-Origin", "*")
-
   if (info.Path == "") {
     // GET / - List host containers.
     if req.Method == http.MethodGet {
