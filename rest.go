@@ -43,7 +43,6 @@ type UrlList []string
 type RestService struct {
   // The base mountpoint URL for the service.
 	Url string
-	Root *PageLoop
 }
 
 // Handles requests for application data.
@@ -60,7 +59,7 @@ type TaskJobComplete struct {
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
-  rest := &RestService{Root: root, Url: API_URL}
+  rest := &RestService{Url: API_URL}
 	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Root: root}))
 	return rest
 }
