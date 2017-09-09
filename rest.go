@@ -22,6 +22,7 @@ const(
 	TASKS = "tasks"
 	FILES = "files"
 	PAGES = "pages"
+  TEMPLATES = "templates"
 )
 
 var(
@@ -55,69 +56,17 @@ type RestService struct {
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
   rest := &RestService{Root: root, Url: API_URL}
   url := API_URL
-	mux.Handle(url, http.StripPrefix(url, RestRootHandler{Root: root}))
+	mux.Handle(url, http.StripPrefix(url, RestHandler{Root: root}))
 	return rest
 }
 
-// Handles requests to the API root.
-type RestRootHandler struct {
-	Root *PageLoop
-}
-
 // Handles requests for application data.
-type RestAppHandler struct {
+type RestHandler struct {
 	Root *PageLoop
 	Container *model.Container
 }
 
-func (h RestRootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-  h.doServeHttp(res, req)
-}
-
-// Gets the list of applications for the API root (/api/).
-func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	url := req.URL
-	path := url.Path
-
-  // TODO: only allow this in Dev mode?
-  res.Header().Set("Access-Control-Allow-Origin", "*")
-
-	// List host containers
-	if path == "" {
-		if req.Method != http.MethodGet {
-			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-		}
-    return HttpUtils.Json(res, http.StatusOK, h.Root.Host.Containers)
-  // List available application templates
-	} else if path == "templates" {
-    apps := adapter.ListApplicationTemplates()
-    return HttpUtils.Json(res, http.StatusOK, apps)
-  }
-
-	path = strings.Trim(path, "/")
-	parts := strings.Split(path, "/")
-
-	if len(parts) > 0 {
-		var c *model.Container = h.Root.Host.GetByName(parts[0])
-		// Container not found
-		if c == nil {
-			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-		}
-
-		// Proxy to the app handler
-		// Using http.StripPrefix() here does not invoke
-		// the underlying handler???
-		handler := RestAppHandler{Root: h.Root, Container: c}
-		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
-		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
-		handler.ServeHTTP(res, req)
-    // TODO: get return value from handler?
-		return -1, nil
-	}
-	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-}
-
-func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   h.doServeHttp(res, req)
 }
 
@@ -353,8 +302,13 @@ func (a *ApplicationRequestHandler) postFile(url string, app *model.Application,
   return file
 }
 
+func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, error) {
+  return -1, nil
+}
+
+
 // Handles application information (files, pages etc.)
-func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
+func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	var err error
 	var data []byte
   var file *model.File
@@ -363,11 +317,49 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
 		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
+	url := req.URL
+	path := url.Path
+
+  // TODO: only allow this in Dev mode?
+  res.Header().Set("Access-Control-Allow-Origin", "*")
+
+	// List host containers
+	if path == "" {
+		if req.Method != http.MethodGet {
+			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+		}
+    return HttpUtils.Json(res, http.StatusOK, h.Root.Host.Containers)
+  // List available application templates
+	} else if path == TEMPLATES {
+    apps := adapter.ListApplicationTemplates()
+    return HttpUtils.Json(res, http.StatusOK, apps)
+  }
+
+	path = strings.Trim(path, "/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) > 0 {
+		var c *model.Container = h.Root.Host.GetByName(parts[0])
+		// Container not found
+		if c == nil {
+			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+		}
+
+    h.Container = c
+
+		// Proxy to the app handler
+		// Using http.StripPrefix() here does not invoke
+		// the underlying handler???
+		// handler := RestHandler{Root: h.Root, Container: c}
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, parts[0])
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/")
+	}
+
   info := &ApplicationRequestHandler{Root: h.Root, Container: h.Container}
   info.Parse(req)
 
+  path = info.Path
   app := info.App
-  path := info.Path
   name := info.Name
   action := info.Action
   item := info.Item
@@ -498,7 +490,7 @@ func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) 
 }
 
 // Create a new file for an application
-func (h RestAppHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (h RestHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
 
 	ct := req.Header.Get("Content-Type")
