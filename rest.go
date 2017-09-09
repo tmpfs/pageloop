@@ -438,7 +438,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
 					if file = h.putFile(item, app, res, req); file != nil {
-            return HttpUtils.OkFile(http.StatusCreated, res, file)
+            return HttpUtils.Json(res, http.StatusCreated, file)
           }
 				} else if (name != "" && action == TASKS && item != "") {
           taskName := strings.TrimPrefix(item, "/")
