@@ -143,8 +143,12 @@ func (h RestRootHandler) doServeHttp(res http.ResponseWriter, req *http.Request)
 	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
 
-// Handles application information (files, pages etc.)
 func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+  h.doServeHttp(res, req)
+}
+
+// Handles application information (files, pages etc.)
+func (h RestAppHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	var err error
 	var data []byte
 	//var body []byte
@@ -156,8 +160,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   var file *model.File
 
 	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-		HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-		return
+		return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
 	url := req.URL
@@ -184,8 +187,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		app = h.Container.GetByName(name)
 		// Application must exist
 		if app == nil {
-			HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-			return
+			return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 		}
 	}
 
@@ -228,8 +230,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 									data, err = json.Marshal(page)
 								}
 							default:
-								HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-								return
+								return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 						}
 					}
 				}
@@ -238,8 +239,7 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		case http.MethodDelete:
 			if name != "" && action == "" {
 				if app.Protected {
-					HttpUtils.Error(res, http.StatusForbidden, nil, errors.New("Cannot delete protected application"))
-					return
+					return HttpUtils.Error(res, http.StatusForbidden, nil, errors.New("Cannot delete protected application"))
 				}
 
         // Stop serving files for the application
@@ -247,55 +247,47 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
         // Delete the mountpoint
         if err = h.Root.DeleteApplicationMountpoint(app); err != nil {
-					HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-					return
+					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         // Delete the files
         if err = h.Root.DeleteApplicationFiles(app); err != nil {
-					HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-					return
+					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         // Delete the in-memory application
         h.Container.Del(app)
 
-				HttpUtils.Ok(res, OK)
-				return
+				return HttpUtils.Ok(res, OK)
       // DELETE /api/{container}/{app}/files/ - Bulk file deletion
       } else if action == FILES && item == "" {
         var urls UrlList
         var content []byte
 
         if content, err = HttpUtils.ReadBody(req); err != nil {
-          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-          return
+          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         if err = json.Unmarshal(content, &urls); err != nil {
-          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-          return
+          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         for _, url := range urls {
           if file = h.deleteFile(url, app, res, req); file == nil {
             // If we got a nil file an error occured and the response
             // will already have been sent
-            return
+            return -1, nil
           }
         }
 
         // If we made it this far all files were deleted
-        HttpUtils.Ok(res, OK)
-				return
+        return HttpUtils.Ok(res, OK)
 			} else if action == FILES && item != "" {
         if file = h.deleteFile(item, app, res, req); file != nil {
-          HttpUtils.Ok(res, OK)
+          return HttpUtils.Ok(res, OK)
         }
-				return
 			} else {
-				HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-				return
+				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 			}
 		// PUT /api/{container}/
 		case http.MethodPut:
@@ -303,14 +295,12 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				var input *model.Application = &model.Application{}
 				_, err = HttpUtils.ValidateRequest(SchemaAppNew, input, req)
 				if err != nil {
-					HttpUtils.Error(res, http.StatusBadRequest, nil, err)
-					return
+					return HttpUtils.Error(res, http.StatusBadRequest, nil, err)
 				}
 
         existing := h.Container.GetByName(input.Name)
         if existing != nil {
-					HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Application %s already exists", input.Name))
-					return
+					return HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Application %s already exists", input.Name))
         }
 
         input.Url = input.MountpointUrl(h.Container)
@@ -318,16 +308,14 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
         // mountpoint exists
         exists := h.Root.HasMountpoint(input.Url)
         if exists {
-					HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Mountpoint URL %s already exists", input.Url))
-					return
+					return HttpUtils.Error(res, http.StatusPreconditionFailed, nil, fmt.Errorf("Mountpoint URL %s already exists", input.Url))
         }
 
         var mountpoint *Mountpoint
 
         // Create and save a mountpoint for the application.
         if mountpoint, err = h.Root.CreateMountpoint(input); err != nil {
-					HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-					return
+					return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         if input.Template != nil {
@@ -335,14 +323,12 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
           // Find the template app/ directory
           if source, err = h.Root.LookupTemplate(input.Template); err != nil {
-            HttpUtils.Error(res, http.StatusBadRequest, nil, err);
-            return
+            return HttpUtils.Error(res, http.StatusBadRequest, nil, err);
           }
 
           // Copy template source files
           if err = h.Root.CopyApplicationTemplate(input, source); err != nil {
-            HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-            return
+            return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
           }
         }
 
@@ -350,37 +336,32 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
         // Load and publish the app source files
         if app, err = h.Root.LoadMountpoint(*mountpoint, h.Container); err != nil {
-          HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-          return
+          return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
         }
 
         // Mount the application
         h.Root.MountApplication(app)
 
-				HttpUtils.Created(res, OK)
-				return
+				return HttpUtils.Created(res, OK)
 			} else {
 				// PUT /api/{container}/{app}/files/{url}
 				if name != "" && action == FILES && item != "" {
 					if file = h.putFile(item, app, res, req); file != nil {
-            HttpUtils.OkFile(http.StatusCreated, res, file)
+            return HttpUtils.OkFile(http.StatusCreated, res, file)
           }
-					return
 				} else if (name != "" && action == TASKS && item != "") {
           taskName := strings.TrimPrefix(item, "/")
           taskName = strings.TrimSuffix(taskName, "/")
 
           // No build configuration of missing build task
           if !app.HasBuilder() || app.Builder.Tasks[taskName] == "" {
-            HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-            return
+            return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
           }
 
           fullName := fmt.Sprintf("%s/%s:%s", app.Container.Name, app.Name, taskName)
 
           if Jobs.GetRunningJob(fullName) != nil {
-            HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
-            return
+            return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
           }
 
           // Set up a new job for the task
@@ -397,37 +378,30 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
           fmt.Printf("%#v\n", job)
 
           // TODO: send job information to the client
-          HttpUtils.Write(res, http.StatusAccepted, OK)
-
-          return
+          return HttpUtils.Write(res, http.StatusAccepted, OK)
         }
 
-				HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-				return
+				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 			}
 		case http.MethodPost:
 			// POST /api/{container}/{app}/files/{url}
 			if name != "" && action == FILES && item != "" {
 				if file = h.postFile(item, app, res, req); file != nil {
-          HttpUtils.OkFile(http.StatusOK, res, file)
+          return HttpUtils.OkFile(http.StatusOK, res, file)
         }
-				return
 			}
-			HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-			return
+			return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
 	}
 
 	if err != nil {
-		HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-		return
+		return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
 	}
 
 	if data != nil {
-		HttpUtils.Ok(res, data)
-		return
-	}
+		return HttpUtils.Ok(res, data)
+  }
 
-	HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
 
 func (h RestAppHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
