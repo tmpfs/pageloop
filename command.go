@@ -2,13 +2,7 @@ package pageloop
 
 import (
   "fmt"
-  //"os/exec"
-	//"regexp"
-	//"strings"
   "net/http"
-  //"mime"
-  //"path/filepath"
-	//"encoding/json"
   "github.com/tmpfs/pageloop/model"
 )
 
