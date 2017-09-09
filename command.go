@@ -44,6 +44,27 @@ type CommandAdapter struct {
   Host *model.Host
 }
 
+// List containers.
+func (b *CommandAdapter) ListContainers() []*model.Container {
+  return b.Host.Containers
+}
+
+// List all system templates and user applications
+// that have been marked as a template.
+func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {
+  // Get built in and user templates
+  c := b.Host.GetByName("template")
+  u := b.Host.GetByName("user")
+  list := append(c.Apps, u.Apps...)
+  var apps []*model.Application
+  for _, app := range list {
+    if app.IsTemplate {
+      apps = append(apps, app)
+    }
+  }
+  return apps
+}
+
 // Create application.
 func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Application) *StatusError {
   existing := c.GetByName(a.Name)
@@ -89,23 +110,27 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
   return nil
 }
 
-// List containers.
-func (b *CommandAdapter) ListContainers() []*model.Container {
-  return b.Host.Containers
-}
-
-// List all system templates and user applications
-// that have been marked as a template.
-func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {
-  // Get built in and user templates
-  c := b.Host.GetByName("template")
-  u := b.Host.GetByName("user")
-  list := append(c.Apps, u.Apps...)
-  var apps []*model.Application
-  for _, app := range list {
-    if app.IsTemplate {
-      apps = append(apps, app)
-    }
+// Delete an application.
+func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Application) *StatusError {
+  if a.Protected {
+    return CommandError(http.StatusForbidden, "Cannot delete protected application")
   }
-  return apps
+
+  // Stop serving files for the application
+  b.Root.UnmountApplication(a)
+
+  // Delete the mountpoint
+  if err := b.Root.DeleteApplicationMountpoint(a); err != nil {
+    return CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  // Delete the files
+  if err := a.DeleteApplicationFiles(); err != nil {
+    return CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  // Delete the in-memory application
+  c.Del(a)
+
+  return nil
 }

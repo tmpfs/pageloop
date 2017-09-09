@@ -176,25 +176,9 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
-    if app.Protected {
-      return HttpUtils.Error(res, http.StatusForbidden, nil, fmt.Errorf("Cannot delete protected application"))
+    if err := adapter.DeleteApplication(a.Container, a.App); err != nil {
+      return HttpUtils.ErrorJson(res, err)
     }
-
-    // Stop serving files for the application
-    a.Root.UnmountApplication(app)
-
-    // Delete the mountpoint
-    if err := a.Root.DeleteApplicationMountpoint(app); err != nil {
-      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-    }
-
-    // Delete the files
-    if err := app.DeleteApplicationFiles(); err != nil {
-      return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-    }
-
-    // Delete the in-memory application
-    a.Container.Del(app)
 
     return HttpUtils.Ok(res, OK)
   // DELETE /api/{container}/{app}/files/ - Bulk file deletion
