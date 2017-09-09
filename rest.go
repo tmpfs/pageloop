@@ -248,7 +248,7 @@ func (a *RequestHandler) deleteFile(url string, app *model.Application, res http
 func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
   // POST /api/{container}/{app}/files/{url}
   if a.Name != "" && a.Action == FILES && a.Item != "" {
-    if file := a.postFile(res, req); file != nil {
+    if file := a.PostFile(res, req); file != nil {
       return HttpUtils.Json(res, http.StatusOK, file)
     }
   }
@@ -256,7 +256,7 @@ func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, 
 }
 
 // Update the content of a file.
-func (a *RequestHandler) postFile(res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
   app := a.App
   url := a.Item
@@ -324,7 +324,7 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
   if a.Path != "" {
     // PUT /api/{container}/{application}/files/{url} - Create a new file.
     if a.Action == FILES && a.Item != "" {
-      if file := a.putFile(res, req); file != nil {
+      if file := a.PutFile(res, req); file != nil {
         return HttpUtils.Json(res, http.StatusCreated, file)
       }
     // PUT /api/{container}/{application}/tasks/ - Run a build task.
@@ -377,7 +377,7 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
 }
 
 // Create a new file for an application
-func (a *RequestHandler) putFile(res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
   app := a.App
   url := a.Item
@@ -415,7 +415,7 @@ func (a *RequestHandler) putFile(res http.ResponseWriter, req *http.Request) *mo
 
     var file *model.File
 
-    if file, err = a.Root.LookupTemplateFile(input); err != nil {
+    if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
       HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
       return nil
     }

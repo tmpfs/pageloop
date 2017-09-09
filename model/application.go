@@ -6,6 +6,7 @@ import (
   "os"
   "path"
   "strings"
+  "io/ioutil"
   "path/filepath"
 )
 
@@ -81,14 +82,6 @@ type Application struct {
 
   // Public publish path
   publicPath string
-}
-
-// References an existing mounted application subdirectory
-// used for the intialization of the application files.
-type ApplicationTemplate struct {
-	Container string
-	Application string
-	File string
 }
 
 func NewApplication(mountpoint, description string) *Application {
@@ -343,6 +336,30 @@ func (app *Application) SetPath(path string) {
   app.publicPath = filepath.Join(path, PUBLIC)
 }
 
+// Copy source files from another source application into this application.
+func (app *Application) CopyApplicationTemplate(source *Application) error {
+  var err error
+  var files []*File = source.Files
+  var prefix string
+
+  for _, f := range files {
+    if !f.Directory {
+      rel := strings.TrimPrefix(f.Relative, prefix)
+      out := filepath.Join(app.SourceDirectory(), rel)
+      parent := filepath.Dir(rel)
+      if parent != "/" {
+        parent = filepath.Join(app.Path, parent)
+        if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
+          return err
+        }
+      }
+      content := f.Source(true)
+      ioutil.WriteFile(out, content, f.Info().Mode())
+    }
+  }
+  return nil
+}
+
 // Load an application using the file system assigned to this application.
 func (app *Application) Load(path string) error {
   var err error
@@ -472,3 +489,4 @@ func (app *Application) setComputedPageFields(page *Page) {
 	page.Url = file.Url
 	page.Size = file.info.Size()
 }
+

@@ -15,33 +15,6 @@ func ValidName(name string) bool {
   return NamePatternRe.MatchString(name)
 }
 
-// Contains a slice of containers.
-type Host struct {
-	Containers []*Container `json:"containers"`
-}
-
-// Create a new host.
-func NewHost() *Host {
-	h := new(Host)
-	//h.Containers = make([] *Container)
-	return h
-}
-
-// Add a container.
-func (h *Host) Add(c *Container) {
-	h.Containers = append(h.Containers, c)
-}
-
-// Get a container by name.
-func (h *Host) GetByName(name string) *Container {
-	for _, container := range h.Containers {
-		if container.Name == name {
-			return container
-		}
-	}
-	return nil
-}
-
 // Contains a slice of applications.
 type Container struct {
 	Name string `json:"name,omitempty"`

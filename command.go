@@ -41,10 +41,7 @@ func CommandError(status int, message string, a ...interface{}) *StatusError {
 // returns errors with an associated HTTP status code.
 type CommandAdapter struct {
   Root *PageLoop
-}
-
-type Command struct {
-  Root *PageLoop
+  Host *model.Host
 }
 
 // Create application.
@@ -70,11 +67,11 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
     // Handle creating from a template.
     if a.Template != nil {
       // Find the template application.
-      if source, err := b.Root.LookupTemplate(a.Template); err != nil {
+      if source, err := b.Host.LookupTemplate(a.Template); err != nil {
         return CommandError(http.StatusBadRequest, err.Error())
       } else {
         // Copy template source files.
-        if err := b.Root.CopyApplicationTemplate(a, source); err != nil {
+        if err := a.CopyApplicationTemplate(source); err != nil {
           return CommandError(http.StatusInternalServerError, err.Error())
         }
       }
@@ -94,15 +91,15 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
 
 // List containers.
 func (b *CommandAdapter) ListContainers() []*model.Container {
-  return b.Root.Host.Containers
+  return b.Host.Containers
 }
 
 // List all system templates and user applications
 // that have been marked as a template.
 func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {
   // Get built in and user templates
-  c := b.Root.Host.GetByName("template")
-  u := b.Root.Host.GetByName("user")
+  c := b.Host.GetByName("template")
+  u := b.Host.GetByName("user")
   list := append(c.Apps, u.Apps...)
   var apps []*model.Application
   for _, app := range list {

@@ -9,7 +9,6 @@ import (
 	"mime"
 	"strings"
 	"strconv"
-  "io/ioutil"
   "net/http"
   "path/filepath"
 	"regexp"
@@ -226,12 +225,12 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var err error
 
   // Initialize the command adapter
-  adapter = &CommandAdapter{Root: l}
-
   l.Config = config
 
   // Set up a host for our containers
 	l.Host = model.NewHost()
+
+  adapter = &CommandAdapter{Root: l, Host: l.Host}
 
 	// Configure application containers.
 	sys := model.NewContainer("system", "System applications.", true)
@@ -509,59 +508,6 @@ func (l *PageLoop) DeleteApplicationFiles(a *model.Application) error {
   // Delete source files
   if err = os.RemoveAll(a.Path); err != nil {
     return err
-  }
-
-  return nil
-}
-
-// Find an application from an application template reference.
-func (l *PageLoop) LookupTemplate(t *model.ApplicationTemplate) (*model.Application, error) {
-  container := l.Host.GetByName(t.Container)
-  if container == nil {
-    return nil, fmt.Errorf("Template container %s does not exist", t.Container)
-  }
-  app := container.GetByName(t.Application)
-  if app == nil {
-    return nil, fmt.Errorf("Template application %s does not exist", t.Application)
-  }
-
-  return app, nil
-}
-
-// Find an application file from an application template reference.
-func (l *PageLoop) LookupTemplateFile(t *model.ApplicationTemplate) (*model.File, error) {
-  var err error
-  var app *model.Application
-  var file *model.File
-  if app, err = l.LookupTemplate(t); err != nil {
-    return nil, err
-  }
-
-  url := t.File
-  file = app.Urls[url]
-  return file, nil
-}
-
-//
-func (l *PageLoop) CopyApplicationTemplate(dest *model.Application, source *model.Application) error {
-  var err error
-  var files []*model.File = source.Files
-  var prefix string
-
-  for _, f := range files {
-    if !f.Directory {
-      rel := strings.TrimPrefix(f.Relative, prefix)
-      out := filepath.Join(dest.SourceDirectory(), rel)
-      parent := filepath.Dir(rel)
-      if parent != "/" {
-        parent = filepath.Join(dest.Path, parent)
-        if err = os.MkdirAll(parent, os.ModeDir | 0755); err != nil {
-          return err
-        }
-      }
-      content := f.Source(true)
-      ioutil.WriteFile(out, content, f.Info().Mode())
-    }
   }
 
   return nil
