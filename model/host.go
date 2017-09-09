@@ -2,6 +2,15 @@ package model
 
 import(
   "fmt"
+  "regexp"
+)
+
+var(
+  VENDOR = regexp.MustCompile(`(vendor|node_modules)/`)
+  TEMPLATE_FILE = regexp.MustCompile(`\.html?$`)
+  MARKDOWN_FILE = regexp.MustCompile(`\.(md|markdown)?$`)
+  FRONTMATTER = regexp.MustCompile(`^---\n`)
+  FRONTMATTER_END = regexp.MustCompile(`---$`)
 )
 
 // References an existing mounted application (and optionally specific file)

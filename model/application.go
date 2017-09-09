@@ -30,6 +30,7 @@ var(
 	types = []string{YAML, JSON}
 )
 
+// TODO: remove StatusError, should be handled by the command adapter
 type StatusError struct {
 	Status int
 	Message string
@@ -497,4 +498,3 @@ func (app *Application) setComputedPageFields(page *Page) {
 	page.Url = file.Url
 	page.Size = file.info.Size()
 }
-
