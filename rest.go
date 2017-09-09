@@ -315,6 +315,46 @@ func (a *ApplicationRequestHandler) postFile(url string, app *model.Application,
 }
 
 func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, error) {
+  if a.Path != "" {
+    // PUT /api/{container}/{application}/files/{url} - Create a new file.
+    if a.Action == FILES && a.Item != "" {
+      if file := a.putFile(a.Item, a.App, res, req); file != nil {
+        return HttpUtils.Json(res, http.StatusCreated, file)
+      }
+    // PUT /api/{container}/{application}/tasks/ - Run a build task.
+    } else if (a.Action == TASKS && a.Item != "") {
+      taskName := strings.TrimPrefix(a.Item, "/")
+      taskName = strings.TrimSuffix(taskName, "/")
+
+      // No build configuration of missing build task
+      if !a.App.HasBuilder() || a.App.Builder.Tasks[taskName] == "" {
+        return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+      }
+
+      fullName := fmt.Sprintf("%s/%s:%s", a.App.Container.Name, a.App.Name, taskName)
+
+      if Jobs.GetRunningJob(fullName) != nil {
+        return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
+      }
+
+      // Set up a new job for the task
+      job := Jobs.NewJob(fullName)
+      Jobs.Start(job)
+
+      println("run task job: " + fullName)
+
+      // Run the task
+      a.App.Builder.Run(taskName, a.App, &TaskJobComplete{Job: job})
+
+      // Accepted for processing
+      fmt.Printf("%#v\n", job)
+
+      // TODO: send job information to the client
+      return HttpUtils.Write(res, http.StatusAccepted, OK)
+    }
+
+    return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+  }
   return -1, nil
 }
 
@@ -331,7 +371,7 @@ func (a *ApplicationRequestHandler) PutApplication(res http.ResponseWriter, req 
 }
 
 // Create a new file for an application
-func (h RestHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (a *ApplicationRequestHandler) putFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
 	var err error
 
 	ct := req.Header.Get("Content-Type")
@@ -367,7 +407,7 @@ func (h RestHandler) putFile(url string, app *model.Application, res http.Respon
 
     var file *model.File
 
-    if file, err = h.Root.LookupTemplateFile(input); err != nil {
+    if file, err = a.Root.LookupTemplateFile(input); err != nil {
       HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
       return nil
     }
@@ -404,9 +444,6 @@ func (h RestHandler) putFile(url string, app *model.Application, res http.Respon
 
 // Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	var err error
-  var file *model.File
-
 	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
     return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
@@ -460,52 +497,9 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 		case http.MethodDelete:
       return info.Delete(res, req)
 		case http.MethodPut:
-      if info.Path != "" {
-				// PUT /api/{container}/{application}/files/{url} - Create a new file.
-				if info.Action == FILES && info.Item != "" {
-					if file = h.putFile(info.Item, info.App, res, req); file != nil {
-            return HttpUtils.Json(res, http.StatusCreated, file)
-          }
-				// PUT /api/{container}/{application}/tasks/ - Run a build task.
-				} else if (info.Action == TASKS && info.Item != "") {
-          taskName := strings.TrimPrefix(info.Item, "/")
-          taskName = strings.TrimSuffix(taskName, "/")
-
-          // No build configuration of missing build task
-          if !info.App.HasBuilder() || info.App.Builder.Tasks[taskName] == "" {
-            return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-          }
-
-          fullName := fmt.Sprintf("%s/%s:%s", info.App.Container.Name, info.App.Name, taskName)
-
-          if Jobs.GetRunningJob(fullName) != nil {
-            return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
-          }
-
-          // Set up a new job for the task
-          job := Jobs.NewJob(fullName)
-          Jobs.Start(job)
-
-          println("run task job: " + fullName)
-
-          // Run the task
-          info.App.Builder.Run(taskName, info.App, &TaskJobComplete{Job: job})
-
-          // Accepted for processing
-          fmt.Printf("%#v\n", job)
-
-          // TODO: send job information to the client
-          return HttpUtils.Write(res, http.StatusAccepted, OK)
-        }
-
-				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-			}
+      return info.Put(res, req)
 		case http.MethodPost:
       return info.Post(res, req)
-	}
-
-	if err != nil {
-		return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
 	}
 
 	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
