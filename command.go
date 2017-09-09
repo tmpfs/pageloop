@@ -134,3 +134,11 @@ func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Applicat
 
   return nil
 }
+
+// Move a file.
+func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest string) *StatusError {
+  if err := a.Move(f, dest); err != nil {
+    return CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return nil
+}

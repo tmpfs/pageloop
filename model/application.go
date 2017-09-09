@@ -182,16 +182,11 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 
 // Move a file to a new URL
 func (app *Application) Move(file *File, newUrl string) error {
+  println("move new url: " + newUrl)
   u := path.Clean(newUrl)
   if !strings.HasPrefix(u, "/") {
     u = "/" + u
   }
-
-  /*
-  if strings.HasSuffix(u, "/") {
-    u = strings.TrimSuffix(u, "/")
-  }
-  */
 
   if app.Urls[u] != nil {
     return fmt.Errorf("Cannot move file, destination %s exists", newUrl)
@@ -207,7 +202,6 @@ func (app *Application) Move(file *File, newUrl string) error {
   file.Path = pth
   delete(app.Urls, file.Url)
   app.setComputedFileFields(file)
-
   return nil
 }
 
@@ -447,7 +441,7 @@ func (app *Application) GetUrlFromPath(file *File, relative string) string {
 // Get an absolute path from a relative URL reference.
 func (app *Application) GetPathFromUrl(url string) string {
   url = path.Clean(url)
-	base := app.Path
+	base := app.SourceDirectory()
 	parts := strings.Split(url, SLASH)
 	//dest = filepath.Join(path.Split(dest))
 

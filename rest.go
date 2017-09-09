@@ -268,16 +268,15 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
     // Handle moving the file with Location header
     if loc != "" {
       if url == loc {
-        HttpUtils.Error(res, http.StatusBadRequest, nil,
-          fmt.Errorf("Cannot move file, source and destination are equal: %s", url))
+        HttpUtils.ErrorJson(res,
+          CommandError(http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url))
         return nil
       }
 
-      if err = app.Move(file, loc); err != nil {
-        HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+      if err := adapter.MoveFile(app, file, loc); err != nil {
+        HttpUtils.ErrorJson(res, err)
         return nil
       }
-      return file
     // Update file content
     } else {
       // Strip charset for mime comparison
