@@ -4,6 +4,7 @@ package pageloop
 
 import (
   "fmt"
+  "os/exec"
 	"errors"
 	"io/ioutil"
 	"regexp"
@@ -21,6 +22,7 @@ const(
 	JSON_MIME = "application/json; charset=utf-8"
 
 	// App actions
+	TASKS = "tasks"
 	FILES = "files"
 	PAGES = "pages"
 )
@@ -30,6 +32,17 @@ var(
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
 )
+
+type TaskJobComplete struct {
+  Job *Job
+}
+
+func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
+  Jobs.Stop(t.Job)
+  println("Task job completed: " + t.Job.Name)
+
+  fmt.Printf("%#v\n", t.Job)
+}
 
 type UrlList []string
 
@@ -358,7 +371,41 @@ func (h RestAppHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
             okFile(http.StatusCreated, res, file)
           }
 					return
-				}
+				} else if (name != "" && action == TASKS && item != "") {
+          taskName := strings.TrimPrefix(item, "/")
+          taskName = strings.TrimSuffix(taskName, "/")
+
+          // No build configuration of missing build task
+          if !app.HasBuilder() || app.Builder.Tasks[taskName] == "" {
+            ex(res, http.StatusNotFound, nil, nil)
+            return
+          }
+
+          fullName := fmt.Sprintf("%s/%s:%s", app.Container.Name, app.Name, taskName)
+
+          if Jobs.GetRunningJob(fullName) != nil {
+            ex(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
+            return
+          }
+
+          // Set up a new job for the task
+          job := Jobs.NewJob(fullName)
+          Jobs.Start(job)
+
+          println("run task job: " + fullName)
+
+          // Run the task
+          app.Builder.Run(taskName, app, &TaskJobComplete{Job: job})
+
+          // Accepted for processing
+
+          fmt.Printf("%#v\n", job)
+
+          // TODO: send job information to the client
+          write(res, http.StatusAccepted, OK)
+
+          return
+        }
 
 				ex(res, http.StatusMethodNotAllowed, nil, nil)
 				return

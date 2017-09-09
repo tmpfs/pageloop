@@ -76,15 +76,18 @@ func ReadBuildFile (app *Application) (*BuildFile, error) {
   return nil, nil
 }
 
-// Run an arbitrary command in a goroutine and invoke the
+// Execute an arbitrary command in a goroutine and invoke the
 // done callback on completion.
-func (b *BuildFile) Run(app *Application, raw string, done TaskComplete) {
+func (b *BuildFile) Exec(app *Application, raw string, done TaskComplete) {
   var cwd = app.SourceDirectory()
   var parts []string = strings.Split(raw, " ")
   var name string = parts[0]
   var args []string = parts[1:]
   var cmd *exec.Cmd = exec.Command(name, args...)
   cmd.Dir = cwd
+
+  //cmd.Stdout = os.Stdout
+  //cmd.Stderr = os.Stderr
 
   run := func(c chan error) {
     if err := cmd.Run(); err != nil {
@@ -104,8 +107,19 @@ func (b *BuildFile) Run(app *Application, raw string, done TaskComplete) {
   go run(c)
 }
 
-// Run the main build task asynchonously.
+// Get a task command by string key.
+func (b *BuildFile) TaskCommand(key string) string {
+  return b.Tasks[key]
+}
+
+// Run a build task.
+func (b *BuildFile) Run(key string, app *Application, done TaskComplete) string {
+  cmd := b.TaskCommand(key)
+  b.Exec(app, cmd, done)
+  return cmd
+}
+
+// Run the main build task.
 func (b *BuildFile) Build(app *Application, done TaskComplete) {
-  var command string = b.Command
-  b.Run(app, command, done)
+  b.Exec(app, b.Command, done)
 }
