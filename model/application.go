@@ -30,20 +30,6 @@ var(
 	types = []string{YAML, JSON}
 )
 
-// TODO: remove StatusError, should be handled by the command adapter
-type StatusError struct {
-	Status int
-	Message string
-}
-
-func (s StatusError) Error() string {
-	return s.Message
-}
-
-func NewStatusError (status int, message string, a ...interface{}) StatusError {
-	return StatusError{Status: status, Message: fmt.Sprintf(message, a...)}
-}
-
 type Application struct {
 	// Mountpoint URL
 	Url string `json:"url"`
@@ -131,15 +117,6 @@ func (app *Application) ExistsConflict(url string) bool {
 
 // Create a new file and publish it, the file cannot already exist on disc.
 func (app *Application) Create(url string, content []byte) (*File, error) {
-	var file *File = app.Urls[url]
-	if file != nil {
-		return nil, NewStatusError(412, "File already exists %s", url)
-	}
-
-  if app.ExistsConflict(url) {
-		return nil, NewStatusError(412, "File already exists, publish conflict on %s", url)
-  }
-
 	path := app.GetPathFromUrl(url)
 
   /*
@@ -163,7 +140,7 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 
   isDir := strings.HasSuffix(url, SLASH)
 
-	file = app.NewFile(path, nil, content)
+  file := app.NewFile(path, nil, content)
   if isDir {
     file.Directory = true
   }
