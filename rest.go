@@ -37,8 +37,33 @@ var(
     http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}
 )
 
+// List of URLs used for bulk file operations.
+type UrlList []string
+
+// Main rest service.
+type RestService struct {
+  // The base mountpoint URL for the service.
+	Url string
+	Root *PageLoop
+}
+
+// Handles requests for application data.
+type RestHandler struct {
+	Root *PageLoop
+	Container *model.Container
+}
+
+// Handler for asynchronous background tasks.
 type TaskJobComplete struct {
   Job *Job
+}
+
+// Configure the service. Adds a rest handler for the API URL to
+// the passed servemux.
+func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
+  rest := &RestService{Root: root, Url: API_URL}
+	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Root: root}))
+	return rest
 }
 
 func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
@@ -48,28 +73,6 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
   fmt.Printf("%#v\n", t.Job)
 }
 
-type UrlList []string
-
-type RestService struct {
-	Url string
-	Root *PageLoop
-}
-
-func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
-  rest := &RestService{Root: root, Url: API_URL}
-	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Root: root}))
-	return rest
-}
-
-// Handles requests for application data.
-type RestHandler struct {
-	Root *PageLoop
-	Container *model.Container
-}
-
-func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-  h.doServeHttp(res, req)
-}
 
 // Enapcaulates request information for application API endpoints.
 type RequestHandler struct {
@@ -442,6 +445,11 @@ func (a *RequestHandler) putFile(url string, app *model.Application, res http.Re
   return file
 }
 
+// Handle REST API endpoint requests.
+func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+  h.doServeHttp(res, req)
+}
+
 // Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
@@ -470,7 +478,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     }
 
     // METHOD /{container} - 404 if container not found.
-		// Container not found
 		if info.Container == nil {
 			return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 		}
@@ -502,5 +509,5 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return info.Post(res, req)
 	}
 
-	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+	return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }

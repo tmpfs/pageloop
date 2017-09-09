@@ -471,8 +471,6 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
 
   a.SetPath(filepath.Join(l.Config.SourceDirectory, a.Name))
 
-  println("Create mountpoint: " + a.Path)
-
   // Create source application directory
   if err := os.MkdirAll(a.SourceDirectory(), os.ModeDir | 0755); err != nil {
 		return nil, err
