@@ -318,129 +318,16 @@ func (a *ApplicationRequestHandler) Put(res http.ResponseWriter, req *http.Reque
   return -1, nil
 }
 
-// Primary handler, decoupled from ServeHTTP so we can return from the function.
-func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	var err error
-	var data []byte
-  var file *model.File
 
-	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-    return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
-	}
-
-  info := &ApplicationRequestHandler{Root: h.Root}
-  info.Parse(req)
-
-  //fmt.Printf("%#v\n", req.URL.Path)
-  //fmt.Printf("%#v\n", info)
-
-  // TODO: only allow this in Dev mode?
-  res.Header().Set("Access-Control-Allow-Origin", "*")
-
-  if (info.Path == "") {
-    // GET / - List host containers.
-    if req.Method == http.MethodGet {
-      return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
-    }
-  } else {
-    // GET /templates - List available application templates.
-    if req.Method == http.MethodGet && info.Path == TEMPLATES {
-      return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
-    }
-
-    // METHOD /{container} - 404 if container not found.
-		// Container not found
-		if info.Container == nil {
-			return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
-		}
-	}
-
-  app := info.App
-  name := info.Name
-  action := info.Action
-  item := info.Item
-
-  // Container level endpoints
-	switch req.Method {
-		case http.MethodPut:
-		  // PUT /api/{container}/ - Create a new application.
-			if info.Container != nil && info.Name == "" {
-				var input *model.Application = &model.Application{}
-        if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
-          return HttpUtils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
-        }
-        if err := adapter.CreateApplication(info.Container, input); err != nil {
-          return HttpUtils.ErrorJson(res, err)
-        }
-				return HttpUtils.Created(res, OK)
-			}
+func (a *ApplicationRequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
+  var input *model.Application = &model.Application{}
+  if _, err := HttpUtils.ValidateRequest(SchemaAppNew, input, req); err != nil {
+    return HttpUtils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
   }
-
-  // Application must exist
-  if info.App == nil {
-    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  if err := adapter.CreateApplication(a.Container, input); err != nil {
+    return HttpUtils.ErrorJson(res, err)
   }
-
-  // Application level endpoints
-	switch req.Method {
-		case http.MethodGet:
-      return info.Get(res, req)
-		case http.MethodDelete:
-      return info.Delete(res, req)
-		case http.MethodPut:
-      if info.Path != "" {
-				// PUT /api/{container}/{app}/files/{url}
-				if name != "" && action == FILES && item != "" {
-					if file = h.putFile(item, app, res, req); file != nil {
-            return HttpUtils.Json(res, http.StatusCreated, file)
-          }
-				} else if (name != "" && action == TASKS && item != "") {
-          taskName := strings.TrimPrefix(item, "/")
-          taskName = strings.TrimSuffix(taskName, "/")
-
-          // No build configuration of missing build task
-          if !app.HasBuilder() || app.Builder.Tasks[taskName] == "" {
-            return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
-          }
-
-          fullName := fmt.Sprintf("%s/%s:%s", app.Container.Name, app.Name, taskName)
-
-          if Jobs.GetRunningJob(fullName) != nil {
-            return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
-          }
-
-          // Set up a new job for the task
-          job := Jobs.NewJob(fullName)
-          Jobs.Start(job)
-
-          println("run task job: " + fullName)
-
-          // Run the task
-          app.Builder.Run(taskName, app, &TaskJobComplete{Job: job})
-
-          // Accepted for processing
-
-          fmt.Printf("%#v\n", job)
-
-          // TODO: send job information to the client
-          return HttpUtils.Write(res, http.StatusAccepted, OK)
-        }
-
-				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
-			}
-		case http.MethodPost:
-      return info.Post(res, req)
-	}
-
-	if err != nil {
-		return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
-	}
-
-	if data != nil {
-		return HttpUtils.Ok(res, data)
-  }
-
-	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  return HttpUtils.Created(res, OK)
 }
 
 // Create a new file for an application
@@ -513,4 +400,113 @@ func (h RestHandler) putFile(url string, app *model.Application, res http.Respon
   }
 
   return file
+}
+
+// Primary handler, decoupled from ServeHTTP so we can return from the function.
+func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
+	var err error
+  var file *model.File
+
+	if !HttpUtils.IsMethodAllowed(req.Method, RestAllowedMethods) {
+    return HttpUtils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
+	}
+
+  info := &ApplicationRequestHandler{Root: h.Root}
+  info.Parse(req)
+
+  //fmt.Printf("%#v\n", req.Method)
+  //fmt.Printf("%#v\n", req.URL.Path)
+  //fmt.Printf("%#v\n", info)
+
+  // TODO: only allow this in Dev mode?
+  res.Header().Set("Access-Control-Allow-Origin", "*")
+
+  if (info.Path == "") {
+    // GET / - List host containers.
+    if req.Method == http.MethodGet {
+      return HttpUtils.Json(res, http.StatusOK, adapter.ListContainers())
+    }
+  } else {
+    // GET /templates - List available application templates.
+    if req.Method == http.MethodGet && info.Path == TEMPLATES {
+      return HttpUtils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
+    }
+
+    // METHOD /{container} - 404 if container not found.
+		// Container not found
+		if info.Container == nil {
+			return HttpUtils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+		}
+	}
+
+  // Container level endpoints
+	switch req.Method {
+		case http.MethodPut:
+		  // PUT /api/{container}/ - Create a new application.
+			if info.Container != nil && info.Name == "" {
+        return info.PutApplication(res, req)
+			}
+  }
+
+  // Application must exist
+  if info.App == nil {
+    return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+  }
+
+  // Application level endpoints
+	switch req.Method {
+		case http.MethodGet:
+      return info.Get(res, req)
+		case http.MethodDelete:
+      return info.Delete(res, req)
+		case http.MethodPut:
+      if info.Path != "" {
+				// PUT /api/{container}/{application}/files/{url} - Create a new file.
+				if info.Action == FILES && info.Item != "" {
+					if file = h.putFile(info.Item, info.App, res, req); file != nil {
+            return HttpUtils.Json(res, http.StatusCreated, file)
+          }
+				// PUT /api/{container}/{application}/tasks/ - Run a build task.
+				} else if (info.Action == TASKS && info.Item != "") {
+          taskName := strings.TrimPrefix(info.Item, "/")
+          taskName = strings.TrimSuffix(taskName, "/")
+
+          // No build configuration of missing build task
+          if !info.App.HasBuilder() || info.App.Builder.Tasks[taskName] == "" {
+            return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
+          }
+
+          fullName := fmt.Sprintf("%s/%s:%s", info.App.Container.Name, info.App.Name, taskName)
+
+          if Jobs.GetRunningJob(fullName) != nil {
+            return HttpUtils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
+          }
+
+          // Set up a new job for the task
+          job := Jobs.NewJob(fullName)
+          Jobs.Start(job)
+
+          println("run task job: " + fullName)
+
+          // Run the task
+          info.App.Builder.Run(taskName, info.App, &TaskJobComplete{Job: job})
+
+          // Accepted for processing
+          fmt.Printf("%#v\n", job)
+
+          // TODO: send job information to the client
+          return HttpUtils.Write(res, http.StatusAccepted, OK)
+        }
+
+				return HttpUtils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+			}
+		case http.MethodPost:
+      return info.Post(res, req)
+	}
+
+	if err != nil {
+		return HttpUtils.Error(res, http.StatusInternalServerError, nil, err)
+	}
+
+	return HttpUtils.Error(res, http.StatusNotFound, nil, nil)
 }
