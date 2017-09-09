@@ -63,3 +63,25 @@ func (h *Host) LookupTemplateFile(t *ApplicationTemplate) (*File, error) {
   url := t.File
   return app.Urls[url], nil
 }
+
+// Generate HTML markup for a directory listing.
+func (h *Host) DirectoryListing (file *File) ([]byte, error) {
+  // Build the template data
+  d := file.DirectoryListing()
+  // Get the directory listing template file
+  c := h.GetByName("template")
+  a :=  c.GetByName("listing")
+  f := a.Urls["/index.html"]
+  p := f.Page()
+  // Parse and execute the template
+  if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
+    return nil, err
+  } else {
+    if output, err := p.ExecuteTemplate(tpl, d); err != nil {
+      return nil, err
+    } else {
+      return output, nil
+    }
+  }
+  return nil, nil
+}

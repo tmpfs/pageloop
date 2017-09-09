@@ -118,7 +118,6 @@ func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	indexPage := clean + "/index.html"
 	indexMdPage := clean + "/index.md"
   if file != nil && file.Directory && app.Urls[indexPage] == nil && app.Urls[indexMdPage] == nil {
-
     h.Root.DirectoryListing(file, res, req)
     return
   }
@@ -127,32 +126,13 @@ func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 }
 
 func (l *PageLoop) DirectoryListing (file *model.File, res http.ResponseWriter, req *http.Request) {
-
-  internalError := func (err error) {
-    // TODO: implement internal error handling
-    panic(err)
-  }
-
-  // Build the template data
-  d := file.DirectoryListing()
-  // Get the directory listing template file
-  c := l.Host.GetByName("template")
-  a :=  c.GetByName("listing")
-  f := a.Urls["/index.html"]
-  p := f.Page()
-  // Parse and execute the template
-  if tpl, err := p.ParseTemplate(file.Path, f.Source(false), p.DefaultFuncMap(), false); err != nil {
-    internalError(err)
+  if output, err := l.Host.DirectoryListing(file); err != nil {
+    http.Error(res, err.Error(), http.StatusInternalServerError)
     return
   } else {
-    if output, err := p.ExecuteTemplate(tpl, d); err != nil {
-      internalError(err)
-      return
-    } else {
-      // Send the response
-      send(res, req, file, output)
-      return
-    }
+    // Send the directory listing
+    send(res, req, file, output)
+    return
   }
 }
 
