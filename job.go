@@ -1,5 +1,9 @@
 package pageloop
 
+import(
+  "time"
+)
+
 var(
   // Singleton job manager.
   Jobs *JobManager
@@ -14,6 +18,8 @@ type Job struct {
   Name string `json:"name"`
   id uint64 `json:"id"`
   running bool `json:"active"`
+  start time.Time
+  duration time.Duration
 }
 
 // Access the job number.
@@ -54,6 +60,7 @@ func (j *JobManager) GetRunningJob(name string) *Job {
 // Start a job.
 func (j *JobManager) Start(job *Job) {
   job.running = true
+  job.start = time.Now()
   j.Jobs = append(j.Jobs, job)
 }
 
@@ -61,6 +68,7 @@ func (j *JobManager) Start(job *Job) {
 // of active jobs.
 func (j *JobManager) Stop(job *Job) {
   job.running = false
+  job.duration = time.Since(job.start)
   for i, cj := range j.Jobs {
     if job == cj {
       before := j.Jobs[0:i]
