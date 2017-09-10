@@ -176,7 +176,7 @@ func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError
 // Abort an active job.
 func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
   var err error
-  var job *Job = Jobs.GetRunningJob(id)
+  var job *Job = Jobs.ActiveJob(id)
   if job == nil {
     return nil, CommandError(http.StatusNotFound, "")
   }

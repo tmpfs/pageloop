@@ -70,7 +70,7 @@ func (j *JobManager) NewJob(id string, runner JobRunner) *Job {
 }
 
 // Find a job by id that is currently active.
-func (j *JobManager) GetRunningJob(id string) *Job {
+func (j *JobManager) ActiveJob(id string) *Job {
   for _, job := range j.Active {
     if job.Id == id && job.Running() {
       return job
@@ -109,7 +109,7 @@ func (j *JobManager) Abort(job *Job) error {
     return fmt.Errorf(
       "Cannot abort job %s (%d), job is not cancelable", job.Id, job.Number)
   }
-  if j.GetRunningJob(job.Id) == nil {
+  if j.ActiveJob(job.Id) == nil {
     return fmt.Errorf(
       "Cannot abort job %s (%d), job not running", job.Id, job.Number)
   }

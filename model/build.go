@@ -77,7 +77,7 @@ func (t *Task) Run(done JobComplete) (*Job, error) {
   job := Jobs.NewJob(t.Id(), t)
 
   // TODO: move this to Jobs.Start()
-  if Jobs.GetRunningJob(t.Id()) != nil {
+  if Jobs.ActiveJob(t.Id()) != nil {
     return nil, fmt.Errorf("Job %s is already running", t.Id())
   }
 
