@@ -1,4 +1,4 @@
-package pageloop
+package handler
 
 import (
   "strings"
@@ -8,6 +8,7 @@ import (
 
 // Serves application public files from disc.
 type PublicHandler struct {
+  Listing *DirList
 	App *Application
   FileServer http.Handler
 }
@@ -21,7 +22,7 @@ func (h PublicHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	indexPage := clean + "/index.html"
 	indexMdPage := clean + "/index.md"
   if file != nil && file.Directory && app.Urls[indexPage] == nil && app.Urls[indexMdPage] == nil {
-    listing.List(file, res, req)
+    h.Listing.List(file, res, req)
     return
   }
 

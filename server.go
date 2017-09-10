@@ -6,9 +6,7 @@ import (
   "log"
 	"mime"
 	"strings"
-	"strconv"
   "net/http"
-  "path/filepath"
   "time"
   "github.com/tmpfs/pageloop/model"
 )
@@ -26,7 +24,6 @@ var mux *http.ServeMux
 var(
   adapter *CommandAdapter
   manager *MountpointManager
-  listing *DirectoryList
 )
 
 type PageLoop struct {
@@ -80,26 +77,6 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	handler.ServeHTTP(res, req)
 }
 
-func send (res http.ResponseWriter, req *http.Request, file *model.File, output []byte) {
-	path := "/" + req.URL.Path
-  base := filepath.Base(path)
-
-  ext := filepath.Ext(file.Name)
-  ct := mime.TypeByExtension(ext)
-
-  // TODO: remove this?
-  if (ext == ".pdf") {
-    res.Header().Set("Content-Disposition", "inline; filename=" + base)
-  }
-
-  res.Header().Set("Content-Type", ct)
-  res.Header().Set("Content-Length", strconv.Itoa(len(output)))
-  if (req.Method == http.MethodHead) {
-    return
-  }
-  res.Write(output)
-}
-
 // Creates an HTTP server.
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var err error
@@ -110,9 +87,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   // Set up a host for our containers
 	l.Host = model.NewHost()
 
-  manager = NewMountpointManager(config)
-
-  listing = &DirectoryList{Host: l.Host}
+  manager = NewMountpointManager(config, l.Host)
 
   // TODO: remove Root reference
   adapter = &CommandAdapter{Host: l.Host, Mountpoints: manager}

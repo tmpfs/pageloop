@@ -7,6 +7,7 @@ import (
   "strings"
   "net/http"
   "path/filepath"
+  . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
 )
 
@@ -48,13 +49,14 @@ type MountpointMap struct {
 
 type MountpointManager struct {
   Config *ServerConfig
+  Host *Host
 }
 
-func NewMountpointManager(c *ServerConfig) *MountpointManager {
+func NewMountpointManager(c *ServerConfig, h *Host) *MountpointManager {
 	// Initialize mountpoint maps
 	mountpoints = make(map[string] http.Handler)
 	multiplex = make(map[string] bool)
-  return &MountpointManager{Config: c}
+  return &MountpointManager{Config: c, Host: h}
 }
 
 // Delete a mountpoint for a userspace application and persist the list of mountpoints.
@@ -194,21 +196,23 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
 // from in memory data. The src version is the file with any frontmatter
 // stripped and the raw version includes frontmatter.
 func (m *MountpointManager) MountApplication(app *Application) {
+  listing := &DirList{Host: m.Host}
+
 	// Serve the static build files from the mountpoint path.
 	url := app.PublishUrl()
 	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
   fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
-  mountpoints[url] = http.StripPrefix(url, PublicHandler{App: app, FileServer: fileserver})
+  mountpoints[url] = http.StripPrefix(url, PublicHandler{Listing: listing, App: app, FileServer: fileserver})
 
 	// Serve the source files with frontmatter stripped.
 	url = app.SourceUrl()
 	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{App: app})
+  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app})
 
 	// Serve the raw source files.
 	url = app.RawUrl()
 	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{App: app, Raw: true})
+  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app, Raw: true})
 }
 
 // Unmount an application from the web server.

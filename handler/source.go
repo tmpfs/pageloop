@@ -1,4 +1,4 @@
-package pageloop
+package handler
 
 import (
   "strings"
@@ -8,6 +8,7 @@ import (
 
 // Serves application source files from memory.
 type SourceHandler struct {
+  Listing *DirList
 	App *Application
 	Raw bool
 }
@@ -52,7 +53,7 @@ func (h SourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		return
   // Handle directory listing
 	} else if file != nil {
-    listing.List(file, res, req)
+    h.Listing.List(file, res, req)
     return
   }
 
