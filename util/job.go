@@ -35,9 +35,9 @@ type JobAbort interface {
 // Job is a potentially long running background task
 // such as executing an external command in a goroutine.
 type Job struct {
-  Name string `json:"name"`
+  Name string `json:"id"`
   Runner JobRunner `json:"run"`
-  Number uint64 `json:"id"`
+  Number uint64 `json:"num"`
   running bool `json:"active"`
   start time.Time
   duration time.Duration
