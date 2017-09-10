@@ -131,10 +131,15 @@ in the application build file and the task may not already be
 running. If the job is running a conflict status response error 
 code is sent.
 
-An accepted response is sent on success.
+An accepted response is sent on success with the job information 
+for the task.
 
 ## GET /templates
 
 Get a list of application templates.
+
+## GET /jobs
+
+Get a list of active jobs.
 
 </div>
