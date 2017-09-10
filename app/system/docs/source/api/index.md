@@ -142,4 +142,8 @@ Get a list of application templates.
 
 Get a list of active jobs.
 
+## DELETE /jobs/{id}
+
+Abort an active job.
+
 </div>
