@@ -48,6 +48,11 @@ type CommandAdapter struct {
   Mountpoints *MountpointManager
 }
 
+// List jobs.
+func (b *CommandAdapter) ListJobs() []*Job {
+  return Jobs.Active
+}
+
 // List containers.
 func (b *CommandAdapter) ListContainers() []*Container {
   return b.Host.Containers

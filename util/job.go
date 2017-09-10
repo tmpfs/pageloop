@@ -51,7 +51,7 @@ func (j *Job) Running() bool {
 // a list of active jobs.
 type JobManager struct {
   // List of active jobs
-  Jobs []*Job
+  Active []*Job
 }
 
 // Create a new job.
@@ -64,7 +64,7 @@ func (j *JobManager) NewJob(name string, runner JobRunner) *Job {
 
 // Find a job by name that is currently running.
 func (j *JobManager) GetRunningJob(name string) *Job {
-  for _, job := range j.Jobs {
+  for _, job := range j.Active {
     if job.Name == name && job.Running() {
       return job
     }
@@ -76,7 +76,7 @@ func (j *JobManager) GetRunningJob(name string) *Job {
 func (j *JobManager) Start(job *Job) {
   job.running = true
   job.start = time.Now()
-  j.Jobs = append(j.Jobs, job)
+  j.Active = append(j.Active, job)
 }
 
 // Stop a job. The job is removed from the list
@@ -84,11 +84,11 @@ func (j *JobManager) Start(job *Job) {
 func (j *JobManager) Stop(job *Job) {
   job.running = false
   job.duration = time.Since(job.start)
-  for i, cj := range j.Jobs {
+  for i, cj := range j.Active {
     if job == cj {
-      before := j.Jobs[0:i]
-      after := j.Jobs[i+1:]
-      j.Jobs = append(before, after...)
+      before := j.Active[0:i]
+      after := j.Active[i+1:]
+      j.Active = append(before, after...)
     }
   }
 }
@@ -96,4 +96,7 @@ func (j *JobManager) Stop(job *Job) {
 // Create singleton job manager.
 func init() {
   Jobs = &JobManager{}
+  // Need to initialize the active jobs so that endpoints 
+  // return the empty array rather than null
+  Jobs.Active = make([]*Job, 0)
 }

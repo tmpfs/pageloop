@@ -20,6 +20,7 @@ const(
 	FILES = "files"
 	PAGES = "pages"
   TEMPLATES = "templates"
+  JOBS = "jobs"
 )
 
 var(
@@ -358,9 +359,13 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return utils.Json(res, http.StatusOK, h.Adapter.ListContainers())
     }
   } else {
-    // GET /templates - List available application templates.
-    if req.Method == http.MethodGet && info.Path == TEMPLATES {
-      return utils.Json(res, http.StatusOK, h.Adapter.ListApplicationTemplates())
+    if req.Method == http.MethodGet {
+      // GET /templates - List available application templates.
+      if info.Path == TEMPLATES {
+        return utils.Json(res, http.StatusOK, h.Adapter.ListApplicationTemplates())
+      } else if info.Path == JOBS {
+        return utils.Json(res, http.StatusOK, h.Adapter.ListJobs())
+      }
     }
 
     // METHOD /{container} - 404 if container not found.
