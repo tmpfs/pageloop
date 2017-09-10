@@ -126,12 +126,12 @@ Get page information for the page URL.
 
 ## PUT /{container}/{application}/tasks/{name}
 
-Starts a task for the given application. The task must be defined 
-in the application build file and the task may not already be 
-running. If the job is running a conflict status response error 
+Starts a task for the given application. The task must be defined
+in the application build file and the task may not already be
+running. If the job is running a conflict status response error
 code is sent.
 
-An accepted response is sent on success with the job information 
+An accepted response is sent on success with the job information
 for the task.
 
 ## GET /templates
@@ -142,8 +142,13 @@ Get a list of application templates.
 
 Get a list of active jobs.
 
+## GET /jobs/{id}
+
+Get information about an active job.
+
 ## DELETE /jobs/{id}
 
-Abort an active job.
+Abort an active job. Conflict status is returned if the job is not
+running or cannot be aborted.
 
 </div>
