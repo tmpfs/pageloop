@@ -1,6 +1,7 @@
 package util
 
 import(
+  "fmt"
   "time"
 )
 
@@ -26,6 +27,11 @@ type JobRunner interface {
   Run(done JobComplete) (*Job, error)
 }
 
+// Type for job runners that are cancelable.
+type JobAbort interface {
+  Abort() error
+}
+
 // Job is a potentially long running background task
 // such as executing an external command in a goroutine.
 type Job struct {
@@ -45,6 +51,12 @@ func (j *Job) Id() uint64 {
 // Determine if the job is active.
 func (j *Job) Running() bool {
   return j.running
+}
+
+// Determine if the job can be aborted.
+func (j *Job) CanAbort() bool {
+  _, ok := j.Runner.(JobAbort)
+  return ok
 }
 
 // Job manager creates, starts and stops jobs and maintains
@@ -91,6 +103,25 @@ func (j *JobManager) Stop(job *Job) {
       j.Active = append(before, after...)
     }
   }
+}
+
+// Abort an active job.
+//
+// It is an error if the job is not running of if the job 
+// cannot be aborted.
+func (j *JobManager) Abort(job *Job) error {
+  if !job.CanAbort() {
+    return fmt.Errorf(
+      "Cannot abort job %s (%d), job is not cancelable", job.Name, job.Id())
+  }
+  if j.GetRunningJob(job.Name) == nil {
+    return fmt.Errorf(
+      "Cannot abort job %s (%d), job not running", job.Name, job.Id())
+  }
+  if abortable, ok := job.Runner.(JobAbort); ok {
+    return abortable.Abort() 
+  }
+  return nil
 }
 
 // Create singleton job manager.

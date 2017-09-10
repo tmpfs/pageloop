@@ -121,3 +121,4 @@ Wow, so much to do, here is some stuff:
 46) Standardize public/source directories for all apps
 47) Add Electron build for the editor, bundle a standalone server executable
 48) Deprecate loading page data from external files - frontmatter data only
+49) Cancel new file view on ESC key

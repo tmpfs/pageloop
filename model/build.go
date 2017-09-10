@@ -61,6 +61,12 @@ func (t *Task) Id() string {
   return t.Namespace + ":" + t.Key
 }
 
+// Abort this task
+func (t *Task) Abort() error {
+  println("abort running task job")
+  return nil
+}
+
 // Execute an arbitrary command in a goroutine and invoke the
 // done callback on completion.
 func (t *Task) Run(done JobComplete) (*Job, error) {
