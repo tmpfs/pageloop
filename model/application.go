@@ -374,7 +374,7 @@ func (app *Application) HasBuilder() bool {
 }
 
 func (app *Application) Build(done TaskComplete) {
-  app.Builder.Build(app, done)
+  app.Builder.Build(done)
 }
 
 // Publish application files to the given directory.

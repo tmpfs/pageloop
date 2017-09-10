@@ -21,6 +21,8 @@ var(
 )
 
 type BuildFile struct {
+  App *Application `json:"-" yaml:"-"`
+
   // Allows disabling builds when the server boots
   Boot bool `json:"-" yaml:"boot"`
 
@@ -49,7 +51,7 @@ func (d *DefaultTaskComplete) Done(err error, cmd *exec.Cmd, raw string) {
 
 func ReadBuildFile (app *Application) (*BuildFile, error) {
   var err error
-  var file *BuildFile = &BuildFile{}
+  var file *BuildFile = &BuildFile{App: app}
   var input string = filepath.Join(app.SourceDirectory(), BuildFileName)
   var content []byte
   if content, err = ioutil.ReadFile(input); err != nil {
@@ -82,7 +84,8 @@ func ReadBuildFile (app *Application) (*BuildFile, error) {
 
 // Execute an arbitrary command in a goroutine and invoke the
 // done callback on completion.
-func (b *BuildFile) Exec(app *Application, raw string, done TaskComplete) {
+func (b *BuildFile) Exec(raw string, done TaskComplete) {
+  var app *Application = b.App
   var cwd = app.SourceDirectory()
   var parts []string = strings.Split(raw, " ")
   var name string = parts[0]
@@ -117,13 +120,13 @@ func (b *BuildFile) TaskCommand(key string) string {
 }
 
 // Run a build task.
-func (b *BuildFile) Run(key string, app *Application, done TaskComplete) string {
+func (b *BuildFile) Run(key string, done TaskComplete) string {
   cmd := b.TaskCommand(key)
-  b.Exec(app, cmd, done)
+  b.Exec(cmd, done)
   return cmd
 }
 
 // Run the main build task.
-func (b *BuildFile) Build(app *Application, done TaskComplete) {
-  b.Exec(app, b.Command, done)
+func (b *BuildFile) Build(done TaskComplete) {
+  b.Exec(b.Command, done)
 }

@@ -169,7 +169,7 @@ func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError
   println("run task job: " + fullName)
 
   // Run the task
-  a.Builder.Run(task, a, &TaskJobComplete{Job: job})
+  a.Builder.Run(task, &TaskJobComplete{Job: job})
 
   // Accepted for processing
   fmt.Printf("%#v\n", job)
