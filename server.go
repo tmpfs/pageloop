@@ -199,10 +199,6 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	l.Host.Add(tpl)
 	l.Host.Add(usr)
 
-	// Initialize mountpoint maps
-	mountpoints = make(map[string] http.Handler)
-	multiplex = make(map[string] bool)
-
   // Initialize server mux
   mux = http.NewServeMux()
 

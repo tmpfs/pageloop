@@ -52,6 +52,9 @@ type MountpointManager struct {
 }
 
 func NewMountpointManager(c *ServerConfig) *MountpointManager {
+	// Initialize mountpoint maps
+	mountpoints = make(map[string] http.Handler)
+	multiplex = make(map[string] bool)
   return &MountpointManager{Config: c}
 }
 
