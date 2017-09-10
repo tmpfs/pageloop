@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"errors"
 	"net/http"
-	"github.com/tmpfs/pageloop/model"
+	. "github.com/tmpfs/pageloop/model"
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
 )
@@ -16,27 +16,25 @@ const(
 
 type RpcService struct {
 	Url string
-	Root *PageLoop
 }
 
-func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
-	var service *RpcService = &RpcService{Root: root, Url: RPC_URL}
+func NewRpcService(mux *http.ServeMux, host *Host) *RpcService {
+	var service *RpcService = &RpcService{Url: RPC_URL}
 
 	// RPC endpoint
 	endpoint := rpc.NewServer()
 	// Do not specify charset on MIME type here
 	endpoint.RegisterCodec(json.NewCodec(), "application/json")
 
-	host := new(HostService)
-	host.Root = root
+	hostService := new(HostService)
+	hostService.Host = host
 
-	endpoint.RegisterService(host, "host")
+	endpoint.RegisterService(hostService, "host")
 
 	app := new(AppService)
-	app.Root = root
+  app.Host = host
 
 	endpoint.RegisterService(app, "app")
-
 
 	mux.Handle(RPC_URL, endpoint)
 
@@ -44,7 +42,7 @@ func NewRpcService(root *PageLoop, mux *http.ServeMux) *RpcService {
 }
 
 type HostService struct {
-	Root *PageLoop
+  Host *Host
 }
 
 type HostListArgs struct {
@@ -53,15 +51,15 @@ type HostListArgs struct {
 }
 
 type HostListReply struct {
-	Containers []*model.Container `json:"containers"`
+	Containers []*Container `json:"containers"`
 }
 
 // Get a slice of the host container list.
 //
-// If length is zero it is set to the number of applications so 
+// If length is zero it is set to the number of applications so
 // pass index zero without a length to list all applications.
 func (h *HostService) List(r *http.Request, args *HostListArgs, reply *HostListReply) error {
-	var host *model.Host = h.Root.Host
+	var host *Host = h.Host
 	if args.Len == 0 {
 		args.Len = len(host.Containers) - args.Index
 	}
@@ -77,20 +75,20 @@ type AppListArgs struct {
 }
 
 type AppListReply struct {
-	Apps []*model.Application `json:"apps"`
+	Apps []*Application `json:"apps"`
 }
 
 type AppService struct {
-	Root *PageLoop
+  Host *Host
 }
 
 // Get a slice of the application list for a container.
 //
-// If length is zero it is set to the number of applications so 
+// If length is zero it is set to the number of applications so
 // pass index zero without a length to list all applications.
 func (h *AppService) List(r *http.Request, args *AppListArgs, reply *AppListReply) error {
-	var container *model.Container
-	if container = h.Root.Host.GetByName(args.GroupId); container == nil {
+	var container *Container
+	if container = h.Host.GetByName(args.GroupId); container == nil {
 		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	if args.Len == 0 {
@@ -106,13 +104,13 @@ type AppGetArgs struct {
 }
 
 type AppGetReply struct {
-	App *model.Application `json:"app"`
+	App *Application `json:"app"`
 }
 
 // Get an application by name.
 func (h *AppService) Get(r *http.Request, args *AppGetArgs, reply *AppGetReply) error {
-	var container *model.Container
-	if container = h.Root.Host.GetByName(args.GroupId); container == nil {
+	var container *Container
+	if container = h.Host.GetByName(args.GroupId); container == nil {
 		return errors.New(fmt.Sprintf("No container found for %s", args.GroupId))
 	}
 	reply.App = container.GetByName(args.Name)

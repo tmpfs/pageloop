@@ -203,7 +203,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   mux = http.NewServeMux()
 
 	// RPC global endpoint (/rpc/)
-	rpc := NewRpcService(l, mux)
+	rpc := NewRpcService(mux, l.Host)
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
