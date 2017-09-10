@@ -37,15 +37,10 @@ type JobAbort interface {
 type Job struct {
   Name string `json:"name"`
   Runner JobRunner `json:"run"`
-  id uint64 `json:"id"`
+  Number uint64 `json:"id"`
   running bool `json:"active"`
   start time.Time
   duration time.Duration
-}
-
-// Access the job number.
-func (j *Job) Id() uint64 {
-  return j.id
 }
 
 // Determine if the job is active.
@@ -70,7 +65,7 @@ type JobManager struct {
 func (j *JobManager) NewJob(name string, runner JobRunner) *Job {
   job := &Job{Name: name, Runner: runner}
   JobCount++
-  job.id = JobCount
+  job.Number = JobCount
   return job
 }
 
@@ -112,11 +107,11 @@ func (j *JobManager) Stop(job *Job) {
 func (j *JobManager) Abort(job *Job) error {
   if !job.CanAbort() {
     return fmt.Errorf(
-      "Cannot abort job %s (%d), job is not cancelable", job.Name, job.Id())
+      "Cannot abort job %s (%d), job is not cancelable", job.Name, job.Number)
   }
   if j.GetRunningJob(job.Name) == nil {
     return fmt.Errorf(
-      "Cannot abort job %s (%d), job not running", job.Name, job.Id())
+      "Cannot abort job %s (%d), job not running", job.Name, job.Number)
   }
   if abortable, ok := job.Runner.(JobAbort); ok {
     return abortable.Abort() 
