@@ -120,7 +120,7 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
           } else {
             // GET /api/{container}/{application}/files/{url}
             if file := a.App.GetFileByUrl(a.Item); file == nil {
-              return utils.Error(res, http.StatusNotFound, nil, nil)
+              return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
             } else {
               return utils.Json(res, http.StatusOK, file)
             }
@@ -132,17 +132,18 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
           } else {
             // GET /api/{container}/{application}/pages/{url}
             if page := a.App.GetPageByUrl(a.Item); page == nil {
-              return utils.Error(res, http.StatusNotFound, nil, nil)
+              return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
             } else {
               return utils.Json(res, http.StatusOK, page)
             }
           }
         default:
-          return utils.Error(res, http.StatusNotFound, nil, nil)
+          return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
       }
     }
   }
-  return utils.Error(res, http.StatusNotFound, nil, nil)
+
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Handle DELETE requests.
@@ -160,10 +161,10 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
     if content, err := utils.ReadBody(req); err != nil {
-      return utils.Error(res, http.StatusInternalServerError, nil, err)
+      return utils.ErrorJson(res, CommandError(http.StatusInternalServerError, err.Error()))
     } else {
       if err = json.Unmarshal(content, &urls); err != nil {
-        return utils.Error(res, http.StatusInternalServerError, nil, err)
+        return utils.ErrorJson(res, CommandError(http.StatusInternalServerError, err.Error()))
       }
 
       for _, url := range urls {
@@ -197,7 +198,7 @@ func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, 
       return utils.Json(res, http.StatusOK, file)
     }
   }
-  return utils.Error(res, http.StatusNotFound, nil, nil)
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Update the content of a file.
@@ -280,8 +281,6 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
         return utils.Json(res, http.StatusAccepted, job)
       }
     }
-
-    return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
   }
   return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
@@ -387,7 +386,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
   // Application must exist
   if info.App == nil {
-    return utils.Error(res, http.StatusNotFound, nil, nil)
+    return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
   }
 
   // Application level endpoints

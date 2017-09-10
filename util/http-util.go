@@ -32,25 +32,6 @@ func (h HttpUtil) ErrorJson(res http.ResponseWriter, ex *StatusError) (int, erro
   }
 }
 
-// Send an error response to the client.
-
-// TODO: deprecate in favour of ErrorJson
-func (h HttpUtil) Error(res http.ResponseWriter, code int, data []byte, exception error) (int, error) {
-	var err error
-	if data == nil {
-		var m map[string] interface{} = make(map[string] interface{})
-		m["code"] = code
-		m["message"] = http.StatusText(code)
-		if exception != nil {
-			m["error"] = exception.Error()
-		}
-		if data, err = json.Marshal(m); err != nil {
-			return 0, err
-		}
-	}
-	return h.Write(res, code, data)
-}
-
 // Read in a request body.
 func (h HttpUtil) ReadBody(req *http.Request) ([]byte, error) {
 	defer req.Body.Close()
