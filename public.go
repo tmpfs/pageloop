@@ -1,22 +1,18 @@
 package pageloop
 
 import (
-  //"os"
-  //"fmt"
-  //"log"
   "strings"
   "net/http"
-  //"path/filepath"
   . "github.com/tmpfs/pageloop/model"
 )
 
 // Serves application public files from disc.
-type ApplicationPublicHandler struct {
+type PublicHandler struct {
 	App *Application
   FileServer http.Handler
 }
 
-func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (h PublicHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   app := h.App
   path := "/" + req.URL.Path
   file := app.Urls[path]

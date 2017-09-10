@@ -1,24 +1,20 @@
 package pageloop
 
 import (
-  //"os"
-  //"fmt"
-  //"log"
   "strings"
   "net/http"
-  //"path/filepath"
   . "github.com/tmpfs/pageloop/model"
 )
 
 // Serves application source files from memory.
-type ApplicationSourceHandler struct {
+type SourceHandler struct {
 	App *Application
 	Raw bool
 }
 
 // Tests the request path and attempts to find a corresponding source file
 // in the application files.
-func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (h SourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	index := "index.html"
 	urls := h.App.Urls
 	path := "/" + req.URL.Path
