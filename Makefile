@@ -9,7 +9,7 @@ bindata-dev:
 dev: bindata-dev
 	@go run bin/main.go
 
-build: bindata/
+build: bindata
 	@cd bin && go build -o pageloop
 
 test:
