@@ -53,16 +53,6 @@ func (h HttpUtil) ReadBody(req *http.Request) ([]byte, error) {
 	return ioutil.ReadAll(req.Body)
 }
 
-// Send an OK response to the client.
-func (h HttpUtil) Ok(res http.ResponseWriter, data []byte) (int, error) {
-	return h.Write(res, http.StatusOK, data)
-}
-
-// Send a created response to the client, typically in reply to a PUT.
-func (h HttpUtil) Created(res http.ResponseWriter, data []byte) (int, error) {
-	return h.Write(res, http.StatusCreated, data)
-}
-
 // Write a JSON document to the response from the given doc object.
 func (h HttpUtil) Json(res http.ResponseWriter, status int, doc interface{}) (int, error) {
   var data []byte

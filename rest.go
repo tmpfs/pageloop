@@ -26,7 +26,7 @@ const(
 
 var(
   utils = HttpUtil{}
-	OK = []byte(`{"ok": true}`)
+  OK map[string] bool
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
 
@@ -175,8 +175,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
     if err := adapter.DeleteApplication(a.Container, a.App); err != nil {
       return utils.ErrorJson(res, err)
     }
-
-    return utils.Ok(res, OK)
+    return utils.Json(res, http.StatusOK, OK)
   // DELETE /api/{container}/{app}/files/ - Bulk file deletion
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
@@ -196,13 +195,13 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
         }
       }
       // If we made it this far all files were deleted
-      return utils.Ok(res, OK)
+      return utils.Json(res, http.StatusOK, OK)
     }
 
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
     if file := a.deleteFile(a.Item, app, res, req); file != nil {
-      return utils.Ok(res, OK)
+      return utils.Json(res, http.StatusOK, OK)
     }
   } else {
     return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
@@ -334,7 +333,7 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       fmt.Printf("%#v\n", job)
 
       // TODO: send job information to the client
-      return utils.Write(res, http.StatusAccepted, OK)
+      return utils.Json(res, http.StatusAccepted, OK)
     }
 
     return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
@@ -351,7 +350,7 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
   if err := adapter.CreateApplication(a.Container, input); err != nil {
     return utils.ErrorJson(res, err)
   }
-  return utils.Created(res, OK)
+  return utils.Json(res, http.StatusCreated, OK)
 }
 
 // Create a new file for an application
@@ -450,4 +449,9 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 	}
 
 	return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+}
+
+func init () {
+  OK = make(map[string]bool)
+  OK["ok"] = true
 }
