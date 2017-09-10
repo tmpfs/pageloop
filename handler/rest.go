@@ -24,6 +24,9 @@ const(
   TEMPLATES = "templates"
 )
 
+// TODO: Delete file command -> adapter
+// TODO: Run task command -> adapter
+
 var(
   utils = HttpUtil{}
   OK map[string] bool
