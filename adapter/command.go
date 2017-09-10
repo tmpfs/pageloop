@@ -13,9 +13,8 @@ type TaskJobComplete struct {}
 
 func (tj *TaskJobComplete) Done(err error, job *Job) {
   // TODO: send reply to the client over websocket
+  fmt.Printf("[job:%d] completed %s\n", job.Number, job.Id)
   Jobs.Stop(job)
-  println("Task job completed: " + job.Id)
-  fmt.Printf("%#v\n", job)
 }
 
 // TODO: implement action generation and execution
@@ -168,7 +167,7 @@ func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError
   }
 
   // Accepted for processing
-  fmt.Printf("%#v\n", job)
+  fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
 
   return job, nil
 }
