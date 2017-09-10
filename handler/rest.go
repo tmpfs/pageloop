@@ -22,8 +22,6 @@ const(
   TEMPLATES = "templates"
 )
 
-// TODO: remove all calls to utils.Error() - prefer ErrorJson()
-
 var(
   utils = HttpUtil{}
 	SchemaAppNew = MustAsset("schema/app-new.json")
@@ -120,7 +118,7 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
           } else {
             // GET /api/{container}/{application}/files/{url}
             if file := a.App.GetFileByUrl(a.Item); file == nil {
-              return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+              return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
             } else {
               return utils.Json(res, http.StatusOK, file)
             }
@@ -132,18 +130,18 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
           } else {
             // GET /api/{container}/{application}/pages/{url}
             if page := a.App.GetPageByUrl(a.Item); page == nil {
-              return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+              return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
             } else {
               return utils.Json(res, http.StatusOK, page)
             }
           }
         default:
-          return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+          return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
       }
     }
   }
 
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Handle DELETE requests.
@@ -153,7 +151,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
     if app, err := a.Adapter.DeleteApplication(a.Container, a.App); err != nil {
-      return utils.ErrorJson(res, err)
+      return utils.Errorj(res, err)
     } else {
       return utils.Json(res, http.StatusOK, app)
     }
@@ -161,15 +159,15 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
     if content, err := utils.ReadBody(req); err != nil {
-      return utils.ErrorJson(res, CommandError(http.StatusInternalServerError, err.Error()))
+      return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
     } else {
       if err = json.Unmarshal(content, &urls); err != nil {
-        return utils.ErrorJson(res, CommandError(http.StatusInternalServerError, err.Error()))
+        return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
       }
 
       for _, url := range urls {
         if file, err := a.Adapter.DeleteFile(a.App, url); err != nil {
-          return utils.ErrorJson(res, err)
+          return utils.Errorj(res, err)
         } else {
           files = append(files, file)
         }
@@ -180,25 +178,25 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
     if file, err := a.Adapter.DeleteFile(a.App, a.Item); err != nil {
-      return utils.ErrorJson(res, err)
+      return utils.Errorj(res, err)
     } else {
       files = append(files, file)
       return utils.Json(res, http.StatusOK, files)
     }
   }
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
 
 func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
   // POST /api/{container}/{app}/files/{url}
   if a.Name != "" && a.Action == FILES && a.Item != "" {
     if file, err := a.PostFile(res, req); err != nil {
-      return utils.ErrorJson(res, err)
+      return utils.Errorj(res, err)
     } else {
       return utils.Json(res, http.StatusOK, file)
     }
   }
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Update the content of a file.
@@ -265,7 +263,7 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
     // PUT /api/{container}/{application}/files/{url} - Create a new file.
     if a.Action == FILES && a.Item != "" {
       if file, err := a.PutFile(res, req); err != nil {
-        return utils.ErrorJson(res, err)
+        return utils.Errorj(res, err)
       } else {
         return utils.Json(res, http.StatusCreated, file)
       }
@@ -275,30 +273,30 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       taskName = strings.TrimSuffix(taskName, SLASH)
 
       if job, err := a.Adapter.RunTask(a.App, taskName); err != nil {
-        return utils.ErrorJson(res, err)
+        return utils.Errorj(res, err)
       } else {
         // TODO: send job information to the client - should a Job+Task pair
         return utils.Json(res, http.StatusAccepted, job)
       }
     }
   }
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
 
 func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
   var input *Application = &Application{}
   if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
-    return utils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
+    return utils.Errorj(res, CommandError(http.StatusBadRequest, err.Error()))
   }
   if app, err := a.Adapter.CreateApplication(a.Container, input); err != nil {
-    return utils.ErrorJson(res, err)
+    return utils.Errorj(res, err)
   } else {
     // Mount the application
     MountApplication(a.Adapter.Mountpoints.MountpointMap, a.Adapter.Host, app)
     return utils.Json(res, http.StatusCreated, app)
   }
 
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Create a new file for an application
@@ -347,7 +345,7 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-    return utils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
+    return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
   info := &RequestHandler{Adapter: h.Adapter}
@@ -367,7 +365,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
     // METHOD /{container} - 404 if container not found.
 		if info.Container == nil {
-			return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+			return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 		}
 	}
 
@@ -386,7 +384,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
   // Application must exist
   if info.App == nil {
-    return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+    return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
   }
 
   // Application level endpoints
@@ -401,5 +399,5 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return info.Post(res, req)
 	}
 
-  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
+  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }

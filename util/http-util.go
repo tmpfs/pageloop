@@ -17,7 +17,7 @@ const(
 type HttpUtil struct {}
 
 // Send an error response to the client as JSON.
-func (h HttpUtil) ErrorJson(res http.ResponseWriter, ex *StatusError) (int, error) {
+func (h HttpUtil) Errorj(res http.ResponseWriter, ex *StatusError) (int, error) {
   message := ex.Error()
   var m map[string] interface{} = make(map[string] interface{})
   m["code"] = ex.Status
