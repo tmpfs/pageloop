@@ -377,12 +377,19 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 		}
 	}
 
-  // DELETE /jobs/{jobid}
-  if info.BaseName == JOBS && info.Name != "" && req.Method == http.MethodDelete {
-    if job, err := h.Adapter.AbortJob(info.Name); err != nil {
-      return utils.Errorj(res, err)
-    } else {
-      return utils.Json(res, http.StatusOK, job)
+  if info.BaseName == JOBS && info.Name != "" {
+    // DELETE /jobs/{jobid}
+    if req.Method == http.MethodDelete {
+      if job, err := h.Adapter.AbortJob(info.Name); err != nil {
+        return utils.Errorj(res, err)
+      } else {
+        return utils.Json(res, http.StatusOK, job)
+      }
+    } else if req.Method == http.MethodGet {
+      if job := h.Adapter.ReadJob(info.Name); job != nil {
+        return utils.Json(res, http.StatusOK, job)
+      }
+			return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
     }
   }
 

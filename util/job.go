@@ -21,7 +21,7 @@ type JobComplete interface {
 
 // Job runners start a job running and must return a job.
 //
-// They should assign themselves as the runner for the job so 
+// They should assign themselves as the runner for the job so
 // that complete listeners can inspect the runner that started the job.
 type JobRunner interface {
   Run(done JobComplete) (*Job, error)
@@ -38,8 +38,9 @@ type Job struct {
   Id string `json:"id"`
   Runner JobRunner `json:"run"`
   Number uint64 `json:"num"`
+  Timestamp int64 `json:"timestamp"`
+  start time.Time `json:"-"`
   running bool `json:"active"`
-  start time.Time
   duration time.Duration
 }
 
@@ -83,6 +84,7 @@ func (j *JobManager) ActiveJob(id string) *Job {
 func (j *JobManager) Start(job *Job) {
   job.running = true
   job.start = time.Now()
+  job.Timestamp = job.start.Unix()
   j.Active = append(j.Active, job)
 }
 
@@ -102,7 +104,7 @@ func (j *JobManager) Stop(job *Job) {
 
 // Abort an active job.
 //
-// It is an error if the job is not running of if the job 
+// It is an error if the job is not running of if the job
 // cannot be aborted.
 func (j *JobManager) Abort(job *Job) error {
   if !job.CanAbort() {
@@ -116,7 +118,7 @@ func (j *JobManager) Abort(job *Job) error {
 
   defer j.Stop(job)
   if abortable, ok := job.Runner.(JobAbort); ok {
-    return abortable.Abort() 
+    return abortable.Abort()
   }
   return nil
 }
@@ -124,7 +126,7 @@ func (j *JobManager) Abort(job *Job) error {
 // Create singleton job manager.
 func init() {
   Jobs = &JobManager{}
-  // Need to initialize the active jobs so that endpoints 
+  // Need to initialize the active jobs so that endpoints
   // return the empty array rather than null
   Jobs.Active = make([]*Job, 0)
 }
