@@ -22,16 +22,6 @@ const(
 var Name string = "pageloop"
 var Version string = "1.0"
 
-// Maps application URLs to HTTP handlers.
-//
-// Because we want to mount and unmount applications and we cannot remove
-// a handler we have a single handler that defers to these handlers.
-var mountpoints map[string] http.Handler
-
-// We need to know which requests go through the normal serve mux logic
-// so they do not collide with application requests.
-var multiplex map[string] bool
-
 // Primary serve mux handler for built in endpoints.
 var mux *http.ServeMux
 

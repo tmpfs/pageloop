@@ -10,6 +10,18 @@ import (
   . "github.com/tmpfs/pageloop/model"
 )
 
+var(
+  // Maps application URLs to HTTP handlers.
+  //
+  // Because we want to mount and unmount applications and we cannot remove
+  // a handler we have a single handler that defers to these handlers.
+  mountpoints map[string] http.Handler
+
+  // We need to know which requests go through the normal serve mux logic
+  // so they do not collide with application requests.
+  multiplex map[string] bool
+)
+
 // A mountpoint maps a path location indicating the source
 // for an application and a URL that the application should
 // be mounted at.
