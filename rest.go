@@ -57,7 +57,7 @@ type TaskJobComplete struct {
 
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
-func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
+func NewRestService(mux *http.ServeMux) *RestService {
   rest := &RestService{Url: API_URL}
 	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{}))
 	return rest

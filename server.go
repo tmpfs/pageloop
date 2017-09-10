@@ -233,7 +233,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	rest := NewRestService(l, mux)
+	rest := NewRestService(mux)
 	log.Printf("Serving rest service from %s", API_URL)
 
 	multiplex[strings.TrimSuffix(rpc.Url, "/")] = true
