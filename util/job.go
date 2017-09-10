@@ -35,7 +35,7 @@ type JobAbort interface {
 // Job is a potentially long running background task
 // such as executing an external command in a goroutine.
 type Job struct {
-  Name string `json:"id"`
+  Id string `json:"id"`
   Runner JobRunner `json:"run"`
   Number uint64 `json:"num"`
   running bool `json:"active"`
@@ -62,17 +62,17 @@ type JobManager struct {
 }
 
 // Create a new job.
-func (j *JobManager) NewJob(name string, runner JobRunner) *Job {
-  job := &Job{Name: name, Runner: runner}
+func (j *JobManager) NewJob(id string, runner JobRunner) *Job {
+  job := &Job{Id: id, Runner: runner}
   JobCount++
   job.Number = JobCount
   return job
 }
 
-// Find a job by name that is currently running.
-func (j *JobManager) GetRunningJob(name string) *Job {
+// Find a job by id that is currently active.
+func (j *JobManager) GetRunningJob(id string) *Job {
   for _, job := range j.Active {
-    if job.Name == name && job.Running() {
+    if job.Id == id && job.Running() {
       return job
     }
   }
@@ -107,11 +107,11 @@ func (j *JobManager) Stop(job *Job) {
 func (j *JobManager) Abort(job *Job) error {
   if !job.CanAbort() {
     return fmt.Errorf(
-      "Cannot abort job %s (%d), job is not cancelable", job.Name, job.Number)
+      "Cannot abort job %s (%d), job is not cancelable", job.Id, job.Number)
   }
-  if j.GetRunningJob(job.Name) == nil {
+  if j.GetRunningJob(job.Id) == nil {
     return fmt.Errorf(
-      "Cannot abort job %s (%d), job not running", job.Name, job.Number)
+      "Cannot abort job %s (%d), job not running", job.Id, job.Number)
   }
   if abortable, ok := job.Runner.(JobAbort); ok {
     return abortable.Abort() 

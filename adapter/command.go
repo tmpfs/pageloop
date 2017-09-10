@@ -14,7 +14,7 @@ type TaskJobComplete struct {}
 func (tj *TaskJobComplete) Done(err error, job *Job) {
   // TODO: send reply to the client over websocket
   Jobs.Stop(job)
-  println("Task job completed: " + job.Name)
+  println("Task job completed: " + job.Id)
   fmt.Printf("%#v\n", job)
 }
 
