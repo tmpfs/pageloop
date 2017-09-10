@@ -166,3 +166,16 @@ func (b *CommandAdapter) UpdateFile(a *Application, f *File, content []byte) (*F
   return f, nil
 }
 
+// Delete a file.
+func (b *CommandAdapter) DeleteFile(a *Application, url string) (*File, *StatusError) {
+  var err error
+  var file *File = a.Urls[url]
+  if file == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+  if err = a.Del(file); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return file, nil
+}
+

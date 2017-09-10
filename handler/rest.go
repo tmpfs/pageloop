@@ -166,6 +166,8 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
 func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int, error) {
   app := a.App
 
+  var files []*File
+
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
     if err := a.Adapter.DeleteApplication(a.Container, a.App); err != nil {
@@ -175,7 +177,6 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
   // DELETE /api/{container}/{app}/files/ - Bulk file deletion
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
-
     if content, err := utils.ReadBody(req); err != nil {
       return utils.Error(res, http.StatusInternalServerError, nil, err)
     } else {
@@ -184,41 +185,26 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
       }
 
       for _, url := range urls {
-        if file := a.deleteFile(url, app, res, req); file == nil {
-          // If we got a nil file an error occured and the response
-          // will already have been sent
-          return -1, nil
+        if file, err := a.Adapter.DeleteFile(app, url); err != nil {
+          return utils.ErrorJson(res, err)
+        } else {
+          files = append(files, file)
         }
       }
       // If we made it this far all files were deleted
-      return utils.Json(res, http.StatusOK, OK)
+      return utils.Json(res, http.StatusOK, files)
     }
 
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
-    if file := a.deleteFile(a.Item, app, res, req); file != nil {
-      return utils.Json(res, http.StatusOK, OK)
+    if file, err := a.Adapter.DeleteFile(app, a.Item); err != nil {
+      return utils.ErrorJson(res, err)
+    } else {
+      files = append(files, file)
+      return utils.Json(res, http.StatusOK, files)
     }
-  } else {
-    return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
   }
-
-  return utils.Error(res, http.StatusNotFound, nil, nil)
-}
-
-// TODO: move deletion to command adapter
-func (a *RequestHandler) deleteFile(url string, app *Application, res http.ResponseWriter, req *http.Request) *File {
-  var err error
-  var file *File = app.Urls[url]
-  if file == nil {
-    utils.Error(res, http.StatusNotFound, nil, nil)
-    return nil
-  }
-  if err = app.Del(file); err != nil {
-    utils.Error(res, http.StatusInternalServerError, nil, err)
-    return nil
-  }
-  return file
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
 
 func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
@@ -230,7 +216,7 @@ func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, 
       return utils.Json(res, http.StatusOK, file)
     }
   }
-  return -1, nil
+  return utils.Error(res, http.StatusNotFound, nil, nil)
 }
 
 // Update the content of a file.
@@ -335,7 +321,7 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
 
     return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
   }
-  return -1, nil
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
 
 func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
