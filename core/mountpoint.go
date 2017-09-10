@@ -176,3 +176,33 @@ func (m *MountpointManager) UnmountApplication(app *Application) {
   delete(m.MountpointMap, app.SourceUrl())
   delete(m.MountpointMap, app.RawUrl())
 }
+
+// Creating a mapping from string container name references to the
+// actual containers they reference.
+func (m *MountpointManager) Collect(mountpoints []Mountpoint) (map[string] *MountpointMap, error) {
+  var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
+  for _, mt := range mountpoints {
+    c := m.Host.GetByName(mt.Container)
+    if c == nil {
+      return nil, fmt.Errorf("Unknown container %s", mt.Container)
+    }
+    if collection[mt.Container] == nil {
+      collection[mt.Container] = &MountpointMap{Container: c}
+    }
+    collection[mt.Container].Mountpoints = append(collection[mt.Container].Mountpoints, mt)
+  }
+  return collection, nil
+}
+
+// Load mountpoints from a collection map.
+func (m *MountpointManager) LoadCollection(collection map[string] *MountpointMap) ([]*Application, error) {
+  var apps []*Application
+  for _, c := range collection {
+    if mounted, err := m.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+      return nil, err
+    } else {
+      apps = append(apps, mounted...)
+    }
+  }
+  return apps, nil
+}

@@ -14,25 +14,22 @@ import (
 )
 
 const(
-	HTML_MIME = "text/html; charset=utf-8"
-)
-
-var(
   Name string = "pageloop"
   Version string = "1.0"
-
-  mux *http.ServeMux
 )
 
 type PageLoop struct {
   // Server configuration
   Config *ServerConfig
 
-	// Underlying HTTP server.
+	// Underlying HTTP server
 	Server *http.Server `json:"-"`
 
+  // Server multiplexer
+  Mux *http.ServeMux `json:"-"`
+
   // Reference to the mountpoint manager
-  MountpointManager *MountpointManager
+  MountpointManager *MountpointManager `json:"-"`
 
 	// Application host
 	Host *Host
@@ -40,57 +37,51 @@ type PageLoop struct {
 
 // Creates an HTTP server.
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
-  var err error
+  var handler http.Handler
 
+  // Configuration for the server
   l.Config = config
+
+  // Initialize server multiplexer
+  l.Mux = http.NewServeMux()
 
   // Set up a host for our containers
 	l.Host = NewHost()
 
+  // Manager for application mountpoints.
+  //
+  // Application mountpoints are dynamic (they can be added and removed at runtime)
+  // so they need special care.
   l.MountpointManager = NewMountpointManager(l.Config, l.Host)
 
-  // Initialize the command adapter
+  // Initialize the command adapter, services invoke the command adapter
+  // for all operations on the model.
   adapter := &CommandAdapter{Host: l.Host, Mountpoints: l.MountpointManager}
 
 	// Configure application containers.
 	sys := NewContainer("system", "System applications.", true)
 	tpl := NewContainer("template", "Application & document templates.", true)
 	usr := NewContainer("user", "User applications.", false)
-
 	l.Host.Add(sys)
 	l.Host.Add(tpl)
 	l.Host.Add(usr)
 
-  // Initialize server mux
-  mux = http.NewServeMux()
-  var handler http.Handler
-
 	// RPC global endpoint (/rpc/)
-	handler = RpcService(mux, l.Host)
+	handler = RpcService(l.Mux, l.Host)
 	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
-
 	// REST API global endpoint (/api/)
-	handler = RestService(mux, adapter)
+	handler = RestService(l.Mux, adapter)
 	l.MountpointManager.MountpointMap[API_URL] = handler
 	log.Printf("Serving rest service from %s", API_URL)
 
   // Collect mountpoints by container name
-  var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
-  for _, m := range config.Mountpoints {
-    c := l.Host.GetByName(m.Container)
-    if c == nil {
-      return nil, fmt.Errorf("Unknown container %s", m.Container)
-    }
-    if collection[m.Container] == nil {
-      collection[m.Container] = &MountpointMap{Container: c}
-    }
-    collection[m.Container].Mountpoints = append(collection[m.Container].Mountpoints, m)
-  }
-
-  // Load mountpoints
-  for _, c := range collection {
-    if _, err = l.MountpointManager.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+  if collection, err := l.MountpointManager.Collect(config.Mountpoints); err != nil {
+    return nil, err
+  // Load the mountpoints using the container map
+  } else {
+    // Discarding the returned list of applications
+    if _, err = l.MountpointManager.LoadCollection(collection); err != nil {
       return nil, err
     }
   }
@@ -102,7 +93,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   s := &http.Server{
     Addr:           config.Addr,
-    Handler:        ServerHandler{MountpointManager: l.MountpointManager, Mux: mux},
+    Handler:        ServerHandler{MountpointManager: l.MountpointManager, Mux: l.Mux},
     ReadTimeout:    10 * time.Second,
     WriteTimeout:   10 * time.Second,
     MaxHeaderBytes: 1 << 20,

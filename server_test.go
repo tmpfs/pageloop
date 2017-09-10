@@ -17,6 +17,10 @@ var appUrl string = api + "/user/"
 
 var server *http.Server
 
+const(
+	HTML_MIME = "text/html; charset=utf-8"
+)
+
 // Test call to listen without a server
 func TestListenError(t *testing.T) {
 	var err error
