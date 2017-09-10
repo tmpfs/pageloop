@@ -39,9 +39,16 @@ type Job struct {
   Runner JobRunner `json:"run"`
   Number uint64 `json:"num"`
   Timestamp int64 `json:"timestamp"`
+  // String version of the job duration
+  Runtime string `json:"runtime"`
   start time.Time `json:"-"`
   running bool `json:"active"`
   duration time.Duration
+}
+
+func (j *Job) UpdateDuration() {
+  j.duration = time.Since(j.start)
+  j.Runtime = j.duration.String()
 }
 
 // Determine if the job is active.
@@ -74,6 +81,7 @@ func (j *JobManager) NewJob(id string, runner JobRunner) *Job {
 func (j *JobManager) ActiveJob(id string) *Job {
   for _, job := range j.Active {
     if job.Id == id && job.Running() {
+      job.UpdateDuration()
       return job
     }
   }
@@ -92,7 +100,7 @@ func (j *JobManager) Start(job *Job) {
 // of active jobs.
 func (j *JobManager) Stop(job *Job) {
   job.running = false
-  job.duration = time.Since(job.start)
+  job.UpdateDuration()
   for i, cj := range j.Active {
     if job == cj {
       before := j.Active[0:i]
