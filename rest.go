@@ -230,15 +230,17 @@ func (a *RequestHandler) deleteFile(url string, app *model.Application, res http
 func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, error) {
   // POST /api/{container}/{app}/files/{url}
   if a.Name != "" && a.Action == FILES && a.Item != "" {
-    if file := a.PostFile(res, req); file != nil {
+    if file, err := a.PostFile(res, req); err != nil {
+      return utils.ErrorJson(res, err)
+    } else {
       return utils.Json(res, http.StatusOK, file)
     }
   }
-  return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
+  return -1, nil
 }
 
 // Update the content of a file.
-func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*model.File, *StatusError) {
 	var err error
   app := a.App
   url := a.Item
@@ -250,14 +252,12 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
   if loc == "" {
     // No content type header
     if ct == "" {
-      utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content type header is required"))
-      return nil
+      return nil, CommandError(http.StatusBadRequest, "Content type header is required")
     }
 
     // No content length header
     if cl == "" {
-      utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Content length header is required"))
-      return nil
+      return nil, CommandError(http.StatusBadRequest, "Content length header is required")
     }
   }
 
@@ -266,14 +266,12 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
     // Handle moving the file with Location header
     if loc != "" {
       if url == loc {
-        utils.ErrorJson(res,
-          CommandError(http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url))
-        return nil
+        return nil, CommandError(
+          http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url)
       }
 
       if err := adapter.MoveFile(app, file, loc); err != nil {
-        utils.ErrorJson(res, err)
-        return nil
+        return nil, err
       }
     // Update file content
     } else {
@@ -281,8 +279,8 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
       ct = CharsetStrip.ReplaceAllString(ct, "")
       ft := CharsetStrip.ReplaceAllString(file.Mime, "")
       if ft != ct {
-        utils.Error(res, http.StatusBadRequest, nil, fmt.Errorf("Mismatched MIME types attempting to update file"))
-        return nil
+        return nil, CommandError(
+          http.StatusBadRequest, "Mismatched MIME types attempting to update file")
       }
 
       // TODO: fix empty reply when there is no request body
@@ -290,15 +288,14 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) *m
       var content []byte
       if content, err = utils.ReadBody(req); err == nil {
         // Update the application model
-        if err = app.Update(file, content); err != nil {
-          utils.Error(res, http.StatusInternalServerError, nil, err)
-          return nil
+        if _, err := adapter.UpdateFile(app, file, content); err != nil {
+          return nil, err
         }
       }
     }
 	}
 
-  return file
+  return file, nil
 }
 
 func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, error) {
@@ -384,17 +381,16 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
 
-  // Lookup template file
+  // Create from a template
   if !isDir && ct == JSON_MIME {
-    input := &model.ApplicationTemplate{}
-    if err = json.Unmarshal(content, input); err != nil {
+    tplref := &model.ApplicationTemplate{}
+    if err = json.Unmarshal(content, tplref); err != nil {
       return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
-
-    return adapter.CreateFileTemplate(a.App, a.Item, input)
+    return adapter.CreateFileTemplate(a.App, a.Item, tplref)
   }
 
-  // Update the application model
+  // Create from request body content
   return adapter.CreateFile(a.App, a.Item, content)
 }
 

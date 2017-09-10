@@ -173,3 +173,11 @@ func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []
 
   return file, nil
 }
+
+// Update file content.
+func (b *CommandAdapter) UpdateFile(a *model.Application, f *model.File, content []byte) (*model.File, *StatusError) {
+  if err := a.Update(f, content); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return f, nil
+}
