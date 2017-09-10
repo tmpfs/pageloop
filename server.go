@@ -4,7 +4,6 @@ package pageloop
 import (
 	"fmt"
   "log"
-	"errors"
 	"mime"
 	"strings"
 	"strconv"
@@ -256,7 +255,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 func (l *PageLoop) Listen(server *http.Server) error {
 	var err error
 	if server == nil {
-		return errors.New("Cannot listen without a server, call NewServer().")
+		return fmt.Errorf("Cannot listen without a server, call NewServer().")
 	}
 
 	log.Printf("Listen %s", server.Addr)
