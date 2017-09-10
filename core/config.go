@@ -1,4 +1,4 @@
-package pageloop
+package core
 
 import (
   "os"

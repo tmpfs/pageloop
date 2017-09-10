@@ -1,10 +1,10 @@
 PACKAGES = github.com/tmpfs/pageloop github.com/tmpfs/pageloop/model github.com/tmpfs/pageloop/vdom
 
 bindata:
-	@go-bindata -pkg pageloop -prefix data -o assets.go $(shell find ./data -type d)
+	@go-bindata -pkg core -prefix data -o core/assets.go $(shell find ./data -type d)
 
 bindata-dev:
-	@go-bindata -debug -pkg pageloop -prefix data -o assets.go $(shell find ./data -type d)
+	@go-bindata -debug -pkg core -prefix data -o core/assets.go $(shell find ./data -type d)
 
 dev: bindata-dev
 	@go run bin/main.go

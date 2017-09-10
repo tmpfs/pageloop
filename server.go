@@ -8,6 +8,9 @@ import (
 	"strings"
   "net/http"
   "time"
+  . "github.com/tmpfs/pageloop/adapter"
+  . "github.com/tmpfs/pageloop/core"
+  . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
 )
 
@@ -22,7 +25,6 @@ var Version string = "1.0"
 var mux *http.ServeMux
 
 var(
-  adapter *CommandAdapter
   manager *MountpointManager
 )
 
@@ -33,12 +35,18 @@ type PageLoop struct {
 	// Underlying HTTP server.
 	Server *http.Server `json:"-"`
 
+  // Reference to the mountpoint manager
+  MountpointManager *MountpointManager
+
 	// Application host
 	Host *Host
 }
 
 // Main HTTP server handler.
-type ServerHandler struct {}
+type ServerHandler struct {
+  // Reference to the mountpoint manager
+  MountpointManager *MountpointManager
+}
 
 // The default server handler, defers to a multiplexer.
 func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -48,7 +56,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// Look for serve mux mappings first
-	for k, _ := range multiplex {
+	for k, _ := range h.MountpointManager.MultiplexMap {
 		if strings.HasPrefix(path, k) {
 			handler, _ = mux.Handler(req)
 			handler.ServeHTTP(res, req)
@@ -61,7 +69,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	// Serve the highest score which is the longest
 	// matching URL path.
 	var score int
-	for k, v := range mountpoints {
+	for k, v := range h.MountpointManager.MountpointMap {
 		if strings.HasPrefix(path, k) {
 			if handler != nil && len(k) < score {
 				continue
@@ -81,16 +89,15 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var err error
 
-  // Initialize the command adapter
   l.Config = config
 
   // Set up a host for our containers
 	l.Host = NewHost()
 
-  manager = NewMountpointManager(config, l.Host)
+  l.MountpointManager = NewMountpointManager(l.Config, l.Host)
 
-  // TODO: remove Root reference
-  adapter = &CommandAdapter{Host: l.Host, Mountpoints: manager}
+  // Initialize the command adapter
+  adapter := &CommandAdapter{Host: l.Host, Mountpoints: l.MountpointManager}
 
 	// Configure application containers.
 	sys := NewContainer("system", "System applications.", true)
@@ -109,11 +116,11 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	rest := NewRestService(mux)
+	rest := NewRestService(mux, adapter)
 	log.Printf("Serving rest service from %s", API_URL)
 
-	multiplex[strings.TrimSuffix(rpc.Url, "/")] = true
-	multiplex[strings.TrimSuffix(rest.Url, "/")] = true
+	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rpc.Url, "/")] = true
+	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rest.Url, "/")] = true
 
   // Collect mountpoints by container name
   var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
@@ -136,19 +143,26 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   }
 
   // Mount containers and the applications within them
-	manager.MountContainer(sys)
-	manager.MountContainer(tpl)
-	manager.MountContainer(usr)
+	l.MountContainer(sys)
+	l.MountContainer(tpl)
+	l.MountContainer(usr)
 
   s := &http.Server{
     Addr:           config.Addr,
-    Handler:        ServerHandler{},
+    Handler:        ServerHandler{MountpointManager: l.MountpointManager},
     ReadTimeout:    10 * time.Second,
     WriteTimeout:   10 * time.Second,
     MaxHeaderBytes: 1 << 20,
   }
 
   return s, nil
+}
+
+// Mount all applications in a container.
+func (l *PageLoop) MountContainer(container *Container) {
+	for _, a := range container.Apps {
+		MountApplication(l.MountpointManager.MountpointMap, l.Host, a)
+	}
 }
 
 // Start the HTTP server listening.

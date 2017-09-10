@@ -1,26 +1,17 @@
-package pageloop
+package core
 
 import (
   "os"
   "fmt"
-  "log"
   "strings"
   "net/http"
   "path/filepath"
-  . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
 )
 
 var(
-  // Maps application URLs to HTTP handlers.
-  //
-  // Because we want to mount and unmount applications and we cannot remove
-  // a handler we have a single handler that defers to these handlers.
   mountpoints map[string] http.Handler
 
-  // We need to know which requests go through the normal serve mux logic
-  // so they do not collide with application requests.
-  multiplex map[string] bool
 )
 
 // A mountpoint maps a path location indicating the source
@@ -48,15 +39,26 @@ type MountpointMap struct {
 }
 
 type MountpointManager struct {
+  // Maps application URLs to HTTP handlers.
+  //
+  // Because we want to mount and unmount applications and we cannot remove
+  // a handler we have a single handler that defers to these handlers.
+  MountpointMap map[string] http.Handler
+  // We need to know which requests go through the normal serve mux logic
+  // so they do not collide with application requests.
+  MultiplexMap map[string] bool
+  // Server configuration
   Config *ServerConfig
+  // Model virtual host
   Host *Host
 }
 
 func NewMountpointManager(c *ServerConfig, h *Host) *MountpointManager {
+  manager := &MountpointManager{Config: c, Host: h}
 	// Initialize mountpoint maps
-	mountpoints = make(map[string] http.Handler)
-	multiplex = make(map[string] bool)
-  return &MountpointManager{Config: c, Host: h}
+	manager.MountpointMap = make(map[string] http.Handler)
+	manager.MultiplexMap = make(map[string] bool)
+  return manager
 }
 
 // Delete a mountpoint for a userspace application and persist the list of mountpoints.
@@ -99,10 +101,10 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
 // Test if a mountpoint exists by URL.
 func (m *MountpointManager) HasMountpoint(url string) bool {
   umu := strings.TrimSuffix(url, "/")
-  if _, ok := multiplex[url]; ok {
+  if _, ok := m.MultiplexMap[url]; ok {
     return true
   }
-  if _, ok := multiplex[umu]; ok {
+  if _, ok := m.MultiplexMap[umu]; ok {
     return true
   }
   for _, m := range m.Config.Mountpoints {
@@ -112,13 +114,6 @@ func (m *MountpointManager) HasMountpoint(url string) bool {
     }
   }
   return false
-}
-
-// Mount all applications in a container.
-func (m *MountpointManager) MountContainer(container *Container) {
-	for _, a := range container.Apps {
-		m.MountApplication(a)
-	}
 }
 
 // Load a single mountpoint.
@@ -190,35 +185,9 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
 	return apps, nil
 }
 
-// Mount an application such that it's published and source
-// files are accessible over HTTP. This serves the published files
-// as static files and serves two versions of the source file
-// from in memory data. The src version is the file with any frontmatter
-// stripped and the raw version includes frontmatter.
-func (m *MountpointManager) MountApplication(app *Application) {
-  listing := &DirList{Host: m.Host}
-
-	// Serve the static build files from the mountpoint path.
-	url := app.PublishUrl()
-	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
-  fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
-  mountpoints[url] = http.StripPrefix(url, PublicHandler{Listing: listing, App: app, FileServer: fileserver})
-
-	// Serve the source files with frontmatter stripped.
-	url = app.SourceUrl()
-	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app})
-
-	// Serve the raw source files.
-	url = app.RawUrl()
-	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app, Raw: true})
-}
-
 // Unmount an application from the web server.
 func (m *MountpointManager) UnmountApplication(app *Application) {
-  delete(mountpoints, app.PublishUrl())
-  delete(mountpoints, app.SourceUrl())
-  delete(mountpoints, app.RawUrl())
+  delete(m.MountpointMap, app.PublishUrl())
+  delete(m.MountpointMap, app.SourceUrl())
+  delete(m.MountpointMap, app.RawUrl())
 }
-

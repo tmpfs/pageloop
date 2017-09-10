@@ -1,5 +1,5 @@
 // Exposes a REST API to the application
-package pageloop
+package handler
 
 import (
   "fmt"
@@ -10,12 +10,14 @@ import (
   "mime"
   "path/filepath"
 	"encoding/json"
+  . "github.com/tmpfs/pageloop/adapter"
+  . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 const(
 	API_URL = "/api/"
-	JSON_MIME = "application/json; charset=utf-8"
 
 	// App actions
 	TASKS = "tasks"
@@ -41,12 +43,14 @@ type UrlList []string
 
 // Main rest service.
 type RestService struct {
+  Adapter *CommandAdapter
   // The base mountpoint URL for the service.
 	Url string
 }
 
 // Handles requests for application data.
 type RestHandler struct {
+  Adapter *CommandAdapter
 	Container *Container
 }
 
@@ -57,9 +61,9 @@ type TaskJobComplete struct {
 
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
-func NewRestService(mux *http.ServeMux) *RestService {
-  rest := &RestService{Url: API_URL}
-	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{}))
+func NewRestService(mux *http.ServeMux, adapter *CommandAdapter) *RestService {
+  rest := &RestService{Url: API_URL, Adapter: adapter}
+  mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Adapter: adapter}))
 	return rest
 }
 
@@ -73,6 +77,7 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
 
 // Enapcaulates request information for application API endpoints.
 type RequestHandler struct {
+  Adapter *CommandAdapter
   // The container context for the application.
   Container *Container
   // Reference to the underlying application, will be nil if not found.
@@ -113,7 +118,7 @@ func (a *RequestHandler) Parse(req *http.Request) {
 		}
 
     // Try to lookup container / application, both may be nil on 404.
-    a.Container = adapter.Host.GetByName(a.BaseName)
+    a.Container = a.Adapter.Host.GetByName(a.BaseName)
     if a.Container != nil {
 		  a.App = a.Container.GetByName(a.Name)
     }
@@ -170,7 +175,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
-    if err := adapter.DeleteApplication(a.Container, a.App); err != nil {
+    if err := a.Adapter.DeleteApplication(a.Container, a.App); err != nil {
       return utils.ErrorJson(res, err)
     }
     return utils.Json(res, http.StatusOK, OK)
@@ -266,7 +271,7 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*
           http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url)
       }
 
-      if err := adapter.MoveFile(app, file, loc); err != nil {
+      if err := a.Adapter.MoveFile(app, file, loc); err != nil {
         return nil, err
       }
     // Update file content
@@ -284,7 +289,7 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*
       var content []byte
       if content, err = utils.ReadBody(req); err == nil {
         // Update the application model
-        if _, err := adapter.UpdateFile(app, file, content); err != nil {
+        if _, err := a.Adapter.UpdateFile(app, file, content); err != nil {
           return nil, err
         }
       }
@@ -340,15 +345,18 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
   return -1, nil
 }
 
-
 func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
   var input *Application = &Application{}
   if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
     return utils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
   }
-  if err := adapter.CreateApplication(a.Container, input); err != nil {
+  if app, err := a.Adapter.CreateApplication(a.Container, input); err != nil {
     return utils.ErrorJson(res, err)
+  } else {
+    // Mount the application
+    MountApplication(a.Adapter.Mountpoints.MountpointMap, a.Adapter.Host, app)
   }
+
   return utils.Json(res, http.StatusCreated, OK)
 }
 
@@ -383,11 +391,11 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*F
     if err = json.Unmarshal(content, tplref); err != nil {
       return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
-    return adapter.CreateFileTemplate(a.App, a.Item, tplref)
+    return a.Adapter.CreateFileTemplate(a.App, a.Item, tplref)
   }
 
   // Create from request body content
-  return adapter.CreateFile(a.App, a.Item, content)
+  return a.Adapter.CreateFile(a.App, a.Item, content)
 }
 
 // Handle REST API endpoint requests.
@@ -401,18 +409,18 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  info := &RequestHandler{}
+  info := &RequestHandler{Adapter: h.Adapter}
   info.Parse(req)
 
   if (info.Path == "") {
     // GET / - List host containers.
     if req.Method == http.MethodGet {
-      return utils.Json(res, http.StatusOK, adapter.ListContainers())
+      return utils.Json(res, http.StatusOK, h.Adapter.ListContainers())
     }
   } else {
     // GET /templates - List available application templates.
     if req.Method == http.MethodGet && info.Path == TEMPLATES {
-      return utils.Json(res, http.StatusOK, adapter.ListApplicationTemplates())
+      return utils.Json(res, http.StatusOK, h.Adapter.ListApplicationTemplates())
     }
 
     // METHOD /{container} - 404 if container not found.

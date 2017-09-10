@@ -1,27 +1,11 @@
-package pageloop
+package adapter
 
 import (
-  "fmt"
   "net/http"
-  "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/core"
+  . "github.com/tmpfs/pageloop/util"
 )
-
-type StatusError struct {
-	Status int
-	Message string
-}
-
-func (s StatusError) Error() string {
-	return s.Message
-}
-
-// Get an error with an associated HTTP status code.
-func CommandError(status int, message string, a ...interface{}) *StatusError {
-  if message == "" {
-    message = http.StatusText(status)
-  }
-	return &StatusError{Status: status, Message: fmt.Sprintf(message, a...)}
-}
 
 // Abstraction that allows many different interfaces to
 // the data model whether it is a string command interpreter,
@@ -31,23 +15,23 @@ func CommandError(status int, message string, a ...interface{}) *StatusError {
 // For simplicity with access over HTTP this implementation always
 // returns errors with an associated HTTP status code.
 type CommandAdapter struct {
-  Host *model.Host
+  Host *Host
   Mountpoints *MountpointManager
 }
 
 // List containers.
-func (b *CommandAdapter) ListContainers() []*model.Container {
+func (b *CommandAdapter) ListContainers() []*Container {
   return b.Host.Containers
 }
 
 // List all system templates and user applications
 // that have been marked as a template.
-func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {
+func (b *CommandAdapter) ListApplicationTemplates() []*Application {
   // Get built in and user templates
   c := b.Host.GetByName("template")
   u := b.Host.GetByName("user")
   list := append(c.Apps, u.Apps...)
-  var apps []*model.Application
+  var apps []*Application
   for _, app := range list {
     if app.IsTemplate {
       apps = append(apps, app)
@@ -57,10 +41,13 @@ func (b *CommandAdapter) ListApplicationTemplates() []*model.Application {
 }
 
 // Create application.
-func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Application) *StatusError {
+func (b *CommandAdapter) CreateApplication(c *Container, a *Application) (*Application, *StatusError) {
+
+  var app *Application
+
   existing := c.GetByName(a.Name)
   if existing != nil {
-    return CommandError(http.StatusPreconditionFailed, "Application %s already exists", a.Name)
+    return nil, CommandError(http.StatusPreconditionFailed, "Application %s already exists", a.Name)
   }
 
   // Get mountpoint URL.
@@ -69,40 +56,40 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
   // Mountpoint exists.
   exists := b.Mountpoints.HasMountpoint(a.Url)
   if exists {
-    return CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", a.Url)
+    return nil, CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", a.Url)
   }
 
   // Create and save a mountpoint for the application.
   if mountpoint, err := b.Mountpoints.CreateMountpoint(a); err != nil {
-    return CommandError(http.StatusInternalServerError, err.Error())
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
   } else {
     // Handle creating from a template.
     if a.Template != nil {
       // Find the template application.
       if source, err := b.Host.LookupTemplate(a.Template); err != nil {
-        return CommandError(http.StatusBadRequest, err.Error())
+        return nil, CommandError(http.StatusBadRequest, err.Error())
       } else {
         // Copy template source files.
         if err := a.CopyApplicationTemplate(source); err != nil {
-          return CommandError(http.StatusInternalServerError, err.Error())
+          return nil, CommandError(http.StatusInternalServerError, err.Error())
         }
       }
     }
 
     // Load and publish the app source files, note that we get a new application back
     // after loading the mountpoint.
-    if app, err := b.Mountpoints.LoadMountpoint(*mountpoint, c); err != nil {
-      return CommandError(http.StatusInternalServerError, err.Error())
+    if app, err = b.Mountpoints.LoadMountpoint(*mountpoint, c); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
     } else {
-      // Mount the application
-      b.Mountpoints.MountApplication(app)
+      // Return the new application reference
+      return app, nil
     }
   }
-  return nil
+  return app, nil
 }
 
 // Delete an application.
-func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Application) *StatusError {
+func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) *StatusError {
   if a.Protected {
     return CommandError(http.StatusForbidden, "Cannot delete protected application")
   }
@@ -127,7 +114,7 @@ func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Applicat
 }
 
 // Move a file.
-func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest string) *StatusError {
+func (b *CommandAdapter) MoveFile(a *Application, f *File, dest string) *StatusError {
   if err := a.Move(f, dest); err != nil {
     return CommandError(http.StatusInternalServerError, err.Error())
   }
@@ -135,9 +122,9 @@ func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest stri
 }
 
 // Create a file from a template.
-func (b *CommandAdapter) CreateFileTemplate(a *model.Application, url string, template *model.ApplicationTemplate) (*model.File, *StatusError) {
+func (b *CommandAdapter) CreateFileTemplate(a *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
   var err error
-  var file *model.File
+  var file *File
   var content []byte
 
   if file, err = b.Host.LookupTemplateFile(template); err != nil {
@@ -153,9 +140,9 @@ func (b *CommandAdapter) CreateFileTemplate(a *model.Application, url string, te
 }
 
 // Create a new file and publish it, the file cannot already exist on disc.
-func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []byte) (*model.File, *StatusError) {
+func (b *CommandAdapter) CreateFile(a *Application, url string, content []byte) (*File, *StatusError) {
   var err error
-	var file *model.File = a.Urls[url]
+	var file *File = a.Urls[url]
 
 	if file != nil {
     return nil, CommandError(http.StatusConflict,"File already exists %s", url)
@@ -172,9 +159,10 @@ func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []
 }
 
 // Update file content.
-func (b *CommandAdapter) UpdateFile(a *model.Application, f *model.File, content []byte) (*model.File, *StatusError) {
+func (b *CommandAdapter) UpdateFile(a *Application, f *File, content []byte) (*File, *StatusError) {
   if err := a.Update(f, content); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
   return f, nil
 }
+

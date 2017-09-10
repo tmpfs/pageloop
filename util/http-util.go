@@ -1,4 +1,4 @@
-package pageloop
+package util
 
 import (
 	"errors"
@@ -7,6 +7,10 @@ import (
 	"net/http"
 	"encoding/json"
 	"github.com/xeipuuv/gojsonschema"
+)
+
+const(
+	JSON_MIME = "application/json; charset=utf-8"
 )
 
 // Utilities for the REST API endpoints.

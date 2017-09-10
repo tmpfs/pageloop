@@ -6,6 +6,7 @@ import (
   "log"
   "flag"
   "github.com/tmpfs/pageloop"
+  . "github.com/tmpfs/pageloop/core"
 )
 
 var helpText []byte
@@ -52,7 +53,7 @@ func main() {
   }
 
   loop := &pageloop.PageLoop{}
-  conf := pageloop.DefaultServerConfig()
+  conf := DefaultServerConfig()
 
   // Merge user supplied config with the defaults
   if *c != "" {
@@ -82,5 +83,5 @@ func main() {
 }
 
 func init() {
-  helpText = pageloop.MustAsset("pageloop.txt")
+  helpText = MustAsset("pageloop.txt")
 }
