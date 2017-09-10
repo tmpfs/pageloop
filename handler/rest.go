@@ -24,7 +24,6 @@ const(
   TEMPLATES = "templates"
 )
 
-// TODO: Delete file command -> adapter
 // TODO: Run task command -> adapter
 
 var(
@@ -164,16 +163,15 @@ func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, e
 
 // Handle DELETE requests.
 func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int, error) {
-  app := a.App
-
   var files []*File
 
 	// DELETE /api/{container}/{name} - Delete an application
   if a.Name != "" && a.Action == "" {
-    if err := a.Adapter.DeleteApplication(a.Container, a.App); err != nil {
+    if app, err := a.Adapter.DeleteApplication(a.Container, a.App); err != nil {
       return utils.ErrorJson(res, err)
+    } else {
+      return utils.Json(res, http.StatusOK, app)
     }
-    return utils.Json(res, http.StatusOK, OK)
   // DELETE /api/{container}/{app}/files/ - Bulk file deletion
   } else if a.Action == FILES && a.Item == "" {
     var urls UrlList
@@ -185,7 +183,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
       }
 
       for _, url := range urls {
-        if file, err := a.Adapter.DeleteFile(app, url); err != nil {
+        if file, err := a.Adapter.DeleteFile(a.App, url); err != nil {
           return utils.ErrorJson(res, err)
         } else {
           files = append(files, file)
@@ -197,7 +195,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
-    if file, err := a.Adapter.DeleteFile(app, a.Item); err != nil {
+    if file, err := a.Adapter.DeleteFile(a.App, a.Item); err != nil {
       return utils.ErrorJson(res, err)
     } else {
       files = append(files, file)

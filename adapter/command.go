@@ -89,9 +89,9 @@ func (b *CommandAdapter) CreateApplication(c *Container, a *Application) (*Appli
 }
 
 // Delete an application.
-func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) *StatusError {
+func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) (*Application, *StatusError) {
   if a.Protected {
-    return CommandError(http.StatusForbidden, "Cannot delete protected application")
+    return nil, CommandError(http.StatusForbidden, "Cannot delete protected application")
   }
 
   // Stop serving files for the application
@@ -99,18 +99,18 @@ func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) *Status
 
   // Delete the mountpoint
   if err := b.Mountpoints.DeleteApplicationMountpoint(a.Url); err != nil {
-    return CommandError(http.StatusInternalServerError, err.Error())
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
 
   // Delete the files
   if err := a.DeleteApplicationFiles(); err != nil {
-    return CommandError(http.StatusInternalServerError, err.Error())
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
 
   // Delete the in-memory application
   c.Del(a)
 
-  return nil
+  return a, nil
 }
 
 // Move a file.
