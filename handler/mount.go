@@ -30,4 +30,3 @@ func MountApplication(mountpoints map[string]http.Handler, host *Host, app *Appl
 	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
   mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app, Raw: true})
 }
-

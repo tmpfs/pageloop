@@ -10,7 +10,11 @@ import(
   "gopkg.in/yaml.v2"
 )
 
-const BuildFileName = "build.yml"
+// TODO: inject application and remove from function signatures
+
+const(
+  BuildFileName = "build.yml"
+)
 
 var(
   defaultTask = "publish"

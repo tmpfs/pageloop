@@ -2,8 +2,6 @@
 package handler
 
 import (
-  "fmt"
-  "os/exec"
 	"regexp"
 	"strings"
 	"net/http"
@@ -25,7 +23,6 @@ const(
 )
 
 // TODO: remove all calls to utils.Error() - prefer ErrorJson()
-// TODO: Run task command -> adapter
 
 var(
   utils = HttpUtil{}
@@ -35,7 +32,11 @@ var(
   // TODO: CORS for OPTIONS requests
   // Allowed methods.
 	RestAllowedMethods []string = []string{
-    http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}
+    http.MethodGet,
+    http.MethodPost,
+    http.MethodPut,
+    http.MethodDelete,
+    http.MethodOptions}
 )
 
 // List of URLs used for bulk file operations.
@@ -45,18 +46,6 @@ type UrlList []string
 type RestHandler struct {
   Adapter *CommandAdapter
 	Container *Container
-}
-
-// Handler for asynchronous background tasks.
-type TaskJobComplete struct {
-  Job *Job
-}
-
-func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
-  // TODO: send reply to the client over websocket
-  Jobs.Stop(t.Job)
-  println("Task job completed: " + t.Job.Name)
-  fmt.Printf("%#v\n", t.Job)
 }
 
 // Configure the service. Adds a rest handler for the API URL to
@@ -289,31 +278,12 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       taskName := strings.TrimPrefix(a.Item, SLASH)
       taskName = strings.TrimSuffix(taskName, SLASH)
 
-      // No build configuration of missing build task
-      if !a.App.HasBuilder() || a.App.Builder.Tasks[taskName] == "" {
-        return utils.Error(res, http.StatusNotFound, nil, nil)
+      if job, err := a.Adapter.RunTask(a.App, taskName); err != nil {
+        return utils.ErrorJson(res, err)
+      } else {
+        // TODO: send job information to the client - should a Job+Task pair
+        return utils.Json(res, http.StatusAccepted, job)
       }
-
-      fullName := fmt.Sprintf("%s/%s:%s", a.App.Container.Name, a.App.Name, taskName)
-
-      if Jobs.GetRunningJob(fullName) != nil {
-        return utils.Error(res, http.StatusConflict, nil, fmt.Errorf("Job %s is already running", fullName))
-      }
-
-      // Set up a new job for the task
-      job := Jobs.NewJob(fullName)
-      Jobs.Start(job)
-
-      println("run task job: " + fullName)
-
-      // Run the task
-      a.App.Builder.Run(taskName, a.App, &TaskJobComplete{Job: job})
-
-      // Accepted for processing
-      fmt.Printf("%#v\n", job)
-
-      // TODO: send job information to the client - should a Job+Task pair
-      return utils.Json(res, http.StatusAccepted, job)
     }
 
     return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)

@@ -1,12 +1,27 @@
 package adapter
 
 import (
+  "fmt"
+  "os/exec"
   "net/http"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/util"
 )
 
+// Handler for asynchronous background tasks.
+type TaskJobComplete struct {
+  Job *Job
+}
+
+func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
+  // TODO: send reply to the client over websocket
+  Jobs.Stop(t.Job)
+  println("Task job completed: " + t.Job.Name)
+  fmt.Printf("%#v\n", t.Job)
+}
+
+// TODO: implement action generation and execution
 const(
   // Basic CRUD operations
   OperationCreate = iota
@@ -15,9 +30,9 @@ const(
   OperationDelete
 )
 
-// Action is a pure string representation of a command invocation
+// A command action is a simple representation of a command invocation
 // it can be used to execute a command without any object references.
-type Action struct {
+type CommandAction struct {
   Operation int
   ContainerName string
   ApplicationName string
@@ -130,6 +145,33 @@ func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) (*Appli
   return a, nil
 }
 
+func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError) {
+  // No build configuration of missing build task
+  if !a.HasBuilder() || a.Builder.Tasks[task] == "" {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+
+  fullName := fmt.Sprintf("%s/%s:%s", a.Container.Name, a.Name, task)
+
+  if Jobs.GetRunningJob(fullName) != nil {
+    return nil, CommandError(http.StatusConflict, "Job %s is already running", fullName)
+  }
+
+  // Set up a new job for the task
+  job := Jobs.NewJob(fullName)
+  Jobs.Start(job)
+
+  println("run task job: " + fullName)
+
+  // Run the task
+  a.Builder.Run(task, a, &TaskJobComplete{Job: job})
+
+  // Accepted for processing
+  fmt.Printf("%#v\n", job)
+
+  return job, nil
+}
+
 // Move a file.
 func (b *CommandAdapter) MoveFile(a *Application, f *File, dest string) *StatusError {
   if err := a.Move(f, dest); err != nil {
@@ -195,4 +237,3 @@ func (b *CommandAdapter) DeleteFile(a *Application, url string) (*File, *StatusE
   }
   return file, nil
 }
-
