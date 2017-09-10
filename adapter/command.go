@@ -52,6 +52,29 @@ func (b *CommandAdapter) ListJobs() []*Job {
   return Jobs.Active
 }
 
+// Read a job.
+func (b *CommandAdapter) ReadJob(id string) *Job {
+  return Jobs.ActiveJob(id)
+}
+
+// Abort an active job.
+func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
+  var err error
+  var job *Job = Jobs.ActiveJob(id)
+  if job == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+
+  if err = Jobs.Abort(job); err != nil {
+    return nil, CommandError(http.StatusConflict, "")
+  }
+
+  // Accepted for processing
+  fmt.Printf("[job:%d] aborted %s\n", job.Number, job.Id)
+
+  return job, nil
+}
+
 // List containers.
 func (b *CommandAdapter) ListContainers() []*Container {
   return b.Host.Containers
@@ -80,7 +103,6 @@ func (b *CommandAdapter) ListApplicationTemplates() []*Application {
 
 // Create application.
 func (b *CommandAdapter) CreateApplication(c *Container, a *Application) (*Application, *StatusError) {
-
   var app *Application
 
   existing := c.GetByName(a.Name)
@@ -169,24 +191,6 @@ func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError
 
   // Accepted for processing
   fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
-
-  return job, nil
-}
-
-// Abort an active job.
-func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
-  var err error
-  var job *Job = Jobs.ActiveJob(id)
-  if job == nil {
-    return nil, CommandError(http.StatusNotFound, "")
-  }
-
-  if err = Jobs.Abort(job); err != nil {
-    return nil, CommandError(http.StatusConflict, "")
-  }
-
-  // Accepted for processing
-  fmt.Printf("[job:%d] aborted %s\n", job.Number, job.Id)
 
   return job, nil
 }
