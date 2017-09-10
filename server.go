@@ -362,13 +362,6 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 	}
 }
 
-// Unmount an application from the web server.
-func (l *PageLoop) UnmountApplication(app *model.Application) {
-  delete(mountpoints, app.PublishUrl())
-  delete(mountpoints, app.SourceUrl())
-  delete(mountpoints, app.RawUrl())
-}
-
 // Test if a mountpoint exists by URL.
 func (l *PageLoop) HasMountpoint(url string) bool {
   umu := strings.TrimSuffix(url, "/")

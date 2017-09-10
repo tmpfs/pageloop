@@ -100,3 +100,10 @@ func (m *MountpointManager) MountApplication(app *Application) {
 	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
   mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
 }
+
+// Unmount an application from the web server.
+func (m *MountpointManager) UnmountApplication(app *Application) {
+  delete(mountpoints, app.PublishUrl())
+  delete(mountpoints, app.SourceUrl())
+  delete(mountpoints, app.RawUrl())
+}

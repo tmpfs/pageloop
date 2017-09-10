@@ -108,7 +108,7 @@ func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Applicat
   }
 
   // Stop serving files for the application
-  b.Root.UnmountApplication(a)
+  b.Mountpoints.UnmountApplication(a)
 
   // Delete the mountpoint
   if err := b.Mountpoints.DeleteApplicationMountpoint(a.Url); err != nil {
