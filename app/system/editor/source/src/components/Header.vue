@@ -42,7 +42,6 @@ export default {
   computed: {
     buildable: function () {
       const state = this.$store.state
-      console.log(state.app.build)
       return state.hasApplication() && state.app.hasTasks() && state.main.view === 'edit'
     },
     name: function () {

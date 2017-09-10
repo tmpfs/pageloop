@@ -89,9 +89,18 @@ export default {
     loaded: function (e) {
       const app = this.$store.state.app
       const base = app.publicUrl
-      let pathname = e.currentTarget.contentWindow.location.pathname
+      const win = e.currentTarget.contentWindow
+      let pathname = win.location.pathname
       pathname = pathname.replace(base, '')
-      this.path = pathname
+      this.path = pathname + win.location.hash
+
+      // Kludge so we can show the anchor hash in the preview path
+      win.addEventListener('click', (e) => {
+        const win = e.view
+        setTimeout(() => {
+          this.path = win.location.pathname.replace(base, '') + win.location.hash
+        }, 50)
+      })
     },
     refresh (file) {
       if (file === '') {

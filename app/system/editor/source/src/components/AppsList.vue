@@ -27,7 +27,6 @@ export default {
   props: ['containerName'],
   computed: {
     list: function () {
-      console.log(this.container)
       return this.$store.state.containers
     },
     container: function () {
