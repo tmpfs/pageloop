@@ -151,6 +151,7 @@ func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) (*Appli
   return a, nil
 }
 
+// Run an application build task.
 func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError) {
   var err error
   var job *Job
@@ -168,6 +169,24 @@ func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError
 
   // Accepted for processing
   fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
+
+  return job, nil
+}
+
+// Abort an active job.
+func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
+  var err error
+  var job *Job = Jobs.GetRunningJob(id)
+  if job == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+
+  if err = Jobs.Abort(job); err != nil {
+    return nil, CommandError(http.StatusConflict, "")
+  }
+
+  // Accepted for processing
+  fmt.Printf("[job:%d] aborted %s\n", job.Number, job.Id)
 
   return job, nil
 }
