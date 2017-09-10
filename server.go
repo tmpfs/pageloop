@@ -239,9 +239,9 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   }
 
   // Mount containers and the applications within them
-	l.MountContainer(sys)
-	l.MountContainer(tpl)
-	l.MountContainer(usr)
+	manager.MountContainer(sys)
+	manager.MountContainer(tpl)
+	manager.MountContainer(usr)
 
   s := &http.Server{
     Addr:           config.Addr,
@@ -343,13 +343,6 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
     apps = append(apps, app)
   }
 	return apps, nil
-}
-
-// Mount all applications in a container.
-func (l *PageLoop) MountContainer(container *model.Container) {
-	for _, a := range container.Apps {
-		manager.MountApplication(a)
-	}
 }
 
 func init() {

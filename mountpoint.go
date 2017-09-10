@@ -138,3 +138,10 @@ func (m *MountpointManager) HasMountpoint(url string) bool {
   }
   return false
 }
+
+// Mount all applications in a container.
+func (m *MountpointManager) MountContainer(container *Container) {
+	for _, a := range container.Apps {
+		m.MountApplication(a)
+	}
+}
