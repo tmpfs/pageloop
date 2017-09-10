@@ -24,11 +24,11 @@ const(
   TEMPLATES = "templates"
 )
 
+// TODO: remove all calls to utils.Error() - prefer ErrorJson()
 // TODO: Run task command -> adapter
 
 var(
   utils = HttpUtil{}
-  OK map[string] bool
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
 
@@ -313,8 +313,8 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       // Accepted for processing
       fmt.Printf("%#v\n", job)
 
-      // TODO: send job information to the client
-      return utils.Json(res, http.StatusAccepted, OK)
+      // TODO: send job information to the client - should a Job+Task pair
+      return utils.Json(res, http.StatusAccepted, job)
     }
 
     return utils.Error(res, http.StatusMethodNotAllowed, nil, nil)
@@ -332,9 +332,10 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
   } else {
     // Mount the application
     MountApplication(a.Adapter.Mountpoints.MountpointMap, a.Adapter.Host, app)
+    return utils.Json(res, http.StatusCreated, app)
   }
 
-  return utils.Json(res, http.StatusCreated, OK)
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
 
 // Create a new file for an application
@@ -432,10 +433,5 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return info.Post(res, req)
 	}
 
-	return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
-}
-
-func init () {
-  OK = make(map[string]bool)
-  OK["ok"] = true
+  return utils.ErrorJson(res, CommandError(http.StatusNotFound, ""))
 }
