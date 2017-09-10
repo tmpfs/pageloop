@@ -435,6 +435,18 @@ func (app *Application) MountpointUrl(c *Container) string {
   return "/apps/www/" + c.Name + "/" + app.Name + "/"
 }
 
+func (app *Application) PublishUrl() string {
+  return app.Url
+}
+
+func (app *Application) SourceUrl() string {
+	return "/apps/src/" + app.Container.Name + "/" + app.Name + "/"
+}
+
+func (app *Application) RawUrl() string {
+  return "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
+}
+
 // Private methods
 
 // Extract a name, relative path and URL for a file.
@@ -475,3 +487,4 @@ func (app *Application) setComputedPageFields(page *Page) {
 	page.Url = file.Url
 	page.Size = file.info.Size()
 }
+

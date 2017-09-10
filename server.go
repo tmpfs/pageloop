@@ -38,6 +38,7 @@ var mux *http.ServeMux
 var(
   adapter *CommandAdapter
   manager *MountpointManager
+  listing *DirectoryList
 )
 
 type PageLoop struct {
@@ -93,14 +94,12 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Serves application source files from memory.
 type ApplicationSourceHandler struct {
-  Root *PageLoop
 	App *model.Application
 	Raw bool
 }
 
 // Serves application public files from disc.
 type ApplicationPublicHandler struct {
-  Root *PageLoop
 	App *model.Application
   FileServer http.Handler
 }
@@ -114,22 +113,11 @@ func (h ApplicationPublicHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 	indexPage := clean + "/index.html"
 	indexMdPage := clean + "/index.md"
   if file != nil && file.Directory && app.Urls[indexPage] == nil && app.Urls[indexMdPage] == nil {
-    h.Root.DirectoryListing(file, res, req)
+    listing.List(file, res, req)
     return
   }
   // Defer to file server for files
   h.FileServer.ServeHTTP(res, req)
-}
-
-func (l *PageLoop) DirectoryListing (file *model.File, res http.ResponseWriter, req *http.Request) {
-  if output, err := l.Host.DirectoryListing(file); err != nil {
-    http.Error(res, err.Error(), http.StatusInternalServerError)
-    return
-  } else {
-    // Send the directory listing
-    send(res, req, file, output)
-    return
-  }
 }
 
 func send (res http.ResponseWriter, req *http.Request, file *model.File, output []byte) {
@@ -189,7 +177,7 @@ func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.R
 		return
   // Handle directory listing
 	} else if file != nil {
-    h.Root.DirectoryListing(file, res, req)
+    listing.List(file, res, req)
     return
   }
 
@@ -208,6 +196,9 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   manager = NewMountpointManager(config)
 
+  listing = &DirectoryList{Host: l.Host}
+
+  // TODO: remove Root reference
   adapter = &CommandAdapter{Root: l, Host: l.Host, Mountpoints: manager}
 
 	// Configure application containers.
@@ -367,50 +358,15 @@ func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Co
 // Mount all applications in a container.
 func (l *PageLoop) MountContainer(container *model.Container) {
 	for _, a := range container.Apps {
-		l.MountApplication(a)
+		manager.MountApplication(a)
 	}
-}
-
-func (l *PageLoop) getPublishUrl (app *model.Application) string {
-  return app.Url
-}
-
-func (l *PageLoop) getSourceUrl (app *model.Application) string {
-	return "/apps/src/" + app.Container.Name + "/" + app.Name + "/"
-}
-
-func (l *PageLoop) getRawUrl (app *model.Application) string {
-  return "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
-}
-
-// Mount an application such that it's published and source
-// files are accessible over HTTP. This serves the published files
-// as static files and serves two versions of the source file
-// from in memory data. The src version is the file with any frontmatter
-// stripped and the raw version includes frontmatter.
-func (l *PageLoop) MountApplication(app *model.Application) {
-	// Serve the static build files from the mountpoint path.
-	url := l.getPublishUrl(app)
-	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
-  fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
-  mountpoints[url] = http.StripPrefix(url, ApplicationPublicHandler{Root:l, App: app, FileServer: fileserver})
-
-	// Serve the source files with frontmatter stripped.
-	url = l.getSourceUrl(app)
-	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app})
-
-	// Serve the raw source files.
-	url = l.getRawUrl(app)
-	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{Root: l, App: app, Raw: true})
 }
 
 // Unmount an application from the web server.
 func (l *PageLoop) UnmountApplication(app *model.Application) {
-  delete(mountpoints, l.getPublishUrl(app))
-  delete(mountpoints, l.getSourceUrl(app))
-  delete(mountpoints, l.getRawUrl(app))
+  delete(mountpoints, app.PublishUrl())
+  delete(mountpoints, app.SourceUrl())
+  delete(mountpoints, app.RawUrl())
 }
 
 // Test if a mountpoint exists by URL.

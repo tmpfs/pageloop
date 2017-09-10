@@ -3,6 +3,8 @@ package pageloop
 import (
   "os"
   "fmt"
+  "log"
+  "net/http"
   "path/filepath"
   . "github.com/tmpfs/pageloop/model"
 )
@@ -76,3 +78,25 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
   return mt, nil
 }
 
+// Mount an application such that it's published and source
+// files are accessible over HTTP. This serves the published files
+// as static files and serves two versions of the source file
+// from in memory data. The src version is the file with any frontmatter
+// stripped and the raw version includes frontmatter.
+func (m *MountpointManager) MountApplication(app *Application) {
+	// Serve the static build files from the mountpoint path.
+	url := app.PublishUrl()
+	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
+  fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
+  mountpoints[url] = http.StripPrefix(url, ApplicationPublicHandler{App: app, FileServer: fileserver})
+
+	// Serve the source files with frontmatter stripped.
+	url = app.SourceUrl()
+	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
+  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app})
+
+	// Serve the raw source files.
+	url = app.RawUrl()
+	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
+  mountpoints[url] = http.StripPrefix(url, ApplicationSourceHandler{App: app, Raw: true})
+}

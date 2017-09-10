@@ -95,7 +95,7 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
       return CommandError(http.StatusInternalServerError, err.Error())
     } else {
       // Mount the application
-      b.Root.MountApplication(app)
+      b.Mountpoints.MountApplication(app)
     }
   }
   return nil
