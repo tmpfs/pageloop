@@ -115,9 +115,12 @@ func send (res http.ResponseWriter, req *http.Request, file *model.File, output 
 
   ext := filepath.Ext(file.Name)
   ct := mime.TypeByExtension(ext)
+
+  // TODO: remove this?
   if (ext == ".pdf") {
     res.Header().Set("Content-Disposition", "inline; filename=" + base)
   }
+
   res.Header().Set("Content-Type", ct)
   res.Header().Set("Content-Length", strconv.Itoa(len(output)))
   if (req.Method == http.MethodHead) {

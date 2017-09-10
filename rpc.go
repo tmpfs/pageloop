@@ -14,6 +14,8 @@ const(
 	RPC_URL = "/rpc/"
 )
 
+// TODO: operate using the command adapter!!!
+
 type RpcService struct {
 	Url string
 }
