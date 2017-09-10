@@ -56,6 +56,11 @@ func (b *CommandAdapter) ListContainers() []*Container {
   return b.Host.Containers
 }
 
+// List applications in a container.
+func (b *CommandAdapter) ListApplications(c *Container) []*Application {
+  return c.Apps
+}
+
 // List all system templates and user applications
 // that have been marked as a template.
 func (b *CommandAdapter) ListApplicationTemplates() []*Application {

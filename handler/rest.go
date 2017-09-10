@@ -97,7 +97,6 @@ func (a *RequestHandler) Parse(req *http.Request) {
         a.Item += SLASH
       }
 		}
-
     // Try to lookup container / application, both may be nil on 404.
     a.Container = a.Adapter.Host.GetByName(a.BaseName)
     if a.Container != nil {
@@ -108,11 +107,7 @@ func (a *RequestHandler) Parse(req *http.Request) {
 
 // Handle GET requests.
 func (a *RequestHandler) Get(res http.ResponseWriter, req *http.Request) (int, error) {
-  if a.Path == "" {
-    // TODO: check this is necessary
-    // GET /api/
-    return utils.Json(res, http.StatusOK, a.Container.Apps)
-  } else {
+  if a.Path != "" {
     if a.Action == "" {
       // GET /api/{container}/{application}
       return utils.Json(res, http.StatusOK, a.App)
@@ -359,6 +354,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   info := &RequestHandler{Adapter: h.Adapter}
   info.Parse(req)
 
+  // Top-level endpoints
   if (info.Path == "") {
     // GET / - List host containers.
     if req.Method == http.MethodGet {
@@ -377,12 +373,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 	}
 
   // Container level endpoints
-	switch req.Method {
-		case http.MethodPut:
-		  // PUT /api/{container}/ - Create a new application.
-			if info.Container != nil && info.Name == "" {
+	if info.Container != nil && info.Name == "" {
+    switch req.Method {
+      // GET /api/{container}/ - List applications for a container.
+      case http.MethodGet:
+        return utils.Json(res, http.StatusOK, h.Adapter.ListApplications(info.Container))
+
+      // PUT /api/{container}/ - Create a new application.
+      case http.MethodPut:
         return info.PutApplication(res, req)
-			}
+    }
   }
 
   // Application must exist
