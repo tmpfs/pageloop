@@ -15,6 +15,7 @@ func (s StatusError) Error() string {
 	return s.Message
 }
 
+// Get an error with an associated HTTP status code.
 func CommandError(status int, message string, a ...interface{}) *StatusError {
   if message == "" {
     message = http.StatusText(status)
@@ -30,7 +31,6 @@ func CommandError(status int, message string, a ...interface{}) *StatusError {
 // For simplicity with access over HTTP this implementation always
 // returns errors with an associated HTTP status code.
 type CommandAdapter struct {
-  Root *PageLoop
   Host *model.Host
   Mountpoints *MountpointManager
 }

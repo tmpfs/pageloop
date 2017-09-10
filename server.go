@@ -188,7 +188,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   listing = &DirectoryList{Host: l.Host}
 
   // TODO: remove Root reference
-  adapter = &CommandAdapter{Root: l, Host: l.Host, Mountpoints: manager}
+  adapter = &CommandAdapter{Host: l.Host, Mountpoints: manager}
 
 	// Configure application containers.
 	sys := model.NewContainer("system", "System applications.", true)

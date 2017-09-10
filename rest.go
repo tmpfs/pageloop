@@ -210,6 +210,7 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
   return utils.Error(res, http.StatusNotFound, nil, nil)
 }
 
+// TODO: move deletion to command adapter
 func (a *RequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
   var err error
   var file *model.File = app.Urls[url]

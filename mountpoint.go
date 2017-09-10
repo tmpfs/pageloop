@@ -217,4 +217,3 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
   }
 	return apps, nil
 }
-
