@@ -9,11 +9,6 @@ import (
   . "github.com/tmpfs/pageloop/model"
 )
 
-var(
-  mountpoints map[string] http.Handler
-
-)
-
 // A mountpoint maps a path location indicating the source
 // for an application and a URL that the application should
 // be mounted at.
