@@ -80,12 +80,6 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	handler.ServeHTTP(res, req)
 }
 
-// Serves application source files from memory.
-type ApplicationSourceHandler struct {
-	App *model.Application
-	Raw bool
-}
-
 func send (res http.ResponseWriter, req *http.Request, file *model.File, output []byte) {
 	path := "/" + req.URL.Path
   base := filepath.Base(path)
@@ -104,53 +98,6 @@ func send (res http.ResponseWriter, req *http.Request, file *model.File, output 
     return
   }
   res.Write(output)
-}
-
-// Tests the request path and attempts to find a corresponding source file
-// in the application files.
-func (h ApplicationSourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	index := "index.html"
-	urls := h.App.Urls
-	path := "/" + req.URL.Path
-	clean := strings.TrimSuffix(path, "/")
-  trailing := clean + "/"
-	indexPage := clean + "/" + index
-
-	if req.Method != http.MethodGet && req.Method != http.MethodHead {
-		res.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	var file *model.File
-
-	// Exact match
-	if urls[path] != nil {
-		file = urls[path]
-  } else if urls[trailing] != nil && !strings.HasSuffix(path, "/") {
-    redirect := http.RedirectHandler(req.URL.Path + "/", http.StatusMovedPermanently)
-    redirect.ServeHTTP(res, req)
-    return
-	// Normalized without a trailing slash
-	} else if urls[clean] != nil {
-		file = urls[clean]
-	// Check for index page
-	} else if urls[indexPage] != nil {
-		file = urls[indexPage]
-	}
-
-	// TODO: write cache busting headers
-	// TODO: handle directory requests (no data)
-	if file != nil && !file.Info().IsDir() {
-		output := file.Source(h.Raw)
-    send(res, req, file, output)
-		return
-  // Handle directory listing
-	} else if file != nil {
-    listing.List(file, res, req)
-    return
-  }
-
-	http.NotFound(res, req)
 }
 
 // Creates an HTTP server.
