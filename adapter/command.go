@@ -7,6 +7,23 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+const(
+  // Basic CRUD operations
+  OperationCreate = iota
+  OperationRead
+  OperationUpdate
+  OperationDelete
+)
+
+// Action is a pure string representation of a command invocation
+// it can be used to execute a command without any object references.
+type Action struct {
+  Operation int
+  ContainerName string
+  ApplicationName string
+  FileUrl string
+}
+
 // Abstraction that allows many different interfaces to
 // the data model whether it is a string command interpreter,
 // REST API endpoints, JSON RPC or any other bridge to the

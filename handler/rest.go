@@ -192,7 +192,6 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
       // If we made it this far all files were deleted
       return utils.Json(res, http.StatusOK, files)
     }
-
   // DELETE /api/{container}/{app}/files/{url} - Delete a single file
   } else if a.Action == FILES && a.Item != "" {
     if file, err := a.Adapter.DeleteFile(a.App, a.Item); err != nil {
