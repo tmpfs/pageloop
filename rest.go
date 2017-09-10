@@ -1,4 +1,4 @@
-// Exposes a REST API to the application model.
+// Exposes a REST API to the application
 package pageloop
 
 import (
@@ -10,7 +10,7 @@ import (
   "mime"
   "path/filepath"
 	"encoding/json"
-  "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/model"
 )
 
 const(
@@ -47,7 +47,7 @@ type RestService struct {
 
 // Handles requests for application data.
 type RestHandler struct {
-	Container *model.Container
+	Container *Container
 }
 
 // Handler for asynchronous background tasks.
@@ -74,9 +74,9 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
 // Enapcaulates request information for application API endpoints.
 type RequestHandler struct {
   // The container context for the application.
-  Container *model.Container
+  Container *Container
   // Reference to the underlying application, will be nil if not found.
-  App * model.Application
+  App * Application
   // Request URL path
   Path string
   // Path parts
@@ -94,10 +94,8 @@ type RequestHandler struct {
 // Parse the request path and assign fields to the request handler.
 func (a *RequestHandler) Parse(req *http.Request) {
 	a.Path = req.URL.Path
-	// Check if an app exists when referenced as /api/apps/{name}
-	// and extract path parts.
 	if a.Path != "" {
-		a.Parts = strings.Split(strings.TrimSuffix(a.Path, "/"), "/")
+		a.Parts = strings.Split(strings.TrimSuffix(a.Path, SLASH), SLASH)
 		a.BaseName = a.Parts[0]
 		if len(a.Parts) > 1 {
 		  a.Name = a.Parts[1]
@@ -106,11 +104,11 @@ func (a *RequestHandler) Parse(req *http.Request) {
 			a.Action = a.Parts[2]
 		}
 		if len(a.Parts) > 3 {
-			a.Item = "/" + strings.Join(a.Parts[3:], "/")
+			a.Item = SLASH + strings.Join(a.Parts[3:], SLASH)
       // Respect input trailing slash used to indicate
       // operations on a directory
-      if strings.HasSuffix(a.Path, "/") {
-        a.Item += "/"
+      if strings.HasSuffix(a.Path, SLASH) {
+        a.Item += SLASH
       }
 		}
 
@@ -211,9 +209,9 @@ func (a *RequestHandler) Delete(res http.ResponseWriter, req *http.Request) (int
 }
 
 // TODO: move deletion to command adapter
-func (a *RequestHandler) deleteFile(url string, app *model.Application, res http.ResponseWriter, req *http.Request) *model.File {
+func (a *RequestHandler) deleteFile(url string, app *Application, res http.ResponseWriter, req *http.Request) *File {
   var err error
-  var file *model.File = app.Urls[url]
+  var file *File = app.Urls[url]
   if file == nil {
     utils.Error(res, http.StatusNotFound, nil, nil)
     return nil
@@ -238,7 +236,7 @@ func (a *RequestHandler) Post(res http.ResponseWriter, req *http.Request) (int, 
 }
 
 // Update the content of a file.
-func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*model.File, *StatusError) {
+func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*File, *StatusError) {
 	var err error
   app := a.App
   url := a.Item
@@ -259,7 +257,7 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*
     }
   }
 
-	var file *model.File = app.Urls[url]
+	var file *File = app.Urls[url]
 	if file != nil {
     // Handle moving the file with Location header
     if loc != "" {
@@ -307,8 +305,8 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
       }
     // PUT /api/{container}/{application}/tasks/ - Run a build task.
     } else if (a.Action == TASKS && a.Item != "") {
-      taskName := strings.TrimPrefix(a.Item, "/")
-      taskName = strings.TrimSuffix(taskName, "/")
+      taskName := strings.TrimPrefix(a.Item, SLASH)
+      taskName = strings.TrimSuffix(taskName, SLASH)
 
       // No build configuration of missing build task
       if !a.App.HasBuilder() || a.App.Builder.Tasks[taskName] == "" {
@@ -344,7 +342,7 @@ func (a *RequestHandler) Put(res http.ResponseWriter, req *http.Request) (int, e
 
 
 func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Request) (int, error) {
-  var input *model.Application = &model.Application{}
+  var input *Application = &Application{}
   if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
     return utils.ErrorJson(res, CommandError(http.StatusBadRequest, err.Error()))
   }
@@ -355,7 +353,7 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
 }
 
 // Create a new file for an application
-func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*model.File, *StatusError) {
+func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*File, *StatusError) {
 	var err error
 	var content []byte
 
@@ -371,7 +369,7 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
 		return nil, CommandError(http.StatusBadRequest, "Content length header is required")
 	}
 
-  isDir := strings.HasSuffix(a.Item, "/")
+  isDir := strings.HasSuffix(a.Item, SLASH)
 
   // TODO: stream request body to disc
   // Read in as file content upload
@@ -381,7 +379,7 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
 
   // Create from a template
   if !isDir && ct == JSON_MIME {
-    tplref := &model.ApplicationTemplate{}
+    tplref := &ApplicationTemplate{}
     if err = json.Unmarshal(content, tplref); err != nil {
       return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
