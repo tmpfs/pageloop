@@ -17,9 +17,15 @@ class Application {
     // current selected file
     this.current = this.defaultFile
 
+    this.name = ''
+
     this.build = {
       tasks: {}
     }
+  }
+
+  get publicUrl () {
+    return `/apps/www/${this.owner}/${this.name}`
   }
 
   get files () {

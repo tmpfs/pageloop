@@ -22,7 +22,7 @@
     <div class="column-options">
       <h3>{{path}}</h3>
     </div>
-    <iframe :src="src" class="publish-preview"></iframe>
+    <iframe @load="loaded" :src="src" class="publish-preview"></iframe>
   </div>
 </template>
 
@@ -86,6 +86,13 @@ export default {
     }
   },
   methods: {
+    loaded: function (e) {
+      const app = this.$store.state.app
+      const base = app.publicUrl
+      let pathname = e.currentTarget.contentWindow.location.pathname
+      pathname = pathname.replace(base, '')
+      this.path = pathname
+    },
     refresh (file) {
       if (file === '') {
         this.path = ''
@@ -109,7 +116,6 @@ export default {
         return frame.contentDocument.location.reload()
       }
       this.file = file
-      this.path = url
       this.src = this.getPreviewUrl(url, file)
     },
     getPreviewUrl (url, file) {
