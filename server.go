@@ -462,19 +462,6 @@ func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
   return m, nil
 }
 
-// Delete a mountpoint for a userspace application and persist the list of mountpoints.
-func (l *PageLoop) DeleteApplicationMountpoint(a *model.Application) error {
-  var err error
-  if a.Url == "" {
-    return fmt.Errorf("Cannot delete a mountpoint without an application URL")
-  }
-  var conf *ServerConfig = l.Config.DeleteMountpoint(a.Url)
-  if err = l.Config.WriteFile(conf, ""); err != nil {
-    return err
-  }
-  return nil
-}
-
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
