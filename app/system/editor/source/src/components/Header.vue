@@ -6,7 +6,7 @@
         @click="$store.dispatch('navigate', {href: 'edit'})"
         :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
         title="Edit Current Application">{{name}}</a>
-        <build-tasks></build-tasks>
+        <build-tasks v-if="buildable"></build-tasks>
     </nav>
     <nav class="main">
       <a
@@ -40,6 +40,11 @@ import BuildTasks from '@/components/BuildTasks'
 export default {
   name: 'app-header',
   computed: {
+    buildable: function () {
+      const state = this.$store.state
+      console.log(state.app.build)
+      return state.hasApplication() && state.app.hasTasks() && state.main.view === 'edit'
+    },
     name: function () {
       return this.$store.state.application
     },

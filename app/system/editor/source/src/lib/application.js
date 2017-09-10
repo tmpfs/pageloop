@@ -24,6 +24,13 @@ class Application {
     }
   }
 
+  hasTasks () {
+    for (let k in this.build.tasks) {
+      return true
+    }
+    return false
+  }
+
   get publicUrl () {
     return `/apps/www/${this.owner}/${this.name}`
   }
