@@ -13,7 +13,7 @@ import (
 
 // TODO: operate using the command adapter!!!
 
-func RpcHandler(mux *http.ServeMux, host *Host) http.Handler {
+func RpcService(mux *http.ServeMux, host *Host) http.Handler {
 	// RPC endpoint
 	endpoint := rpc.NewServer()
 	// Do not specify charset on MIME type here

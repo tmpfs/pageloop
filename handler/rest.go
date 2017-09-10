@@ -39,23 +39,8 @@ var(
 // List of URLs used for bulk file operations.
 type UrlList []string
 
-type Service interface {
-  Commands() *CommandAdapter
-  ServiceUrl() string
-}
-
-// Main rest service.
-type RestService struct {
-  Adapter *CommandAdapter
-  // The base mountpoint URL for the service.
-	Url string
-}
-
-
-
 // Handles requests for application data.
 type RestHandler struct {
-  Service Service
   Adapter *CommandAdapter
 	Container *Container
 }
@@ -74,19 +59,10 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
 
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
-func NewRestService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
-  rest := &RestService{Url: API_URL, Adapter: adapter}
-  handler := RestHandler{Adapter: adapter, Service: rest}
+func RestService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
+  handler := RestHandler{Adapter: adapter}
   mux.Handle(API_URL, http.StripPrefix(API_URL, handler))
 	return handler
-}
-
-func (s *RestService) Commands() *CommandAdapter {
-  return s.Adapter
-}
-
-func (s *RestService) ServiceUrl() string {
-  return s.Url
 }
 
 // Enapcaulates request information for application API endpoints.

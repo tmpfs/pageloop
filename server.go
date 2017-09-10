@@ -69,12 +69,12 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   var handler http.Handler
 
 	// RPC global endpoint (/rpc/)
-	handler = RpcHandler(mux, l.Host)
+	handler = RpcService(mux, l.Host)
 	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	handler = NewRestService(mux, adapter)
+	handler = RestService(mux, adapter)
 	l.MountpointManager.MountpointMap[API_URL] = handler
 	log.Printf("Serving rest service from %s", API_URL)
 
