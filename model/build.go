@@ -163,7 +163,7 @@ func (b *BuildFile) TaskCommand(key string, ns string) (*Task, error) {
   }
   // Set working directory for command execution
   t.Cwd = b.App.SourceDirectory()
-  t.Namespace = b.App.Container.Name + "/" + b.App.Name
+  t.Namespace = b.App.Container.Name + ":" + b.App.Name
   return t, nil
 }
 
