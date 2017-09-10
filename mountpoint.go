@@ -1,6 +1,9 @@
 package pageloop
 
 import (
+  "os"
+  "fmt"
+  "path/filepath"
   . "github.com/tmpfs/pageloop/model"
 )
 
@@ -43,5 +46,33 @@ func (m *MountpointManager) DeleteApplicationMountpoint(url string) error {
     return err
   }
   return nil
+}
+
+// Create and persist a mountpoint for a userspace application.
+func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error) {
+  var err error
+  if a.Name == "" {
+    return nil, fmt.Errorf("Cannot create a mountpoint without an application name")
+  }
+
+  if !ValidName(a.Name) {
+    return nil, fmt.Errorf(
+      "Application name %s is invalid, must match pattern %s", a.Name, NamePattern)
+  }
+
+  // Configure filesystem path for source files
+  a.SetPath(filepath.Join(m.Config.SourceDirectory, a.Name))
+
+  // Create source application directory
+  if err := os.MkdirAll(a.SourceDirectory(), os.ModeDir | 0755); err != nil {
+		return nil, err
+	}
+
+  var mt *Mountpoint = &Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
+  var conf *ServerConfig = m.Config.AddMountpoint(*mt)
+  if err = m.Config.WriteFile(conf, ""); err != nil {
+    return nil, err
+  }
+  return mt, nil
 }
 

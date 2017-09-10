@@ -2,7 +2,6 @@
 package pageloop
 
 import (
-  "os"
 	"fmt"
   "log"
 	"errors"
@@ -430,36 +429,6 @@ func (l *PageLoop) HasMountpoint(url string) bool {
     }
   }
   return false
-}
-
-// Create and persist a mountpoint for a userspace application.
-func (l *PageLoop) CreateMountpoint(a *model.Application) (*Mountpoint, error) {
-  var err error
-  if a.Name == "" {
-    return nil, fmt.Errorf("Cannot create a mountpoint without an application name")
-  }
-
-  if !model.ValidName(a.Name) {
-    return nil, fmt.Errorf(
-      "Application name %s is invalid, must match pattern %s", a.Name, model.NamePattern)
-  }
-
-  // Configure filesystem path for source files
-  a.Path = filepath.Join(l.Config.SourceDirectory, a.Name)
-
-  a.SetPath(filepath.Join(l.Config.SourceDirectory, a.Name))
-
-  // Create source application directory
-  if err := os.MkdirAll(a.SourceDirectory(), os.ModeDir | 0755); err != nil {
-		return nil, err
-	}
-
-  var m *Mountpoint = &Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
-  var conf *ServerConfig = l.Config.AddMountpoint(*m)
-  if err = l.Config.WriteFile(conf, ""); err != nil {
-    return nil, err
-  }
-  return m, nil
 }
 
 func init() {

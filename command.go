@@ -73,7 +73,7 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
   }
 
   // Create and save a mountpoint for the application.
-  if mountpoint, err := b.Root.CreateMountpoint(a); err != nil {
+  if mountpoint, err := b.Mountpoints.CreateMountpoint(a); err != nil {
     return CommandError(http.StatusInternalServerError, err.Error())
   } else {
     // Handle creating from a template.
