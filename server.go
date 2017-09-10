@@ -119,6 +119,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	rest := NewRestService(mux, adapter)
 	log.Printf("Serving rest service from %s", API_URL)
 
+  // TODO: just put the handlers in the MountpointMap and remove this map of booleans
 	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rpc.Url, "/")] = true
 	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rest.Url, "/")] = true
 
