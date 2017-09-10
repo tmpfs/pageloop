@@ -142,6 +142,7 @@ func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest stri
 func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []byte) (*model.File, *StatusError) {
   var err error
 	var file *model.File = a.Urls[url]
+
 	if file != nil {
     return nil, CommandError(http.StatusConflict,"File already exists %s", url)
 	}

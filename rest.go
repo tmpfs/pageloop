@@ -365,8 +365,6 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
 	var content []byte
   var file *model.File
 
-  app := a.App
-
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
 
@@ -381,38 +379,32 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
 
   isDir := strings.HasSuffix(a.Item, "/")
 
+  // TODO: stream request body to disc
+  // Read in as file content upload
+  if content, err = utils.ReadBody(req); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
   // Lookup template file
   if !isDir && ct == JSON_MIME {
-    // TODO: stream request body to disc
-    if content, err = utils.ReadBody(req); err != nil {
-		  return nil, CommandError(http.StatusInternalServerError, err.Error())
-    } else {
-
-      input := &model.ApplicationTemplate{}
-      if err = json.Unmarshal(content, input); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      }
-
-      if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      }
-
-      if file == nil {
-        return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", input.File)
-      }
-
-      content = file.Source(true)
+    input := &model.ApplicationTemplate{}
+    if err = json.Unmarshal(content, input); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
-  } else {
-    // TODO: stream request body to disc
-    // Read in as file content upload
-    if content, err = utils.ReadBody(req); err != nil {
-		  return nil, CommandError(http.StatusInternalServerError, err.Error())
+
+    if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
+
+    if file == nil {
+      return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", input.File)
+    }
+
+    content = file.Source(true)
   }
 
   // Update the application model
-  if file, err := adapter.CreateFile(app, a.Item, content); err != nil {
+  if file, err := adapter.CreateFile(a.App, a.Item, content); err != nil {
     return nil, err
   } else {
     return file, nil
