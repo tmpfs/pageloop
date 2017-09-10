@@ -8,7 +8,7 @@ import (
 	"strings"
   "net/http"
   "time"
-  "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/model"
 )
 
 const(
@@ -34,7 +34,7 @@ type PageLoop struct {
 	Server *http.Server `json:"-"`
 
 	// Application host
-	Host *model.Host
+	Host *Host
 }
 
 // Main HTTP server handler.
@@ -85,7 +85,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   l.Config = config
 
   // Set up a host for our containers
-	l.Host = model.NewHost()
+	l.Host = NewHost()
 
   manager = NewMountpointManager(config, l.Host)
 
@@ -93,9 +93,9 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   adapter = &CommandAdapter{Host: l.Host, Mountpoints: manager}
 
 	// Configure application containers.
-	sys := model.NewContainer("system", "System applications.", true)
-	tpl := model.NewContainer("template", "Application & document templates.", true)
-	usr := model.NewContainer("user", "User applications.", false)
+	sys := NewContainer("system", "System applications.", true)
+	tpl := NewContainer("template", "Application & document templates.", true)
+	usr := NewContainer("user", "User applications.", false)
 
 	l.Host.Add(sys)
 	l.Host.Add(tpl)
