@@ -137,6 +137,23 @@ func (b *CommandAdapter) MoveFile(a *model.Application, f *model.File, dest stri
   return nil
 }
 
+// Create a file from a template.
+func (b *CommandAdapter) CreateFileTemplate(a *model.Application, url string, template *model.ApplicationTemplate) (*model.File, *StatusError) {
+  var err error
+  var file *model.File
+  var content []byte
+
+  if file, err = b.Host.LookupTemplateFile(template); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  if file == nil {
+    return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", template.File)
+  }
+
+  content = file.Source(true)
+  return b.CreateFile(a, url, content)
+}
 
 // Create a new file and publish it, the file cannot already exist on disc.
 func (b *CommandAdapter) CreateFile(a *model.Application, url string, content []byte) (*model.File, *StatusError) {

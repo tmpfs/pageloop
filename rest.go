@@ -363,7 +363,6 @@ func (a *RequestHandler) PutApplication(res http.ResponseWriter, req *http.Reque
 func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*model.File, *StatusError) {
 	var err error
 	var content []byte
-  var file *model.File
 
 	ct := req.Header.Get("Content-Type")
 	cl := req.Header.Get("Content-Length")
@@ -392,23 +391,11 @@ func (a *RequestHandler) PutFile(res http.ResponseWriter, req *http.Request) (*m
       return nil, CommandError(http.StatusInternalServerError, err.Error())
     }
 
-    if file, err = a.Root.Host.LookupTemplateFile(input); err != nil {
-      return nil, CommandError(http.StatusInternalServerError, err.Error())
-    }
-
-    if file == nil {
-      return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", input.File)
-    }
-
-    content = file.Source(true)
+    return adapter.CreateFileTemplate(a.App, a.Item, input)
   }
 
   // Update the application model
-  if file, err := adapter.CreateFile(a.App, a.Item, content); err != nil {
-    return nil, err
-  } else {
-    return file, nil
-  }
+  return adapter.CreateFile(a.App, a.Item, content)
 }
 
 // Handle REST API endpoint requests.
