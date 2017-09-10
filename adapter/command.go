@@ -14,11 +14,11 @@ type TaskJobComplete struct {
   Job *Job
 }
 
-func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
+func (tj *TaskJobComplete) Done(err error, cmd *exec.Cmd, t *Task) {
   // TODO: send reply to the client over websocket
-  Jobs.Stop(t.Job)
-  println("Task job completed: " + t.Job.Name)
-  fmt.Printf("%#v\n", t.Job)
+  Jobs.Stop(tj.Job)
+  println("Task job completed: " + tj.Job.Name)
+  fmt.Printf("%#v\n", tj.Job)
 }
 
 // TODO: implement action generation and execution
