@@ -63,7 +63,6 @@ func (t *Task) Id() string {
 
 // Abort this task
 func (t *Task) Abort() error {
-  println("abort running task job")
   ps := t.Cmd.Process
   if ps == nil {
     return fmt.Errorf("Cannot abort task %s, process not running", t.Id())

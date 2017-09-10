@@ -113,6 +113,8 @@ func (j *JobManager) Abort(job *Job) error {
     return fmt.Errorf(
       "Cannot abort job %s (%d), job not running", job.Id, job.Number)
   }
+
+  defer j.Stop(job)
   if abortable, ok := job.Runner.(JobAbort); ok {
     return abortable.Abort() 
   }
