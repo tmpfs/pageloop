@@ -4,7 +4,6 @@ import (
   "os"
   "fmt"
   "log"
-	"regexp"
   "strings"
   "net/http"
   "path/filepath"
@@ -166,18 +165,12 @@ func (m *MountpointManager) LoadMountpoint(mountpoint Mountpoint, container *Con
 // and adds it to the given container.
 func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container *Container) ([]*Application, error) {
   var err error
-	// Bundled application endpoints
-	dataPattern := regexp.MustCompile(`^data://`)
-
   var apps []*Application
 
   // iterate apps and configure paths
   for _, mt := range mountpoints {
 		urlPath := mt.Url
 		path := mt.Path
-		if dataPattern.MatchString(path) {
-			path = dataPattern.ReplaceAllString(path, "data/")
-		}
     var p string
     p, err = filepath.Abs(path)
     if err != nil {
