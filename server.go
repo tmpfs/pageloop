@@ -17,14 +17,11 @@ const(
 	HTML_MIME = "text/html; charset=utf-8"
 )
 
-var Name string = "pageloop"
-var Version string = "1.0"
-
-// Primary serve mux handler for built in endpoints.
-var mux *http.ServeMux
-
 var(
-  manager *MountpointManager
+  Name string = "pageloop"
+  Version string = "1.0"
+
+  mux *http.ServeMux
 )
 
 type PageLoop struct {
@@ -93,7 +90,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   // Load mountpoints
   for _, c := range collection {
-    if _, err = manager.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+    if _, err = l.MountpointManager.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
       return nil, err
     }
   }
