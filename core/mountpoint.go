@@ -39,9 +39,6 @@ type MountpointManager struct {
   // Because we want to mount and unmount applications and we cannot remove
   // a handler we have a single handler that defers to these handlers.
   MountpointMap map[string] http.Handler
-  // We need to know which requests go through the normal serve mux logic
-  // so they do not collide with application requests.
-  MultiplexMap map[string] bool
   // Server configuration
   Config *ServerConfig
   // Model virtual host
@@ -52,7 +49,6 @@ func NewMountpointManager(c *ServerConfig, h *Host) *MountpointManager {
   manager := &MountpointManager{Config: c, Host: h}
 	// Initialize mountpoint maps
 	manager.MountpointMap = make(map[string] http.Handler)
-	manager.MultiplexMap = make(map[string] bool)
   return manager
 }
 
@@ -96,12 +92,6 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
 // Test if a mountpoint exists by URL.
 func (m *MountpointManager) HasMountpoint(url string) bool {
   umu := strings.TrimSuffix(url, "/")
-  if _, ok := m.MultiplexMap[url]; ok {
-    return true
-  }
-  if _, ok := m.MultiplexMap[umu]; ok {
-    return true
-  }
   for _, m := range m.Config.Mountpoints {
     cmu := strings.TrimSuffix(m.Url, "/")
     if m.Url == url || cmu == umu {

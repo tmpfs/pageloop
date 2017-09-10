@@ -5,24 +5,15 @@ import (
 	"fmt"
 	"errors"
 	"net/http"
-	. "github.com/tmpfs/pageloop/model"
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
-)
-
-const(
-	RPC_URL = "/rpc/"
+  . "github.com/tmpfs/pageloop/core"
+	. "github.com/tmpfs/pageloop/model"
 )
 
 // TODO: operate using the command adapter!!!
 
-type RpcService struct {
-	Url string
-}
-
-func NewRpcService(mux *http.ServeMux, host *Host) *RpcService {
-	var service *RpcService = &RpcService{Url: RPC_URL}
-
+func RpcHandler(mux *http.ServeMux, host *Host) http.Handler {
 	// RPC endpoint
 	endpoint := rpc.NewServer()
 	// Do not specify charset on MIME type here
@@ -40,7 +31,7 @@ func NewRpcService(mux *http.ServeMux, host *Host) *RpcService {
 
 	mux.Handle(RPC_URL, endpoint)
 
-	return service
+	return endpoint
 }
 
 type HostService struct {

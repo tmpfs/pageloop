@@ -7,6 +7,11 @@ import (
   "gopkg.in/yaml.v2"
 )
 
+const(
+	API_URL = "/api/"
+	RPC_URL = "/rpc/"
+)
+
 var defaultServerConfig *ServerConfig
 
 // Represents a runtime configuration.

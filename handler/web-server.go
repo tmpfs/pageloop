@@ -20,9 +20,11 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
-	// Look for serve mux mappings first
-	for k, _ := range h.MountpointManager.MultiplexMap {
-		if strings.HasPrefix(path, k) {
+  var system []string
+  system = append(system, API_URL, RPC_URL)
+	// Look for system services first
+	for _, u := range system {
+		if strings.HasPrefix(path, u) {
 			handler, _ = h.Mux.Handler(req)
 			handler.ServeHTTP(res, req)
 			return

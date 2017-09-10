@@ -5,7 +5,6 @@ import (
 	"fmt"
   "log"
 	"mime"
-	"strings"
   "net/http"
   "time"
   . "github.com/tmpfs/pageloop/adapter"
@@ -67,18 +66,17 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   // Initialize server mux
   mux = http.NewServeMux()
+  var handler http.Handler
 
 	// RPC global endpoint (/rpc/)
-	rpc := NewRpcService(mux, l.Host)
+	handler = RpcHandler(mux, l.Host)
+	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	rest := NewRestService(mux, adapter)
+	handler = NewRestService(mux, adapter)
+	l.MountpointManager.MountpointMap[API_URL] = handler
 	log.Printf("Serving rest service from %s", API_URL)
-
-  // TODO: just put the handlers in the MountpointMap and remove this map of booleans
-	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rpc.Url, "/")] = true
-	l.MountpointManager.MultiplexMap[strings.TrimSuffix(rest.Url, "/")] = true
 
   // Collect mountpoints by container name
   var collection map[string] *MountpointMap = make(map[string] *MountpointMap)

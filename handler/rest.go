@@ -17,8 +17,6 @@ import (
 )
 
 const(
-	API_URL = "/api/"
-
 	// App actions
 	TASKS = "tasks"
 	FILES = "files"
@@ -41,6 +39,11 @@ var(
 // List of URLs used for bulk file operations.
 type UrlList []string
 
+type Service interface {
+  Commands() *CommandAdapter
+  ServiceUrl() string
+}
+
 // Main rest service.
 type RestService struct {
   Adapter *CommandAdapter
@@ -48,8 +51,11 @@ type RestService struct {
 	Url string
 }
 
+
+
 // Handles requests for application data.
 type RestHandler struct {
+  Service Service
   Adapter *CommandAdapter
 	Container *Container
 }
@@ -59,14 +65,6 @@ type TaskJobComplete struct {
   Job *Job
 }
 
-// Configure the service. Adds a rest handler for the API URL to
-// the passed servemux.
-func NewRestService(mux *http.ServeMux, adapter *CommandAdapter) *RestService {
-  rest := &RestService{Url: API_URL, Adapter: adapter}
-  mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Adapter: adapter}))
-	return rest
-}
-
 func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
   // TODO: send reply to the client over websocket
   Jobs.Stop(t.Job)
@@ -74,6 +72,22 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
   fmt.Printf("%#v\n", t.Job)
 }
 
+// Configure the service. Adds a rest handler for the API URL to
+// the passed servemux.
+func NewRestService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
+  rest := &RestService{Url: API_URL, Adapter: adapter}
+  handler := RestHandler{Adapter: adapter, Service: rest}
+  mux.Handle(API_URL, http.StripPrefix(API_URL, handler))
+	return handler
+}
+
+func (s *RestService) Commands() *CommandAdapter {
+  return s.Adapter
+}
+
+func (s *RestService) ServiceUrl() string {
+  return s.Url
+}
 
 // Enapcaulates request information for application API endpoints.
 type RequestHandler struct {
