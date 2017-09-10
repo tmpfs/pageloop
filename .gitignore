@@ -1,6 +1,7 @@
 /config.yml
 /source
 /assets.go
+/bin/pageloop
 public
 app/user
 node_modules
