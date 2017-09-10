@@ -115,10 +115,10 @@ Wow, so much to do, here is some stuff:
     TODO: preview of binary files displayed by the browser, eg: png, jpg, pdf, gif etc
 
 42) Import/export from zip archive
-43) Add tips/hints for sidebar file upload
-44) Support deleting multiple selected files
+43) ~~Add tips/hints for sidebar file upload~~
+44) ~~Support deleting multiple selected files~~
 45) File upload documentation
-46) Standardize public/source directories for all apps
+46) ~~Standardize public/source directories for all apps~~
 47) Add Electron build for the editor, bundle a standalone server executable
 48) Deprecate loading page data from external files - frontmatter data only
-49) Cancel new file view on ESC key
+49) ~~Cancel new file view on ESC key~~

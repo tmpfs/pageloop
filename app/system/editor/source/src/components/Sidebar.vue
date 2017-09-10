@@ -106,6 +106,10 @@ export default {
       set: function (val) {
         const state = this.$store.state
         let values = [val]
+
+        // This maintains the current file in the URL
+        // when switching file lists but doesn't really
+        // work for lists that don't contain the current file :(
         if (val !== 'new-file') {
           if (state.hasFile()) {
             let file = state.current
@@ -122,6 +126,11 @@ export default {
       this.keyMap = this.$store.state.keymap.add({
         'Backspace': () => {
           this.confirmDelete()
+        },
+        'Esc': () => {
+          if (this.currentView === 'new-file') {
+            this.closeNewFileView()
+          }
         }
       })
     },
