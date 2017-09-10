@@ -47,7 +47,6 @@ type RestService struct {
 
 // Handles requests for application data.
 type RestHandler struct {
-	Root *PageLoop
 	Container *model.Container
 }
 
@@ -60,7 +59,7 @@ type TaskJobComplete struct {
 // the passed servemux.
 func NewRestService(root *PageLoop, mux *http.ServeMux) *RestService {
   rest := &RestService{Url: API_URL}
-	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{Root: root}))
+	mux.Handle(API_URL, http.StripPrefix(API_URL, RestHandler{}))
 	return rest
 }
 
@@ -74,7 +73,6 @@ func (t *TaskJobComplete) Done(err error, cmd *exec.Cmd, raw string) {
 
 // Enapcaulates request information for application API endpoints.
 type RequestHandler struct {
-	Root *PageLoop
   // The container context for the application.
   Container *model.Container
   // Reference to the underlying application, will be nil if not found.
@@ -405,7 +403,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.ErrorJson(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  info := &RequestHandler{Root: h.Root}
+  info := &RequestHandler{}
   info.Parse(req)
 
   if (info.Path == "") {
