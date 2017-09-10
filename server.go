@@ -362,24 +362,6 @@ func (l *PageLoop) MountContainer(container *model.Container) {
 	}
 }
 
-// Test if a mountpoint exists by URL.
-func (l *PageLoop) HasMountpoint(url string) bool {
-  umu := strings.TrimSuffix(url, "/")
-  if _, ok := multiplex[url]; ok {
-    return true
-  }
-  if _, ok := multiplex[umu]; ok {
-    return true
-  }
-  for _, m := range l.Config.Mountpoints {
-    cmu := strings.TrimSuffix(m.Url, "/")
-    if m.Url == url || cmu == umu {
-      return true
-    }
-  }
-  return false
-}
-
 func init() {
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")

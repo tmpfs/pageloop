@@ -67,7 +67,7 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
   a.Url = a.MountpointUrl(c)
 
   // Mountpoint exists.
-  exists := b.Root.HasMountpoint(a.Url)
+  exists := b.Mountpoints.HasMountpoint(a.Url)
   if exists {
     return CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", a.Url)
   }
