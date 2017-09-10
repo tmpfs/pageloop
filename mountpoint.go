@@ -4,6 +4,7 @@ import (
   "os"
   "fmt"
   "log"
+	"regexp"
   "strings"
   "net/http"
   "path/filepath"
@@ -145,3 +146,79 @@ func (m *MountpointManager) MountContainer(container *Container) {
 		m.MountApplication(a)
 	}
 }
+
+// Load a single mountpoint.
+func (m *MountpointManager) LoadMountpoint(mountpoint Mountpoint, container *Container) (*Application, error) {
+  var err error
+  var apps []*Application
+  var list []Mountpoint
+  list = append(list, mountpoint)
+  if apps, err = m.LoadMountpoints(list, container); err != nil {
+    return nil, err
+  }
+  return apps[0], nil
+}
+
+// Iterates a list of mountpoints and creates an application for each mountpoint
+// and adds it to the given container.
+func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container *Container) ([]*Application, error) {
+  var err error
+	// Bundled application endpoints
+	dataPattern := regexp.MustCompile(`^data://`)
+
+  var apps []*Application
+
+  // iterate apps and configure paths
+  for _, mt := range mountpoints {
+		urlPath := mt.Url
+		path := mt.Path
+		if dataPattern.MatchString(path) {
+			path = dataPattern.ReplaceAllString(path, "data/")
+		}
+    var p string
+    p, err = filepath.Abs(path)
+    if err != nil {
+      return nil, err
+    }
+		name := filepath.Base(path)
+
+		// No mountpoint URL given so we assume an app
+		// relative to the container
+		if urlPath == "" {
+			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
+		}
+
+		app := NewApplication(urlPath, mt.Description)
+    app.IsTemplate = mt.Template
+		fs := NewUrlFileSystem(app)
+		app.FileSystem = fs
+
+    // Load the application files into memory
+		if err = app.Load(p); err != nil {
+			return nil, err
+		}
+
+    // Only publish if the build file has not explicitly
+    // enabled build at boot time
+    var shouldPublish = true
+    if app.HasBuilder() && !app.Builder.Boot {
+      shouldPublish = false
+    }
+
+    if shouldPublish {
+      // Publish the application files to a build directory
+      if err = app.Publish(app.PublicDirectory()); err != nil {
+        return nil, err
+      }
+    }
+
+		// Add to the container
+		if err = container.Add(app); err != nil {
+			return nil, err
+		}
+
+    apps = append(apps, app)
+  }
+	return apps, nil
+}
+

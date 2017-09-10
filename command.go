@@ -91,7 +91,7 @@ func (b *CommandAdapter) CreateApplication(c *model.Container, a *model.Applicat
 
     // Load and publish the app source files, note that we get a new application back
     // after loading the mountpoint.
-    if app, err := b.Root.LoadMountpoint(*mountpoint, c); err != nil {
+    if app, err := b.Mountpoints.LoadMountpoint(*mountpoint, c); err != nil {
       return CommandError(http.StatusInternalServerError, err.Error())
     } else {
       // Mount the application

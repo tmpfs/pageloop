@@ -10,7 +10,6 @@ import (
 	"strconv"
   "net/http"
   "path/filepath"
-	"regexp"
   "time"
   "github.com/tmpfs/pageloop/model"
 )
@@ -233,7 +232,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   // Load mountpoints
   for _, c := range collection {
-    if _, err = l.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
+    if _, err = manager.LoadMountpoints(c.Mountpoints, c.Container); err != nil {
       return nil, err
     }
   }
@@ -268,81 +267,6 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	}
 
 	return nil
-}
-
-// Load a single mountpoint.
-func (l *PageLoop) LoadMountpoint(mountpoint Mountpoint, container *model.Container) (*model.Application, error) {
-  var err error
-  var apps []*model.Application
-  var list []Mountpoint
-  list = append(list, mountpoint)
-  if apps, err = l.LoadMountpoints(list, container); err != nil {
-    return nil, err
-  }
-  return apps[0], nil
-}
-
-// Iterates a list of mountpoints and creates an application for each mountpoint
-// and adds it to the given container.
-func (l *PageLoop) LoadMountpoints(mountpoints []Mountpoint, container *model.Container) ([]*model.Application, error) {
-  var err error
-	// Bundled application endpoints
-	dataPattern := regexp.MustCompile(`^data://`)
-
-  var apps []*model.Application
-
-  // iterate apps and configure paths
-  for _, mt := range mountpoints {
-		urlPath := mt.Url
-		path := mt.Path
-		if dataPattern.MatchString(path) {
-			path = dataPattern.ReplaceAllString(path, "data/")
-		}
-    var p string
-    p, err = filepath.Abs(path)
-    if err != nil {
-      return nil, err
-    }
-		name := filepath.Base(path)
-
-		// No mountpoint URL given so we assume an app
-		// relative to the container
-		if urlPath == "" {
-			urlPath = fmt.Sprintf("/%s/%s/", container.Name, name)
-		}
-
-		app := model.NewApplication(urlPath, mt.Description)
-    app.IsTemplate = mt.Template
-		fs := model.NewUrlFileSystem(app)
-		app.FileSystem = fs
-
-    // Load the application files into memory
-		if err = app.Load(p); err != nil {
-			return nil, err
-		}
-
-    // Only publish if the build file has not explicitly
-    // enabled build at boot time
-    var shouldPublish = true
-    if app.HasBuilder() && !app.Builder.Boot {
-      shouldPublish = false
-    }
-
-    if shouldPublish {
-      // Publish the application files to a build directory
-      if err = app.Publish(app.PublicDirectory()); err != nil {
-        return nil, err
-      }
-    }
-
-		// Add to the container
-		if err = container.Add(app); err != nil {
-			return nil, err
-		}
-
-    apps = append(apps, app)
-  }
-	return apps, nil
 }
 
 func init() {
