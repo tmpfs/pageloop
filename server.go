@@ -36,6 +36,11 @@ var multiplex map[string] bool
 // Primary serve mux handler for built in endpoints.
 var mux *http.ServeMux
 
+var(
+  adapter *CommandAdapter
+  manager *MountpointManager
+)
+
 type PageLoop struct {
   // Server configuration
   Config *ServerConfig
@@ -45,14 +50,6 @@ type PageLoop struct {
 
 	// Application host
 	Host *model.Host
-}
-
-// Temporary map used when initializing loaded mountpoint definitions
-// containing a container reference which was declared by string name
-// in the mountpoint definition.
-type MountpointMap struct {
-  Container *model.Container
-  Mountpoints []Mountpoint
 }
 
 // Main HTTP server handler.
@@ -210,7 +207,9 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   // Set up a host for our containers
 	l.Host = model.NewHost()
 
-  adapter = &CommandAdapter{Root: l, Host: l.Host}
+  manager = NewMountpointManager(config)
+
+  adapter = &CommandAdapter{Root: l, Host: l.Host, Mountpoints: manager}
 
 	// Configure application containers.
 	sys := model.NewContainer("system", "System applications.", true)

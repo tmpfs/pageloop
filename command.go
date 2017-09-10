@@ -6,10 +6,6 @@ import (
   "github.com/tmpfs/pageloop/model"
 )
 
-var(
-  adapter *CommandAdapter
-)
-
 type StatusError struct {
 	Status int
 	Message string
@@ -36,6 +32,7 @@ func CommandError(status int, message string, a ...interface{}) *StatusError {
 type CommandAdapter struct {
   Root *PageLoop
   Host *model.Host
+  Mountpoints *MountpointManager
 }
 
 // List containers.
@@ -114,7 +111,7 @@ func (b *CommandAdapter) DeleteApplication(c *model.Container, a *model.Applicat
   b.Root.UnmountApplication(a)
 
   // Delete the mountpoint
-  if err := b.Root.DeleteApplicationMountpoint(a); err != nil {
+  if err := b.Mountpoints.DeleteApplicationMountpoint(a.Url); err != nil {
     return CommandError(http.StatusInternalServerError, err.Error())
   }
 
