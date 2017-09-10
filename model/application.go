@@ -8,6 +8,7 @@ import (
   "strings"
   "io/ioutil"
   "path/filepath"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 const (
@@ -373,7 +374,7 @@ func (app *Application) HasBuilder() bool {
   return app.Builder != nil
 }
 
-func (app *Application) Build(done TaskComplete) {
+func (app *Application) Build(done JobComplete) {
   app.Builder.Build(done)
 }
 

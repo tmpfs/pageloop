@@ -12,10 +12,25 @@ var(
   JobCount uint64 = 0
 )
 
+// Contract for types that require notification when a job
+// is completed.
+type JobComplete interface {
+  Done(err error, j *Job)
+}
+
+// Job runners start a job running and must return a job.
+//
+// They should assign themselves as the runner for the job so 
+// that complete listeners can inspect the runner that started the job.
+type JobRunner interface {
+  Run(done JobComplete) (*Job, error)
+}
+
 // Job is a potentially long running background task
 // such as executing an external command in a goroutine.
 type Job struct {
   Name string `json:"name"`
+  Runner JobRunner `json:"run"`
   id uint64 `json:"id"`
   running bool `json:"active"`
   start time.Time
@@ -40,8 +55,8 @@ type JobManager struct {
 }
 
 // Create a new job.
-func (j *JobManager) NewJob(name string) *Job {
-  job := &Job{Name: name}
+func (j *JobManager) NewJob(name string, runner JobRunner) *Job {
+  job := &Job{Name: name, Runner: runner}
   JobCount++
   job.id = JobCount
   return job

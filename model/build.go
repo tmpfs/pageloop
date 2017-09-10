@@ -8,7 +8,9 @@ import(
   "io/ioutil"
   "path/filepath"
   "gopkg.in/yaml.v2"
+  . "github.com/tmpfs/pageloop/util"
 )
+
 
 // TODO: inject application and remove from function signatures
 
@@ -36,13 +38,13 @@ type BuildFile struct {
 // Formal task declaration.
 type Task struct {
   // A namespace for this command, eg: {container}/{application}
-  Namespace string
-  Key string
-  Raw string
-  Command string
-  Arguments []string
-  Cwd string
-  Cmd *exec.Cmd
+  Namespace string `json:"namespace"`
+  Key string `json:"key"`
+  Raw string `json:"raw"`
+  Command string `json:"command"`
+  Arguments []string `json:"arguments"`
+  Cwd string `json:"-"`
+  Cmd *exec.Cmd `json:"-"`
 }
 
 func (t *Task) Parse(raw string) {
@@ -61,12 +63,19 @@ func (t *Task) Id() string {
 
 // Execute an arbitrary command in a goroutine and invoke the
 // done callback on completion.
-func (t *Task) Run(done TaskComplete) {
+func (t *Task) Run(done JobComplete) (*Job, error) {
+  // Set up a new job for the task
+  job := Jobs.NewJob(t.Id(), t)
+
+  // TODO: move this to Jobs.Start()
+  if Jobs.GetRunningJob(t.Id()) != nil {
+    return nil, fmt.Errorf("Job %s is already running", t.Id())
+  }
+
+  Jobs.Start(job)
+
   var cmd *exec.Cmd = exec.Command(t.Command, t.Arguments...)
   cmd.Dir = t.Cwd
-
-  //cmd.Stdout = os.Stdout
-  //cmd.Stderr = os.Stderr
 
   t.Cmd = cmd
 
@@ -81,27 +90,25 @@ func (t *Task) Run(done TaskComplete) {
 
   listen := func(c chan error) {
     e := <- c
-    done.Done(e, cmd, t)
+    done.Done(e, job)
   }
 
   go listen(c)
   go run(c)
-}
 
+  return job, nil
+}
 
 type Tasks map[string]string
 
-type TaskComplete interface {
-  Done(err error, cmd *exec.Cmd, t *Task)
-}
-
 type DefaultTaskComplete struct {}
 
-func (d *DefaultTaskComplete) Done(err error, cmd *exec.Cmd, t *Task) {
+func (d *DefaultTaskComplete) Done(err error, j *Job) {
   if err != nil {
     os.Stderr.WriteString(err.Error() + "\n")
   } else {
-    fmt.Printf("[task] %s (%s)\n", t.Raw, cmd.Dir)
+    // TODO: type asertion and print
+    // fmt.Printf("[task] %s (%s)\n", t.Raw, cmd.Dir)
   }
 }
 
@@ -147,21 +154,21 @@ func (b *BuildFile) TaskCommand(key string, ns string) (*Task, error) {
   }
   // Set working directory for command execution
   t.Cwd = b.App.SourceDirectory()
+  t.Namespace = b.App.Container.Name + "/" + b.App.Name
   return t, nil
 }
 
 // Run a build task.
-func (b *BuildFile) Run(key string, done TaskComplete) (*Task, error) {
+func (b *BuildFile) Run(key string, done JobComplete) (*Job, error) {
   var err error
   var t *Task
   if t, err = b.TaskCommand(key, ""); err != nil {
     return nil, err 
   }
-  t.Run(done)
-  return t, nil
+  return t.Run(done)
 }
 
 // Run the main build task.
-func (b *BuildFile) Build(done TaskComplete) (*Task, error) {
+func (b *BuildFile) Build(done JobComplete) (*Job, error) {
   return b.Run(defaultTask, done)
 }

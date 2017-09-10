@@ -2,7 +2,6 @@ package adapter
 
 import (
   "fmt"
-  "os/exec"
   "net/http"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/core"
@@ -10,15 +9,13 @@ import (
 )
 
 // Handler for asynchronous background tasks.
-type TaskJobComplete struct {
-  Job *Job
-}
+type TaskJobComplete struct {}
 
-func (tj *TaskJobComplete) Done(err error, cmd *exec.Cmd, t *Task) {
+func (tj *TaskJobComplete) Done(err error, job *Job) {
   // TODO: send reply to the client over websocket
-  Jobs.Stop(tj.Job)
-  println("Task job completed: " + tj.Job.Name)
-  fmt.Printf("%#v\n", tj.Job)
+  Jobs.Stop(job)
+  println("Task job completed: " + job.Name)
+  fmt.Printf("%#v\n", job)
 }
 
 // TODO: implement action generation and execution
@@ -151,25 +148,19 @@ func (b *CommandAdapter) DeleteApplication(c *Container, a *Application) (*Appli
 }
 
 func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError) {
+  var err error
+  var job *Job
   // No build configuration of missing build task
   if !a.HasBuilder() || a.Builder.Tasks[task] == "" {
     return nil, CommandError(http.StatusNotFound, "")
   }
 
-  fullName := fmt.Sprintf("%s/%s:%s", a.Container.Name, a.Name, task)
-
-  if Jobs.GetRunningJob(fullName) != nil {
-    return nil, CommandError(http.StatusConflict, "Job %s is already running", fullName)
+  // Run the task and get a job
+  if job, err = a.Builder.Run(task, &TaskJobComplete{}); err != nil {
+    // Send conflict if job already running, this is a bit flaky is Run()
+    // starts returning errors for other reasons :(
+    return nil, CommandError(http.StatusConflict, err.Error())
   }
-
-  // Set up a new job for the task
-  job := Jobs.NewJob(fullName)
-  Jobs.Start(job)
-
-  println("run task job: " + fullName)
-
-  // Run the task
-  a.Builder.Run(task, &TaskJobComplete{Job: job})
 
   // Accepted for processing
   fmt.Printf("%#v\n", job)
