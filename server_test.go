@@ -26,7 +26,7 @@ func TestListenError(t *testing.T) {
 		t.Fatal("Expected error response from call to listen without server")
 	}
 
-	conf := ServerConfig{Addr: ":443", Dev: true}
+	conf := ServerConfig{Addr: ":443"}
 	if server, err = loop.NewServer(conf); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestStartServer(t *testing.T) {
   var apps []Mountpoint
 	apps = append(apps, Mountpoint{UrlPath: "/app/mock-app/", Path: "test/fixtures/mock-app"})
   loop := &PageLoop{}
-	conf := ServerConfig{Mountpoints: apps, Addr: ":3579", Dev: true}
+	conf := ServerConfig{Mountpoints: apps, Addr: ":3579"}
 	if server, err = loop.NewServer(conf); err != nil {
 		t.Fatal(err)
 	}

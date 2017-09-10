@@ -21,10 +21,6 @@ type ServerConfig struct {
   // Directory for generated source files
   SourceDirectory string `json:"source,omitempty" yaml:"source,omitempty"`
 
-	// Load system assets from the file system, don't use
-	// the embedded assets.
-	Dev bool `json:"dev,omitempty" yaml:"dev,omitempty"`
-
   // User configuration merged with this config, only
   // available if merge has been called.
   userConfig *ServerConfig
