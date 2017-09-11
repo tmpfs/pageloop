@@ -2,6 +2,7 @@
 package handler
 
 import (
+  //"fmt"
 	"net/http"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
@@ -68,11 +69,23 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           return utils.Errorj(res, err)
         }
         act.Push(input)
-      } else if (mapping.CommandDefinition.MethodName == "CreateFile" || mapping.CommandDefinition.MethodName == "UpdateFile") {
+      } else if mapping.CommandDefinition.MethodName == "CreateFile" {
           if content, err := utils.ReadBody(req); err != nil {
             return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
             act.Push(content)
+          }
+      } else if mapping.CommandDefinition.MethodName == "UpdateFile" {
+          location := req.Header.Get("Location")
+          if location != "" {
+            act = h.Adapter.Mutate(act, "MoveFile")
+            act.Push(location)
+          } else {
+            if content, err := utils.ReadBody(req); err != nil {
+              return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
+            } else {
+              act.Push(content)
+            }
           }
         }
       // Invoke the command
