@@ -433,13 +433,19 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
 }
 
 func init() {
-  // Mapped as root request
+  // GET /
   ActionMap[&Action{Operation: OperationRead}] =
     &ActionDefinition{
       MethodName: "ListContainers",
       Status: http.StatusOK}
-      ActionMap[&Action{Operation: OperationRead, BaseName: "templates"}] =
+  // GET /templates
+  ActionMap[&Action{Operation: OperationRead, BaseName: "templates"}] =
     &ActionDefinition{
       MethodName: "ListApplicationTemplates",
+      Status: http.StatusOK}
+  // GET /jobs
+  ActionMap[&Action{Operation: OperationRead, BaseName: "jobs"}] =
+    &ActionDefinition{
+      MethodName: "ListJobs",
       Status: http.StatusOK}
 }
