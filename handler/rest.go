@@ -350,6 +350,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
+  // TODO: complete refactor to command action execution
+
   // Parse out an action from the requets
   if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)

@@ -11,6 +11,10 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+var(
+  ActionMap map[*Action]*ActionDefinition = make(map[*Action]*ActionDefinition)
+)
+
 // Handler for asynchronous background tasks.
 type TaskJobComplete struct {}
 
@@ -47,6 +51,10 @@ func (act *Action) IsRoot() bool {
   return act.Path == ""
 }
 
+func (act *Action) BaseNameOnly() bool {
+  return act.BaseName != "" && act.Context == "" && act.Action == "" && act.Item == ""
+}
+
 func (act *Action) Match(in *Action) bool {
   if act.Operation != in.Operation {
     return false
@@ -54,6 +62,10 @@ func (act *Action) Match(in *Action) bool {
 
   // Exact path match
   if act.Path == in.Path {
+    return true
+  }
+
+  if act.BaseNameOnly() && in.BaseNameOnly() && act.BaseName == in.BaseName {
     return true
   }
 
@@ -332,6 +344,7 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
 }
 
 type ActionDefinition struct {
+  MethodName string
   // Received will be the command adapter
   Receiver reflect.Value
   // Method is the function to invoke
@@ -353,24 +366,19 @@ type ActionResult struct {
 }
 
 func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
-  var mapping map[*Action]*ActionDefinition = make(map[*Action]*ActionDefinition)
   var m reflect.Method
   receiver := reflect.ValueOf(b)
   t := reflect.TypeOf(b)
 
-  m, _ = t.MethodByName("ListContainers")
-  mapping[&Action{Operation: OperationRead, Path: ""}] =
-    &ActionDefinition{
-      Receiver: receiver,
-      Method: m,
-      ArityIn: m.Type.NumIn(),
-      ArityOut: m.Type.NumOut(),
-      Status: http.StatusOK}
-
-  for a, fn := range mapping {
+  for a, def := range ActionMap {
     // fmt.Printf("test for match: %#v\n", a)
     if a.Match(act) {
-      return a, fn
+      def.Receiver = receiver
+      m, _ = t.MethodByName(def.MethodName)
+      def.Method = m
+      def.ArityIn = m.Type.NumIn()
+      def.ArityOut = m.Type.NumOut()
+      return a, def
     }
   }
   return nil, nil
@@ -384,27 +392,30 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
     return nil, CommandError(http.StatusNotFound, "")
   }
 
-  fmt.Printf("def: %#v\n", def)
-
   var args []reflect.Value = make([]reflect.Value, 0)
+  // Docs say that a Method does not need the receiver argument
+  // but it appears we need it
   args = append(args, def.Receiver)
-  fmt.Printf("args:%#v\n", args)
+
+  // fmt.Printf("args:%#v\n", args)
 
   // TODO: work out correct args
 
+  // Call the method
   res := def.Method.Func.Call(args)
 
+  // Check return value arity
   if len(res) == 0 || len(res) > 2 {
     return nil, CommandError(
       http.StatusInternalServerError, "Invalid command return value arity")
   }
 
-  var retval []interface{}
-
+  // Setup the result object
   var result *ActionResult = &ActionResult{ActionDefinition: def, Action: action}
-  // Shortcut for result success status code
   result.Status = result.ActionDefinition.Status
 
+  // Get the underlying return values and test for error response
+  var retval []interface{}
   for _, val := range res {
     v := val.Interface()
     if ex, ok := v.(*StatusError); ok {
@@ -414,14 +425,21 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
     retval = append(retval, v)
   }
 
-  // Must have 1-2 return values
-  if len(retval) == 0 || len(retval) > 2 {
-    return nil, CommandError(
-      http.StatusInternalServerError, "Invalid command return value")
-  }
-
   // Assign the method call return value as the result data
   result.Data = retval[0]
 
+  // Done :)
   return result, result.Error
+}
+
+func init() {
+  // Mapped as root request
+  ActionMap[&Action{Operation: OperationRead}] =
+    &ActionDefinition{
+      MethodName: "ListContainers",
+      Status: http.StatusOK}
+      ActionMap[&Action{Operation: OperationRead, BaseName: "templates"}] =
+    &ActionDefinition{
+      MethodName: "ListApplicationTemplates",
+      Status: http.StatusOK}
 }
