@@ -350,10 +350,18 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  // TODO: catch errors
-  act, _ := h.Adapter.CommandAction(req.Method, req.URL)
-  h.Adapter.Execute(act)
-  return -1, nil
+  // Parse out an action from the requets
+  if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
+    return utils.Errorj(res, err)
+  } else {
+    // Got an action - execute it
+    if result, err := h.Adapter.Execute(act); err != nil {
+      return utils.Errorj(res, err)
+    } else {
+      return utils.Json(res, http.StatusOK, result)
+    }
+    return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
+  }
 
   info := &RequestHandler{Adapter: h.Adapter}
   info.Parse(req)

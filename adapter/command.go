@@ -331,6 +331,14 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
   return a, nil
 }
 
+type ActionRequest struct {
+  Receiver reflect.Value
+  Method reflect.Method
+  Success int
+  Data interface{}
+  Error *StatusError
+}
+
 func (b *CommandAdapter) Handler(act *Action) (*Action, string) {
   var mapping map[*Action]string = make(map[*Action]string)
   mapping[&Action{Operation: OperationRead, Path: ""}] = "ListContainers"
@@ -343,7 +351,7 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, string) {
   return nil, ""
 }
 
-func (b *CommandAdapter) Execute(act *Action) ([]interface{}, *StatusError) {
+func (b *CommandAdapter) Execute(act *Action) (interface{}, *StatusError) {
   println("Execute action")
   fmt.Printf("%#v\n", act)
   _, handler := b.Handler(act)
@@ -362,16 +370,30 @@ func (b *CommandAdapter) Execute(act *Action) ([]interface{}, *StatusError) {
   fmt.Printf("args:%#v\n", args)
   res := m.Func.Call(args)
 
+  if len(res) == 0 || len(res) > 2 {
+    return nil, CommandError(
+      http.StatusInternalServerError, "Invalid command return value arity")
+  }
+
   var retval []interface{}
 
   for _, val := range res {
     v := val.Interface()
+    // Return with error as early as possible
     if ex, ok := v.(*StatusError); ok {
       return nil, ex
     }
     retval = append(retval, v)
   }
 
+  // Arity one for return value and no error in method signature
+  if len(retval) == 1 {
+    return retval[0], nil
+  }
+
   fmt.Printf("result:%#v\n", retval)
-  return retval, nil
+
+  // Should never make it here if we are configured correctly
+  return nil, CommandError(
+    http.StatusInternalServerError, "Invalid command return value")
 }
