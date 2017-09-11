@@ -51,7 +51,7 @@ type Action struct {
 }
 
 // An action definition defines the receiving command function for an incoming action.
-type ActionDefinition struct {
+type CommandDefinition struct {
   MethodName string
   // Received will be the command adapter
   Receiver reflect.Value
@@ -70,13 +70,13 @@ type ActionDefinition struct {
 // Combines action routing information with the command definition.
 type ActionMap struct {
   *Action
-  *ActionDefinition
+  *CommandDefinition
 }
 
 // An ActionResult is the response returned after command invocation.
 type ActionResult struct {
   *Action
-  *ActionDefinition
+  *CommandDefinition
   Data interface{}
   Error *StatusError
   Status int
@@ -232,7 +232,7 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
   return a, nil
 }
 
-func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
+func (b *CommandAdapter) Handler(act *Action) (*Action, *CommandDefinition) {
   var m reflect.Method
   receiver := reflect.ValueOf(b)
   t := reflect.TypeOf(b)
@@ -241,7 +241,7 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
 
   for _, mapping := range ActionList {
     a := mapping.Action
-    def := mapping.ActionDefinition
+    def := mapping.CommandDefinition
     fmt.Printf("test for match pattern: %#v\n", a.Path)
     fmt.Printf("test for match input: %#v\n", act.Path)
     if a.Match(act) {
@@ -292,8 +292,8 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   }
 
   // Setup the result object
-  var result *ActionResult = &ActionResult{ActionDefinition: def, Action: action}
-  result.Status = result.ActionDefinition.Status
+  var result *ActionResult = &ActionResult{CommandDefinition: def, Action: action}
+  result.Status = result.CommandDefinition.Status
 
   // Get the underlying return values and test for error response
   var retval []interface{}
@@ -315,8 +315,8 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
 
 // Initialize the action list with route actions and action definitions.
 func init() {
-  push := func(action *Action, def *ActionDefinition) {
-    ActionList = append(ActionList, &ActionMap{Action: action, ActionDefinition: def})
+  push := func(action *Action, def *CommandDefinition) {
+    ActionList = append(ActionList, &ActionMap{Action: action, CommandDefinition: def})
   }
 
   contextArg := func(b *CommandAdapter, action *Action) []reflect.Value {
@@ -349,38 +349,38 @@ func init() {
 
   // GET /
   push(NewAction(OperationRead, ""),
-    &ActionDefinition{MethodName: "Meta", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "Meta", Status: http.StatusOK})
   // GET /templates
   push(NewAction(OperationRead, "/templates"),
-    &ActionDefinition{MethodName: "ListApplicationTemplates", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ListApplicationTemplates", Status: http.StatusOK})
   // GET /jobs
   push(NewAction(OperationRead, "/jobs"),
-    &ActionDefinition{MethodName: "ListJobs", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ListJobs", Status: http.StatusOK})
   // GET /jobs/{id}
   push(NewAction(OperationRead, "/jobs/*"),
-    &ActionDefinition{MethodName: "ReadJob", Status: http.StatusOK, Arguments: contextArg})
+    &CommandDefinition{MethodName: "ReadJob", Status: http.StatusOK, Arguments: contextArg})
   // DELETE /jobs/{id}
   push(NewAction(OperationDelete, "/jobs/*"),
-    &ActionDefinition{MethodName: "AbortJob", Status: http.StatusOK, Arguments: contextArg})
+    &CommandDefinition{MethodName: "AbortJob", Status: http.StatusOK, Arguments: contextArg})
   // GET /apps
   push(NewAction(OperationRead, "/apps"),
-    &ActionDefinition{MethodName: "ReadHost", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ReadHost", Status: http.StatusOK})
   // GET /apps/{container}
   push(NewAction(OperationRead, "/apps/*"),
-    &ActionDefinition{MethodName: "ReadContainer", Status: http.StatusOK, Arguments: containerArg})
+    &CommandDefinition{MethodName: "ReadContainer", Status: http.StatusOK, Arguments: containerArg})
   // GET /apps/{container}/{application}
   push(NewAction(OperationRead, "/apps/*/*"),
-    &ActionDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg})
+    &CommandDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg})
   // GET /apps/{container}/{application}/files
   push(NewAction(OperationRead, "/apps/*/*/files"),
-    &ActionDefinition{MethodName: "ReadApplicationFiles", Status: http.StatusOK, Arguments: applicationArg})
+    &CommandDefinition{MethodName: "ReadApplicationFiles", Status: http.StatusOK, Arguments: applicationArg})
   // GET /apps/{container}/{application}/pages
   push(NewAction(OperationRead, "/apps/*/*/pages"),
-    &ActionDefinition{MethodName: "ReadApplicationPages", Status: http.StatusOK, Arguments: applicationArg})
+    &CommandDefinition{MethodName: "ReadApplicationPages", Status: http.StatusOK, Arguments: applicationArg})
   // GET /apps/{container}/{application}/files/{url}
   push(NewAction(OperationRead, "/apps/*/*/files/*"),
-    &ActionDefinition{MethodName: "ReadFile", Status: http.StatusOK, Arguments: fileArg})
+    &CommandDefinition{MethodName: "ReadFile", Status: http.StatusOK, Arguments: fileArg})
   // GET /apps/{container}/{application}/pages/{url}
   push(NewAction(OperationRead, "/apps/*/*/pages/*"),
-    &ActionDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
+    &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
 }
