@@ -44,8 +44,8 @@ type Action struct {
   Context string
   // Target for the operation, typically an application.
   Target string
-  // An action or filter operation for the request.
-  Action string
+  // A filter operation for the request.
+  Filter string
   // An item, may contain slashes.
   Item string
 }
@@ -104,7 +104,7 @@ func (act *Action) TargetOnly() bool {
   return len(act.Parts) == 3
 }
 
-func (act *Action) ActionOnly() bool {
+func (act *Action) FilterOnly() bool {
   return len(act.Parts) == 4
 }
 
@@ -130,7 +130,7 @@ func (act *Action) Parse(path string) {
       act.Target = act.Parts[2]
     }
     if len(act.Parts) > 3 {
-      act.Action = act.Parts[3]
+      act.Filter = act.Parts[3]
     }
     if len(act.Parts) > 4 {
       act.Item = SLASH + strings.Join(act.Parts[4:], SLASH)
@@ -157,8 +157,8 @@ func (act *Action) TargetMatch(in *Action) bool {
   return (act.Wildcard(act.Target) || act.Target == in.Target)
 }
 
-func (act *Action) ActionMatch(in *Action) bool {
-  return (act.Wildcard(act.Action) || act.Action == in.Action)
+func (act *Action) FilterMatch(in *Action) bool {
+  return (act.Wildcard(act.Filter) || act.Filter == in.Filter)
 }
 
 func (act *Action) ItemMatch(in *Action) bool {
@@ -193,7 +193,7 @@ func (act *Action) Match(in *Action) bool {
     }
 
     // Deal with action only
-    if act.ActionOnly() && in.ActionOnly() && act.ContextMatch(in) && act.TargetMatch(in) && act.ActionMatch(in) {
+    if act.FilterOnly() && in.FilterOnly() && act.ContextMatch(in) && act.TargetMatch(in) && act.FilterMatch(in) {
       return true
     }
 
@@ -257,6 +257,12 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
   return nil, nil
 }
 
+// Execute an action.
+//
+// This attempts to find an action and action definition that match the
+// supplied action. It is an error if the action does not match a mapped
+// route otherwise the action is executed and the result is returned back
+// to the caller as an action result.
 func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   action, def := b.Handler(act)
 
@@ -275,10 +281,6 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
     fn := def.Arguments(b, act)
     args = append(args, fn...)
   }
-
-  // fmt.Printf("args:%#v\n", args)
-
-  // TODO: work out correct args
 
   // Call the method
   res := def.Method.Func.Call(args)
@@ -311,8 +313,8 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   return result, result.Error
 }
 
+// Initialize the action list with route actions and action definitions.
 func init() {
-
   push := func(action *Action, def *ActionDefinition) {
     ActionList = append(ActionList, &ActionMap{Action: action, ActionDefinition: def})
   }
