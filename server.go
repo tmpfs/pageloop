@@ -56,7 +56,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
   // Initialize the command adapter, services invoke the command adapter
   // for all operations on the model.
-  adapter := &CommandAdapter{Host: l.Host, Mountpoints: l.MountpointManager}
+  adapter := &CommandAdapter{Name: Name, Version: Version, Host: l.Host, Mountpoints: l.MountpointManager}
 
 	// Configure application containers.
 	sys := NewContainer("system", "System applications.", true)

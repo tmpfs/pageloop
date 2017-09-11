@@ -77,11 +77,19 @@ func (act *Action) IsRoot() bool {
 }
 
 func (act *Action) TypeOnly() bool {
-  return act.Type != "" && act.Context == "" && act.Target == "" && act.Action == "" && act.Item == ""
+  return len(act.Parts) == 1
 }
 
 func (act *Action) ContextOnly() bool {
-  return act.Type != "" && act.Context != "" && act.Target == "" && act.Action == "" && act.Item == ""
+  return len(act.Parts) == 2
+}
+
+func (act *Action) TargetOnly() bool {
+  return len(act.Parts) == 3
+}
+
+func (act *Action) ActionOnly() bool {
+  return len(act.Parts) == 4
 }
 
 func (act *Action) MatchType(in *Action) bool {
@@ -119,6 +127,13 @@ func (act *Action) Parse(path string) {
   }
 }
 
+func (act *Action) ContextMatch(in *Action) bool {
+  return (act.Wildcard(act.Context) || act.Context == in.Context)
+}
+
+func (act *Action) TargetMatch(in *Action) bool {
+  return (act.Wildcard(act.Target) || act.Target == in.Target)
+}
 
 func (act *Action) Match(in *Action) bool {
   if act.Operation != in.Operation {
@@ -137,7 +152,12 @@ func (act *Action) Match(in *Action) bool {
   // Got a type match
   if act.MatchType(in) {
     // Deal with context only
-    if act.ContextOnly() && in.ContextOnly() && (act.Wildcard(act.Context) || act.Context == in.Context) {
+    if act.ContextOnly() && in.ContextOnly() && act.ContextMatch(in) {
+      return true
+    }
+
+    // Deal with target only
+    if act.TargetOnly() && in.TargetOnly() && act.ContextMatch(in) && act.TargetMatch(in) {
       return true
     }
   }
@@ -153,6 +173,8 @@ func (act *Action) Match(in *Action) bool {
 // For simplicity with access over HTTP this implementation always
 // returns errors with an associated HTTP status code.
 type CommandAdapter struct {
+  Name string
+  Version string
   Host *Host
   Mountpoints *MountpointManager
 }
@@ -190,6 +212,14 @@ func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
 }
 
 // List containers.
+func (b *CommandAdapter) Meta() map[string]interface{} {
+  status := make(map[string]interface{})
+  status["name"] = b.Name
+  status["version"] = b.Version
+  return status
+}
+
+// List containers and their applications.
 func (b *CommandAdapter) ListContainers() []*Container {
   return b.Host.Containers
 }
@@ -213,6 +243,14 @@ func (b *CommandAdapter) ListApplicationTemplates() []*Application {
     }
   }
   return apps
+}
+
+func (b *CommandAdapter) ReadApplication(c *Container, name string) (*Application, *StatusError) {
+  a :=  c.GetByName(name)
+  if a == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+  return a, nil
 }
 
 // Create application.
@@ -411,7 +449,7 @@ type ActionDefinition struct {
   // HTTP status code to use on success
   Status int
   // Build function invocation arguments
-  Arguments func(action *Action) []reflect.Value
+  Arguments func(b *CommandAdapter, action *Action) []reflect.Value
 }
 
 type ActionResult struct {
@@ -430,7 +468,8 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
   fmt.Printf("TEST ON ACTION: %#v\n", act)
 
   for a, def := range ActionMap {
-    fmt.Printf("test for match: %#v\n", a)
+    fmt.Printf("test for match: %#v\n", a.Path)
+    fmt.Printf("test for match: %#v\n", act.Path)
     if a.Match(act) {
       println("got method match: " + def.MethodName)
       def.Receiver = receiver
@@ -459,7 +498,7 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
 
   // Additional arguments to pass after we add the received
   if def.Arguments != nil {
-    fn := def.Arguments(act)
+    fn := def.Arguments(b, act)
     args = append(args, fn...)
   }
 
@@ -506,16 +545,28 @@ func NewAction(op int, path string) *Action {
 
 func init() {
 
-  contextArg := func(action *Action) []reflect.Value {
+  contextArg := func(b *CommandAdapter, action *Action) []reflect.Value {
     var args []reflect.Value
     args = append(args, reflect.ValueOf(action.Context))
     return args
   }
 
+  containerArg := func(b *CommandAdapter, action *Action) []reflect.Value {
+    var args []reflect.Value
+    args = append(args, reflect.ValueOf(b.Host.GetByName(action.Context)))
+    return args
+  }
+
+  applicationArg := func(b *CommandAdapter, action *Action) []reflect.Value {
+    var args []reflect.Value
+    args = append(args, reflect.ValueOf(b.Host.GetByName(action.Context)), reflect.ValueOf(action.Target))
+    return args
+  }
+
   // GET /
-  ActionMap[NewAction(OperationRead, "/apps")] =
+  ActionMap[NewAction(OperationRead, "")] =
     &ActionDefinition{
-      MethodName: "ListContainers",
+      MethodName: "Meta",
       Status: http.StatusOK}
   // GET /templates
   ActionMap[NewAction(OperationRead, "/templates")] =
@@ -538,5 +589,22 @@ func init() {
     &ActionDefinition{
       MethodName: "AbortJob",
       Arguments: contextArg,
+      Status: http.StatusOK}
+  // GET /apps
+  ActionMap[NewAction(OperationRead, "/apps")] =
+    &ActionDefinition{
+      MethodName: "ListContainers",
+      Status: http.StatusOK}
+  // GET /apps/{container}
+  ActionMap[NewAction(OperationRead, "/apps/*")] =
+    &ActionDefinition{
+      MethodName: "ListApplications",
+      Arguments: containerArg,
+      Status: http.StatusOK}
+  // GET /apps/{container}/{application}
+  ActionMap[NewAction(OperationRead, "/apps/*/*")] =
+    &ActionDefinition{
+      MethodName: "ReadApplication",
+      Arguments: applicationArg,
       Status: http.StatusOK}
 }
