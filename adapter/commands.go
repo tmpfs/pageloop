@@ -37,6 +37,7 @@ func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
 
 // APPLICATIONS
 
+// Read an application.
 func (b *CommandAdapter) ReadApplication(c string, a string) (*Application, *StatusError) {
   if container, err := b.ReadContainer(c); err != nil {
     return nil, err
@@ -49,6 +50,7 @@ func (b *CommandAdapter) ReadApplication(c string, a string) (*Application, *Sta
   }
 }
 
+// Read the files for an application.
 func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *StatusError) {
   if app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
@@ -57,6 +59,7 @@ func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *Sta
   }
 }
 
+// Read the pages for an application.
 func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *StatusError) {
   if app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
@@ -67,6 +70,7 @@ func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *Sta
 
 // FILES / PAGES
 
+// Read a file.
 func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusError) {
   if app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
@@ -76,6 +80,24 @@ func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusE
       return nil, CommandError(http.StatusNotFound, "File %s not found", f)
     }
     return file, nil
+  }
+}
+
+// Read a page.
+func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusError) {
+  if app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    file := app.Urls[f]
+    // Cannot find the target file
+    if file == nil {
+      return nil, CommandError(http.StatusNotFound, "File %s not found", f)
+    }
+    // File is not a page type
+    if file.Page() == nil {
+      return nil, CommandError(http.StatusNotFound, "Page %s not found", f)
+    }
+    return file.Page(), nil
   }
 }
 
