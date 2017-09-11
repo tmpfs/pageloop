@@ -349,7 +349,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   if (info.Path == "") {
     // GET / - List host containers.
     if req.Method == http.MethodGet {
-      return utils.Json(res, http.StatusOK, h.Adapter.ListContainers())
+      return utils.Json(res, http.StatusOK, h.Adapter.ReadHost())
     }
   } else {
     if req.Method == http.MethodGet {

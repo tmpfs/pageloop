@@ -135,6 +135,10 @@ func (act *Action) TargetMatch(in *Action) bool {
   return (act.Wildcard(act.Target) || act.Target == in.Target)
 }
 
+func (act *Action) ActionMatch(in *Action) bool {
+  return (act.Wildcard(act.Action) || act.Action == in.Action)
+}
+
 func (act *Action) Match(in *Action) bool {
   if act.Operation != in.Operation {
     return false
@@ -160,6 +164,11 @@ func (act *Action) Match(in *Action) bool {
     if act.TargetOnly() && in.TargetOnly() && act.ContextMatch(in) && act.TargetMatch(in) {
       return true
     }
+
+    // Deal with action only
+    if act.ActionOnly() && in.ActionOnly() && act.ContextMatch(in) && act.ActionMatch(in) {
+      return true
+    }
   }
 
   return false
@@ -177,80 +186,6 @@ type CommandAdapter struct {
   Version string
   Host *Host
   Mountpoints *MountpointManager
-}
-
-// List jobs.
-func (b *CommandAdapter) ListJobs() []*Job {
-  return Jobs.Active
-}
-
-// Read a job.
-func (b *CommandAdapter) ReadJob(id string) (*Job, *StatusError) {
-  var job *Job = Jobs.ActiveJob(id)
-  if job == nil {
-    return nil, CommandError(http.StatusNotFound, "")
-  }
-  return job, nil
-}
-
-// Abort an active job.
-func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
-  var err error
-  var job *Job = Jobs.ActiveJob(id)
-  if job == nil {
-    return nil, CommandError(http.StatusNotFound, "")
-  }
-
-  if err = Jobs.Abort(job); err != nil {
-    return nil, CommandError(http.StatusConflict, "")
-  }
-
-  // Accepted for processing
-  fmt.Printf("[job:%d] aborted %s\n", job.Number, job.Id)
-
-  return job, nil
-}
-
-// List containers.
-func (b *CommandAdapter) Meta() map[string]interface{} {
-  status := make(map[string]interface{})
-  status["name"] = b.Name
-  status["version"] = b.Version
-  return status
-}
-
-// List containers and their applications.
-func (b *CommandAdapter) ListContainers() []*Container {
-  return b.Host.Containers
-}
-
-// List applications in a container.
-func (b *CommandAdapter) ListApplications(c *Container) []*Application {
-  return c.Apps
-}
-
-// List all system templates and user applications
-// that have been marked as a template.
-func (b *CommandAdapter) ListApplicationTemplates() []*Application {
-  // Get built in and user templates
-  c := b.Host.GetByName("template")
-  u := b.Host.GetByName("user")
-  list := append(c.Apps, u.Apps...)
-  var apps []*Application
-  for _, app := range list {
-    if app.IsTemplate {
-      apps = append(apps, app)
-    }
-  }
-  return apps
-}
-
-func (b *CommandAdapter) ReadApplication(c *Container, name string) (*Application, *StatusError) {
-  a :=  c.GetByName(name)
-  if a == nil {
-    return nil, CommandError(http.StatusNotFound, "")
-  }
-  return a, nil
 }
 
 // Create application.
@@ -553,13 +488,13 @@ func init() {
 
   containerArg := func(b *CommandAdapter, action *Action) []reflect.Value {
     var args []reflect.Value
-    args = append(args, reflect.ValueOf(b.Host.GetByName(action.Context)))
+    args = append(args, reflect.ValueOf(action.Context))
     return args
   }
 
   applicationArg := func(b *CommandAdapter, action *Action) []reflect.Value {
     var args []reflect.Value
-    args = append(args, reflect.ValueOf(b.Host.GetByName(action.Context)), reflect.ValueOf(action.Target))
+    args = append(args, reflect.ValueOf(action.Context), reflect.ValueOf(action.Target))
     return args
   }
 
@@ -593,18 +528,30 @@ func init() {
   // GET /apps
   ActionMap[NewAction(OperationRead, "/apps")] =
     &ActionDefinition{
-      MethodName: "ListContainers",
+      MethodName: "ReadHost",
       Status: http.StatusOK}
   // GET /apps/{container}
   ActionMap[NewAction(OperationRead, "/apps/*")] =
     &ActionDefinition{
-      MethodName: "ListApplications",
+      MethodName: "ReadContainer",
       Arguments: containerArg,
       Status: http.StatusOK}
   // GET /apps/{container}/{application}
   ActionMap[NewAction(OperationRead, "/apps/*/*")] =
     &ActionDefinition{
       MethodName: "ReadApplication",
+      Arguments: applicationArg,
+      Status: http.StatusOK}
+  // GET /apps/{container}/{application}/files
+  ActionMap[NewAction(OperationRead, "/apps/*/*/files")] =
+    &ActionDefinition{
+      MethodName: "ReadApplicationFiles",
+      Arguments: applicationArg,
+      Status: http.StatusOK}
+  // GET /apps/{container}/{application}/pages
+  ActionMap[NewAction(OperationRead, "/apps/*/*/pages")] =
+    &ActionDefinition{
+      MethodName: "ReadApplicationPages",
       Arguments: applicationArg,
       Status: http.StatusOK}
 }
