@@ -5,10 +5,14 @@ import (
   "reflect"
 )
 
+var(
+  Routes []*ActionMap
+)
+
 // Initialize the action list with route actions and action definitions.
 func init() {
   push := func(action *Action, def *CommandDefinition) {
-    ActionList = append(ActionList, &ActionMap{Action: action, CommandDefinition: def})
+    Routes = append(Routes, &ActionMap{Action: action, CommandDefinition: def})
   }
 
   contextArg := func(b *CommandAdapter, action *Action) []reflect.Value {

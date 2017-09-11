@@ -17,10 +17,6 @@ const(
   OperationDelete
 )
 
-var(
-  ActionList []*ActionMap
-)
-
 // A command action is a simple representation of a command invocation
 // it can be used to execute a command without any object references.
 //
@@ -266,7 +262,7 @@ func (b *CommandAdapter) Handler(act *Action) *ActionMap {
 
   fmt.Printf("TEST ON ACTION: %#v\n", act)
 
-  for _, mapping := range ActionList {
+  for _, mapping := range Routes {
     a := mapping.Action
     def := mapping.CommandDefinition
     fmt.Printf("test for match pattern: %#v\n", a.Path)
