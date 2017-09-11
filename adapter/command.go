@@ -2,7 +2,10 @@ package adapter
 
 import (
   "fmt"
+  "net/url"
   "net/http"
+  "reflect"
+  "strings"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/util"
@@ -28,11 +31,33 @@ const(
 
 // A command action is a simple representation of a command invocation
 // it can be used to execute a command without any object references.
-type CommandAction struct {
+type Action struct {
+  Verb string
+  Url *url.URL
+  Path string
+  Parts []string
   Operation int
-  ContainerName string
-  ApplicationName string
-  FileUrl string
+  BaseName string
+  Context string
+  Action string
+  Item string
+}
+
+func (act *Action) IsRoot() bool {
+  return act.Path == ""
+}
+
+func (act *Action) Match(in *Action) bool {
+  if act.Operation != in.Operation {
+    return false
+  }
+
+  // Exact path match
+  if act.Path == in.Path {
+    return true
+  }
+
+  return false
 }
 
 // Abstraction that allows many different interfaces to
@@ -259,4 +284,94 @@ func (b *CommandAdapter) DeleteFile(a *Application, url string) (*File, *StatusE
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
   return file, nil
+}
+
+// Get a command action from an HTTP verb and request URL.
+func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *StatusError) {
+  var a *Action = &Action{Verb: verb, Url: url}
+  switch verb {
+    case http.MethodPut:
+      a.Operation = OperationCreate
+    case http.MethodGet:
+      a.Operation = OperationRead
+    case http.MethodPost:
+      a.Operation = OperationUpdate
+    case http.MethodDelete:
+      a.Operation = OperationDelete
+    default:
+      return nil, CommandError(http.StatusMethodNotAllowed, "")
+  }
+
+  parse := func(path string) {
+    a.Path = path
+    if a.Path != "" {
+      a.Parts = strings.Split(strings.TrimSuffix(a.Path, SLASH), SLASH)
+      a.BaseName = a.Parts[0]
+      if len(a.Parts) > 1 {
+        a.Context = a.Parts[1]
+      }
+      if len(a.Parts) > 2 {
+        a.Action = a.Parts[2]
+      }
+      if len(a.Parts) > 3 {
+        a.Item = SLASH + strings.Join(a.Parts[3:], SLASH)
+        // Respect input trailing slash used to indicate
+        // operations on a directory
+        if strings.HasSuffix(a.Path, SLASH) {
+          a.Item += SLASH
+        }
+      }
+    }
+  }
+
+  parse(url.Path)
+
+  fmt.Printf("%#v\n", a)
+
+  return a, nil
+}
+
+func (b *CommandAdapter) Handler(act *Action) (*Action, string) {
+  var mapping map[*Action]string = make(map[*Action]string)
+  mapping[&Action{Operation: OperationRead, Path: ""}] = "ListContainers"
+  for a, fn := range mapping {
+    fmt.Printf("test for match: %#v\n", a)
+    if a.Match(act) {
+      return a, fn
+    }
+  }
+  return nil, ""
+}
+
+func (b *CommandAdapter) Execute(act *Action) ([]interface{}, *StatusError) {
+  println("Execute action")
+  fmt.Printf("%#v\n", act)
+  _, handler := b.Handler(act)
+  fmt.Printf("handler: %#v\n", handler)
+  t := reflect.TypeOf(b)
+  m, _ := t.MethodByName(handler)
+
+  fmt.Printf("reflect value: %#v\n", m)
+  fmt.Printf("reflect kind: %#v\n", m.Func.String())
+  fmt.Printf("reflect kind: %#v\n", m.Type.NumIn())
+  fmt.Printf("reflect kind: %#v\n", m.Type.NumOut())
+
+  var args []reflect.Value = make([]reflect.Value, 0)
+  receiver := reflect.ValueOf(b)
+  args = append(args, receiver)
+  fmt.Printf("args:%#v\n", args)
+  res := m.Func.Call(args)
+
+  var retval []interface{}
+
+  for _, val := range res {
+    v := val.Interface()
+    if ex, ok := v.(*StatusError); ok {
+      return nil, ex
+    }
+    retval = append(retval, v)
+  }
+
+  fmt.Printf("result:%#v\n", retval)
+  return retval, nil
 }
