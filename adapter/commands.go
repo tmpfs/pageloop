@@ -94,12 +94,17 @@ func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *Sta
 
 // FILES / PAGES
 
+
 // Read a file.
-func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusError) {
+func (b *CommandAdapter) ReadFile(c string, a string, f string) (*Application, *File, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
-    return nil, err
+    return nil, nil, err
   } else {
-    return b.CommandExecute.ReadFile(app, f)
+    if file, err := b.CommandExecute.ReadFile(app, f); err != nil {
+      return nil, nil, err
+    } else {
+      return app, file, nil
+    }
   }
 }
 
@@ -111,6 +116,22 @@ func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusE
     return b.CommandExecute.ReadPage(app, f)
   }
 }
+
+// Move a file
+func (b *CommandAdapter) MoveFile(c, a, f, dest string) (*File, *StatusError) {
+  if app, file, err :=  b.ReadFile(c, a, f); err != nil {
+    return nil, err
+  } else {
+    if file, err := b.CommandExecute.MoveFile(app, file, dest); err != nil {
+      return nil, err
+    } else {
+      return file, nil
+    }
+  }
+
+  return nil, nil
+}
+
 
 // JOBS
 

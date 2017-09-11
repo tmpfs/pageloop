@@ -222,9 +222,12 @@ func (a *RequestHandler) PostFile(res http.ResponseWriter, req *http.Request) (*
           http.StatusBadRequest, "Cannot move file, source and destination are equal: %s", url)
       }
 
+      // MOVE FILE BROKEN
+      /*
       if err := a.Adapter.MoveFile(app, file, loc); err != nil {
         return nil, err
       }
+      */
     // Update file content
     } else {
       // Strip charset for mime comparison

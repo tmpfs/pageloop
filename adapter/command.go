@@ -44,14 +44,6 @@ func NewCommandAdapter(name string, version string, host *Host, mountpoints *Mou
   return a
 }
 
-// Move a file.
-func (b *CommandAdapter) MoveFile(a *Application, f *File, dest string) *StatusError {
-  if err := a.Move(f, dest); err != nil {
-    return CommandError(http.StatusInternalServerError, err.Error())
-  }
-  return nil
-}
-
 // Create a file from a template.
 func (b *CommandAdapter) CreateFileTemplate(a *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
   var err error

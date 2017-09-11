@@ -9,6 +9,18 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+// Move a file.
+
+// BROKEN in v1 now!
+/*
+func (b *CommandAdapter) MoveFile(a *Application, f *File, dest string) *StatusError {
+  if err := a.Move(f, dest); err != nil {
+    return CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return nil
+}
+*/
+
 func (b *CommandAdapter) ListApplications(c *Container) []*Application {
   return c.Apps
 }

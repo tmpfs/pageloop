@@ -152,6 +152,14 @@ func (b *CommandExecute) ReadApplicationPages(app *Application) []*Page {
 
 // FILES / PAGES
 
+// Move a file.
+func (b *CommandExecute) MoveFile(app *Application, file *File, dest string) (*File, *StatusError) {
+  if err := app.Move(file, dest); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return file, nil
+}
+
 // Read a file.
 func (b *CommandExecute) ReadFile(app *Application, url string) (*File, *StatusError) {
   var file *File
