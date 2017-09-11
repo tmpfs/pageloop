@@ -358,7 +358,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     if result, err := h.Adapter.Execute(act); err != nil {
       return utils.Errorj(res, err)
     } else {
-      return utils.Json(res, http.StatusOK, result)
+      return utils.Json(res, result.Status, result.Data)
     }
     return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
   }

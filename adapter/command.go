@@ -331,44 +331,68 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
   return a, nil
 }
 
-type ActionRequest struct {
+type ActionDefinition struct {
+  // Received will be the command adapter
   Receiver reflect.Value
+  // Method is the function to invoke
   Method reflect.Method
-  Success int
-  Data interface{}
-  Error *StatusError
+  // Arity for arguments
+  ArityIn int
+  // Arity for return value
+  ArityOut int
+  // HTTP status code to use on success
+  Status int
 }
 
-func (b *CommandAdapter) Handler(act *Action) (*Action, string) {
-  var mapping map[*Action]string = make(map[*Action]string)
-  mapping[&Action{Operation: OperationRead, Path: ""}] = "ListContainers"
+type ActionResult struct {
+  *Action
+  *ActionDefinition
+  Data interface{}
+  Error *StatusError
+  Status int
+}
+
+func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
+  var mapping map[*Action]*ActionDefinition = make(map[*Action]*ActionDefinition)
+  var m reflect.Method
+  receiver := reflect.ValueOf(b)
+  t := reflect.TypeOf(b)
+
+  m, _ = t.MethodByName("ListContainers")
+  mapping[&Action{Operation: OperationRead, Path: ""}] =
+    &ActionDefinition{
+      Receiver: receiver,
+      Method: m,
+      ArityIn: m.Type.NumIn(),
+      ArityOut: m.Type.NumOut(),
+      Status: http.StatusOK}
+
   for a, fn := range mapping {
-    fmt.Printf("test for match: %#v\n", a)
+    // fmt.Printf("test for match: %#v\n", a)
     if a.Match(act) {
       return a, fn
     }
   }
-  return nil, ""
+  return nil, nil
 }
 
-func (b *CommandAdapter) Execute(act *Action) (interface{}, *StatusError) {
-  println("Execute action")
-  fmt.Printf("%#v\n", act)
-  _, handler := b.Handler(act)
-  fmt.Printf("handler: %#v\n", handler)
-  t := reflect.TypeOf(b)
-  m, _ := t.MethodByName(handler)
+func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
+  action, def := b.Handler(act)
 
-  fmt.Printf("reflect value: %#v\n", m)
-  fmt.Printf("reflect kind: %#v\n", m.Func.String())
-  fmt.Printf("reflect kind: %#v\n", m.Type.NumIn())
-  fmt.Printf("reflect kind: %#v\n", m.Type.NumOut())
+  // No definition found
+  if def == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+
+  fmt.Printf("def: %#v\n", def)
 
   var args []reflect.Value = make([]reflect.Value, 0)
-  receiver := reflect.ValueOf(b)
-  args = append(args, receiver)
+  args = append(args, def.Receiver)
   fmt.Printf("args:%#v\n", args)
-  res := m.Func.Call(args)
+
+  // TODO: work out correct args
+
+  res := def.Method.Func.Call(args)
 
   if len(res) == 0 || len(res) > 2 {
     return nil, CommandError(
@@ -377,23 +401,27 @@ func (b *CommandAdapter) Execute(act *Action) (interface{}, *StatusError) {
 
   var retval []interface{}
 
+  var result *ActionResult = &ActionResult{ActionDefinition: def, Action: action}
+  // Shortcut for result success status code
+  result.Status = result.ActionDefinition.Status
+
   for _, val := range res {
     v := val.Interface()
-    // Return with error as early as possible
     if ex, ok := v.(*StatusError); ok {
-      return nil, ex
+      // Mark result with error
+      result.Error = ex
     }
     retval = append(retval, v)
   }
 
-  // Arity one for return value and no error in method signature
-  if len(retval) == 1 {
-    return retval[0], nil
+  // Must have 1-2 return values
+  if len(retval) == 0 || len(retval) > 2 {
+    return nil, CommandError(
+      http.StatusInternalServerError, "Invalid command return value")
   }
 
-  fmt.Printf("result:%#v\n", retval)
+  // Assign the method call return value as the result data
+  result.Data = retval[0]
 
-  // Should never make it here if we are configured correctly
-  return nil, CommandError(
-    http.StatusInternalServerError, "Invalid command return value")
+  return result, result.Error
 }
