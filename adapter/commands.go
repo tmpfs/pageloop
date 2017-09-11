@@ -27,41 +27,55 @@ func (b *CommandAdapter) ReadHost() []*Container {
 }
 
 // Read a container.
-func (b *CommandAdapter) ReadContainer(name string) (*Container, *StatusError) {
-  c := b.Host.GetByName(name)
-  if c == nil {
-    return nil, CommandError(http.StatusNotFound, "")
+func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
+  container := b.Host.GetByName(c)
+  if container == nil {
+    return nil, CommandError(http.StatusNotFound, "Container %s not found", c)
   }
-  return c, nil
+  return container, nil
 }
 
 // APPLICATIONS
 
-func (b *CommandAdapter) ReadApplication(c string, name string) (*Application, *StatusError) {
+func (b *CommandAdapter) ReadApplication(c string, a string) (*Application, *StatusError) {
   if container, err := b.ReadContainer(c); err != nil {
     return nil, err
   } else {
-    app :=  container.GetByName(name)
+    app :=  container.GetByName(a)
     if app == nil {
-      return nil, CommandError(http.StatusNotFound, "")
+      return nil, CommandError(http.StatusNotFound, "Application %s not found", a)
     }
     return app, nil
   }
 }
 
-func (b *CommandAdapter) ReadApplicationFiles(c string, name string) ([]*File, *StatusError) {
-  if a, err :=  b.ReadApplication(c, name); err != nil {
+func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *StatusError) {
+  if app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
-    return a.Files, nil
+    return app.Files, nil
   }
 }
 
-func (b *CommandAdapter) ReadApplicationPages(c string, name string) ([]*Page, *StatusError) {
-  if a, err :=  b.ReadApplication(c, name); err != nil {
+func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *StatusError) {
+  if app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
-    return a.Pages, nil
+    return app.Pages, nil
+  }
+}
+
+// FILES / PAGES
+
+func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusError) {
+  if app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    file := app.Urls[f]
+    if file == nil {
+      return nil, CommandError(http.StatusNotFound, "File %s not found", f)
+    }
+    return file, nil
   }
 }
 

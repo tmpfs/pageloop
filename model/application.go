@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	SLASH = "/"
-
   // Page data file extensions.
   JSON string = ".json"
   YAML string = ".yml"

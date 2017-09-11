@@ -9,6 +9,7 @@ import(
   "path/filepath"
   "regexp"
   "io/ioutil"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 // Build directory.

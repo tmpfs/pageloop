@@ -11,6 +11,7 @@ import (
 
 const(
 	JSON_MIME = "application/json; charset=utf-8"
+	SLASH = "/"
 )
 
 // Utilities for the REST API endpoints.

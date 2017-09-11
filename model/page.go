@@ -17,6 +17,7 @@ import(
   "golang.org/x/net/html/atom"
   "github.com/tmpfs/pageloop/vdom"
 	. "github.com/rhinoman/go-commonmark"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 const(
