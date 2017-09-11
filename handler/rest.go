@@ -401,7 +401,9 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
         return utils.Json(res, http.StatusOK, job)
       }
     } else if req.Method == http.MethodGet {
-      if job := h.Adapter.ReadJob(info.Name); job != nil {
+      if job, err := h.Adapter.ReadJob(info.Name); err != nil {
+        return utils.Errorj(res, err)
+      } else {
         return utils.Json(res, http.StatusOK, job)
       }
 			return utils.Errorj(res, CommandError(http.StatusNotFound, ""))

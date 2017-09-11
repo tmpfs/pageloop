@@ -1,3 +1,5 @@
+// Package adapter provides a command adapter for interfacing
+// network requests with the underlying model.
 package adapter
 
 import (
@@ -35,15 +37,38 @@ const(
 
 // A command action is a simple representation of a command invocation
 // it can be used to execute a command without any object references.
+//
+// Path references take the form:
+//
+// /{type}?/{context}?/{target}?/{action}?/{item}?
+//
+// Where item is a trailer that may includes slashes to represent a file URL.
+//
+// The context part corresponds to a container and the target part corresponds
+// to an application.
+//
+// If a definition maps a part using the wildcard (*) it will match any string.
 type Action struct {
+  // Source HTTP verb that is translated to an operation constant
   Verb string
+  // A request URL
   Url *url.URL
+  // The path for the request
   Path string
+  // Parsed path parts split on a slash
   Parts []string
+  // The CRUD operation to perform
   Operation int
-  BaseName string
+
+  // The operation type
+  Type string
+  // Context for the operation. May be a container reference, job number etc.
   Context string
+  // Target for the operation, typically an application.
+  Target string
+  // An action or filter operation for the request.
   Action string
+  // An item, may contain slashes.
   Item string
 }
 
@@ -51,8 +76,20 @@ func (act *Action) IsRoot() bool {
   return act.Path == ""
 }
 
-func (act *Action) BaseNameOnly() bool {
-  return act.BaseName != "" && act.Context == "" && act.Action == "" && act.Item == ""
+func (act *Action) TypeOnly() bool {
+  return act.Type != "" && act.Context == "" && act.Target == "" && act.Action == "" && act.Item == ""
+}
+
+func (act *Action) ContextOnly() bool {
+  return act.Type != "" && act.Context != "" && act.Target == "" && act.Action == "" && act.Item == ""
+}
+
+func (act *Action) MatchType(in *Action) bool {
+  return act.Type == in.Type
+}
+
+func (act *Action) Wildcard(val string) bool {
+  return val == "*"
 }
 
 func (act *Action) Match(in *Action) bool {
@@ -65,8 +102,16 @@ func (act *Action) Match(in *Action) bool {
     return true
   }
 
-  if act.BaseNameOnly() && in.BaseNameOnly() && act.BaseName == in.BaseName {
+  if act.TypeOnly() && in.TypeOnly() && act.Type == in.Type {
     return true
+  }
+
+  // Got a type match
+  if act.MatchType(in) {
+    // Deal with context only
+    if act.ContextOnly() && in.ContextOnly() && (act.Wildcard(act.Context) || act.Context == in.Context) {
+      return true
+    }
   }
 
   return false
@@ -90,8 +135,12 @@ func (b *CommandAdapter) ListJobs() []*Job {
 }
 
 // Read a job.
-func (b *CommandAdapter) ReadJob(id string) *Job {
-  return Jobs.ActiveJob(id)
+func (b *CommandAdapter) ReadJob(id string) (*Job, *StatusError) {
+  var job *Job = Jobs.ActiveJob(id)
+  if job == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+  return job, nil
 }
 
 // Abort an active job.
@@ -318,15 +367,18 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
     a.Path = path
     if a.Path != "" {
       a.Parts = strings.Split(strings.TrimSuffix(a.Path, SLASH), SLASH)
-      a.BaseName = a.Parts[0]
+      a.Type = a.Parts[0]
       if len(a.Parts) > 1 {
         a.Context = a.Parts[1]
       }
       if len(a.Parts) > 2 {
-        a.Action = a.Parts[2]
+        a.Target = a.Parts[2]
       }
       if len(a.Parts) > 3 {
-        a.Item = SLASH + strings.Join(a.Parts[3:], SLASH)
+        a.Action = a.Parts[3]
+      }
+      if len(a.Parts) > 4 {
+        a.Item = SLASH + strings.Join(a.Parts[4:], SLASH)
         // Respect input trailing slash used to indicate
         // operations on a directory
         if strings.HasSuffix(a.Path, SLASH) {
@@ -355,6 +407,8 @@ type ActionDefinition struct {
   ArityOut int
   // HTTP status code to use on success
   Status int
+  // Build function invocation arguments
+  Arguments func(action *Action) []reflect.Value
 }
 
 type ActionResult struct {
@@ -396,6 +450,12 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   // Docs say that a Method does not need the receiver argument
   // but it appears we need it
   args = append(args, def.Receiver)
+
+  // Additional arguments to pass after we add the received
+  if def.Arguments != nil {
+    fn := def.Arguments(act)
+    args = append(args, fn...)
+  }
 
   // fmt.Printf("args:%#v\n", args)
 
@@ -439,13 +499,23 @@ func init() {
       MethodName: "ListContainers",
       Status: http.StatusOK}
   // GET /templates
-  ActionMap[&Action{Operation: OperationRead, BaseName: "templates"}] =
+  ActionMap[&Action{Operation: OperationRead, Type: "templates"}] =
     &ActionDefinition{
       MethodName: "ListApplicationTemplates",
       Status: http.StatusOK}
   // GET /jobs
-  ActionMap[&Action{Operation: OperationRead, BaseName: "jobs"}] =
+  ActionMap[&Action{Operation: OperationRead, Type: "jobs"}] =
     &ActionDefinition{
       MethodName: "ListJobs",
+      Status: http.StatusOK}
+  // GET /jobs/{id}
+  ActionMap[&Action{Operation: OperationRead, Type: "jobs", Context: "*"}] =
+    &ActionDefinition{
+      MethodName: "ReadJob",
+      Arguments: func(action *Action) []reflect.Value {
+        var args []reflect.Value
+        args = append(args, reflect.ValueOf(action.Context))
+        return args
+      },
       Status: http.StatusOK}
 }
