@@ -518,4 +518,14 @@ func init() {
         return args
       },
       Status: http.StatusOK}
+  // DELETE /jobs/{id}
+  ActionMap[&Action{Operation: OperationRead, Type: "jobs", Context: "*"}] =
+    &ActionDefinition{
+      MethodName: "AbortJob",
+      Arguments: func(action *Action) []reflect.Value {
+        var args []reflect.Value
+        args = append(args, reflect.ValueOf(action.Context))
+        return args
+      },
+      Status: http.StatusOK}
 }

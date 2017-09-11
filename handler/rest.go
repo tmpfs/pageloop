@@ -25,18 +25,8 @@ const(
 )
 
 var(
-  utils = HttpUtil{}
 	SchemaAppNew = MustAsset("schema/app-new.json")
 	CharsetStrip = regexp.MustCompile(`;.*$`)
-
-  // TODO: CORS for OPTIONS requests
-  // Allowed methods.
-	RestAllowedMethods []string = []string{
-    http.MethodGet,
-    http.MethodPost,
-    http.MethodPut,
-    http.MethodDelete,
-    http.MethodOptions}
 )
 
 // List of URLs used for bulk file operations.
@@ -349,21 +339,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
-
-  // TODO: complete refactor to command action execution
-
-  // Parse out an action from the requets
-  if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
-    return utils.Errorj(res, err)
-  } else {
-    // Got an action - execute it
-    if result, err := h.Adapter.Execute(act); err != nil {
-      return utils.Errorj(res, err)
-    } else {
-      return utils.Json(res, result.Status, result.Data)
-    }
-    return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
-  }
 
   info := &RequestHandler{Adapter: h.Adapter}
   info.Parse(req)
