@@ -433,4 +433,7 @@ func init() {
   // GET /apps/{container}/{application}/pages/{url}
   push(NewAction(OperationRead, "/apps/*/*/pages/*"),
     &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
+  // PUT /apps/{container}/{application}/tasls/{name}
+  push(NewAction(OperationRead, "/apps/*/*/tasks/*"),
+    &CommandDefinition{MethodName: "RunAppTask", Status: http.StatusAccepted, Arguments: fileArg})
 }

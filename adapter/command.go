@@ -31,32 +31,17 @@ func (tj *TaskJobComplete) Done(err error, job *Job) {
 // the resulting action should then be passed to Find() to see if the route matches
 // followed by a call to Execute() to invoke the command function.
 type CommandAdapter struct {
+  *CommandExecute
   Name string
   Version string
   Host *Host
   Mountpoints *MountpointManager
 }
 
-// Run an application build task.
-func(b *CommandAdapter) RunTask(a *Application, task string) (*Job, *StatusError) {
-  var err error
-  var job *Job
-  // No build configuration of missing build task
-  if !a.HasBuilder() || a.Builder.Tasks[task] == "" {
-    return nil, CommandError(http.StatusNotFound, "")
-  }
-
-  // Run the task and get a job
-  if job, err = a.Builder.Run(task, &TaskJobComplete{}); err != nil {
-    // Send conflict if job already running, this is a bit flaky is Run()
-    // starts returning errors for other reasons :(
-    return nil, CommandError(http.StatusConflict, err.Error())
-  }
-
-  // Accepted for processing
-  fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
-
-  return job, nil
+func NewCommandAdapter(name string, version string, host *Host, mountpoints *MountpointManager) *CommandAdapter {
+  a := &CommandAdapter{Name: name, Version: version, Host: host, Mountpoints: mountpoints}
+  a.CommandExecute = &CommandExecute{CommandAdapter: a}
+  return a
 }
 
 // Move a file.

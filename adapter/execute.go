@@ -1,3 +1,4 @@
+
 package adapter
 
 import (
@@ -7,12 +8,18 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
-// Command functions
+// Command functions.
+//
+// This is where the actual implementation for the various commands
+// are using native types as arguments.
+type CommandExecute struct {
+  *CommandAdapter
+}
 
 // ROOT
 
 // Meta information.
-func (b *CommandAdapter) Meta() map[string]interface{} {
+func (b *CommandExecute) Meta() map[string]interface{} {
   status := make(map[string]interface{})
   status["name"] = b.Name
   status["version"] = b.Version
@@ -22,12 +29,12 @@ func (b *CommandAdapter) Meta() map[string]interface{} {
 // CONTAINERS
 
 // Read all containers in a host.
-func (b *CommandAdapter) ReadHost() []*Container {
-  return b.CommandExecute.ReadHost()
+func (b *CommandExecute) ReadHost() []*Container {
+  return b.Host.Containers
 }
 
 // Read a container.
-func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
+func (b *CommandExecute) ReadContainer(c string) (*Container, *StatusError) {
   container := b.Host.GetByName(c)
   if container == nil {
     return nil, CommandError(http.StatusNotFound, "Container %s not found", c)
@@ -37,8 +44,30 @@ func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
 
 // APPLICATIONS
 
+// Run an application build task.
+func(b *CommandExecute) RunTask(a *Application, task string) (*Job, *StatusError) {
+  var err error
+  var job *Job
+  // No build configuration of missing build task
+  if !a.HasBuilder() || a.Builder.Tasks[task] == "" {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+
+  // Run the task and get a job
+  if job, err = a.Builder.Run(task, &TaskJobComplete{}); err != nil {
+    // Send conflict if job already running, this is a bit flaky is Run()
+    // starts returning errors for other reasons :(
+    return nil, CommandError(http.StatusConflict, err.Error())
+  }
+
+  // Accepted for processing
+  fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
+
+  return job, nil
+}
+
 // Create application.
-func (b *CommandAdapter) CreateApp(c string, a *Application) (*Application, *StatusError) {
+func (b *CommandExecute) CreateApp(c string, a *Application) (*Application, *StatusError) {
   // TODO: do not allow creating apps on non-user containers!
   if container, err := b.ReadContainer(c); err != nil {
     return nil, err
@@ -91,7 +120,7 @@ func (b *CommandAdapter) CreateApp(c string, a *Application) (*Application, *Sta
 }
 
 // Delete an application.
-func (b *CommandAdapter) DeleteApp(c string, a string) (*Application, *StatusError) {
+func (b *CommandExecute) DeleteApp(c string, a string) (*Application, *StatusError) {
   if container, app, err := b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
@@ -119,17 +148,8 @@ func (b *CommandAdapter) DeleteApp(c string, a string) (*Application, *StatusErr
   }
 }
 
-// Run an application build task.
-func(b *CommandAdapter) RunAppTask(c string, a string, task string) (*Job, *StatusError) {
-  if _, app, err := b.ReadApplication(c, a); err != nil {
-    return nil, err
-  } else {
-    return b.CommandExecute.RunTask(app, task)
-  }
-}
-
 // Read an application.
-func (b *CommandAdapter) ReadApplication(c string, a string) (*Container, *Application, *StatusError) {
+func (b *CommandExecute) ReadApplication(c string, a string) (*Container, *Application, *StatusError) {
   if container, err := b.ReadContainer(c); err != nil {
     return nil, nil, err
   } else {
@@ -142,7 +162,7 @@ func (b *CommandAdapter) ReadApplication(c string, a string) (*Container, *Appli
 }
 
 // Read the files for an application.
-func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *StatusError) {
+func (b *CommandExecute) ReadApplicationFiles(c string, a string) ([]*File, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
@@ -151,7 +171,7 @@ func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *Sta
 }
 
 // Read the pages for an application.
-func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *StatusError) {
+func (b *CommandExecute) ReadApplicationPages(c string, a string) ([]*Page, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
@@ -162,7 +182,7 @@ func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *Sta
 // FILES / PAGES
 
 // Read a file.
-func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusError) {
+func (b *CommandExecute) ReadFile(c string, a string, f string) (*File, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
@@ -175,7 +195,7 @@ func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusE
 }
 
 // Read a page.
-func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusError) {
+func (b *CommandExecute) ReadPage(c string, a string, f string) (*Page, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
@@ -195,12 +215,12 @@ func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusE
 // JOBS
 
 // List jobs.
-func (b *CommandAdapter) ListJobs() []*Job {
+func (b *CommandExecute) ListJobs() []*Job {
   return Jobs.Active
 }
 
 // Read a job.
-func (b *CommandAdapter) ReadJob(id string) (*Job, *StatusError) {
+func (b *CommandExecute) ReadJob(id string) (*Job, *StatusError) {
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
     return nil, CommandError(http.StatusNotFound, "")
@@ -209,7 +229,7 @@ func (b *CommandAdapter) ReadJob(id string) (*Job, *StatusError) {
 }
 
 // Abort an active job.
-func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
+func(b *CommandExecute) AbortJob(id string) (*Job, *StatusError) {
   var err error
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
@@ -230,7 +250,7 @@ func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
 
 // List all system templates and user applications
 // that have been marked as a template.
-func (b *CommandAdapter) ListApplicationTemplates() []*Application {
+func (b *CommandExecute) ListApplicationTemplates() []*Application {
   // Get built in and user templates
   c := b.Host.GetByName("template")
   u := b.Host.GetByName("user")
