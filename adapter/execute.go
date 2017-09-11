@@ -172,6 +172,7 @@ func (b *CommandExecute) CreateFile(a *Application, url string, content []byte) 
 }
 
 // Create a file from a template.
+// TODO: restore this!
 func (b *CommandExecute) CreateFileTemplate(a *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
   var err error
   var file *File
@@ -224,6 +225,7 @@ func (b *CommandExecute) DeleteFiles(app *Application, list UrlList) ([]*File, *
 }
 
 // Move a file.
+// TODO: restore this!
 func (b *CommandExecute) MoveFile(app *Application, file *File, dest string) (*File, *StatusError) {
   if err := app.Move(file, dest); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())

@@ -1,7 +1,7 @@
 package adapter
 
 import (
-  // "fmt"
+  "fmt"
   "net/http"
   "net/url"
   "reflect"
@@ -333,6 +333,8 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
 
   // Assign the method call return value as the result data
   result.Data = retval[def.Index]
+
+  fmt.Printf("%#v\n", result)
 
   // Done :)
   return result, result.Error

@@ -68,8 +68,13 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           return utils.Errorj(res, err)
         }
         act.Push(input)
-      }
-
+      } else if (mapping.CommandDefinition.MethodName == "CreateFile" || mapping.CommandDefinition.MethodName == "UpdateFile") {
+          if content, err := utils.ReadBody(req); err != nil {
+            return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
+          } else {
+            act.Push(content)
+          }
+        }
       // Invoke the command
       if result, err := h.Adapter.Execute(act); err != nil {
         // Route does not match

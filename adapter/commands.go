@@ -155,6 +155,24 @@ func (b *CommandAdapter) DeleteFiles(c string, a string, l UrlList) ([]*File, *S
   }
 }
 
+// Create file content.
+func (b *CommandAdapter) CreateFile(c string, a string, f string, content []byte) (*File, *StatusError) {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    return b.CommandExecute.CreateFile(app, f, content)
+  }
+}
+
+// Update file content.
+func (b *CommandAdapter) UpdateFile(c string, a string, f string, content []byte) (*File, *StatusError) {
+  if app, file, err :=  b.ReadFile(c, a, f); err != nil {
+    return nil, err
+  } else {
+    return b.CommandExecute.UpdateFile(app, file, content)
+  }
+}
+
 // JOBS
 
 // List jobs.

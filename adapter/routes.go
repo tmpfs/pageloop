@@ -82,6 +82,12 @@ func init() {
   // GET /apps/{container}/{application}/files/{url}
   push(NewAction(OperationRead, "/apps/*/*/files/*"),
     &CommandDefinition{MethodName: "ReadFile", Status: http.StatusOK, Arguments: fileArg})
+  // PUT /apps/{container}/{application}/files/{url}
+  push(NewAction(OperationCreate, "/apps/*/*/files/*"),
+    &CommandDefinition{MethodName: "CreateFile", Status: http.StatusCreated, Arguments: fileArg})
+  // POST /apps/{container}/{application}/files/{url}
+  push(NewAction(OperationUpdate, "/apps/*/*/files/*"),
+    &CommandDefinition{MethodName: "UpdateFile", Status: http.StatusOK, Arguments: fileArg})
   // GET /apps/{container}/{application}/pages/{url}
   push(NewAction(OperationRead, "/apps/*/*/pages/*"),
     &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
