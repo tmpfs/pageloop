@@ -76,7 +76,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	log.Printf("Serving v2 rest service from %s", API_URL)
 
   // Collect mountpoints by container name
-  if collection, err := l.MountpointManager.Collect(config.Mountpoints); err != nil {
+  if collection, err := l.MountpointManager.Collect(config.Mountpoints, config.UserConfig().Mountpoints); err != nil {
     return nil, err
   // Load the mountpoints using the container map
   } else {

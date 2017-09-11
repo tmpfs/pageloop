@@ -98,7 +98,7 @@ func (c *ServerConfig) Merge(path string) error {
   for _, m := range tempServerConfig.Mountpoints {
     // Force user supplied applications into particular container
     m.Container = "user"
-    c.Mountpoints = append(c.Mountpoints, m)
+    //c.Mountpoints = append(c.Mountpoints, m)
   }
 
   c.userConfig = tempServerConfig

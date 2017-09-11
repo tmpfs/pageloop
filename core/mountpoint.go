@@ -89,20 +89,6 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
   return mt, nil
 }
 
-// Test if a mountpoint exists by URL.
-func (m *MountpointManager) HasMountpoint(url string) bool {
-  // println("has mountpoint: " + url)
-  umu := strings.TrimSuffix(url, "/")
-  for _, m := range m.Config.Mountpoints {
-    cmu := strings.TrimSuffix(m.Url, "/")
-    if m.Url == url || cmu == umu {
-      // println("has mountpoint match: " + m.Url)
-      return true
-    }
-  }
-  return false
-}
-
 // Load a single mountpoint.
 func (m *MountpointManager) LoadMountpoint(mountpoint Mountpoint, container *Container) (*Application, error) {
   var err error
@@ -179,19 +165,36 @@ func (m *MountpointManager) UnmountApplication(app *Application) {
   delete(m.MountpointMap, app.RawUrl())
 }
 
+// Test if a mountpoint exists by URL.
+func (m *MountpointManager) HasMountpoint(url string) bool {
+  umu := strings.TrimSuffix(url, "/")
+  for _, m := range m.Config.UserConfig().Mountpoints {
+    cmu := strings.TrimSuffix(m.Url, "/")
+    if m.Url == url || cmu == umu {
+      return true
+    }
+  }
+  return false
+}
+
 // Creating a mapping from string container name references to the
 // actual containers they reference.
-func (m *MountpointManager) Collect(mountpoints []Mountpoint) (map[string] *MountpointMap, error) {
+func (m *MountpointManager) Collect(mountpoints ...[]Mountpoint) (map[string] *MountpointMap, error) {
   var collection map[string] *MountpointMap = make(map[string] *MountpointMap)
-  for _, mt := range mountpoints {
-    c := m.Host.GetByName(mt.Container)
-    if c == nil {
-      return nil, fmt.Errorf("Unknown container %s", mt.Container)
+  for _, list := range mountpoints {
+    for _, mt := range list {
+      if mt.Container == "" {
+        mt.Container = "user"
+      }
+      c := m.Host.GetByName(mt.Container)
+      if c == nil {
+        return nil, fmt.Errorf("Unknown container %s", mt.Container)
+      }
+      if collection[mt.Container] == nil {
+        collection[mt.Container] = &MountpointMap{Container: c}
+      }
+      collection[mt.Container].Mountpoints = append(collection[mt.Container].Mountpoints, mt)
     }
-    if collection[mt.Container] == nil {
-      collection[mt.Container] = &MountpointMap{Container: c}
-    }
-    collection[mt.Container].Mountpoints = append(collection[mt.Container].Mountpoints, mt)
   }
   return collection, nil
 }
