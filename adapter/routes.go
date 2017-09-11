@@ -45,19 +45,19 @@ func init() {
 
   // GET /
   push(NewAction(OperationRead, ""),
-    &CommandDefinition{MethodName: "Meta", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ReadMeta", Status: http.StatusOK})
   // GET /templates
   push(NewAction(OperationRead, "/templates"),
-    &CommandDefinition{MethodName: "ListApplicationTemplates", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ReadApplicationTemplates", Status: http.StatusOK})
   // GET /jobs
   push(NewAction(OperationRead, "/jobs"),
-    &CommandDefinition{MethodName: "ListJobs", Status: http.StatusOK})
+    &CommandDefinition{MethodName: "ReadActiveJobs", Status: http.StatusOK})
   // GET /jobs/{id}
   push(NewAction(OperationRead, "/jobs/*"),
     &CommandDefinition{MethodName: "ReadJob", Status: http.StatusOK, Arguments: contextArg})
   // DELETE /jobs/{id}
   push(NewAction(OperationDelete, "/jobs/*"),
-    &CommandDefinition{MethodName: "AbortJob", Status: http.StatusOK, Arguments: contextArg})
+    &CommandDefinition{MethodName: "DeleteJob", Status: http.StatusOK, Arguments: contextArg})
   // GET /apps
   push(NewAction(OperationRead, "/apps"),
     &CommandDefinition{MethodName: "ReadHost", Status: http.StatusOK})
@@ -87,5 +87,5 @@ func init() {
     &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
   // PUT /apps/{container}/{application}/tasks/{name}
   push(NewAction(OperationCreate, "/apps/*/*/tasks/*"),
-    &CommandDefinition{MethodName: "RunAppTask", Status: http.StatusAccepted, Arguments: fileArg})
+    &CommandDefinition{MethodName: "RunTask", Status: http.StatusAccepted, Arguments: fileArg})
 }

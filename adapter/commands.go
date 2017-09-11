@@ -11,9 +11,9 @@ import (
 
 // ROOT
 
-// Meta information.
-func (b *CommandAdapter) Meta() map[string]interface{} {
-  return b.CommandExecute.Meta()
+// Meta information (/).
+func (b *CommandAdapter) ReadMeta() map[string]interface{} {
+  return b.CommandExecute.ReadMeta()
 }
 
 // CONTAINERS
@@ -54,7 +54,7 @@ func (b *CommandAdapter) DeleteApp(c string, a string) (*Application, *StatusErr
 }
 
 // Run an application build task.
-func(b *CommandAdapter) RunAppTask(c string, a string, task string) (*Job, *StatusError) {
+func(b *CommandAdapter) RunTask(c string, a string, task string) (*Job, *StatusError) {
   task = strings.TrimPrefix(task, SLASH)
   task = strings.TrimSuffix(task, SLASH)
   if _, app, err := b.ReadApplication(c, a); err != nil {
@@ -139,8 +139,8 @@ func (b *CommandAdapter) MoveFile(c, a, f, dest string) (*File, *StatusError) {
 // JOBS
 
 // List jobs.
-func (b *CommandAdapter) ListJobs() []*Job {
-  return b.CommandExecute.ListJobs()
+func (b *CommandAdapter) ReadActiveJobs() []*Job {
+  return b.CommandExecute.ReadActiveJobs()
 }
 
 // Read a job.
@@ -149,15 +149,15 @@ func (b *CommandAdapter) ReadJob(id string) (*Job, *StatusError) {
 }
 
 // Abort an active job.
-func(b *CommandAdapter) AbortJob(id string) (*Job, *StatusError) {
-  return b.CommandExecute.AbortJob(id)
+func(b *CommandAdapter) DeleteJob(id string) (*Job, *StatusError) {
+  return b.CommandExecute.DeleteJob(id)
 }
 
 // MISC
 
 // List all system templates and user applications
 // that have been marked as a template.
-func (b *CommandAdapter) ListApplicationTemplates() []*Application {
-  return b.CommandExecute.ListApplicationTemplates()
+func (b *CommandAdapter) ReadApplicationTemplates() []*Application {
+  return b.CommandExecute.ReadApplicationTemplates()
 }
 

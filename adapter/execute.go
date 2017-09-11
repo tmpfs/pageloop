@@ -18,8 +18,8 @@ type CommandExecute struct {
 
 // ROOT
 
-// Meta information.
-func (b *CommandExecute) Meta() map[string]interface{} {
+// Meta information (/).
+func (b *CommandExecute) ReadMeta() map[string]interface{} {
   status := make(map[string]interface{})
   status["name"] = b.Name
   status["version"] = b.Version
@@ -188,7 +188,7 @@ func (b *CommandExecute) ReadPage(app *Application, url string) (*Page, *StatusE
 // JOBS
 
 // List jobs.
-func (b *CommandExecute) ListJobs() []*Job {
+func (b *CommandExecute) ReadActiveJobs() []*Job {
   return Jobs.Active
 }
 
@@ -202,7 +202,7 @@ func (b *CommandExecute) ReadJob(id string) (*Job, *StatusError) {
 }
 
 // Abort an active job.
-func(b *CommandExecute) AbortJob(id string) (*Job, *StatusError) {
+func(b *CommandExecute) DeleteJob(id string) (*Job, *StatusError) {
   var err error
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
@@ -223,7 +223,7 @@ func(b *CommandExecute) AbortJob(id string) (*Job, *StatusError) {
 
 // List all system templates and user applications
 // that have been marked as a template.
-func (b *CommandExecute) ListApplicationTemplates() []*Application {
+func (b *CommandExecute) ReadApplicationTemplates() []*Application {
   // Get built in and user templates
   c := b.Host.GetByName("template")
   u := b.Host.GetByName("user")
