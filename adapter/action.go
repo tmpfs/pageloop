@@ -64,6 +64,14 @@ type Action struct {
 }
 
 // An action definition defines the receiving command function for an incoming action.
+//
+// Command functions typically have a return value arity of two:
+//
+// func() (interface{}, *StatusError)
+//
+// And the first return value is the one used for the data on the action result unless
+// an index has been specified on the command definition in which case it must not be out
+// of bounds.
 type CommandDefinition struct {
   MethodName string
   // Received will be the command adapter
@@ -81,6 +89,9 @@ type CommandDefinition struct {
 
   // The number of arguments we expect to be populated by the caller.
   Arity int
+
+  // An index into the command return values to use as the result data.
+  Index int
 }
 
 // Combines action routing information with the command definition.
@@ -328,12 +339,6 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   // Call the method
   res := def.Method.Func.Call(args)
 
-  // Check return value arity
-  if len(res) == 0 || len(res) > 2 {
-    return nil, CommandError(
-      http.StatusInternalServerError, "Invalid command return value arity")
-  }
-
   // Setup the result object
   var result *ActionResult = &ActionResult{CommandDefinition: def, Action: act}
   result.Status = result.CommandDefinition.Status
@@ -350,7 +355,7 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   }
 
   // Assign the method call return value as the result data
-  result.Data = retval[0]
+  result.Data = retval[def.Index]
 
   // Done :)
   return result, result.Error
@@ -416,7 +421,7 @@ func init() {
     &CommandDefinition{MethodName: "CreateApp", Status: http.StatusOK, Arguments: containerArg, Arity: 1})
   // GET /apps/{container}/{application}
   push(NewAction(OperationRead, "/apps/*/*"),
-    &CommandDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg})
+    &CommandDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg, Index: 1})
   // GET /apps/{container}/{application}/files
   push(NewAction(OperationRead, "/apps/*/*/files"),
     &CommandDefinition{MethodName: "ReadApplicationFiles", Status: http.StatusOK, Arguments: applicationArg})

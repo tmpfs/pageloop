@@ -37,6 +37,7 @@ func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
 
 // Create application.
 func (b *CommandAdapter) CreateApp(c string, a *Application) (*Application, *StatusError) {
+  // TODO: do not allow creating apps on non-user containers!
   if container, err := b.ReadContainer(c); err != nil {
     return nil, err
   } else {
@@ -87,25 +88,53 @@ func (b *CommandAdapter) CreateApp(c string, a *Application) (*Application, *Sta
   }
 }
 
+// Delete an application.
+func (b *CommandAdapter) DeleteApp(c string, a string) (*Application, *StatusError) {
+  if container, app, err := b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    if app.Protected {
+      return nil, CommandError(http.StatusForbidden, "Cannot delete protected application")
+    }
+
+    // Stop serving files for the application
+    b.Mountpoints.UnmountApplication(app)
+
+    // Delete the mountpoint
+    if err := b.Mountpoints.DeleteApplicationMountpoint(app.Url); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
+    }
+
+    // Delete the files
+    if err := app.DeleteApplicationFiles(); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
+    }
+
+    // Delete the in-memory application
+    container.Del(app)
+
+    return app, nil
+  }
+}
 
 // APPLICATIONS
 
 // Read an application.
-func (b *CommandAdapter) ReadApplication(c string, a string) (*Application, *StatusError) {
+func (b *CommandAdapter) ReadApplication(c string, a string) (*Container, *Application, *StatusError) {
   if container, err := b.ReadContainer(c); err != nil {
-    return nil, err
+    return nil, nil, err
   } else {
     app :=  container.GetByName(a)
     if app == nil {
-      return nil, CommandError(http.StatusNotFound, "Application %s not found", a)
+      return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", a)
     }
-    return app, nil
+    return container, app, nil
   }
 }
 
 // Read the files for an application.
 func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *StatusError) {
-  if app, err :=  b.ReadApplication(c, a); err != nil {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
     return app.Files, nil
@@ -114,7 +143,7 @@ func (b *CommandAdapter) ReadApplicationFiles(c string, a string) ([]*File, *Sta
 
 // Read the pages for an application.
 func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *StatusError) {
-  if app, err :=  b.ReadApplication(c, a); err != nil {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
     return app.Pages, nil
@@ -125,7 +154,7 @@ func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *Sta
 
 // Read a file.
 func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusError) {
-  if app, err :=  b.ReadApplication(c, a); err != nil {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
     file := app.Urls[f]
@@ -138,7 +167,7 @@ func (b *CommandAdapter) ReadFile(c string, a string, f string) (*File, *StatusE
 
 // Read a page.
 func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusError) {
-  if app, err :=  b.ReadApplication(c, a); err != nil {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
     file := app.Urls[f]
