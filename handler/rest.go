@@ -63,7 +63,11 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
         }
         act.Push(input)
       } else if mapping.CommandDefinition.MethodName == "DeleteFiles" {
-        println("read url list for batch delete")
+        var input UrlList = make(UrlList, 0)
+        if err := utils.ReadJson(req, &input); err != nil {
+          return utils.Errorj(res, err)
+        }
+        act.Push(input)
       }
 
       // Invoke the command

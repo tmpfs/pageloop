@@ -7,6 +7,9 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+// List of URLs used for bulk file operations.
+type UrlList []string
+
 // Command functions
 
 // ROOT
@@ -143,6 +146,15 @@ func (b *CommandAdapter) DeleteFile(c, a, f string) (*File, *StatusError) {
   }
 }
 
+// Delete a list of files.
+func (b *CommandAdapter) DeleteFiles(c string, a string, l UrlList) ([]*File, *StatusError) {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    return b.CommandExecute.DeleteFiles(app, l)
+  }
+}
+
 // JOBS
 
 // List jobs.
@@ -167,4 +179,3 @@ func(b *CommandAdapter) DeleteJob(id string) (*Job, *StatusError) {
 func (b *CommandAdapter) ReadApplicationTemplates() []*Application {
   return b.CommandExecute.ReadApplicationTemplates()
 }
-

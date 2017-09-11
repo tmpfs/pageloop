@@ -39,6 +39,17 @@ func (h HttpUtil) ReadBody(req *http.Request) ([]byte, error) {
 	return ioutil.ReadAll(req.Body)
 }
 
+func (h HttpUtil) ReadJson(req *http.Request, input interface{}) *StatusError {
+  if content, err := h.ReadBody(req); err != nil {
+    return CommandError(http.StatusInternalServerError, err.Error())
+  } else {
+    if err = json.Unmarshal(content, input); err != nil {
+      return CommandError(http.StatusInternalServerError, err.Error())
+    }
+  }
+  return nil
+}
+
 // Write a JSON document to the response from the given doc object.
 func (h HttpUtil) Json(res http.ResponseWriter, status int, doc interface{}) (int, error) {
   var data []byte

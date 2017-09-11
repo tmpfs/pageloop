@@ -210,6 +210,19 @@ func (b *CommandExecute) DeleteFile(a *Application, url string) (*File, *StatusE
   return file, nil
 }
 
+// Batch delete files.
+func (b *CommandExecute) DeleteFiles(app *Application, list UrlList) ([]*File, *StatusError) {
+  var files []*File
+  for _, url := range list {
+    if file, err := b.DeleteFile(app, url); err != nil {
+      return nil, err
+    } else {
+      files = append(files, file)
+    }
+  }
+  return files, nil
+}
+
 // Move a file.
 func (b *CommandExecute) MoveFile(app *Application, file *File, dest string) (*File, *StatusError) {
   if err := app.Move(file, dest); err != nil {
