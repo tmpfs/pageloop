@@ -91,10 +91,12 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
 
 // Test if a mountpoint exists by URL.
 func (m *MountpointManager) HasMountpoint(url string) bool {
+  // println("has mountpoint: " + url)
   umu := strings.TrimSuffix(url, "/")
   for _, m := range m.Config.Mountpoints {
     cmu := strings.TrimSuffix(m.Url, "/")
     if m.Url == url || cmu == umu {
+      // println("has mountpoint match: " + m.Url)
       return true
     }
   }

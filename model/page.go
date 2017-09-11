@@ -168,32 +168,6 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 		return p.owner.Url + path
 	}
 
-	// Get a URL relative to the current page being parsed.
-
-	/*
-	funcs["relative"] = func(path string) (string, error) {
-		println("relative func called with path: " + path)
-		var err error
-		domain := "http://localhost"
-		page := p.owner.Url + strings.TrimPrefix(p.Url, SLASH)
-		base := domain + page
-		println("relative page: " + page)
-		println("relative base: " + base)
-		var bu *url.URL
-		var tu *url.URL
-		var ru *url.URL
-		if bu, err = url.Parse(base); err != nil {
-			return "", err
-		}
-		if tu, err = url.Parse(page); err != nil {
-			return "", err
-		}
-		ru = bu.ResolveReference(tu)
-		println(ru.Path)
-		return path, nil
-	}
-	*/
-
   // Render markdown inline in an HTML template
   funcs["markdown"] = func(md string) template.HTML {
     var data string = Md2Html(md, CMARK_OPT_DEFAULT)
@@ -309,7 +283,6 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
 		if layout {
 			src = append(define, data...)
 			src = append(src, end...)
-			//println(string(src))
 
 			// FIXME: the output of calling golang.org/x/net/html#Render
 			// FIXME: escapes the quotes in template nodes so we need

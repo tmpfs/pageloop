@@ -57,25 +57,27 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
       return utils.Errorj(res, err)
     } else {
 
-      if mapping.CommandDefinition.MethodName == "CreateApp" {
+      def := mapping.CommandDefinition
+
+      if def.MethodName == "CreateApp" {
         var input *Application = &Application{}
         if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
           return utils.Errorj(res, CommandError(http.StatusBadRequest, err.Error()))
         }
         act.Push(input)
-      } else if mapping.CommandDefinition.MethodName == "DeleteFiles" {
+      } else if def.MethodName == "DeleteFiles" {
         var input UrlList = make(UrlList, 0)
         if err := utils.ReadJson(req, &input); err != nil {
           return utils.Errorj(res, err)
         }
         act.Push(input)
-      } else if mapping.CommandDefinition.MethodName == "CreateFile" {
+      } else if def.MethodName == "CreateFile" {
           if content, err := utils.ReadBody(req); err != nil {
             return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
             act.Push(content)
           }
-      } else if mapping.CommandDefinition.MethodName == "UpdateFile" {
+      } else if def.MethodName == "UpdateFile" {
           location := req.Header.Get("Location")
           if location != "" {
             act = h.Adapter.Mutate(act, "MoveFile")
@@ -90,9 +92,15 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
         }
       // Invoke the command
       if result, err := h.Adapter.Execute(act); err != nil {
-        // Route does not match
         return utils.Errorj(res, err)
       } else {
+        if def.MethodName == "CreateApp" {
+          // Mount the application, needs to be done here due to some funky
+          // package cyclic references
+          if app, ok := result.Data.(*Application); ok {
+            MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
+          }
+        }
         // Return the result to the client
         return utils.Json(res, result.Status, result.Data)
       }
