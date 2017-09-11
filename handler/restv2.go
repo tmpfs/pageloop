@@ -49,11 +49,18 @@ func (h RestV2Handler) doServeHttp(res http.ResponseWriter, req *http.Request) (
   if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)
   } else {
-    // Got an action - execute it
-    if result, err := h.Adapter.Execute(act); err != nil {
+    // Attempt to match the action
+    if _, err := h.Adapter.Find(act); err != nil {
       return utils.Errorj(res, err)
     } else {
-      return utils.Json(res, result.Status, result.Data)
+      // Invoke the command
+      if result, err := h.Adapter.Execute(act); err != nil {
+        // Route does not match
+        return utils.Errorj(res, err)
+      } else {
+        // Return the result to the client
+        return utils.Json(res, result.Status, result.Data)
+      }
     }
     return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
   }

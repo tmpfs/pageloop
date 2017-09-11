@@ -9,6 +9,14 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+const(
+  // Basic CRUD operations
+  OperationCreate = iota
+  OperationRead
+  OperationUpdate
+  OperationDelete
+)
+
 var(
   ActionList []*ActionMap
 )
@@ -48,6 +56,11 @@ type Action struct {
   Filter string
   // An item, may contain slashes.
   Item string
+
+  // Populated once find has been called.
+  Arguments []reflect.Value
+  Route *Action
+  Command *CommandDefinition
 }
 
 // An action definition defines the receiving command function for an incoming action.
@@ -232,7 +245,7 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
   return a, nil
 }
 
-func (b *CommandAdapter) Handler(act *Action) (*Action, *CommandDefinition) {
+func (b *CommandAdapter) Handler(act *Action) *ActionMap {
   var m reflect.Method
   receiver := reflect.ValueOf(b)
   t := reflect.TypeOf(b)
@@ -251,25 +264,27 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, *CommandDefinition) {
       def.Method = m
       def.ArityIn = m.Type.NumIn()
       def.ArityOut = m.Type.NumOut()
-      return a, def
+      return mapping
     }
   }
-  return nil, nil
+  return nil
 }
 
-// Execute an action.
+// Find the command definition for an incoming action.
 //
-// This attempts to find an action and action definition that match the
-// supplied action. It is an error if the action does not match a mapped
-// route otherwise the action is executed and the result is returned back
-// to the caller as an action result.
-func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
-  action, def := b.Handler(act)
+// If a match is found then the action is populated with a route action,
+// command definition and arguments list.
+//
+// If no match is found an error is returned.
+func (b *CommandAdapter) Find(act *Action) (*ActionMap, *StatusError) {
+  mapping := b.Handler(act)
 
   // No definition found
-  if def == nil {
+  if mapping == nil {
     return nil, CommandError(http.StatusNotFound, "")
   }
+
+  def := mapping.CommandDefinition
 
   var args []reflect.Value = make([]reflect.Value, 0)
   // Docs say that a Method does not need the receiver argument
@@ -282,6 +297,27 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
     args = append(args, fn...)
   }
 
+  act.Route = mapping.Action
+  act.Command = mapping.CommandDefinition
+  act.Arguments = args
+
+  return mapping, nil
+}
+
+// Execute an action.
+//
+// This attempts to find an action and action definition that match the
+// supplied action. It is an error if the action does not match a mapped
+// route otherwise the action is executed and the result is returned back
+// to the caller as an action result.
+func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
+  if act.Command == nil {
+    return nil, CommandError(
+      http.StatusInternalServerError, "Action has no command, call find before execution")
+  }
+
+  def := act.Command
+  args := act.Arguments
   // Call the method
   res := def.Method.Func.Call(args)
 
@@ -292,7 +328,7 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   }
 
   // Setup the result object
-  var result *ActionResult = &ActionResult{CommandDefinition: def, Action: action}
+  var result *ActionResult = &ActionResult{CommandDefinition: def, Action: act}
   result.Status = result.CommandDefinition.Status
 
   // Get the underlying return values and test for error response

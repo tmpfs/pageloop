@@ -19,15 +19,6 @@ func (tj *TaskJobComplete) Done(err error, job *Job) {
   Jobs.Stop(job)
 }
 
-// TODO: implement action generation and execution
-const(
-  // Basic CRUD operations
-  OperationCreate = iota
-  OperationRead
-  OperationUpdate
-  OperationDelete
-)
-
 // Abstraction that allows many different interfaces to
 // the data model whether it is a string command interpreter,
 // REST API endpoints, JSON RPC or any other bridge to the
