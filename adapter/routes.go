@@ -88,9 +88,6 @@ func init() {
   // POST /apps/{container}/{application}/files/{url}
   push(NewAction(OperationUpdate, "/apps/*/*/files/*"),
     &CommandDefinition{MethodName: "UpdateFile", Status: http.StatusOK, Arguments: fileArg})
-  // POST /apps/{container}/{application}/files/{url}
-  push(NewAction(OperationUpdate, "/apps/*/*/files/*"),
-    &CommandDefinition{MethodName: "MoveFile", Status: http.StatusOK, Arguments: fileArg})
   // GET /apps/{container}/{application}/pages/{url}
   push(NewAction(OperationRead, "/apps/*/*/pages/*"),
     &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
@@ -103,4 +100,16 @@ func init() {
   // PUT /apps/{container}/{application}/tasks/{name}
   push(NewAction(OperationCreate, "/apps/*/*/tasks/*"),
     &CommandDefinition{MethodName: "RunTask", Status: http.StatusAccepted, Arguments: fileArg})
+
+  // Mutation handlers are overloaded requests that are
+  // actions that are tested by the caller and mutated
+  // they should never match directly.
+
+  // POST /apps/{container}/{application}/files/{url} - UpdateFile mutation
+  push(NewAction(OperationUpdate, "/apps/*/*/files/*"),
+    &CommandDefinition{MethodName: "MoveFile", Status: http.StatusOK, Arguments: fileArg})
+
+  // PUT /apps/{container}/{application}/files/{url} - CreateFile mutation
+  push(NewAction(OperationCreate, "/apps/*/*/files/*"),
+    &CommandDefinition{MethodName: "CreateFileTemplate", Status: http.StatusCreated, Arguments: fileArg})
 }

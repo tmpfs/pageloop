@@ -164,6 +164,15 @@ func (b *CommandAdapter) CreateFile(c string, a string, f string, content []byte
   }
 }
 
+// Create file from a template.
+func (b *CommandAdapter) CreateFileTemplate(c string, a string, f string, tpl *ApplicationTemplate) (*File, *StatusError) {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    return b.CommandExecute.CreateFileTemplate(app, f, tpl)
+  }
+}
+
 // Update file content.
 func (b *CommandAdapter) UpdateFile(c string, a string, f string, content []byte) (*File, *StatusError) {
   if app, file, err :=  b.ReadFile(c, a, f); err != nil {

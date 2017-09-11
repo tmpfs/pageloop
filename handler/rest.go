@@ -3,7 +3,10 @@ package handler
 
 import (
   //"fmt"
+  "mime"
 	"net/http"
+  "strings"
+  "path/filepath"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -48,6 +51,12 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
+	ct := req.Header.Get("Content-Type")
+
+	if ct == "" {
+    ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
+	}
+
   // Parse out an action from the request
   if act, err := h.Adapter.HttpAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)
@@ -72,11 +81,24 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
         }
         act.Push(input)
       } else if def.MethodName == "CreateFile" {
-          if content, err := utils.ReadBody(req); err != nil {
-            return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
+          isDir := strings.HasSuffix(act.Item, SLASH)
+          // Create from a template
+          if !isDir && ct == JSON_MIME {
+            ref := &ApplicationTemplate{}
+            if err := utils.ReadJson(req, ref); err != nil {
+              return utils.Errorj(res, err)
+            }
+            act = h.Adapter.Mutate(act, "CreateFileTemplate")
+            act.Push(ref)
+          // File content bytes creation
           } else {
-            act.Push(content)
+            if content, err := utils.ReadBody(req); err != nil {
+              return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
+            } else {
+              act.Push(content)
+            }
           }
+
       } else if def.MethodName == "UpdateFile" {
           location := req.Header.Get("Location")
           if location != "" {
