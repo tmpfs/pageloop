@@ -78,6 +78,9 @@ type CommandDefinition struct {
   Status int
   // Build function invocation arguments
   Arguments func(b *CommandAdapter, action *Action) []reflect.Value
+
+  // The number of arguments we expect to be populated by the caller.
+  Arity int
 }
 
 // Combines action routing information with the command definition.
@@ -99,6 +102,10 @@ func NewAction(op int, path string) *Action {
   act := &Action{Operation: op}
   act.Parse(path)
   return act
+}
+
+func (act *Action) Push(t interface{}) {
+  act.Arguments = append(act.Arguments, reflect.ValueOf(t))
 }
 
 func (act *Action) IsRoot() bool {
@@ -404,6 +411,9 @@ func init() {
   // GET /apps/{container}
   push(NewAction(OperationRead, "/apps/*"),
     &CommandDefinition{MethodName: "ReadContainer", Status: http.StatusOK, Arguments: containerArg})
+  // PUT /apps/{container}
+  push(NewAction(OperationCreate, "/apps/*"),
+    &CommandDefinition{MethodName: "CreateApp", Status: http.StatusOK, Arguments: containerArg, Arity: 1})
   // GET /apps/{container}/{application}
   push(NewAction(OperationRead, "/apps/*/*"),
     &CommandDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg})

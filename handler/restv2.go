@@ -50,9 +50,18 @@ func (h RestV2Handler) doServeHttp(res http.ResponseWriter, req *http.Request) (
     return utils.Errorj(res, err)
   } else {
     // Attempt to match the action
-    if _, err := h.Adapter.Find(act); err != nil {
+    if mapping, err := h.Adapter.Find(act); err != nil {
       return utils.Errorj(res, err)
     } else {
+
+      if mapping.CommandDefinition.MethodName == "CreateApp" {
+        var input *Application = &Application{}
+        if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
+          return utils.Errorj(res, CommandError(http.StatusBadRequest, err.Error()))
+        }
+        act.Push(input)
+      }
+
       // Invoke the command
       if result, err := h.Adapter.Execute(act); err != nil {
         // Route does not match

@@ -35,6 +35,59 @@ func (b *CommandAdapter) ReadContainer(c string) (*Container, *StatusError) {
   return container, nil
 }
 
+// Create application.
+func (b *CommandAdapter) CreateApp(c string, a *Application) (*Application, *StatusError) {
+  if container, err := b.ReadContainer(c); err != nil {
+    return nil, err
+  } else {
+
+    var app *Application
+
+    existing := container.GetByName(a.Name)
+    if existing != nil {
+      return nil, CommandError(http.StatusPreconditionFailed, "Application %s already exists", a.Name)
+    }
+
+    // Get mountpoint URL.
+    a.Url = a.MountpointUrl(container)
+
+    // Mountpoint exists.
+    exists := b.Mountpoints.HasMountpoint(a.Url)
+    if exists {
+      return nil, CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", a.Url)
+    }
+
+    // Create and save a mountpoint for the application.
+    if mountpoint, err := b.Mountpoints.CreateMountpoint(a); err != nil {
+      return nil, CommandError(http.StatusInternalServerError, err.Error())
+    } else {
+      // Handle creating from a template.
+      if a.Template != nil {
+        // Find the template application.
+        if source, err := b.Host.LookupTemplate(a.Template); err != nil {
+          return nil, CommandError(http.StatusBadRequest, err.Error())
+        } else {
+          // Copy template source files.
+          if err := a.CopyApplicationTemplate(source); err != nil {
+            return nil, CommandError(http.StatusInternalServerError, err.Error())
+          }
+        }
+      }
+
+      // Load and publish the app source files, note that we get a new application back
+      // after loading the mountpoint.
+      if app, err = b.Mountpoints.LoadMountpoint(*mountpoint, container); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      } else {
+        // Return the new application reference
+        return app, nil
+      }
+    }
+    return app, nil
+  }
+}
+
+
 // APPLICATIONS
 
 // Read an application.
