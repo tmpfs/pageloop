@@ -24,25 +24,25 @@ const(
 //
 // /{type}?/{context}?/{target}?/{action}?/{item}?
 //
-// Where item is a trailer that may includes slashes to represent a file URL.
+// Where item is a trailer that may include slashes to represent a file URL.
 //
 // The context part corresponds to a container and the target part corresponds
 // to an application.
 //
 // If a definition maps a part using the wildcard (*) it will match any string.
 type Action struct {
-  // Source HTTP verb that is translated to an operation constant
+  // Source HTTP verb that is translated to an operation constant.
   Verb string
-  // A request URL
+  // A request URL.
   Url *url.URL
-  // The path for the request
+  // The path for the request.
   Path string
-  // Parsed path parts split on a slash
+  // Parsed path parts split on a slash.
   Parts []string
-  // The CRUD operation to perform
+  // The CRUD operation to perform.
   Operation int
 
-  // The operation type
+  // The operation type, cannot be a wildcard.
   Type string
   // Context for the operation. May be a container reference, job number etc.
   Context string
@@ -53,9 +53,13 @@ type Action struct {
   // An item, may contain slashes.
   Item string
 
-  // Populated once find has been called.
+  // Populated once Find has been called.
+
+  // List of arguments to pass to the command function.
   Arguments []reflect.Value
+  // The route action that triggered the match on this action.
   Route *Action
+  // The command definition used for method invocation.
   Command *CommandDefinition
 }
 
@@ -70,13 +74,17 @@ type Action struct {
 // of bounds.
 type CommandDefinition struct {
   MethodName string
-  // Received will be the command adapter
+  // Receiver will be the command adapter.
   Receiver reflect.Value
-  // Method is the function to invoke
+  // Method is the function to invoke.
   Method reflect.Method
-  // HTTP status code to use on success
+  // HTTP status code to use on success.
   Status int
-  // Build function invocation arguments
+  // Function called to build the initial argument list.
+  // For most invocations these will be sufficient but when creating and
+  // updating arguments may need to be added by the caller in which
+  // case they should call Push() on the action after a call to Find() and
+  // before calling Execute().
   Arguments func(b *CommandAdapter, action *Action) []reflect.Value
   // An index into the command return values to use as the result data.
   Index int
@@ -354,4 +362,3 @@ func (b *CommandAdapter) handler(act *Action) *ActionMap {
   }
   return nil
 }
-
