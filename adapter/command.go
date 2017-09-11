@@ -101,4 +101,3 @@ func (b *CommandAdapter) DeleteFile(a *Application, url string) (*File, *StatusE
   }
   return file, nil
 }
-

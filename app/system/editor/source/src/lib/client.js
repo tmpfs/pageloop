@@ -1,10 +1,10 @@
 class ApiClient {
   constructor (container, application) {
     this.host = ''
-    this.api = `/api/`
+    this.api = `/api/v2/`
     this.container = container
     this.application = application
-    this.url = `${this.api}${container}/${application}/`
+    this.url = `${this.api}apps/${container}/${application}/`
     this.raw = `/apps/raw/${container}/${application}`
   }
 
@@ -85,7 +85,7 @@ class ApiClient {
   }
 
   createNewApp (app) {
-    let url = this.api + 'user/'
+    let url = this.api + 'apps/user/'
     let opts = {
       method: 'PUT',
       headers: {
@@ -103,7 +103,7 @@ class ApiClient {
   }
 
   getContainers () {
-    return this.json(this.api)
+    return this.json(this.api + 'apps/')
   }
 
   getApplication () {
@@ -178,7 +178,7 @@ class ApiClient {
   }
 
   deleteApp (container, application) {
-    let url = `${this.api}${container}/${application}/`
+    let url = this.url
     let opts = {
       method: 'DELETE'
     }

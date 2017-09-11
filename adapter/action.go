@@ -349,7 +349,6 @@ func (b *CommandAdapter) handler(act *Action) *ActionMap {
   var m reflect.Method
   receiver := reflect.ValueOf(b)
   t := reflect.TypeOf(b)
-
   for _, mapping := range Routes {
     a := mapping.Action
     def := mapping.CommandDefinition
