@@ -164,7 +164,7 @@ class ApiClient {
   }
 
   deleteApp (container, application) {
-    let url = this.url
+    let url = this.api + `apps/${container}/${application}`
     let opts = {
       method: 'DELETE'
     }

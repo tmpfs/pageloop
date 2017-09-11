@@ -158,15 +158,14 @@ func (app *Application) Create(url string, content []byte) (*File, error) {
 }
 
 // Move a file to a new URL
-func (app *Application) Move(file *File, newUrl string) error {
-  println("move new url: " + newUrl)
-  u := path.Clean(newUrl)
+func (app *Application) Move(file *File, dest string) error {
+  u := path.Clean(dest)
   if !strings.HasPrefix(u, "/") {
     u = "/" + u
   }
 
   if app.Urls[u] != nil {
-    return fmt.Errorf("Cannot move file, destination %s exists", newUrl)
+    return fmt.Errorf("Cannot move file, destination %s exists", dest)
   }
 
   pth := app.GetPathFromUrl(u)

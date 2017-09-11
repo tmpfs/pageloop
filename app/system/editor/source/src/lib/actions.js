@@ -283,13 +283,23 @@ function Actions (router) {
           }
 
           context.state.notify({title: 'File Info', message: `Renamed ${file.url} to ${newName}`})
+
           // Update file data
-          if (doc.file) {
-            file.name = doc.file.name
-            file.url = doc.file.url
-            file.uri = doc.file.uri
+          for (let k in doc) {
+            file[k] = doc[k]
           }
-          context.commit('preview-url', file)
+
+          // TODO: fix the UI on rename!
+          console.log(file)
+
+          context.commit('preview-url', file.uri)
+
+          /*
+          return context.dispatch('reload')
+            .then(() => {
+              context.commit('preview-url', file)
+            })
+          */
         })
     },
     'upload': function (context, info) {
