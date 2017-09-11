@@ -46,7 +46,7 @@ func (h RestV2Handler) doServeHttp(res http.ResponseWriter, req *http.Request) (
 	}
 
   // Parse out an action from the request
-  if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
+  if act, err := h.Adapter.HttpAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)
   } else {
     // Attempt to match the action

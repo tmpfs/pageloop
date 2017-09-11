@@ -1,7 +1,7 @@
 package adapter
 
 import (
-  "fmt"
+  // "fmt"
   "net/http"
   "net/url"
   "reflect"
@@ -74,10 +74,6 @@ type CommandDefinition struct {
   Receiver reflect.Value
   // Method is the function to invoke
   Method reflect.Method
-  // Arity for arguments
-  ArityIn int
-  // Arity for return value
-  ArityOut int
   // HTTP status code to use on success
   Status int
   // Build function invocation arguments
@@ -101,12 +97,18 @@ type ActionResult struct {
   Status int
 }
 
+// Create a new action for the given operation and path.
 func NewAction(op int, path string) *Action {
   act := &Action{Operation: op}
   act.Parse(path)
   return act
 }
 
+// Add an argument to the list of arguments that will be passed
+// to the command method on invocation.
+//
+// This wraps the past type as a reflect.Value before appending
+// to the arguments slice.
 func (act *Action) Push(t interface{}) {
   act.Arguments = append(act.Arguments, reflect.ValueOf(t))
 }
@@ -189,6 +191,7 @@ func (act *Action) ItemMatch(in *Action) bool {
   return (act.Wildcard(item) || act.Item == in.Item)
 }
 
+// Determine if an incoming action matches this action.
 func (act *Action) Match(in *Action) bool {
   if act.Operation != in.Operation {
     return false
@@ -220,20 +223,17 @@ func (act *Action) Match(in *Action) bool {
       return true
     }
 
-    // println("testing on item")
-
     // Final path portion is an item, that is a file or page URL potentially
     // containing the slash character.
     if act.Item != "" && act.ItemMatch(in) {
       return true
     }
   }
-
   return false
 }
 
 // Get a command action from an HTTP verb and request URL.
-func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *StatusError) {
+func (b *CommandAdapter) HttpAction(verb string, url *url.URL) (*Action, *StatusError) {
   var a *Action = &Action{Verb: verb, Url: url}
   switch verb {
     case http.MethodPut:
@@ -250,44 +250,19 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
 
   a.Parse(url.Path)
 
-  fmt.Printf("%#v\n", a)
-
   return a, nil
 }
 
-func (b *CommandAdapter) Handler(act *Action) *ActionMap {
-  var m reflect.Method
-  receiver := reflect.ValueOf(b)
-  t := reflect.TypeOf(b)
-
-  fmt.Printf("TEST ON ACTION: %#v\n", act)
-
-  for _, mapping := range Routes {
-    a := mapping.Action
-    def := mapping.CommandDefinition
-    fmt.Printf("test for match pattern: %#v\n", a.Path)
-    fmt.Printf("test for match input: %#v\n", act.Path)
-    if a.Match(act) {
-      println("got method match: " + def.MethodName)
-      def.Receiver = receiver
-      m, _ = t.MethodByName(def.MethodName)
-      def.Method = m
-      def.ArityIn = m.Type.NumIn()
-      def.ArityOut = m.Type.NumOut()
-      return mapping
-    }
-  }
-  return nil
-}
-
 // Find the command definition for an incoming action.
+//
+// Must be invoked on an action before passing the action to Execute.
 //
 // If a match is found then the action is populated with a route action,
 // command definition and arguments list.
 //
 // If no match is found an error is returned.
 func (b *CommandAdapter) Find(act *Action) (*ActionMap, *StatusError) {
-  mapping := b.Handler(act)
+  mapping := b.handler(act)
 
   // No definition found
   if mapping == nil {
@@ -316,10 +291,12 @@ func (b *CommandAdapter) Find(act *Action) (*ActionMap, *StatusError) {
 
 // Execute an action.
 //
-// This attempts to find an action and action definition that match the
-// supplied action. It is an error if the action does not match a mapped
-// route otherwise the action is executed and the result is returned back
-// to the caller as an action result.
+// You should have already invoked Find() so that the action has been
+// assigned a route, command definition and arguments list.
+//
+// The method associated with the command definition is invoked and it's
+// return values are converted to an action result which is returned to
+// the caller.
 func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   if act.Command == nil {
     return nil, CommandError(
@@ -351,5 +328,30 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
 
   // Done :)
   return result, result.Error
+}
+
+// PRIVATE
+
+// This is the route matching stuff. Takes the incoming action
+// and finds the first matching route action.
+//
+// Returns the mapping containing the route action and command definition,
+// if the request action does not match any route nil is returned.
+func (b *CommandAdapter) handler(act *Action) *ActionMap {
+  var m reflect.Method
+  receiver := reflect.ValueOf(b)
+  t := reflect.TypeOf(b)
+
+  for _, mapping := range Routes {
+    a := mapping.Action
+    def := mapping.CommandDefinition
+    if a.Match(act) {
+      def.Receiver = receiver
+      m, _ = t.MethodByName(def.MethodName)
+      def.Method = m
+      return mapping
+    }
+  }
+  return nil
 }
 
