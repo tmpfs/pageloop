@@ -1,7 +1,7 @@
 class ApiClient {
   constructor (container, application) {
     this.host = ''
-    this.api = `/api/v2/`
+    this.api = `/api/`
     this.container = container
     this.application = application
     this.url = `${this.api}apps/${container}/${application}/`

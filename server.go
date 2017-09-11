@@ -73,13 +73,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	// REST API global endpoint (/api/)
 	handler = RestService(l.Mux, adapter)
 	l.MountpointManager.MountpointMap[API_URL] = handler
-	log.Printf("Serving rest service from %s", API_URL)
-
-
-	// New REST API global endpoint (/api/v2/)
-	handler = RestServiceV2(l.Mux, adapter)
-	l.MountpointManager.MountpointMap[API_URL + "v2/"] = handler
-	log.Printf("Serving v2 rest service from %s", API_URL + "v2/")
+	log.Printf("Serving v2 rest service from %s", API_URL)
 
   // Collect mountpoints by container name
   if collection, err := l.MountpointManager.Collect(config.Mountpoints); err != nil {

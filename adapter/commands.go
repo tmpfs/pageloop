@@ -1,6 +1,7 @@
 package adapter
 
 import (
+  "strings"
   "net/http"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
@@ -54,6 +55,8 @@ func (b *CommandAdapter) DeleteApp(c string, a string) (*Application, *StatusErr
 
 // Run an application build task.
 func(b *CommandAdapter) RunAppTask(c string, a string, task string) (*Job, *StatusError) {
+  task = strings.TrimPrefix(task, SLASH)
+  task = strings.TrimSuffix(task, SLASH)
   if _, app, err := b.ReadApplication(c, a); err != nil {
     return nil, err
   } else {
