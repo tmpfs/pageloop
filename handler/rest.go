@@ -62,6 +62,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           return utils.Errorj(res, CommandError(http.StatusBadRequest, err.Error()))
         }
         act.Push(input)
+      } else if mapping.CommandDefinition.MethodName == "DeleteFiles" {
+        println("read url list for batch delete")
       }
 
       // Invoke the command

@@ -155,6 +155,7 @@ export default {
           message: `Are you sure you want to delete the file ${selected.url}?`,
           note: 'Be careful file deletion is irreversible.',
           ok: () => {
+            // this.deleteFiles(selection)
             this.deleteFiles(selection)
           }
         }

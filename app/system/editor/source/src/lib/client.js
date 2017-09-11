@@ -147,20 +147,6 @@ class ApiClient {
       })
   }
 
-  // @deprecated, replaced by deleteFiles
-  deleteFile (file) {
-    let url = this.url + 'files' + file.url
-    let opts = {
-      method: 'DELETE'
-    }
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
-  }
-
   renameFile (file, newName) {
     let url = this.url + 'files' + file.url
     let opts = {

@@ -121,6 +121,7 @@ func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusE
 }
 
 // Move a file
+// TODO: restore and test this
 func (b *CommandAdapter) MoveFile(c, a, f, dest string) (*File, *StatusError) {
   if app, file, err :=  b.ReadFile(c, a, f); err != nil {
     return nil, err
@@ -131,10 +132,16 @@ func (b *CommandAdapter) MoveFile(c, a, f, dest string) (*File, *StatusError) {
       return file, nil
     }
   }
-
-  return nil, nil
 }
 
+// Delete a file.
+func (b *CommandAdapter) DeleteFile(c, a, f string) (*File, *StatusError) {
+  if _, app, err :=  b.ReadApplication(c, a); err != nil {
+    return nil, err
+  } else {
+    return b.CommandExecute.DeleteFile(app, f)
+  }
+}
 
 // JOBS
 

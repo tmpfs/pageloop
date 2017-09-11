@@ -152,6 +152,64 @@ func (b *CommandExecute) ReadApplicationPages(app *Application) []*Page {
 
 // FILES / PAGES
 
+// Create a new file and publish it, the file cannot already exist on disc.
+func (b *CommandExecute) CreateFile(a *Application, url string, content []byte) (*File, *StatusError) {
+  var err error
+	var file *File = a.Urls[url]
+
+	if file != nil {
+    return nil, CommandError(http.StatusConflict,"File already exists %s", url)
+	}
+  if a.ExistsConflict(url) {
+    return nil, CommandError(http.StatusConflict,"File already exists, publish conflict on %s", url)
+  }
+
+  if file, err = a.Create(url, content); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  return file, nil
+}
+
+// Create a file from a template.
+func (b *CommandExecute) CreateFileTemplate(a *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
+  var err error
+  var file *File
+  var content []byte
+
+  if file, err = b.Host.LookupTemplateFile(template); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  if file == nil {
+    return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", template.File)
+  }
+
+  content = file.Source(true)
+  return b.CreateFile(a, url, content)
+}
+
+// Update file content.
+func (b *CommandExecute) UpdateFile(a *Application, f *File, content []byte) (*File, *StatusError) {
+  if err := a.Update(f, content); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return f, nil
+}
+
+// Delete a file.
+func (b *CommandExecute) DeleteFile(a *Application, url string) (*File, *StatusError) {
+  var err error
+  var file *File = a.Urls[url]
+  if file == nil {
+    return nil, CommandError(http.StatusNotFound, "")
+  }
+  if err = a.Del(file); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+  return file, nil
+}
+
 // Move a file.
 func (b *CommandExecute) MoveFile(app *Application, file *File, dest string) (*File, *StatusError) {
   if err := app.Move(file, dest); err != nil {

@@ -85,6 +85,9 @@ func init() {
   // GET /apps/{container}/{application}/pages/{url}
   push(NewAction(OperationRead, "/apps/*/*/pages/*"),
     &CommandDefinition{MethodName: "ReadPage", Status: http.StatusOK, Arguments: fileArg})
+  // DELETE /apps/{container}/{application}/files/{url}
+  push(NewAction(OperationDelete, "/apps/*/*/files/*"),
+    &CommandDefinition{MethodName: "DeleteFile", Status: http.StatusOK, Arguments: fileArg})
   // PUT /apps/{container}/{application}/tasks/{name}
   push(NewAction(OperationCreate, "/apps/*/*/tasks/*"),
     &CommandDefinition{MethodName: "RunTask", Status: http.StatusAccepted, Arguments: fileArg})
