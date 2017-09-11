@@ -513,7 +513,7 @@ func init() {
   }
 
   // GET /
-  ActionMap[NewAction(OperationRead, "")] =
+  ActionMap[NewAction(OperationRead, "/apps")] =
     &ActionDefinition{
       MethodName: "ListContainers",
       Status: http.StatusOK}
