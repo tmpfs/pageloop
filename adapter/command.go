@@ -73,7 +73,7 @@ type Action struct {
 }
 
 func (act *Action) IsRoot() bool {
-  return act.Path == ""
+  return len(act.Parts) == 0
 }
 
 func (act *Action) TypeOnly() bool {
@@ -92,13 +92,41 @@ func (act *Action) Wildcard(val string) bool {
   return val == "*"
 }
 
+func (act *Action) Parse(path string) {
+  act.Path = path
+  if act.Path != "" {
+    path := strings.TrimPrefix(act.Path, SLASH)
+    path = strings.TrimSuffix(path, SLASH)
+    act.Parts = strings.Split(path, SLASH)
+    act.Type = act.Parts[0]
+    if len(act.Parts) > 1 {
+      act.Context = act.Parts[1]
+    }
+    if len(act.Parts) > 2 {
+      act.Target = act.Parts[2]
+    }
+    if len(act.Parts) > 3 {
+      act.Action = act.Parts[3]
+    }
+    if len(act.Parts) > 4 {
+      act.Item = SLASH + strings.Join(act.Parts[4:], SLASH)
+      // Respect input trailing slash used to indicate
+      // operations on a directory
+      if strings.HasSuffix(act.Path, SLASH) {
+        act.Item += SLASH
+      }
+    }
+  }
+}
+
+
 func (act *Action) Match(in *Action) bool {
   if act.Operation != in.Operation {
     return false
   }
 
-  // Exact path match
-  if act.Path == in.Path {
+  // Root match
+  if act.IsRoot() && in.IsRoot() {
     return true
   }
 
@@ -363,32 +391,7 @@ func (b *CommandAdapter) CommandAction(verb string, url *url.URL) (*Action, *Sta
       return nil, CommandError(http.StatusMethodNotAllowed, "")
   }
 
-  parse := func(path string) {
-    a.Path = path
-    if a.Path != "" {
-      a.Parts = strings.Split(strings.TrimSuffix(a.Path, SLASH), SLASH)
-      a.Type = a.Parts[0]
-      if len(a.Parts) > 1 {
-        a.Context = a.Parts[1]
-      }
-      if len(a.Parts) > 2 {
-        a.Target = a.Parts[2]
-      }
-      if len(a.Parts) > 3 {
-        a.Action = a.Parts[3]
-      }
-      if len(a.Parts) > 4 {
-        a.Item = SLASH + strings.Join(a.Parts[4:], SLASH)
-        // Respect input trailing slash used to indicate
-        // operations on a directory
-        if strings.HasSuffix(a.Path, SLASH) {
-          a.Item += SLASH
-        }
-      }
-    }
-  }
-
-  parse(url.Path)
+  a.Parse(url.Path)
 
   fmt.Printf("%#v\n", a)
 
@@ -424,9 +427,12 @@ func (b *CommandAdapter) Handler(act *Action) (*Action, *ActionDefinition) {
   receiver := reflect.ValueOf(b)
   t := reflect.TypeOf(b)
 
+  fmt.Printf("TEST ON ACTION: %#v\n", act)
+
   for a, def := range ActionMap {
-    // fmt.Printf("test for match: %#v\n", a)
+    fmt.Printf("test for match: %#v\n", a)
     if a.Match(act) {
+      println("got method match: " + def.MethodName)
       def.Receiver = receiver
       m, _ = t.MethodByName(def.MethodName)
       def.Method = m
@@ -492,40 +498,45 @@ func (b *CommandAdapter) Execute(act *Action) (*ActionResult, *StatusError) {
   return result, result.Error
 }
 
+func NewAction(op int, path string) *Action {
+  act := &Action{Operation: op}
+  act.Parse(path)
+  return act
+}
+
 func init() {
+
+  contextArg := func(action *Action) []reflect.Value {
+    var args []reflect.Value
+    args = append(args, reflect.ValueOf(action.Context))
+    return args
+  }
+
   // GET /
-  ActionMap[&Action{Operation: OperationRead}] =
+  ActionMap[NewAction(OperationRead, "")] =
     &ActionDefinition{
       MethodName: "ListContainers",
       Status: http.StatusOK}
   // GET /templates
-  ActionMap[&Action{Operation: OperationRead, Type: "templates"}] =
+  ActionMap[NewAction(OperationRead, "/templates")] =
     &ActionDefinition{
       MethodName: "ListApplicationTemplates",
       Status: http.StatusOK}
   // GET /jobs
-  ActionMap[&Action{Operation: OperationRead, Type: "jobs"}] =
+  ActionMap[NewAction(OperationRead, "/jobs")] =
     &ActionDefinition{
       MethodName: "ListJobs",
       Status: http.StatusOK}
   // GET /jobs/{id}
-  ActionMap[&Action{Operation: OperationRead, Type: "jobs", Context: "*"}] =
+  ActionMap[NewAction(OperationRead, "/jobs/*")] =
     &ActionDefinition{
       MethodName: "ReadJob",
-      Arguments: func(action *Action) []reflect.Value {
-        var args []reflect.Value
-        args = append(args, reflect.ValueOf(action.Context))
-        return args
-      },
+      Arguments: contextArg,
       Status: http.StatusOK}
   // DELETE /jobs/{id}
-  ActionMap[&Action{Operation: OperationRead, Type: "jobs", Context: "*"}] =
+  ActionMap[NewAction(OperationDelete, "/jobs/*")] =
     &ActionDefinition{
       MethodName: "AbortJob",
-      Arguments: func(action *Action) []reflect.Value {
-        var args []reflect.Value
-        args = append(args, reflect.ValueOf(action.Context))
-        return args
-      },
+      Arguments: contextArg,
       Status: http.StatusOK}
 }

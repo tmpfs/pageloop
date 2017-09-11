@@ -45,7 +45,7 @@ func (h RestV2Handler) doServeHttp(res http.ResponseWriter, req *http.Request) (
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  // Parse out an action from the requets
+  // Parse out an action from the request
   if act, err := h.Adapter.CommandAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)
   } else {
@@ -57,6 +57,5 @@ func (h RestV2Handler) doServeHttp(res http.ResponseWriter, req *http.Request) (
     }
     return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
   }
-
   return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
