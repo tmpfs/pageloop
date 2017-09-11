@@ -86,10 +86,6 @@ type CommandDefinition struct {
   Status int
   // Build function invocation arguments
   Arguments func(b *CommandAdapter, action *Action) []reflect.Value
-
-  // The number of arguments we expect to be populated by the caller.
-  Arity int
-
   // An index into the command return values to use as the result data.
   Index int
 }
@@ -418,10 +414,13 @@ func init() {
     &CommandDefinition{MethodName: "ReadContainer", Status: http.StatusOK, Arguments: containerArg})
   // PUT /apps/{container}
   push(NewAction(OperationCreate, "/apps/*"),
-    &CommandDefinition{MethodName: "CreateApp", Status: http.StatusOK, Arguments: containerArg, Arity: 1})
+    &CommandDefinition{MethodName: "CreateApp", Status: http.StatusCreated, Arguments: containerArg})
   // GET /apps/{container}/{application}
   push(NewAction(OperationRead, "/apps/*/*"),
     &CommandDefinition{MethodName: "ReadApplication", Status: http.StatusOK, Arguments: applicationArg, Index: 1})
+  // DELETE /apps/{container}/{application}
+  push(NewAction(OperationDelete, "/apps/*/*"),
+    &CommandDefinition{MethodName: "DeleteApp", Status: http.StatusOK, Arguments: applicationArg})
   // GET /apps/{container}/{application}/files
   push(NewAction(OperationRead, "/apps/*/*/files"),
     &CommandDefinition{MethodName: "ReadApplicationFiles", Status: http.StatusOK, Arguments: applicationArg})

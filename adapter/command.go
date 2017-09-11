@@ -26,6 +26,10 @@ func (tj *TaskJobComplete) Done(err error, job *Job) {
 //
 // For simplicity with access over HTTP this implementation always
 // returns errors with an associated HTTP status code.
+//
+// Usage of this package involves creating a new action by calling CommandAction(),
+// the resulting action should then be passed to Find() to see if the route matches
+// followed by a call to Execute() to invoke the command function.
 type CommandAdapter struct {
   Name string
   Version string
