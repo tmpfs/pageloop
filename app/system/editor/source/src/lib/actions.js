@@ -11,6 +11,11 @@ function error (res) {
 
 function Actions (router) {
   return {
+    'reset-current-file': function (context, url) {
+      context.state.current = context.state.app.defaultFile
+      context.commit('preview-blank')
+      context.commit('editor-view', 'welcome')
+    },
     'error': function (context, err) {
       // Log the error
       context.dispatch('log', err)
@@ -254,14 +259,14 @@ function Actions (router) {
           context.state.notify({title: 'File Info', message: `Deleted ${urls.join(', ')}`})
           // Current selected file is in deleted list
           if (~files.indexOf(context.state.current)) {
-            context.commit('reset-current-file')
+            // TODO: remove file from window location if already selected!
+            context.dispatch('reset-current-file')
           }
           return context.dispatch('reload')
             .then(() => {
               // Deleted the currently selected file
               if (context.state.current && ~files.indexOf(context.state.current)) {
-                context.commit('reset-current-file')
-                context.commit('editor-view', 'welcome')
+                context.dispatch('reset-current-file')
               }
 
               if (len <= 1) {

@@ -74,13 +74,10 @@ function Routes (router, store) {
         action = 'media'
       }
 
-      // let overlay = action === 'new-file'
-
       // Need to load application data
       if (container !== state.container || (container === state.container && application !== state.application)) {
         store.dispatch('load', {container: match.map.container, application: match.map.application})
           .then(() => {
-            // if (!overlay) store.commit('reset-current-file')
             store.commit('main-view', 'edit')
             store.commit('sidebar-view', action)
             if (!store.state.hasFile()) {
@@ -88,7 +85,6 @@ function Routes (router, store) {
             }
           })
       } else {
-        // if (!overlay) store.commit('reset-current-file')
         store.commit('sidebar-view', action)
         if (!store.state.hasFile()) {
           store.commit('editor-view', 'welcome')
@@ -112,9 +108,8 @@ function Routes (router, store) {
             return router.replace(href, true)
           }
           */
-          store.commit('reset-current-file')
+          store.dispatch('reset-current-file')
           store.commit('main-view', 'edit')
-          store.commit('editor-view', 'welcome')
         })
     })
   router.add(/^(|home|apps|docs|edit|settings)$/, ['section'], (match) => {

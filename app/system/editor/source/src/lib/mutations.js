@@ -61,19 +61,14 @@ const Mutations = {
       }
     }
   },
-  /*
   'preview-blank': function (state, file) {
+    state.preview.blank = !state.preview.blank
   },
-  */
   'preview-change': function (state, file) {
     state.preview.file = file
   },
   'preview-refresh': function (state, toggle) {
     state.preview.refresh = toggle
-  },
-  'reset-current-file': function (state, url) {
-    state.current = state.app.defaultFile
-    state.preview.blank = !state.preview.blank
   },
   'maximize-column': function (state, info) {
     // Maximizing
