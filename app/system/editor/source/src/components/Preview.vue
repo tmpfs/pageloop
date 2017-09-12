@@ -87,11 +87,9 @@ export default {
   mounted: function () {
     // This catches the case when switching main views
     // and a refresh is needed
-    /*
     if (this.file) {
-      this.refresh(this.file)
+      this.reload()
     }
-    */
   },
   methods: {
     loaded: function (e) {
