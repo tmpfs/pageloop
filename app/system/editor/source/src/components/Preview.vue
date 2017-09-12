@@ -87,9 +87,11 @@ export default {
   mounted: function () {
     // This catches the case when switching main views
     // and a refresh is needed
+    /*
     if (this.file) {
       this.refresh(this.file)
     }
+    */
   },
   methods: {
     loaded: function (e) {
@@ -99,6 +101,10 @@ export default {
       let pathname = win.location.pathname
       pathname = pathname.replace(base, '')
       this.path = pathname + win.location.hash
+
+      if (/\.(txt)$/.test(pathname)) {
+        console.log('show text file...')
+      }
 
       // Kludge so we can show the anchor hash in the preview path
       win.addEventListener('click', (e) => {
@@ -123,13 +129,15 @@ export default {
 
       const url = file.uri
 
-      let allowed = /\.(html?|pdf|svg|jpe?g|png|gif)$/
+      // console.log('binary: ' + file.binary)
+
+      let allowed = /\.(html?|pdf|svg|jpe?g|png|gif|txt)$/
       if (!file.dir && url && !allowed.test(url)) {
         return
       }
 
       this.src = this.getPreviewUrl(url)
-      // console.log('set iframe preview src to: ' + this.src)
+      console.log('preview src: ' + url)
     },
     getPreviewUrl (url) {
       if (url) {

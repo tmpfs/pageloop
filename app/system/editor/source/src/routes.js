@@ -101,12 +101,17 @@ function Routes (router, store) {
     (match) => {
       store.dispatch('load', {container: match.map.container, application: match.map.application})
         .then(() => {
+          // TODO: think about how we can automatically select an index file
+          // TODO: without interfering with direct file links
+
+          /*
           let index = store.state.getIndexFile()
           if (index) {
             let href = match.href + '/files' + index.url
             // Redirect to index page if there is one
             return router.replace(href, true)
           }
+          */
           store.commit('reset-current-file')
           store.commit('main-view', 'edit')
           store.commit('editor-view', 'welcome')
