@@ -63,36 +63,38 @@ func(b *CommandExecute) RunTask(a *Application, task string) (*Job, *StatusError
 }
 
 // Create application.
-func (b *CommandExecute) CreateApp(container *Container, a *Application) (*Application, *StatusError) {
+func (b *CommandExecute) CreateApp(container *Container, app *Application) (*Application, *StatusError) {
   // TODO: do not allow creating apps on non-user containers!
-  var app *Application
+  if container.Protected {
+    return nil, CommandError(http.StatusForbidden, "Cannot create applications in a protected container.")
+  }
 
-  existing := container.GetByName(a.Name)
+  existing := container.GetByName(app.Name)
   if existing != nil {
-    return nil, CommandError(http.StatusPreconditionFailed, "Application %s already exists", a.Name)
+    return nil, CommandError(http.StatusPreconditionFailed, "Application %s already exists", app.Name)
   }
 
   // Get mountpoint URL.
-  a.Url = a.MountpointUrl(container)
+  app.Url = app.MountpointUrl(container)
 
   // Mountpoint exists.
-  exists := b.Mountpoints.HasMountpoint(a.Url)
+  exists := b.Mountpoints.HasMountpoint(app.Url)
   if exists {
-    return nil, CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", a.Url)
+    return nil, CommandError(http.StatusPreconditionFailed, "Mountpoint URL %s already exists", app.Url)
   }
 
   // Create and save a mountpoint for the application.
-  if mountpoint, err := b.Mountpoints.CreateMountpoint(a); err != nil {
+  if mountpoint, err := b.Mountpoints.CreateMountpoint(app); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   } else {
     // Handle creating from a template.
-    if a.Template != nil {
+    if app.Template != nil {
       // Find the template application.
-      if source, err := b.Host.LookupTemplate(a.Template); err != nil {
+      if source, err := b.Host.LookupTemplate(app.Template); err != nil {
         return nil, CommandError(http.StatusBadRequest, err.Error())
       } else {
         // Copy template source files.
-        if err := a.CopyApplicationTemplate(source); err != nil {
+        if err := app.CopyApplicationTemplate(source); err != nil {
           return nil, CommandError(http.StatusInternalServerError, err.Error())
         }
       }
@@ -153,18 +155,18 @@ func (b *CommandExecute) ReadApplicationPages(app *Application) []*Page {
 // FILES / PAGES
 
 // Create a new file and publish it, the file cannot already exist on disc.
-func (b *CommandExecute) CreateFile(a *Application, url string, content []byte) (*File, *StatusError) {
+func (b *CommandExecute) CreateFile(app *Application, url string, content []byte) (*File, *StatusError) {
   var err error
-	var file *File = a.Urls[url]
+	var file *File = app.Urls[url]
 
 	if file != nil {
     return nil, CommandError(http.StatusConflict,"File already exists %s", url)
 	}
-  if a.ExistsConflict(url) {
+  if app.ExistsConflict(url) {
     return nil, CommandError(http.StatusConflict,"File already exists, publish conflict on %s", url)
   }
 
-  if file, err = a.Create(url, content); err != nil {
+  if file, err = app.Create(url, content); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
 
@@ -172,7 +174,7 @@ func (b *CommandExecute) CreateFile(a *Application, url string, content []byte) 
 }
 
 // Create a file from a template.
-func (b *CommandExecute) CreateFileTemplate(a *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
+func (b *CommandExecute) CreateFileTemplate(app *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
   var err error
   var file *File
   var content []byte
@@ -186,25 +188,25 @@ func (b *CommandExecute) CreateFileTemplate(a *Application, url string, template
   }
 
   content = file.Source(true)
-  return b.CreateFile(a, url, content)
+  return b.CreateFile(app, url, content)
 }
 
 // Update file content.
-func (b *CommandExecute) UpdateFile(a *Application, f *File, content []byte) (*File, *StatusError) {
-  if err := a.Update(f, content); err != nil {
+func (b *CommandExecute) UpdateFile(app *Application, f *File, content []byte) (*File, *StatusError) {
+  if err := app.Update(f, content); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
   return f, nil
 }
 
 // Delete a file.
-func (b *CommandExecute) DeleteFile(a *Application, url string) (*File, *StatusError) {
+func (b *CommandExecute) DeleteFile(app *Application, url string) (*File, *StatusError) {
   var err error
-  var file *File = a.Urls[url]
+  var file *File = app.Urls[url]
   if file == nil {
     return nil, CommandError(http.StatusNotFound, "")
   }
-  if err = a.Del(file); err != nil {
+  if err = app.Del(file); err != nil {
     return nil, CommandError(http.StatusInternalServerError, err.Error())
   }
   return file, nil
