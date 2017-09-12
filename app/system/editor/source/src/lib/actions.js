@@ -290,17 +290,10 @@ function Actions (router) {
             file[k] = doc[k]
           }
 
-          // TODO: fix the UI on rename!
-          console.log(file)
+          // TODO: use the current active filter - not `files`
+          router.replace(context.state.getAppHref('files', file.url), false)
 
-          context.commit('preview-url', file.uri)
-
-          /*
-          return context.dispatch('reload')
-            .then(() => {
-              context.commit('preview-url', file)
-            })
-          */
+          context.commit('preview-url', file)
         })
     },
     'upload': function (context, info) {

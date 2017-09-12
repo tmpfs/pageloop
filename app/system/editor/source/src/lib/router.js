@@ -13,6 +13,7 @@ class Router {
 
   navigate (href, state) {
     let url = this.url(href)
+    // TODO: work out error with setting state!
     // history.pushState({href: href, state: state}, '', url)
     history.pushState({href: href, state: null}, '', url)
     this.route(href)
