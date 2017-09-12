@@ -47,7 +47,7 @@ class ApiClient {
         file.complete = true
 
         // File object returned by the server
-        file.handle = doc.file
+        file.handle = doc
 
         // Set a timeout before completion so
         // progress preloaders are visible on fast
