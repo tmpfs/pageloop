@@ -9,7 +9,7 @@ var(
   Routes []*ActionMap
 )
 
-// Initialize the action list with route actions and action definitions.
+// Initialize the action list with route actions and command definitions.
 func init() {
   push := func(action *Action, def *CommandDefinition) {
     Routes = append(Routes, &ActionMap{Action: action, CommandDefinition: def})

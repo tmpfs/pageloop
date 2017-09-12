@@ -42,7 +42,7 @@ func (c *Container) Add(app *Application) error {
 	}
 
 	if !NamePatternRe.MatchString(app.Name) {
-		return fmt.Errorf("Application name %s must match pattern %s", app.Name, NamePattern)
+		return fmt.Errorf("Application name is invalid must match pattern %s", NamePattern)
 	}
 
 	var exists *Application = c.GetByName(app.Name)

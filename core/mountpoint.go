@@ -70,7 +70,7 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
 
   if !ValidName(a.Name) {
     return nil, fmt.Errorf(
-      "Application name %s is invalid, must match pattern %s", a.Name, NamePattern)
+      "Application name is invalid, must match pattern %s", NamePattern)
   }
 
   // Configure filesystem path for source files
