@@ -7,7 +7,8 @@
       <h2>Editor</h2>
       <nav class="toolbar clearfix">
         <a @click="save"
-          v-bind:class="{hidden: currentView != 'code-editor'}" href="#" title="Save & Run">Save & Run</a>
+          v-bind:class="{hidden: currentView != 'code-editor', disabled: !isDirty}"
+          title="Save & Run">Save & Run</a>
         <a
           @click="maximized = 'editor'"
           :class="{hidden: maximized === 'editor'}"
