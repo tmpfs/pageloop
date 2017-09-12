@@ -61,8 +61,12 @@ const Mutations = {
       }
     }
   },
-  'preview-url': function (state, url) {
-    state.preview.url = url
+  'preview-url': function (state, file) {
+    console.log('setting preview url: ' + file)
+    state.preview.file = file
+    if (file) {
+      state.preview.url = file.uri
+    }
   },
   'preview-refresh': function (state, toggle) {
     state.preview.refresh = toggle

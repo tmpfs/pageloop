@@ -285,16 +285,13 @@ function Actions (router) {
 
           context.state.notify({title: 'File Info', message: `Renamed ${file.url} to ${newName}`})
 
-          // TODO: sync with pages list too!
-          // TODO: renaming a file with the sidebar pages view
-          // TODO: does not display the new file name
-          // Update file data
-          for (let k in doc) {
-            file[k] = doc[k]
-          }
+          context.state.app.updateFile(file, doc)
 
           const view = context.state.sidebar.view
           router.replace(context.state.getAppHref(view, file.url), false)
+
+          console.log('after file rename: ' + file.url)
+          console.log('after file rename: ' + file.uri)
 
           context.commit('preview-url', file)
         })

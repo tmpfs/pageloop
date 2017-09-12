@@ -103,6 +103,7 @@ export default {
       })
     },
     refresh (file) {
+      console.log('preview refresh called')
       if (file === '') {
         this.path = ''
         this.src = ''
@@ -110,6 +111,11 @@ export default {
       }
 
       const url = file.uri
+
+      console.log('preview refresh: ' + url)
+      if (this.file) {
+        console.log('preview refresh: ' + this.file.uri)
+      }
 
       // TODO: work out how to stop the iframe interpreting
       // TODO: the pdf as an HTML Document

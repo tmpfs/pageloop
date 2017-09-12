@@ -24,6 +24,23 @@ class Application {
     }
   }
 
+  // Update a file with new fields.
+  updateFile (file, doc) {
+    // Get page reference before update
+    const page = this.getPageByUrl(file.url)
+
+    // TODO: sync with pages list too!
+    // TODO: renaming a file with the sidebar pages view
+    // TODO: does not display the new file name
+    // Update file data
+    for (let k in doc) {
+      file[k] = doc[k]
+      if (page) {
+        page[k] = doc[k]
+      }
+    }
+  }
+
   hasTasks () {
     for (let k in this.build.tasks) {
       return true
