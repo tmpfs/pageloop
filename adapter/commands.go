@@ -174,6 +174,11 @@ func (b *CommandAdapter) CreateFileTemplate(c string, a string, f string, tpl *A
 }
 
 // Update file content.
+//
+// This can return a file or page so that when updating pages the page data
+// can be updated on the client.
+//
+// TODO: create an interface for file/page types and return that rather than interface{}
 func (b *CommandAdapter) UpdateFile(c string, a string, f string, content []byte) (interface{}, *StatusError) {
   if app, file, err :=  b.ReadFile(c, a, f); err != nil {
     return nil, err
