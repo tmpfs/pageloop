@@ -120,7 +120,7 @@ export default {
 
       // If the src attribute will not change the page
       // won't be refreshed so we need to call reload()
-      if (url === this.path) {
+      if (this.file && url === this.file.uri) {
         let frame = document.querySelector('.publish-preview')
         return frame.contentDocument.location.reload()
       }
