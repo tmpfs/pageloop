@@ -291,7 +291,8 @@ function Actions (router) {
           }
 
           // TODO: use the current active filter - not `files`
-          router.replace(context.state.getAppHref('files', file.url), false)
+          const view = context.state.sidebar.view
+          router.replace(context.state.getAppHref(view, file.url), false)
 
           context.commit('preview-url', file)
         })
