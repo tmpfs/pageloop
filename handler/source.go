@@ -45,6 +45,8 @@ func (h SourceHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		file = urls[indexPage]
 	}
 
+  res.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+
 	// TODO: write cache busting headers
 	// TODO: handle directory requests (no data)
 	if file != nil && !file.Info().IsDir() {
