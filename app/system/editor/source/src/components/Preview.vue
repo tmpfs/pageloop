@@ -6,7 +6,7 @@
     <div class="column-header">
       <h2>Preview</h2>
         <nav class="toolbar clearfix">
-          <a @click="refresh(file)"
+          <a @click="reload()"
              title="Refresh preview"
              :class="{hidden: path == ''}">Refresh</a>
           <a
@@ -44,6 +44,7 @@ export default {
     }
   },
   computed: {
+    // TODO: figure out sandbox that allows pdfs to render
     sandbox: function () {
       // return 'allow-same-origin allow-scripts'
     },
@@ -58,30 +59,27 @@ export default {
     previewRefresh: function () {
       return this.$store.state.preview.refresh
     },
-    url: {
-      get: function () {
-        return this.$store.state.preview.url
-      },
-      set: function (val) {
-        return this.$store.commit('preview-url', this.file)
-      }
-    },
     file: {
       get: function () {
         return this.$store.state.preview.file
       },
       set: function (val) {
-        return this.$store.commit('preview-url', val)
+        return this.$store.commit('preview-change', val)
       }
+    },
+    url: function () {
+      return this.file ? this.file.uri : undefined
     }
   },
   watch: {
-    url: function (url) {
-      this.refresh(url)
+    url: function (val) {
+      this.refresh(this.file)
     },
+    // We need this awkward toggle to ensure the property
+    // actually changes each time
     previewRefresh: function (val) {
       if (val === true) {
-        this.refresh(this.file)
+        this.reload()
       }
       this.$store.commit('preview-refresh', false)
     }
@@ -110,9 +108,13 @@ export default {
         }, 50)
       })
     },
+    reload: function () {
+      // If the src attribute will not change the page
+      // won't be refreshed so we need to call reload()
+      let frame = document.querySelector('.publish-preview')
+      return frame.contentDocument.location.reload()
+    },
     refresh (file) {
-      console.log('preview refresh called')
-      console.log(file)
       if (!file) {
         this.path = ''
         this.src = ''
@@ -121,28 +123,15 @@ export default {
 
       const url = file.uri
 
-      console.log('preview refresh: ' + url)
-      if (this.file) {
-        console.log('preview refresh: ' + this.file.uri)
-      }
-
-      // TODO: work out how to stop the iframe interpreting
-      // TODO: the pdf as an HTML Document
       let allowed = /\.(html?|pdf|svg|jpe?g|png|gif)$/
       if (!file.dir && url && !allowed.test(url)) {
         return
       }
 
-      // If the src attribute will not change the page
-      // won't be refreshed so we need to call reload()
-      if (this.file && url === this.file.uri) {
-        let frame = document.querySelector('.publish-preview')
-        return frame.contentDocument.location.reload()
-      }
-      // this.file = file
-      this.src = this.getPreviewUrl(url, file)
+      this.src = this.getPreviewUrl(url)
+      // console.log('set iframe preview src to: ' + this.src)
     },
-    getPreviewUrl (url, file) {
+    getPreviewUrl (url) {
       if (url) {
         url = url.replace(/^\//, '')
       }

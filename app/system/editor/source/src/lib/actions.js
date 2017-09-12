@@ -148,7 +148,7 @@ function Actions (router) {
           if (file.editorView) {
             context.commit('editor-view', file.editorView)
           }
-          context.commit('preview-url', file)
+          context.commit('preview-change', file)
           if (context.state.editor.view === 'welcome') {
             if (!file.binary) {
               context.commit('editor-view', context.state.editor.defaultView)
@@ -290,10 +290,7 @@ function Actions (router) {
           const view = context.state.sidebar.view
           router.replace(context.state.getAppHref(view, file.url), false)
 
-          console.log('after file rename: ' + file.url)
-          console.log('after file rename: ' + file.uri)
-
-          context.commit('preview-url', file)
+          context.commit('preview-change', file)
         })
     },
     'upload': function (context, info) {
