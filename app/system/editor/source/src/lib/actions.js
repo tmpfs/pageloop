@@ -252,6 +252,10 @@ function Actions (router) {
           })
 
           context.state.notify({title: 'File Info', message: `Deleted ${urls.join(', ')}`})
+          // Current selected file is in deleted list
+          if (~files.indexOf(context.state.current)) {
+            context.commit('reset-current-file')
+          }
           return context.dispatch('reload')
             .then(() => {
               // Deleted the currently selected file

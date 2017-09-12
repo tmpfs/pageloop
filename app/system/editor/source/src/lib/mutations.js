@@ -61,6 +61,10 @@ const Mutations = {
       }
     }
   },
+  /*
+  'preview-blank': function (state, file) {
+  },
+  */
   'preview-change': function (state, file) {
     state.preview.file = file
   },
@@ -69,7 +73,7 @@ const Mutations = {
   },
   'reset-current-file': function (state, url) {
     state.current = state.app.defaultFile
-    state.preview.url = ''
+    state.preview.blank = !state.preview.blank
   },
   'maximize-column': function (state, info) {
     // Maximizing

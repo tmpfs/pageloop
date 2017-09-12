@@ -3,6 +3,7 @@ class PreviewState {
     this.url = ''
     this.file = {}
     this.refresh = false
+    this.blank = true
   }
 }
 

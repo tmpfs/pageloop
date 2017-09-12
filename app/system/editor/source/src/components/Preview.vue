@@ -69,11 +69,17 @@ export default {
     },
     url: function () {
       return this.file ? this.file.uri : undefined
+    },
+    empty: function () {
+      return this.$store.state.preview.blank
     }
   },
   watch: {
     url: function (val) {
       this.refresh(this.file)
+    },
+    empty: function (val) {
+      this.blank()
     },
     // We need this awkward toggle to ensure the property
     // actually changes each time
@@ -101,6 +107,8 @@ export default {
       this.path = pathname + win.location.hash
 
       if (/\.(txt)$/.test(pathname)) {
+        // TODO: basic text file styles
+        // TODO: handle all (non-html / markdown) text/* mime types in the same way
         console.log('show text file...')
       }
 
@@ -118,11 +126,13 @@ export default {
       let frame = document.querySelector('.publish-preview')
       return frame.contentDocument.location.reload()
     },
+    blank: function () {
+      this.path = ''
+      this.src = ''
+    },
     refresh (file) {
       if (!file) {
-        this.path = ''
-        this.src = ''
-        return
+        return this.blank()
       }
 
       const url = file.uri
