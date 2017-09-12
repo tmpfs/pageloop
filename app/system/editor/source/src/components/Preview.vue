@@ -63,6 +63,14 @@ export default {
         return this.$store.state.preview.url
       },
       set: function (val) {
+        return this.$store.commit('preview-url', this.file)
+      }
+    },
+    file: {
+      get: function () {
+        return this.$store.state.preview.file
+      },
+      set: function (val) {
         return this.$store.commit('preview-url', val)
       }
     }
@@ -104,7 +112,8 @@ export default {
     },
     refresh (file) {
       console.log('preview refresh called')
-      if (file === '') {
+      console.log(file)
+      if (!file) {
         this.path = ''
         this.src = ''
         return
@@ -130,7 +139,7 @@ export default {
         let frame = document.querySelector('.publish-preview')
         return frame.contentDocument.location.reload()
       }
-      this.file = file
+      // this.file = file
       this.src = this.getPreviewUrl(url, file)
     },
     getPreviewUrl (url, file) {
