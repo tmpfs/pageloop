@@ -174,11 +174,18 @@ func (b *CommandAdapter) CreateFileTemplate(c string, a string, f string, tpl *A
 }
 
 // Update file content.
-func (b *CommandAdapter) UpdateFile(c string, a string, f string, content []byte) (*File, *StatusError) {
+func (b *CommandAdapter) UpdateFile(c string, a string, f string, content []byte) (interface{}, *StatusError) {
   if app, file, err :=  b.ReadFile(c, a, f); err != nil {
     return nil, err
   } else {
-    return b.CommandExecute.UpdateFile(app, file, content)
+    if file, err := b.CommandExecute.UpdateFile(app, file, content); err != nil {
+      return nil, err
+    } else {
+      if file.Page() != nil {
+        return file.Page(), nil
+      }
+      return file, nil
+    }
   }
 }
 

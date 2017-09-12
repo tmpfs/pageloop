@@ -217,11 +217,12 @@ function Actions (router) {
                 throw err
               })
           }
+          console.log(doc)
           // Currently YAML is in the source code and
           // can be edited directly we need to sync
           // the data in case it changed
-          if (doc.file && doc.file.data) {
-            file.data = doc.file.data
+          if (doc && doc.data) {
+            file.data = doc.data
           }
           return context.dispatch('preview-refresh')
         })
