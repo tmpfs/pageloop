@@ -42,7 +42,8 @@ func (c *Container) Add(app *Application) error {
 	}
 
 	if !NamePatternRe.MatchString(app.Name) {
-		return fmt.Errorf("Application name is invalid must match pattern %s", NamePattern)
+		return fmt.Errorf(
+      "Application name is invalid, may only contain alphanumeric characters and the hyphen. May not begin with a hyphen.")
 	}
 
 	var exists *Application = c.GetByName(app.Name)

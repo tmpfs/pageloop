@@ -69,8 +69,8 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
   }
 
   if !ValidName(a.Name) {
-    return nil, fmt.Errorf(
-      "Application name is invalid, must match pattern %s", NamePattern)
+		return nil, fmt.Errorf(
+      "Application name is invalid, may only contain alphanumeric characters and the hyphen. Cannot begin with a hyphen.")
   }
 
   // Configure filesystem path for source files
