@@ -40,6 +40,10 @@ class State {
     this.containers = []
     this.templates = []
     this.setApplication('', '')
+
+    this.activity = {
+      notifications: []
+    }
   }
 
   getContainerByName (name) {
@@ -60,6 +64,9 @@ class State {
   }
 
   notify (info, del) {
+    if (!del) {
+      this.activity.notifications.push(info)
+    }
     return this.notifier.notify(info, del)
   }
 
