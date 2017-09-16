@@ -18,6 +18,10 @@ Wow, so much to do, here is some stuff:
    Implementation: 88ceed3f8a32fc37121ad2d1e3cc7edd7d8c303d
 
 7) Add ability to choose application template when creating new apps.
+
+   Basic implementation added, requires more attention to the design and should
+   allow the user to enter a display name and we automatically infer the `name` identifier
+   to use for the URL.
 8) Add confirmation when deleting apps.
 
 	 Implementation: 08f9c5f9921688fcb0f84e1711c05117c50e08d8
@@ -52,6 +56,10 @@ Wow, so much to do, here is some stuff:
     directory. Maybe easiest if they are dragged directly on to a folder in the files list
     rather than creating a separate view for browsing directories although eventually both
     should be supported. Can add an upload area to the file info for directories also.
+
+    Implemented as a drop on the sidebar to upload to the root of the application or directly
+    onto a target directory in the sidebar list. Also a select/drop interface has been added to the
+    file info for directories.
 18) Consider bitmap/svg editor interfaces.
 19) Consider how to automatically create thumbnails on image upload.
 20) Consider normalizing file names on upload, most users do unusual stuff like
@@ -63,10 +71,19 @@ Wow, so much to do, here is some stuff:
 
 22) [[[Fix golang test specs]]]
 23) Support list of media files in sidebar.
+
+    Implemented as a set of client side filters on the primary files list, requires work to
+    compare by MIME type as opposed to file extension.
+
 24) Consider how we can support build tasks, CSS preprocessors and Javascript compilers.
     The current thinking is that we run a node.js service and invoke that from the main
     pageloop service to perform conversion/compilation etc as the node.js ecosystem already
     has all the tools that people are used to.
+
+    Implemented as a simple task runner, whereby an application with a `build.yml` file is
+    deemed to run it's own build and therefore supply it's own template system, data sources
+    etc. Currently accessible in the UI as a dropdown list that starts running a task, requires
+    a lof of attention for providing build task status to the user.
 25) Consider `makestatic` integration for optimization and publishing.
 26) Fix loading/referencing files bundled with the executable. Remove bindata integration?
 
@@ -103,7 +120,7 @@ Wow, so much to do, here is some stuff:
 34) Validate generated markup - java + nu-validator :(
 35) Document size switching component for the preview area, eg: 320x480 ...
 36) Handle large files, do not load into memory, mark as external and serve from disc
-37) Set default stylesheet for markdown documents with no layout, looks pretty ugly
+37) Set default stylesheet for markdown/text documents with no layout, looks pretty ugly
     using the default user agent stylesheet :(
 38) Live markdown compilation on the client to update the preview area.
 39) Sort file lists client side to match server listing?
