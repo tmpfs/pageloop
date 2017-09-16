@@ -175,7 +175,7 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
   }
 
   // Pretty print byte sizes
-  funcs["bytesize"] = func(size int64) string {
+  funcs["prettybytes"] = func(size int64) string {
     return PrettyBytes(size)
   }
 

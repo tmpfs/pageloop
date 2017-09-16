@@ -105,12 +105,12 @@ Returns a  URL relative to the root of the application, for example:
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
 
-### bytesize
+### prettybytes
 
 Converts an int64 file size to a pretty string such as 12.2MB.
 
 ```html
-{{file.size | bytesize}}
+{{file.size | prettybytes}}
 ```
 
 ## Template Configuration

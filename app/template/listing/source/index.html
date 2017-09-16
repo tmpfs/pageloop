@@ -21,7 +21,7 @@
       {{range $index, $child := .Children}}
         <li>
           <a href="{{$child.Name}}" title="{{$child.Name}}">{{$child.Name}}</a>
-          <span class="filesize">{{$child.Size | bytesize}}</span>
+          <span class="filesize">{{$child.Size | prettybytes}}</span>
         </li>
       {{end}}
       </ul>
