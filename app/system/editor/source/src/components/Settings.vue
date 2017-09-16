@@ -6,9 +6,15 @@
       </div>
       <div class="content-column scroll">
         <h2>Preferences</h2>
-        <h3>Local Storage</h3>
         <p class="small">We store the state of the application and your preferences for the User Interface in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
-        <div class="form-actions"><button class="primary">Clear Local Storage</button></div>
+
+        <p class="small">{{count}} items in storage</p>
+        <div class="form-actions">
+          <button
+            @click="clearLocalStorage"
+            :class="{disabled: count == 0}"
+            class="primary">Clear Local Storage</button>
+        </div>
         <ul class="storage">
           <li v-for="v, k in localStorage">
             <div class="storage-key">{{k}}</div>
@@ -29,6 +35,14 @@ export default {
   computed: {
     localStorage: function () {
       return localStorage
+    },
+    count: function () {
+      return Object.keys(this.localStorage).length
+    }
+  },
+  methods: {
+    clearLocalStorage: function () {
+      this.$store.commit('clear-local-storage')
     }
   }
 }

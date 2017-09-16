@@ -124,6 +124,11 @@ const Mutations = {
   },
   'templates': function (state, templates) {
     state.templates = templates
+  },
+  'clear-local-storage': function (state) {
+    for (let k in localStorage) {
+      delete localStorage[k]
+    }
   }
 }
 
