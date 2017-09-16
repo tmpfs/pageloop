@@ -462,6 +462,7 @@ func (app *Application) setFileFields(file *File, base string) {
 	file.Url = url
 	if !file.info.IsDir() {
 		file.Size = file.info.Size()
+    file.PrettySize = PrettyBytes(file.Size)
 	}
 }
 
@@ -478,5 +479,6 @@ func (app *Application) setComputedPageFields(page *Page) {
 	page.Name = file.Name
 	page.Url = file.Url
 	page.Size = file.info.Size()
+  page.PrettySize = PrettyBytes(page.Size)
 }
 

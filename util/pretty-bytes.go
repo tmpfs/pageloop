@@ -1,6 +1,7 @@
 package util
 
 import(
+  "fmt"
   "strconv"
 )
 
@@ -8,19 +9,21 @@ var(
   // TODO: KiB, MiB etc
   Extensions map[string] int64
   Kb int64 = 1000
+  Bytes string = "bytes"
 )
 
 func PrettyBytes(num int64) string {
   for k, v := range Extensions {
     if num >= v {
-      // Don't do decimal precision for small values
-      if v <= Kb {
+      if v == Kb {
+        // Don't do decimal precision for KB values
         return strconv.FormatFloat(float64(num) / float64(v), 'f', 0, 64) + k
       }
       return strconv.FormatFloat(float64(num) / float64(v), 'f', 2, 64) + k
     }
   }
-  return string(num)
+
+  return fmt.Sprintf("%d bytes", num)
 }
 
 func init() {

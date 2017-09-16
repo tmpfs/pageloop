@@ -13,6 +13,7 @@ type File struct {
   Path string `json:"-"`
   Name string `json:"name"`
   Size int64 `json:"size,omitempty"`
+  PrettySize string `json:"filesize,omitempty"`
 
   // This is a slash separated path to the source file
   // relative to the application base, it will start with

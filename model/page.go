@@ -43,6 +43,7 @@ type Page struct {
   Mime string `json:"mime"`
   Binary bool `json:"binary"`
   Size int64 `json:"size,omitempty"`
+  PrettySize string `json:"filesize,omitempty"`
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`
   Blocks []Block  `json:"blocks"`

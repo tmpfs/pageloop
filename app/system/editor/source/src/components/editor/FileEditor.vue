@@ -70,7 +70,7 @@
           <li>Name: {{file.name}}</li>
           <li>URL : {{file.uri}}</li>
           <li v-bind:class="{hidden: !file.dir}">Directory: yes</li>
-          <li v-bind:class="{hidden: file.dir}">Size: {{file.size}} bytes</li>
+          <li v-bind:class="{hidden: file.dir}">Size: {{file.filesize}}</li>
           <li v-bind:class="{hidden: file.dir}">Mime: {{file.mime}}</li>
         </ul>
       </section>
