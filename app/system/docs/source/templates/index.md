@@ -105,6 +105,14 @@ Returns a  URL relative to the root of the application, for example:
 
 For an application mounted at `/docs/` would return `/docs/app.css`.
 
+### bytesize
+
+Converts an int64 file size to a pretty string such as 12.2MB.
+
+```html
+{{file.size | bytesize}}
+```
+
 ## Template Configuration
 
 If you need to disable template parsing for a page set the `template`
