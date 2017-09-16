@@ -100,3 +100,10 @@ a.up {
   padding: 0;
 }
 
+.directory-listing li {
+  clear: both;
+}
+
+.directory-listing .filesize {
+  float: right;
+}
