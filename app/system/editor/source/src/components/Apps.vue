@@ -5,7 +5,7 @@
         <a
           @click="currentView = 'new-app'"
           :class="{selected: currentView === 'new-app'}"
-          title="Create a new application">New Application</a>
+          title="Create a new application">➕ New Application</a>
 
         <a
           @click="listApplications(container, $event)"

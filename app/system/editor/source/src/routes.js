@@ -99,15 +99,15 @@ function Routes (router, store) {
         .then(() => {
           // TODO: think about how we can automatically select an index file
           // TODO: without interfering with direct file links
+          //
+          // console.log('current: ' + store.state.hasFile())
 
-          /*
           let index = store.state.getIndexFile()
           if (index) {
             let href = match.href + '/files' + index.url
             // Redirect to index page if there is one
             return router.replace(href, true)
           }
-          */
           store.dispatch('reset-current-file')
           store.commit('main-view', 'edit')
         })
