@@ -99,6 +99,20 @@ class ApiClient {
     })
   }
 
+  getVersion (app) {
+    const url = this.api
+    return this.request(url, {})
+  }
+
+  getMeta () {
+    // TODO: get stats object too
+    return this.getVersion()
+      .then(({response, document}) => {
+        const meta = {info: document}
+        return {response: response, document: meta}
+      })
+  }
+
   runTask (app, task) {
     const url = this.url + `tasks/${task}`
     const opts = {

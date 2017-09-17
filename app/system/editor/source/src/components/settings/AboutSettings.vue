@@ -1,15 +1,19 @@
 <template>
   <p class="small">
-    About settings!
+    <span>{{meta.info.name}} v{{meta.info.version}}</span>
   </p>
 </template>
 
 <script>
 export default {
   name: 'about-settings',
-  data: function () {
-    return {
+  computed: {
+    meta: function () {
+      return this.$store.state.meta
     }
+  },
+  mounted: function () {
+    this.$store.dispatch('get-meta')
   }
 }
 </script>

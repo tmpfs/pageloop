@@ -1,4 +1,7 @@
 const Mutations = {
+  'meta': function (state, meta) {
+    state.meta = meta
+  },
   'flash': function (state, message) {
     state.flash.message = message
   },

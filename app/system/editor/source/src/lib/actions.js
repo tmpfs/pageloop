@@ -11,6 +11,12 @@ function error (res) {
 
 function Actions (router) {
   return {
+    'get-meta': function (context) {
+      return context.state.client.getMeta()
+        .then(({response, document}) => {
+          context.commit('meta', document)
+        })
+    },
     'reset-current-file': function (context, url) {
       context.state.current = context.state.app.defaultFile
       context.commit('preview-blank')

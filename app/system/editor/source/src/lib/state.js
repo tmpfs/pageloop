@@ -6,6 +6,7 @@ import SidebarState from './state/sidebar'
 import EditorState from './state/editor'
 import PreviewState from './state/preview'
 
+import Meta from './state/meta'
 import Notifier from './state/notifier'
 import Alert from './state/alert'
 import Flash from './state/flash'
@@ -20,6 +21,8 @@ import {KeyManager} from './keymap'
 class State {
   constructor () {
     this.keymap = new KeyManager()
+
+    this.meta = new Meta()
 
     this.main = new MainState()
     this.sidebar = new SidebarState()
