@@ -11,7 +11,6 @@ class Log {
         message: message
       }
     } else if (message instanceof Error) {
-      console.log('treat as log error')
       message = {
         level: message.level || 'Warn',
         message: message.toString(),
@@ -22,22 +21,6 @@ class Log {
     if (this.messages.length > this.maximum) {
       this.messages.pop()
     }
-  }
-
-  get last () {
-    let m = null
-    if (this.messages.length) {
-      m = this.messages[this.messages.length - 1]
-    }
-    return m
-  }
-
-  toString () {
-    let m = this.last
-    if (m instanceof Error) {
-      return m.message || ('' + m)
-    }
-    return m
   }
 }
 

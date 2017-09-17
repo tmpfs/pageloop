@@ -52,8 +52,8 @@ function Actions (router) {
     },
     'containers': function (context) {
       return context.state.client.getContainers()
-        .then((list) => {
-          context.commit('containers', list)
+        .then(({response, document}) => {
+          context.commit('containers', document)
         })
     },
     'run-task': function (context, {app, task}) {
@@ -119,20 +119,20 @@ function Actions (router) {
     },
     'app': function (context) {
       return context.state.client.getApplication()
-        .then((doc) => {
-          context.commit('app', doc)
+        .then(({response, document}) => {
+          context.commit('app', document)
         })
     },
     'list-files': function (context) {
       return context.state.client.getFiles()
-        .then((list) => {
-          context.commit('files', list)
+        .then(({response, document}) => {
+          context.commit('files', document)
         })
     },
     'list-pages': function (context) {
       return context.state.client.getPages()
-        .then((list) => {
-          context.commit('pages', list)
+        .then(({response, document}) => {
+          context.commit('pages', document)
         })
     },
     'reload': function (context) {

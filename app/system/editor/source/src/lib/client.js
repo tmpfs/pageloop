@@ -16,6 +16,29 @@ class ApiClient {
     }
   }
 
+  postflight (res) {
+    if (this.log) {
+      const err = !/^20(0|1|2)$/.test('' + res.status)
+      const url = res.url.replace(document.location.origin, '')
+      this.log.add({level: res.status, message: url, error: err})
+    }
+  }
+
+  // Perform an API request and assume a JSON response.
+  request (url, opts) {
+    this.preflight(url, opts)
+    return fetch(url, opts)
+      .then((res) => {
+        this.postflight(res)
+        if (opts.raw) {
+          return res
+        }
+        return res.json().then((doc) => {
+          return {response: res, document: doc}
+        })
+      })
+  }
+
   upload (file) {
     return new Promise((resolve, reject) => {
       let u = this.url + 'files'
@@ -29,6 +52,8 @@ class ApiClient {
       }
 
       u += file.name
+
+      // TODO: log file uploads
 
       const method = file.exists ? 'POST' : 'PUT'
 
@@ -50,7 +75,8 @@ class ApiClient {
       xhr.onload = function (e) {
         const doc = JSON.parse(this.responseText)
         if (this.status !== 201 && this.status !== 200) {
-          return reject(new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
+          return reject(
+            new Error(`Upload failed for ${file.name}: ${doc.error || doc.message}`))
         }
         file.complete = true
 
@@ -73,81 +99,57 @@ class ApiClient {
     })
   }
 
-  json (url, options) {
-    return fetch(url, options)
-      .then((res) => res.json())
-      .catch((err) => err)
-  }
-
   runTask (app, task) {
-    let url = this.url + `tasks/${task}`
-    let opts = {
+    const url = this.url + `tasks/${task}`
+    const opts = {
       method: 'PUT'
     }
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   createNewApp (app) {
-    let url = this.api + 'apps/user/'
-    let opts = {
+    const url = this.api + 'apps/user/'
+    const opts = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(app)
     }
-
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   getContainers () {
     const url = this.api + 'apps/'
-    this.preflight(url, {})
-    return this.json(url)
+    return this.request(url, {})
   }
 
   getApplication () {
-    this.preflight(this.url, {})
-    return this.json(this.url)
+    const url = this.url
+    return this.request(url, {})
   }
 
   getPages () {
-    let url = this.url + 'pages/'
-    this.preflight(url, {})
-    return this.json(url)
+    const url = this.url + 'pages/'
+    return this.request(url, {})
   }
 
   getFiles () {
-    let url = this.url + 'files/'
-    this.preflight(url, {})
-    return this.json(url)
+    const url = this.url + 'files/'
+    return this.request(url, {})
   }
 
   getFileContents (pathname) {
-    let url = this.raw + pathname
-    this.preflight(url, {})
-    return fetch(url)
-      .catch((err) => err)
+    const url = this.raw + pathname
+    return this.request(url, {raw: true})
   }
 
   deleteFiles (files) {
-    let urls = files.map((f) => {
+    const urls = files.map((f) => {
       return f.url
     })
-    let url = this.url + 'files'
-    let opts = {
+    const url = this.url + 'files'
+    const opts = {
       method: 'DELETE',
       body: JSON.stringify(urls),
       headers: {
@@ -155,69 +157,44 @@ class ApiClient {
       }
     }
     opts.headers['Content-Length'] = opts.body.length
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   renameFile (file, newName) {
-    let url = this.url + 'files' + file.url
-    let opts = {
+    const url = this.url + 'files' + file.url
+    const opts = {
       method: 'POST',
       headers: {
         Location: newName
       }
     }
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   deleteApp (container, application) {
-    let url = this.api + `apps/${container}/${application}`
-    let opts = {
+    const url = this.api + `apps/${container}/${application}`
+    const opts = {
       method: 'DELETE'
     }
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   saveFile (file, value) {
     file.content = value
-
-    let url = this.url + 'files' + file.url
-    let opts = {
+    const url = this.url + 'files' + file.url
+    const opts = {
       method: 'POST',
       headers: {
         'Content-Type': file.mime
       },
       body: value
     }
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   createNewFile (name, template) {
-    let url = this.url + 'files' + name
-    let opts = {
+    const url = this.url + 'files' + name
+    const opts = {
       method: 'PUT',
       headers: {},
       body: ''
@@ -230,25 +207,12 @@ class ApiClient {
     }
 
     opts.headers['Content-Length'] = opts.body.length
-
-    this.preflight(url, opts)
-    return fetch(url, opts)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    return this.request(url, opts)
   }
 
   listTemplates () {
-    let url = this.api + 'templates'
-    this.preflight(url, {})
-    return fetch(url)
-      .then((res) => {
-        return res.json().then((doc) => {
-          return {response: res, document: doc}
-        })
-      })
+    const url = this.api + 'templates'
+    return this.request(url, {})
   }
 }
 
