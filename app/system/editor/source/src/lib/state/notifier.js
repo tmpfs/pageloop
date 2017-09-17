@@ -12,11 +12,9 @@ class Notifier {
 
   notify (info, del) {
     if (del) {
-      console.log('trying to delete notification')
       for (let i = 0; i < this.notifications.length; i++) {
         if (info === this.notifications[i]) {
           this.notifications.splice(i, 1)
-          console.log('deleting notification')
           break
         }
       }

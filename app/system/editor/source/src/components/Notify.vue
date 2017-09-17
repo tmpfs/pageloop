@@ -1,6 +1,6 @@
 <template>
-  <div class="notifications" :class="{hidden: !notifications.length}">
-    <transition-group name="reveal" tag="div">
+  <div class="notifications">
+    <transition-group appear name="reveal" tag="div" v-on:after-enter="afterEnter">
       <div class="notify"
         :class="{error: item.error}"
         v-bind:key="item.id"
@@ -29,55 +29,13 @@ export default {
       if (ind === -1) {
         return
       }
-      // let el = this.$el.childNodes[ind]
-      console.log('dismiss called')
-      console.log(this.notifications)
-
       return this.$store.state.notify(this.notifications[ind], true)
-
-      /*
-      if (!el) {
-        console.log('returning early')
-        return
-      }
-      let cb = () => {
-        el.removeEventListener('transitionend', cb)
-        console.log('transition end called')
-        this.$store.state.notify(item, true)
-      }
-      el.addEventListener('transitionend', cb)
-      */
-      // item.rendered = false
-      // item.reveal = false
     },
     afterEnter: function (el) {
-      // ...
       console.log('enter cmpleted')
-
-      /*
-      if (!n.persist) {
-        console.log('set timeout to dismiss')
-        setTimeout(() => {
-          this.dismiss(n)
-        }, n.timeout || 5000)
-      }
-      */
+      console.log(el)
+      // TODO: auto removal of notification
     }
-  },
-  updated: function () {
-    /*
-    setTimeout(() => {
-      this.notifications.forEach((n) => {
-        n.rendered = true
-        if (!n.persist) {
-          console.log('set timeout to dismiss')
-          setTimeout(() => {
-            this.dismiss(n)
-          }, n.timeout || 5000)
-        }
-      })
-    }, 50)
-    */
   }
 }
 </script>
@@ -104,14 +62,18 @@ export default {
 	}
 
   .reveal-enter {
-		transition: all 1s ease-in;
 		opacity: 0;
-		left: 32rem;
   }
 
-  .reveal-enter-active {
+  .reveal-enter-active, .reveal-leave-active {
+		transition: all 0.4s ease-in;
     opacity: 1;
     left: 0;
+  }
+
+  .reveal-enter, .reveal-leave-to {
+    opacity: 0;
+		left: 32rem;
   }
 
 	.notify.error {
@@ -129,17 +91,6 @@ export default {
 
 	.notify p:last-child {
 		margin-bottom: 0;
-	}
-
-  /*
-	.notify.reveal {
-		opacity: 1;
-		left: 0;
-	}
-  */
-
-	.notify.rendered {
-		transition: none;
 	}
 
 	.notify > h2 {
