@@ -1,4 +1,5 @@
 let socket
+let id = 0
 
 class SocketConnection {
   constructor () {
@@ -6,6 +7,7 @@ class SocketConnection {
     this.protocols
     this.opts
     this._conn
+    this._listeners = []
   }
 
   get connected () {
@@ -18,11 +20,24 @@ class SocketConnection {
     console.log(this._conn)
 
     this._conn.onopen = () => {
-      this._conn.send('Foo')
+      // this.send({message: 'foo'})
     }
 
     this._conn.onmessage = (e) => {
       console.log(e)
+
+      if (e.data) {
+        let doc
+        try {
+          doc = JSON.parse(e.data)
+        } catch (e) {
+          throw e
+        }
+        if (doc.id && this._listeners[id]) {
+          this._listeners[id](doc)
+          delete this._listeners[id]
+        }
+      }
     }
 
     this._conn.onerror = (err) => {
@@ -44,11 +59,25 @@ class SocketConnection {
     this._conn = null
   }
 
+  // Send a JSON payload and ignore any response
   send (payload) {
-    console.log(payload)
+    payload.id = (++id)
     if (this.connected) {
       this._conn.send(JSON.stringify(payload))
-      return true
+    }
+  }
+
+  request (payload) {
+    // console.log(payload)
+    payload.id = (++id)
+    if (this.connected) {
+      return new Promise((resolve, reject) => {
+        this._listeners[payload.id] = (document) => {
+          console.log('listener called')
+          resolve({response: {}, document: document})
+        }
+        this._conn.send(JSON.stringify(payload))
+      })
     }
   }
 }
@@ -93,7 +122,8 @@ class ApiClient {
   request (url, opts) {
     const log = this.preflight(url, opts)
     if (this.socket.connected) {
-      console.log('send api request over websocket')
+      // console.log('send api request over websocket')
+      return this.socket.request({url: url, opts: opts})
     }
     return fetch(url, opts)
       .then((res) => {
