@@ -1,3 +1,53 @@
+class SocketConnection {
+  constructor () {
+    this.url = document.location.origin.replace(/^http/, 'ws') + '/ws/'
+    this.protocols = undefined
+    this.opts = undefined
+    this._conn
+  }
+
+  connect () {
+    this._conn = new WebSocket(this.url, this.protocols, this.opts)
+
+    console.log(this._conn)
+
+    this._conn.onopen = () => {
+      console.log('socket conn opened')
+      this._conn.send('Foo')
+    }
+
+    this._conn.onmessage = (e) => {
+      console.log(e)
+    }
+
+    this._conn.onerror = (err) => {
+      console.error(err)
+    }
+
+    this._conn.onclose = () => {
+      console.log('socket conn closed')
+    }
+
+    /*
+    function onOpen() {
+      console.log('open called')
+    }
+
+    function onMessage(event) {
+      console.log(event)
+    }
+
+    function onError(err) {
+      console.error(err)
+    }
+
+    function onClose() {
+      this.ws.onclose = null;
+    }
+    */
+  }
+}
+
 class ApiClient {
   constructor (container, application) {
     this.host = ''
@@ -8,6 +58,9 @@ class ApiClient {
     this.raw = `/apps/raw/${container}/${application}`
     // should be injected
     this.log = null
+
+    this.websocket = new SocketConnection()
+    this.websocket.connect()
   }
 
   preflight (url, opts) {

@@ -48,10 +48,14 @@ module.exports = {
         target: 'http://localhost:3577',
         changeOrigin: true
       },
-      '/api/': {
-        target: 'http://localhost:3577',
+      '/ws/': {
+        target: 'ws://localhost:3577',
         changeOrigin: true,
         ws: true
+      },
+      '/api/': {
+        target: 'http://localhost:3577',
+        changeOrigin: true
       },
       '/apps/': {
         target: 'http://localhost:3577',

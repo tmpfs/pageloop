@@ -34,7 +34,7 @@ func (h HttpUtil) Errorj(res http.ResponseWriter, ex *StatusError) (int, error) 
 }
 
 // Read in a request body.
-runc (h HttpUtil) ReadBody(req *http.Request) ([]byte, error) {
+func (h HttpUtil) ReadBody(req *http.Request) ([]byte, error) {
 	defer req.Body.Close()
 	return ioutil.ReadAll(req.Body)
 }

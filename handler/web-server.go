@@ -4,6 +4,7 @@ import (
   "strings"
   "strconv"
   "net/http"
+  // "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/core"
 )
 
@@ -42,6 +43,15 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var handler http.Handler
 	var path string = req.URL.Path
 
+  // println("got request: " + path)
+
+  /*
+  if websocket.IsWebSocketUpgrade(req) {
+    println("do upgrade")
+    return
+  }
+  */
+
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
   Stats.Http.Add("requests", 1)
@@ -53,7 +63,7 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   proxy := &ResponseWriterProxy{Response: res}
 
   var system []string
-  system = append(system, API_URL, RPC_URL)
+  system = append(system, API_URL, RPC_URL, WEBSOCKET_URL)
 	// Look for system services first
 	for _, u := range system {
 		if strings.HasPrefix(path, u) {

@@ -40,7 +40,7 @@ type HostService struct {
 
 type HostListArgs struct {
 	Index int `json:"index"`
-	Len int `json:="length"`
+	Len int `json:"length"`
 }
 
 type HostListReply struct {

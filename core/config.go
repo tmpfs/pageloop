@@ -9,6 +9,7 @@ import (
 
 const(
 	API_URL = "/api/"
+	WEBSOCKET_URL = "/ws/"
 	RPC_URL = "/rpc/"
 )
 

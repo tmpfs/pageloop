@@ -66,10 +66,17 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	l.Host.Add(tpl)
 	l.Host.Add(usr)
 
+	// Websocket global endpoint (/ws/)
+	handler = WebsocketService(l.Mux, adapter)
+	l.MountpointManager.MountpointMap[WEBSOCKET_URL] = handler
+	log.Printf("Serving websocket service from %s", WEBSOCKET_URL)
+
 	// RPC global endpoint (/rpc/)
+  // TODO: pass adapter not the host!
 	handler = RpcService(l.Mux, l.Host)
 	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
+
 	// REST API global endpoint (/api/)
 	handler = RestService(l.Mux, adapter)
 	l.MountpointManager.MountpointMap[API_URL] = handler
