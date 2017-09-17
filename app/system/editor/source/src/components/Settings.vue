@@ -37,7 +37,7 @@
               class="primary">Clear Local Storage</button>
           </div>
           <ul class="storage">
-            <li v-for="v, k in localStorage">
+            <li v-for="v, k in storage">
               <div class="storage-key">{{k}}</div>
               <div class="storage-value">{{v}}</div>
             </li>
@@ -76,20 +76,31 @@
 <script>
 export default {
   name: 'settings',
+  data: function () {
+    return {
+      storage: window.localStorage
+    }
+  },
   computed: {
-    localStorage: function () {
-      return localStorage
-    },
     count: function () {
-      return Object.keys(this.localStorage).length
+      if (!this.storage) {
+        return 0
+      }
+      return Object.keys(this.storage).length
     },
     activityNotifications: function () {
       return this.$store.state.activity.notifications
     }
   },
+  mounted: function () {
+    this.storage = window.localStorage
+    // console.log('this storage: ')
+    // console.log(this.storage)
+  },
   methods: {
     clearLocalStorage: function () {
       this.$store.commit('clear-local-storage')
+      this.storage = null
     }
   }
 }
