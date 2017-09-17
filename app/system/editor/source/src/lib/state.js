@@ -33,10 +33,13 @@ class State {
 
     this.transfer = new Transfer()
     this.log = new Log()
+    this.network = new Log()
 
     // We use the defaultClient when no application
     // is selected
     this.client = this.defaultClient = new ApiClient()
+    this.defaultClient.log = this.network
+    this.client.log = this.network
 
     this.containers = []
     this.templates = []
@@ -123,6 +126,7 @@ class State {
 
     // Set up new API client
     this.client = new ApiClient(container, application)
+    this.client.log = this.network
   }
 
   get current () {

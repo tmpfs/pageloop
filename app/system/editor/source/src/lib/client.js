@@ -6,6 +6,14 @@ class ApiClient {
     this.application = application
     this.url = `${this.api}apps/${container}/${application}/`
     this.raw = `/apps/raw/${container}/${application}`
+    // should be injected
+    this.log = null
+  }
+
+  preflight (url, opts) {
+    if (this.log) {
+      this.log.add({level: opts.method || 'GET', message: url})
+    }
   }
 
   upload (file) {
@@ -76,6 +84,7 @@ class ApiClient {
     let opts = {
       method: 'PUT'
     }
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -94,6 +103,7 @@ class ApiClient {
       body: JSON.stringify(app)
     }
 
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -103,26 +113,32 @@ class ApiClient {
   }
 
   getContainers () {
-    return this.json(this.api + 'apps/')
+    const url = this.api + 'apps/'
+    this.preflight(url, {})
+    return this.json(url)
   }
 
   getApplication () {
+    this.preflight(this.url, {})
     return this.json(this.url)
   }
 
   getPages () {
     let url = this.url + 'pages/'
+    this.preflight(url, {})
     return this.json(url)
   }
 
   getFiles () {
     let url = this.url + 'files/'
+    this.preflight(url, {})
     return this.json(url)
   }
 
   getFileContents (pathname) {
-    let url = this.raw
-    return fetch(url + pathname)
+    let url = this.raw + pathname
+    this.preflight(url, {})
+    return fetch(url)
       .catch((err) => err)
   }
 
@@ -139,6 +155,7 @@ class ApiClient {
       }
     }
     opts.headers['Content-Length'] = opts.body.length
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -155,6 +172,7 @@ class ApiClient {
         Location: newName
       }
     }
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -168,6 +186,7 @@ class ApiClient {
     let opts = {
       method: 'DELETE'
     }
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -187,6 +206,7 @@ class ApiClient {
       },
       body: value
     }
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -211,6 +231,7 @@ class ApiClient {
 
     opts.headers['Content-Length'] = opts.body.length
 
+    this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
         return res.json().then((doc) => {
@@ -221,6 +242,7 @@ class ApiClient {
 
   listTemplates () {
     let url = this.api + 'templates'
+    this.preflight(url, {})
     return fetch(url)
       .then((res) => {
         return res.json().then((doc) => {
