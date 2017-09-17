@@ -3,6 +3,7 @@
     <transition-group appear name="reveal" tag="div" v-on:after-enter="afterEnter">
       <div class="notify"
         :class="{error: item.error}"
+        :data-id="item.id"
         v-bind:key="item.id"
         v-for="item, index in notifications">
           <a class="close" @click="dismiss(item)"></a>
@@ -29,12 +30,23 @@ export default {
       if (ind === -1) {
         return
       }
-      return this.$store.state.notify(this.notifications[ind], true)
+      item = this.notifications[ind]
+      if (item.timer) {
+        clearTimeout(item.timer)
+      }
+      return this.$store.state.notify(item, true)
     },
     afterEnter: function (el) {
-      console.log('enter cmpleted')
-      console.log(el)
-      // TODO: auto removal of notification
+      const id = parseInt(el.getAttribute('data-id'))
+      const item = this.$store.state.notifier.getById(id)
+      if (item && !item.persist) {
+        const timeout = item.timeout || 4000
+        item.timer = setTimeout(() => {
+          console.log('auto remove notification')
+          console.log(id)
+          this.dismiss(item)
+        }, timeout)
+      }
     }
   }
 }
@@ -59,6 +71,7 @@ export default {
 		padding: 0 0 1rem 0;
 		border-radius: 3px;
 		margin-bottom: 1rem;
+    /* transform: translateY(0); */
 	}
 
   .reveal-enter {
@@ -75,6 +88,12 @@ export default {
     opacity: 0;
 		left: 32rem;
   }
+
+  /*
+  .reveal-move {
+    transition: transform 0.5s ease-out;
+  }
+  */
 
 	.notify.error {
 	  background: var(--red-color);

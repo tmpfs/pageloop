@@ -25,6 +25,14 @@ class Notifier {
 
     this.notifications.unshift(info)
   }
+
+  getById (id) {
+    for (let i = 0; i < this.notifications.length; i++) {
+      if (id === this.notifications[i].id) {
+        return this.notifications[i]
+      }
+    }
+  }
 }
 
 export default Notifier
