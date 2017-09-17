@@ -32,6 +32,9 @@ func (b *CommandExecute) ReadStats() map[string]interface{} {
   stats := make(map[string]interface{})
   // TODO: do not expose these internals, just network i/o stats
   expvar.Do(func(kv expvar.KeyValue) {
+    if kv.Key == "cmdline" || kv.Key == "memstats" {
+      return
+    }
     // println(kv.Key)
     // TODO:
     stats[kv.Key] = kv.Value.String()

@@ -20,6 +20,8 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
+  Stats.Http.Add("requests", 1)
+
   var system []string
   system = append(system, API_URL, RPC_URL)
 	// Look for system services first

@@ -1,6 +1,7 @@
 <template>
   <p class="small">
     <span>{{meta.info.name}} v{{meta.info.version}}</span>
+    {{meta.stats}}
   </p>
 </template>
 
