@@ -12,24 +12,24 @@ class ApiClient {
 
   preflight (url, opts) {
     if (this.log) {
-      this.log.add({level: opts.method || 'GET', message: url})
+      return this.log.add({level: opts.method || 'GET', message: url})
     }
   }
 
-  postflight (res) {
-    if (this.log) {
+  postflight (log, res) {
+    if (log) {
       const err = !/^20(0|1|2)$/.test('' + res.status)
       const url = res.url.replace(document.location.origin, '')
-      this.log.add({level: res.status, message: url, error: err})
+      log.add({level: res.status, message: url, error: err})
     }
   }
 
   // Perform an API request and assume a JSON response.
   request (url, opts) {
-    this.preflight(url, opts)
+    const log = this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
-        this.postflight(res)
+        this.postflight(log, res)
         if (opts.raw) {
           return res
         }

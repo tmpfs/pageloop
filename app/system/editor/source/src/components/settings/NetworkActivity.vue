@@ -5,8 +5,14 @@
       <li class="item"
         :class="{error: item.error}"
         v-for="item in activity">
-        <h5>{{item.level}}</h5>
-        <p class="small">{{item.message}}</p>
+        <div>
+          <h5>{{item.level}}</h5>
+          <p class="small">{{item.message}}</p>
+        </div>
+        <div v-for="child in item.messages">
+          <h5>{{child.level}}</h5>
+          <p class="small">{{child.message}}</p>
+        </div>
       </li>
     </ul>
   </div>
@@ -37,15 +43,18 @@ export default {
 
   .item {
     background: var(--base03-color);
-    display: flex;
     padding: 1rem 0;
   }
 
-  .item > :last-child {
+  .item > div {
+    display: flex;
+  }
+
+  .item > div > :last-child {
     flex: 1 0;
   }
 
-  .item :first-child {
+  .item > div > :first-child {
     min-width: 8rem;
     text-align: right;
   }
