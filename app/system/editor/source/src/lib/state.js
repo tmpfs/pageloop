@@ -13,6 +13,7 @@ import Hints from './state/hints'
 
 import Transfer from './transfer'
 import Log from './state/log'
+import Activity from './state/activity'
 
 import {KeyManager} from './keymap'
 
@@ -41,9 +42,7 @@ class State {
     this.templates = []
     this.setApplication('', '')
 
-    this.activity = {
-      notifications: []
-    }
+    this.activity = new Activity()
   }
 
   getContainerByName (name) {
@@ -65,7 +64,7 @@ class State {
 
   notify (info, del) {
     if (!del) {
-      this.activity.notifications.push(info)
+      this.activity.addNotificationActivity(info)
     }
     return this.notifier.notify(info, del)
   }
