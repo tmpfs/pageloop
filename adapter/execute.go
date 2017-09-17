@@ -35,9 +35,28 @@ func (b *CommandExecute) ReadStats() map[string]interface{} {
     if kv.Key == "cmdline" || kv.Key == "memstats" {
       return
     }
+    fmt.Printf("%#v\n", kv.Value)
     // println(kv.Key)
     // TODO:
-    stats[kv.Key] = kv.Value.String()
+
+    // Handle maps
+
+    if hashmap, ok := kv.Value.(*expvar.Map); ok {
+      // values := stats[kv.Key]
+      values := make(map[string]interface{})
+      hashmap.Do(func(mkv expvar.KeyValue) {
+        fmt.Printf("%#v\n", mkv.Value)
+        if i, ok := mkv.Value.(*expvar.Int); ok {
+          values[mkv.Key] = i.Value()
+        }
+      })
+      stats[kv.Key] = values
+    }
+
+    // Handle functions
+    if fn, ok := kv.Value.(expvar.Func); ok {
+      stats[kv.Key] = fn.Value()
+    }
   })
   // fmt.Printf("%#v\n", stats)
   return stats
