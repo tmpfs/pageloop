@@ -1,12 +1,28 @@
 <template>
   <div class="content-main">
     <div class="content">
-      <div class="content-column">
-        <h2>Settings</h2>
-        <div class="scroll"></div>
+      <div class="content-column settings">
+        <div class="column-header">
+          <h2>Settings</h2>
+        </div>
+        <div class="column-options">
+          <nav class="tabs">
+            <a>Organization</a>
+          </nav>
+        </div>
+        <div class="scroll">
+          <p class="small">Lorem ipsum, blah</p>
+        </div>
       </div>
-      <div class="content-column">
-        <h2>Preferences</h2>
+      <div class="content-column preferences">
+        <div class="column-header">
+          <h2>Preferences</h2>
+        </div>
+        <div class="column-options">
+          <nav class="tabs">
+            <a>Browser</a>
+          </nav>
+        </div>
         <div class="scroll">
           <p class="small">We store the state of the application and your preferences for the User Interface in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
 
@@ -25,10 +41,17 @@
           </ul>
         </div>
       </div>
-      <div class="content-column">
-        <h2>Activity</h2>
+      <div class="content-column activity">
+        <div class="column-header">
+          <h2>Activity</h2>
+        </div>
+        <div class="column-options">
+          <nav class="tabs">
+            <a>Notifications</a>
+            <a>Logs</a>
+          </nav>
+        </div>
         <div class="scroll">
-          <h3>Notifications</h3>
           <ul class="activity">
             <li class="item"
               :class="{error: item.error}"
@@ -68,20 +91,21 @@ export default {
 </script>
 
 <style scoped>
-  h2 {
+  .column-header h2 {
     margin: 0;
-    height: 4.6rem;
-    padding: 1.3rem 0;
-    font-size: 2rem;
+    padding: 0;
+  }
+
+  .settings h2, .settings .scroll {
+    padding-left: 2rem;
   }
 
   h3 {
-    margin: 0 0 1rem 0;
+    margin: 0;
   }
 
   .content-main {
     border-top: 1px solid var(--border-color);
-    padding-left: 2rem;
   }
 
   .content {
@@ -92,12 +116,8 @@ export default {
     width: 33.3%;
   }
 
-  .content-column:not(:last-child) {
-    margin-right: 2rem;
-  }
-
-  .content-column:last-child .scroll {
-    padding-right: 2rem;
+  .scroll {
+    padding: 0 2rem 0 0;
   }
 
   ul {
