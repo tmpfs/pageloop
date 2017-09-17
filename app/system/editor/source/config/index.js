@@ -50,7 +50,7 @@ module.exports = {
       },
       '/ws/': {
         target: 'ws://localhost:3577',
-        changeOrigin: true,
+        changeOrigin: false,
         ws: true
       },
       '/api/': {

@@ -1,8 +1,11 @@
 package handler
 
 import (
+  "fmt"
+  "bufio"
   "strings"
   "strconv"
+  "net"
   "net/http"
   // "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/core"
@@ -38,19 +41,18 @@ func (w *ResponseWriterProxy) Write(data []byte) (int, error) {
   }
 }
 
+func (w *ResponseWriterProxy) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+  hj, ok := w.Response.(http.Hijacker)
+  if !ok {
+    return nil, nil, fmt.Errorf("webserver doesn't support hijacking")
+  }
+  return hj.Hijack()
+}
+
 // The default server handler, defers to a multiplexer.
 func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var handler http.Handler
 	var path string = req.URL.Path
-
-  // println("got request: " + path)
-
-  /*
-  if websocket.IsWebSocketUpgrade(req) {
-    println("do upgrade")
-    return
-  }
-  */
 
   res.Header().Set("Access-Control-Allow-Origin", "*")
 

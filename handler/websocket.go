@@ -30,6 +30,7 @@ func WebsocketService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler 
 
 // Handle websocket endpoint requests.
 func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+  fmt.Printf("%#v\n", req)
   conn, err := upgrader.Upgrade(res, req, nil)
   if err != nil {
     log.Println(err)
