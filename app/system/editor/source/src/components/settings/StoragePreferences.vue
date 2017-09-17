@@ -2,13 +2,13 @@
   <div class="storage-preferences">
     <p class="small">We store the state of the application and your preferences in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
 
-    <p class="small">{{count}} items in storage</p>
     <div class="form-actions">
       <button
         @click="clearLocalStorage"
         :class="{disabled: count == 0}"
-        class="primary">Clear Local Storage</button>
+        class="primary">Reset to defaults</button>
     </div>
+    <p class="small title">{{count}} items in storage</p>
     <ul class="storage">
       <li v-for="v, k in storage">
         <div class="storage-key">{{k}}</div>
@@ -51,6 +51,10 @@ export default {
     list-style-type: none;
     padding: 0;
     margin: 0;
+  }
+
+  .title {
+    border-bottom: 1px solid var(--border-color);
   }
 
   .storage {

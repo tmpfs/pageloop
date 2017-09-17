@@ -19,6 +19,11 @@ func (b *CommandAdapter) ReadMeta() map[string]interface{} {
   return b.CommandExecute.ReadMeta()
 }
 
+// Stats information (/stats).
+func (b *CommandAdapter) ReadStats() map[string]interface{} {
+  return b.CommandExecute.ReadStats()
+}
+
 // CONTAINERS
 
 // Read all containers in a host.

@@ -9,6 +9,10 @@
       <label for="show-code-editor">Show code editor</label>
     </div>
     <div>
+      <input id="use-vim-mode" type="checkbox" v-model="useVimCodeEditor" />
+      <label for="use-vim-mode">Use VIM code editor mode</label>
+    </div>
+    <div>
       <input id="frontmatter-display" type="checkbox" v-model="frontmatterDisplay" />
       <label for="frontmatter-display">Show frontmatter in code view</label>
     </div>
@@ -22,6 +26,7 @@ export default {
     return {
       showDataEditor: true,
       showCodeEditor: true,
+      useVimCodeEditor: true,
       frontmatterDisplay: true
     }
   }

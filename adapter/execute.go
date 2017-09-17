@@ -4,6 +4,7 @@ package adapter
 import (
   "fmt"
   "net/http"
+  "expvar"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
@@ -20,10 +21,23 @@ type CommandExecute struct {
 
 // Meta information (/).
 func (b *CommandExecute) ReadMeta() map[string]interface{} {
-  status := make(map[string]interface{})
-  status["name"] = b.Name
-  status["version"] = b.Version
-  return status
+  meta := make(map[string]interface{})
+  meta["name"] = b.Name
+  meta["version"] = b.Version
+  return meta
+}
+
+// Stats information (/stats)
+func (b *CommandExecute) ReadStats() map[string]interface{} {
+  stats := make(map[string]interface{})
+  // TODO: do not expose these internals, just network i/o stats
+  expvar.Do(func(kv expvar.KeyValue) {
+    // println(kv.Key)
+    // TODO:
+    stats[kv.Key] = kv.Value.String()
+  })
+  // fmt.Printf("%#v\n", stats)
+  return stats
 }
 
 // CONTAINERS

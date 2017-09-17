@@ -46,6 +46,9 @@ func init() {
   // GET /
   push(NewAction(OperationRead, ""),
     &CommandDefinition{MethodName: "ReadMeta", Status: http.StatusOK})
+  // GET /stats
+  push(NewAction(OperationRead, "/stats"),
+    &CommandDefinition{MethodName: "ReadStats", Status: http.StatusOK})
   // GET /templates
   push(NewAction(OperationRead, "/templates"),
     &CommandDefinition{MethodName: "ReadApplicationTemplates", Status: http.StatusOK})
