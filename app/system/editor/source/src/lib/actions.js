@@ -17,6 +17,7 @@ function Actions (router) {
       context.commit('editor-view', 'welcome')
     },
     'error': function (context, err) {
+      // console.log('showing error')
       // Log the error
       context.dispatch('log', err)
       // Notify the user

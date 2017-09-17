@@ -31,16 +31,12 @@
           <h3>Notifications</h3>
           <ul class="activity">
             <li class="item"
+              :class="{error: item.error}"
               v-for="item in activityNotifications">
-              <div v-if="!item.error">
-                <h5>{{item.title}}</h5>
-                <p class="small">{{item.message}}</p>
-              </div>
-              <div class="error"
-                v-else>
-                <h5>Error</h5>
-                <p class="small">{{item.error.message}}</p>
-              </div>
+              <h5 v-if="!item.error">{{item.title}}</h5>
+              <h5 v-else>Error</h5>
+              <p v-if="!item.error" class="small">{{item.message}}</p>
+              <p v-else class="small">{{item.error.message}}</p>
             </li>
           </ul>
         </div>
@@ -126,19 +122,25 @@ export default {
 
   .item {
     background: var(--base03-color);
+    display: flex;
+    padding: 1rem 0;
+  }
+
+  .item > :last-child {
+    flex: 1 0;
   }
 
   .item :first-child {
-    position: relative;
+    min-width: 8rem;
+    text-align: right;
   }
 
   h5 {
     display: inline-block;
-    position: absolute;
-    top: 0;
-    left: 1rem;
     background: transparent;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    border-right: 2px solid currentColor;
+    padding: 0 1rem;
   }
 
   .item p {
@@ -146,7 +148,7 @@ export default {
     margin: 0;
   }
 
-  .item .error {
+  .item.error {
     background: var(--red-color);
     color: var(--base3-color);
   }
