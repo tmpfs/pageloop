@@ -13,7 +13,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <p class="small">Lorem ipsum, blah</p>
+          <component v-bind:is="settingsView"></component>
         </div>
       </div>
       <div class="content-column preferences">
@@ -28,25 +28,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <p class="small">
-            <input id="frontmatter-display" type="checkbox" />
-            <label for="frontmatter-display">Show frontmatter in code view</label>
-          </p>
-          <p class="small">We store the state of the application and your preferences for the User Interface in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
-
-          <p class="small">{{count}} items in storage</p>
-          <div class="form-actions">
-            <button
-              @click="clearLocalStorage"
-              :class="{disabled: count == 0}"
-              class="primary">Clear Local Storage</button>
-          </div>
-          <ul class="storage">
-            <li v-for="v, k in storage">
-              <div class="storage-key">{{k}}</div>
-              <div class="storage-value">{{v}}</div>
-            </li>
-          </ul>
+          <component v-bind:is="preferencesView"></component>
         </div>
       </div>
       <div class="content-column activity">
@@ -61,17 +43,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <ul class="activity">
-            <p class="small" v-if="!activityNotifications.length">No notifications found.</p>
-            <li class="item"
-              :class="{error: item.error}"
-              v-for="item in activityNotifications">
-              <h5 v-if="!item.error">{{item.title}}</h5>
-              <h5 v-else>Error</h5>
-              <p v-if="!item.error" class="small">{{item.message}}</p>
-              <p v-else class="small">{{item.error.message}}</p>
-            </li>
-          </ul>
+          <component v-bind:is="activityView"></component>
         </div>
       </div>
     </div>
@@ -79,34 +51,37 @@
 </template>
 
 <script>
+import ProfileSettings from '@/components/settings/ProfileSettings'
+import OrganizationSettings from '@/components/settings/OrganizationSettings'
+import AboutSettings from '@/components/settings/AboutSettings'
+
+import EditorPreferences from '@/components/settings/EditorPreferences'
+import TemplatePreferences from '@/components/settings/TemplatePreferences'
+import StoragePreferences from '@/components/settings/StoragePreferences'
+
+import NotificationsActivity from '@/components/settings/NotificationsActivity'
+import LogActivity from '@/components/settings/LogActivity'
+import NetworkActivity from '@/components/settings/NetworkActivity'
+
 export default {
   name: 'settings',
   data: function () {
     return {
-      storage: window.localStorage
+      settingsView: 'profile-settings',
+      preferencesView: 'editor-preferences',
+      activityView: 'notifications-activity'
     }
   },
-  computed: {
-    count: function () {
-      if (!this.storage) {
-        return 0
-      }
-      return Object.keys(this.storage).length
-    },
-    activityNotifications: function () {
-      return this.$store.state.activity.notifications
-    }
-  },
-  mounted: function () {
-    this.storage = window.localStorage
-    // console.log('this storage: ')
-    // console.log(this.storage)
-  },
-  methods: {
-    clearLocalStorage: function () {
-      this.$store.commit('clear-local-storage')
-      this.storage = null
-    }
+  components: {
+    ProfileSettings,
+    OrganizationSettings,
+    AboutSettings,
+    EditorPreferences,
+    TemplatePreferences,
+    StoragePreferences,
+    NotificationsActivity,
+    LogActivity,
+    NetworkActivity
   }
 }
 </script>
