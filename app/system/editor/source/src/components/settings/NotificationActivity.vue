@@ -1,15 +1,17 @@
 <template>
-  <ul class="notification-activity">
-    <p class="small" v-if="!activityNotifications.length">No notification activity detected.</p>
-    <li class="item"
-      :class="{error: item.error}"
-      v-for="item in activityNotifications">
-      <h5 v-if="!item.error">{{item.title}}</h5>
-      <h5 v-else>Error</h5>
-      <p v-if="!item.error" class="small">{{item.message}}</p>
-      <p v-else class="small">{{item.error.message}}</p>
-    </li>
-  </ul>
+  <div class="notification-activity">
+    <p class="small empty" v-if="!activity.length">No notification activity detected.</p>
+    <ul v-else>
+      <li class="item"
+        :class="{error: item.error}"
+        v-for="item in activity">
+        <h5 v-if="!item.error">{{item.title}}</h5>
+        <h5 v-else>Error</h5>
+        <p v-if="!item.error" class="small">{{item.message}}</p>
+        <p v-else class="small">{{item.error.message}}</p>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
@@ -17,7 +19,7 @@
 export default {
   name: 'notification-activity',
   computed: {
-    activityNotifications: function () {
+    activity: function () {
       return this.$store.state.activity.notification
     }
   }
@@ -25,6 +27,10 @@ export default {
 </script>
 
 <style scoped>
+  .empty {
+    padding: 0 1rem;
+  }
+
   ul {
     list-style-type: none;
     padding: 0;

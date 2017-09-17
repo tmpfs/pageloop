@@ -227,6 +227,14 @@ export default {
     margin-bottom: 1rem;
   }
 
+  input[type="checkbox"] {
+    vertical-align: text-bottom;
+  }
+
+  input[type="radio"] {
+    vertical-align: text-top;
+  }
+
   button, input[type="submit"], input[type="reset"] {
     cursor: pointer;
     border: 2px solid var(--base1-color);

@@ -105,14 +105,6 @@ export default {
 </script>
 
 <style scoped>
-  .settings .scroll {
-    padding-left: 2rem;
-  }
-
-  h3 {
-    margin: 0;
-  }
-
   .content-main {
     border-top: 1px solid var(--border-color);
   }
@@ -129,7 +121,8 @@ export default {
     border-right: 1px solid var(--border-color);
   }
 
-  .scroll {
-    padding: 0;
+  .settings .scroll, .preferences .scroll {
+    padding: 0 1rem;
   }
+
 </style>
