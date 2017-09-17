@@ -186,31 +186,6 @@ export default {
     height: calc(100% - 4.6rem);
   }
 
-  .column-header {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--base02-color);
-    user-select: none;
-    height: 2.2rem;
-  }
-
-  .column-options {
-    border-bottom: 1px solid var(--border-color);
-    background: var(--base02-color);
-  }
-
-  .column-header > * {
-    flex: 1 0;
-  }
-
-  .column-header h2 {
-    display: inline-block;
-    font-size: 1.4rem;
-    text-transform: uppercase;
-    padding: 0 1rem;
-  }
 
   h3 {
     font-size: 1.4rem;

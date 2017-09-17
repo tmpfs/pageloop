@@ -7,7 +7,9 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
+            <a>User</a>
             <a>Organization</a>
+            <a>About</a>
           </nav>
         </div>
         <div class="scroll">
@@ -20,7 +22,8 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
-            <a>Browser</a>
+            <a>Templates</a>
+            <a>Storage</a>
           </nav>
         </div>
         <div class="scroll">
@@ -49,6 +52,7 @@
           <nav class="tabs">
             <a>Notifications</a>
             <a>Logs</a>
+            <a>Network</a>
           </nav>
         </div>
         <div class="scroll">
