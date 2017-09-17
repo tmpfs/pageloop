@@ -5,10 +5,8 @@
       <li class="item"
         :class="{error: item.error}"
         v-for="item in activity">
-        <h5 v-if="!item.error">{{item.title}}</h5>
-        <h5 v-else>Error</h5>
-        <p v-if="!item.error" class="small">{{item.message}}</p>
-        <p v-else class="small">{{item.error.message}}</p>
+        <h5>{{item.level}}</h5>
+        <p class="small">{{item.message}}</p>
       </li>
     </ul>
   </div>
@@ -20,7 +18,7 @@ export default {
   name: 'log-activity',
   computed: {
     activity: function () {
-      return this.$store.state.activity.log
+      return this.$store.state.activity.log.messages
     }
   }
 }

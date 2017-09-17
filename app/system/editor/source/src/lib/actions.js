@@ -27,13 +27,12 @@ function Actions (router) {
     },
     'load': function (context, {container, application}) {
       context.state.setApplication(container, application)
-      context.dispatch('log', `Loading app from ${context.state.url}`)
+      context.dispatch('log', `Loading app from ${context.state.client.url}`)
       return context.dispatch('app')
         .then(() => context.dispatch('list-files'))
         .then(() => context.dispatch('list-pages'))
         .then(() => {
           context.commit('sidebar-view', 'pages')
-          context.dispatch('log', 'Done')
         })
         .catch((err) => {
           return context.dispatch('error', err)
@@ -90,7 +89,7 @@ function Actions (router) {
     },
     'edit-app': function (context, {container, application}) {
       let href = `apps/${container.name}/${application.name}`
-      context.state.activity.addNotificationActivity({title: 'App Info', message: `Edit application ${application.name}`})
+      context.state.log.add({level: 'Info', message: `Edit application ${application.name}`})
       return context.dispatch('navigate', {href: href})
     },
     'del-app': function (context, {container, application}) {
@@ -148,8 +147,8 @@ function Actions (router) {
         })
     },
     'open-file': function (context, file) {
-      context.state.activity.addNotificationActivity(
-        {title: 'File Info', message: `Open file ${file.url}`})
+      context.state.log.add(
+        {level: 'Info', message: `Open file ${file.url}`})
       return context.dispatch('get-file-contents', file)
         .then((content) => {
           if (!file.binary) {
@@ -231,7 +230,7 @@ function Actions (router) {
               })
           }
 
-          context.state.activity.addNotificationActivity({title: 'File Info', message: `Saved file ${file.url}`})
+          context.state.log.add({level: 'Info', message: `Saved file ${file.url}`})
 
           // console.log(doc)
 

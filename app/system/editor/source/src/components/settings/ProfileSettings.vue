@@ -1,7 +1,19 @@
 <template>
-  <p class="small">
-    Profile settings!
-  </p>
+  <div class="profile-settings small">
+    <div>
+      <input id="show-notifications" type="checkbox" v-model="showNotifications" />
+      <label for="show-notifications">Show notifications</label>
+      <p class="small">When notifications are disabled you will not be notified as events occur but can view them in the notification activity.</p>
+    </div>
+    <div>
+      <input id="show-system" type="checkbox" v-model="showSystemApplications" />
+      <label for="show-system">Show system applications</label>
+    </div>
+    <div>
+      <input id="show-template" type="checkbox" v-model="showTemplateApplications" />
+      <label for="show-template">Show template applications</label>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -9,10 +21,22 @@ export default {
   name: 'profile-settings',
   data: function () {
     return {
+      showSystemApplications: false,
+      showTemplateApplications: false,
+      showNotifications: true
     }
   }
 }
 </script>
 
 <style scoped>
+  .profile-settings {
+    margin-top: 1rem;
+  }
+
+  label + p.small {
+    margin-top: 0;
+    margin-left: 2.5rem;
+  }
+
 </style>

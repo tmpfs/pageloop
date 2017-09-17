@@ -1,13 +1,26 @@
 class Log {
   constructor () {
-    this.maximum = 1024
+    this.maximum = 512
     this.messages = []
   }
 
   add (message) {
-    this.messages.push(message)
+    if (typeof (message) === 'string') {
+      message = {
+        level: 'Info',
+        message: message
+      }
+    } else if (message instanceof Error) {
+      console.log('treat as log error')
+      message = {
+        level: message.level || 'Warn',
+        message: message.toString(),
+        error: message
+      }
+    }
+    this.messages.unshift(message)
     if (this.messages.length > this.maximum) {
-      this.messages.shift()
+      this.messages.pop()
     }
   }
 

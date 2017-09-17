@@ -42,7 +42,7 @@ class State {
     this.templates = []
     this.setApplication('', '')
 
-    this.activity = new Activity()
+    this.activity = new Activity(this.log)
   }
 
   getContainerByName (name) {
@@ -64,7 +64,7 @@ class State {
 
   notify (info, del) {
     if (!del) {
-      this.activity.addNotificationActivity(info)
+      this.activity.add(info)
     }
     return this.notifier.notify(info, del)
   }
