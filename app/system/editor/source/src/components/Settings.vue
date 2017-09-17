@@ -81,6 +81,7 @@ export default {
 
   .content-main {
     border-top: 1px solid var(--border-color);
+    padding-left: 2rem;
   }
 
   .content {
@@ -93,6 +94,10 @@ export default {
 
   .content-column:not(:last-child) {
     margin-right: 2rem;
+  }
+
+  .content-column:last-child {
+    padding-right: 2rem;
   }
 
   ul {
