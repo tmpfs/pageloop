@@ -22,9 +22,12 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
-            <a>Editor</a>
-            <a>Templates</a>
-            <a>Storage</a>
+            <a
+              @click="preferencesView = 'editor-preferences'">Editor</a>
+            <a
+              @click="preferencesView = 'template-preferences'">Templates</a>
+            <a
+             @click="preferencesView = 'storage-preferences'">Storage</a>
           </nav>
         </div>
         <div class="scroll">
