@@ -1,3 +1,5 @@
+let socket
+
 class SocketConnection {
   constructor () {
     this.url = document.location.origin.replace(/^http/, 'ws') + '/ws/'
@@ -58,9 +60,15 @@ class ApiClient {
     this.raw = `/apps/raw/${container}/${application}`
     // should be injected
     this.log = null
+    this.websocket = this.connect()
+  }
 
-    this.websocket = new SocketConnection()
-    this.websocket.connect()
+  connect () {
+    if (!socket) {
+      socket = new SocketConnection()
+      socket.connect()
+    }
+    return socket
   }
 
   preflight (url, opts) {

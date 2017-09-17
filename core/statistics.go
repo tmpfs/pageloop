@@ -19,6 +19,7 @@ type Uptime struct {
 type Statistics struct {
   StartTime time.Time
   Http *expvar.Map
+  Websocket *expvar.Map
 }
 
 func uptime () interface{} {
@@ -38,6 +39,9 @@ func init() {
   Stats.Http.Add("responses", 0)
   Stats.Http.Add("body-in", 0)
   Stats.Http.Add("body-out", 0)
+
+  Stats.Websocket = expvar.NewMap("ws")
+  Stats.Websocket.Add("connections", 0)
 
   expvar.Publish("uptime", expvar.Func(uptime))
 }

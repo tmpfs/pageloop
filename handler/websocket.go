@@ -1,7 +1,7 @@
 package handler
 
 import (
-  "fmt"
+  // "fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -10,10 +10,15 @@ import (
 )
 
 var(
+  connections []*WebsocketConnection
   upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
     WriteBufferSize: 1024}
 )
+
+type WebsocketConnection struct {
+  Conn *websocket.Conn
+}
 
 // Handles requests for application data.
 type WebsocketHandler struct {
@@ -30,25 +35,41 @@ func WebsocketService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler 
 
 // Handle websocket endpoint requests.
 func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-  fmt.Printf("%#v\n", req)
   conn, err := upgrader.Upgrade(res, req, nil)
   if err != nil {
     log.Println(err)
+    return
   }
 
-  fmt.Printf("%#v\n", conn)
+  // fmt.Printf("%#v\n", conn)
 
-  //for {
-    //messageType, _, err := conn.ReadMessage()
-    //if err != nil {
-      //return
-    //}
+  ws := &WebsocketConnection{Conn: conn}
+  connections = append(connections, ws)
+  Stats.Websocket.Add("connections", 1)
 
-    //println(string(messageType))
+  conn.SetCloseHandler(func(code int, text string) error {
+    for i, ws := range connections {
+      if ws.Conn == conn {
+        before := connections[0:i]
+        after := connections[i+1:]
+        connections = append(before, after...)
+        Stats.Websocket.Add("connections", -1)
+      }
+    }
+    return nil
+  })
 
-    //if err := conn.WriteMessage(messageType, p); err != nil {
-      //return err
-    //}
-  //}
+  for {
+    messageType, p, err := conn.ReadMessage()
+    if err != nil {
+      return
+    }
+
+    // println(string(p))
+
+    // TODO: handle write errors
+    if err := conn.WriteMessage(messageType, p); err != nil {
+      return
+    }
+  }
 }
-
