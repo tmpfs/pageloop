@@ -52,15 +52,6 @@ export default {
   /* Fonts */
 
   @font-face {
-    font-family: 'SourceSerif';
-    src: url('/assets/font/sourceserifpro-regular-webfont.woff2') format('woff2'),
-         url('/assets/font/sourceserifpro-regular-webfont.woff') format('woff');
-    font-style: normal;
-    font-weight: normal;
-    text-rendering: optimizeLegibility;
-  }
-
-  @font-face {
     font-family: 'SourceSans';
     src: url('/assets/font/sourcesanspro-regular-webfont.woff2') format('woff2'),
          url('/assets/font/sourcesanspro-regular-webfont.woff') format('woff');
@@ -275,7 +266,6 @@ export default {
   }
 
   section.document {
-    font-family: SourceSerif;
     text-align: left;
     display: inline-block;
     margin: auto 0;

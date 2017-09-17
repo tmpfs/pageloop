@@ -23,15 +23,6 @@
 }
 
 @font-face {
-  font-family: 'SourceSerif';
-  src: url('/assets/font/sourceserifpro-regular-webfont.woff2') format('woff2'),
-       url('/assets/font/sourceserifpro-regular-webfont.woff') format('woff');
-  font-style: normal;
-  font-weight: normal;
-  text-rendering: optimizeLegibility;
-}
-
-@font-face {
   font-family: 'SourceSans';
   src: url('/assets/font/sourcesanspro-regular-webfont.woff2') format('woff2'),
        url('/assets/font/sourcesanspro-regular-webfont.woff') format('woff');
@@ -62,7 +53,7 @@ body {
   text-align: center;
   font-size: 1.8rem;
   line-height: 2.2rem;
-  font-family: 'SourceSerif';
+  font-family: 'SourceSans';
   background: var(--background);
   color: var(--color);
 }
