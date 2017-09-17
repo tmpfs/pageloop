@@ -143,6 +143,8 @@ function Actions (router) {
         })
     },
     'open-file': function (context, file) {
+      context.state.activity.addNotificationActivity(
+        {title: 'File Info', message: `Open file ${file.url}`})
       return context.dispatch('get-file-contents', file)
         .then((content) => {
           if (!file.binary) {
