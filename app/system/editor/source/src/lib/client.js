@@ -3,9 +3,13 @@ let socket
 class SocketConnection {
   constructor () {
     this.url = document.location.origin.replace(/^http/, 'ws') + '/ws/'
-    this.protocols = undefined
-    this.opts = undefined
+    this.protocols
+    this.opts
     this._conn
+  }
+
+  get connected () {
+    return this._conn && this._conn.readyState === WebSocket.OPEN
   }
 
   connect () {
@@ -14,7 +18,6 @@ class SocketConnection {
     console.log(this._conn)
 
     this._conn.onopen = () => {
-      console.log('socket conn opened')
       this._conn.send('Foo')
     }
 
@@ -23,30 +26,30 @@ class SocketConnection {
     }
 
     this._conn.onerror = (err) => {
+      // TODO: log this error
       console.error(err)
     }
 
     this._conn.onclose = () => {
+      this.cleanup()
       console.log('socket conn closed')
     }
+  }
 
-    /*
-    function onOpen() {
-      console.log('open called')
-    }
+  cleanup () {
+    this._conn.onopen = null
+    this._conn.onmessage = null
+    this._conn.onerror = null
+    this._conn.onclose = null
+    this._conn = null
+  }
 
-    function onMessage(event) {
-      console.log(event)
+  send (payload) {
+    console.log(payload)
+    if (this.connected) {
+      this._conn.send(JSON.stringify(payload))
+      return true
     }
-
-    function onError(err) {
-      console.error(err)
-    }
-
-    function onClose() {
-      this.ws.onclose = null;
-    }
-    */
   }
 }
 
@@ -60,9 +63,10 @@ class ApiClient {
     this.raw = `/apps/raw/${container}/${application}`
     // should be injected
     this.log = null
-    this.websocket = this.connect()
+    this.socket = this.connect()
   }
 
+  // Singleton websocket
   connect () {
     if (!socket) {
       socket = new SocketConnection()
@@ -88,6 +92,9 @@ class ApiClient {
   // Perform an API request and assume a JSON response.
   request (url, opts) {
     const log = this.preflight(url, opts)
+    if (this.socket.connected) {
+      console.log('send api request over websocket')
+    }
     return fetch(url, opts)
       .then((res) => {
         this.postflight(log, res)

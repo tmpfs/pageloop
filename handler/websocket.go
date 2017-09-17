@@ -25,7 +25,7 @@ type WebsocketHandler struct {
   Adapter *CommandAdapter
 }
 
-// Configure the service. Adds a rest handler for the API URL to
+// Configure the service. Adds a handler for the websocket URL to
 // the passed servemux.
 func WebsocketService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
   handler := WebsocketHandler{Adapter: adapter}
