@@ -22,11 +22,16 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
+            <a>Editor</a>
             <a>Templates</a>
             <a>Storage</a>
           </nav>
         </div>
         <div class="scroll">
+          <p class="small">
+            <input id="frontmatter-display" type="checkbox" />
+            <label for="frontmatter-display">Show frontmatter in code view</label>
+          </p>
           <p class="small">We store the state of the application and your preferences for the User Interface in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
 
           <p class="small">{{count}} items in storage</p>
@@ -127,13 +132,18 @@ export default {
     width: 33.3%;
   }
 
+  .content-column:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+  }
+
   .scroll {
-    padding: 0 2rem 0 0;
+    padding: 0;
   }
 
   ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
   }
 
   .storage {
@@ -171,7 +181,7 @@ export default {
     text-align: right;
   }
 
-  h5 {
+  .item h5 {
     display: inline-block;
     background: transparent;
     font-size: 1.4rem;
