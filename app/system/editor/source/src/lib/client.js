@@ -122,8 +122,8 @@ class ApiClient {
   request (url, opts) {
     const log = this.preflight(url, opts)
     if (this.socket.connected) {
-      // console.log('send api request over websocket')
-      return this.socket.request({url: url, opts: opts})
+      // TODO: implement API requests over websockets
+      // return this.socket.request({url: url, opts: opts})
     }
     return fetch(url, opts)
       .then((res) => {
