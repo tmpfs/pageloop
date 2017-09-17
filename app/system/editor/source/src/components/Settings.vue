@@ -57,6 +57,7 @@
         </div>
         <div class="scroll">
           <ul class="activity">
+            <p class="small" v-if="!activityNotifications.length">No notifications found.</p>
             <li class="item"
               :class="{error: item.error}"
               v-for="item in activityNotifications">
@@ -95,12 +96,7 @@ export default {
 </script>
 
 <style scoped>
-  .column-header h2 {
-    margin: 0;
-    padding: 0;
-  }
-
-  .settings h2, .settings .scroll {
+  .settings .scroll {
     padding-left: 2rem;
   }
 
