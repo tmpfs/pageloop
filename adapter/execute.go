@@ -30,22 +30,19 @@ func (b *CommandExecute) ReadMeta() map[string]interface{} {
 // Stats information (/stats)
 func (b *CommandExecute) ReadStats() map[string]interface{} {
   stats := make(map[string]interface{})
-  // TODO: do not expose these internals, just network i/o stats
   expvar.Do(func(kv expvar.KeyValue) {
     if kv.Key == "cmdline" || kv.Key == "memstats" {
       return
     }
-    fmt.Printf("%#v\n", kv.Value)
-    // println(kv.Key)
-    // TODO:
+
+    // TODO: handle stirngs and floats
+
+    // fmt.Printf("%#v\n", kv.Value)
 
     // Handle maps
-
     if hashmap, ok := kv.Value.(*expvar.Map); ok {
-      // values := stats[kv.Key]
       values := make(map[string]interface{})
       hashmap.Do(func(mkv expvar.KeyValue) {
-        fmt.Printf("%#v\n", mkv.Value)
         if i, ok := mkv.Value.(*expvar.Int); ok {
           values[mkv.Key] = i.Value()
         }
@@ -58,7 +55,9 @@ func (b *CommandExecute) ReadStats() map[string]interface{} {
       stats[kv.Key] = fn.Value()
     }
   })
+
   // fmt.Printf("%#v\n", stats)
+
   return stats
 }
 
