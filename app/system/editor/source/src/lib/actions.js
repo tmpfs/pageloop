@@ -82,11 +82,16 @@ function Actions (router) {
               })
           }
 
-          context.state.notify({title: 'App Info', message: `Created ${app.name}`})
+          context.state.notify({title: 'App Info', message: `Created application ${app.name}`})
 
           // Refresh containers list
           return context.dispatch('containers')
         })
+    },
+    'edit-app': function (context, {container, application}) {
+      let href = `apps/${container.name}/${application.name}`
+      context.state.activity.addNotificationActivity({title: 'App Info', message: `Edit application ${application.name}`})
+      return context.dispatch('navigate', {href: href})
     },
     'del-app': function (context, {container, application}) {
       return context.state.client.deleteApp(container, application)
@@ -225,7 +230,11 @@ function Actions (router) {
                 throw err
               })
           }
-          console.log(doc)
+
+          context.state.activity.addNotificationActivity({title: 'File Info', message: `Saved file ${file.url}`})
+
+          // console.log(doc)
+
           // Currently YAML is in the source code and
           // can be edited directly we need to sync
           // the data in case it changed

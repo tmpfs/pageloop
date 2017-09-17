@@ -96,7 +96,7 @@ export default {
     margin-right: 2rem;
   }
 
-  .content-column:last-child {
+  .content-column:last-child .scroll {
     padding-right: 2rem;
   }
 

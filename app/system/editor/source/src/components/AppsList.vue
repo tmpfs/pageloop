@@ -6,7 +6,7 @@
         <p class="small">URL: {{app.url}}<br />{{app.description}}
           <p class="app-actions">
             <a class="name"
-              @click="$store.dispatch('navigate', {href: linkify(container, app)})"
+              @click="editApplication(container, app)"
               :title="title(app, 'Edit')">Edit</a>
             <a class="name"
               :href="linkify(container, app, true)"
@@ -34,6 +34,9 @@ export default {
     }
   },
   methods: {
+    editApplication: function (container, app) {
+      return this.$store.dispatch('edit-app', {container: container, application: app})
+    },
     confirmDeleteApplication: function (container, application) {
       let details = {
         title: `Delete Application (${application.name})`,
