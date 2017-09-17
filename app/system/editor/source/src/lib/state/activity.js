@@ -1,11 +1,13 @@
 class Activity {
   constructor () {
-    this.notifications = []
+    this.notification = []
+    this.log = []
+    this.network = []
   }
 
   addNotificationActivity (info) {
     info.time = Date.now()
-    this.notifications.unshift(info)
+    this.notification.unshift(info)
   }
 }
 

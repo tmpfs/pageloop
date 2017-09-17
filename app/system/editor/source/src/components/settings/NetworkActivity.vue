@@ -3,7 +3,7 @@
     <p class="small" v-if="!activityNetwork.length">No network activity detected.</p>
     <li class="item"
       :class="{error: item.error}"
-      v-for="item in activityNotifications">
+      v-for="item in activityNetwork">
       <h5 v-if="!item.error">{{item.title}}</h5>
       <h5 v-else>Error</h5>
       <p v-if="!item.error" class="small">{{item.message}}</p>
@@ -15,7 +15,7 @@
 <script>
 
 export default {
-  name: 'log-activity',
+  name: 'network-activity',
   computed: {
     activityNetwork: function () {
       return this.$store.state.activity.network

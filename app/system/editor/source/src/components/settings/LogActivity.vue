@@ -1,9 +1,9 @@
 <template>
   <ul class="log-activity">
-    <p class="small" v-if="!activityLogs.length">No notifications found.</p>
+    <p class="small" v-if="!activityLogs.length">No log activity detected.</p>
     <li class="item"
       :class="{error: item.error}"
-      v-for="item in activityNotifications">
+      v-for="item in activityLogs">
       <h5 v-if="!item.error">{{item.title}}</h5>
       <h5 v-else>Error</h5>
       <p v-if="!item.error" class="small">{{item.message}}</p>
@@ -18,7 +18,7 @@ export default {
   name: 'log-activity',
   computed: {
     activityLogs: function () {
-      return this.$store.state.activity.logs
+      return this.$store.state.activity.log
     }
   }
 }

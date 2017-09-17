@@ -1,6 +1,6 @@
 <template>
   <ul class="notification-activity">
-    <p class="small" v-if="!activityNotifications.length">No notifications found.</p>
+    <p class="small" v-if="!activityNotifications.length">No notification activity detected.</p>
     <li class="item"
       :class="{error: item.error}"
       v-for="item in activityNotifications">
@@ -15,10 +15,10 @@
 <script>
 
 export default {
-  name: 'notifications-activity',
+  name: 'notification-activity',
   computed: {
     activityNotifications: function () {
-      return this.$store.state.activity.notifications
+      return this.$store.state.activity.notification
     }
   }
 }

@@ -7,9 +7,15 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
-            <a>Profile</a>
-            <a>Organization</a>
-            <a>About</a>
+            <a
+              :class="{selected: settingsView === 'profile-settings'}"
+              @click="settingsView = 'profile-settings'">Profile</a>
+            <a
+              :class="{selected: settingsView === 'organization-settings'}"
+              @click="settingsView = 'organization-settings'">Organization</a>
+            <a
+              :class="{selected: settingsView === 'about-settings'}"
+              @click="settingsView = 'about-settings'">About</a>
           </nav>
         </div>
         <div class="scroll">
@@ -23,10 +29,13 @@
         <div class="column-options">
           <nav class="tabs">
             <a
+              :class="{selected: preferencesView === 'editor-preferences'}"
               @click="preferencesView = 'editor-preferences'">Editor</a>
             <a
+              :class="{selected: preferencesView === 'template-preferences'}"
               @click="preferencesView = 'template-preferences'">Templates</a>
             <a
+              :class="{selected: preferencesView === 'storage-preferences'}"
              @click="preferencesView = 'storage-preferences'">Storage</a>
           </nav>
         </div>
@@ -40,9 +49,15 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
-            <a>Notifications</a>
-            <a>Logs</a>
-            <a>Network</a>
+            <a
+              :class="{selected: activityView === 'notification-activity'}"
+              @click="activityView = 'notification-activity'">Notifications</a>
+            <a
+              :class="{selected: activityView === 'log-activity'}"
+              @click="activityView = 'log-activity'">Logs</a>
+            <a
+              :class="{selected: activityView === 'network-activity'}"
+              @click="activityView = 'network-activity'">Network</a>
           </nav>
         </div>
         <div class="scroll">
@@ -62,7 +77,7 @@ import EditorPreferences from '@/components/settings/EditorPreferences'
 import TemplatePreferences from '@/components/settings/TemplatePreferences'
 import StoragePreferences from '@/components/settings/StoragePreferences'
 
-import NotificationsActivity from '@/components/settings/NotificationsActivity'
+import NotificationActivity from '@/components/settings/NotificationActivity'
 import LogActivity from '@/components/settings/LogActivity'
 import NetworkActivity from '@/components/settings/NetworkActivity'
 
@@ -72,7 +87,7 @@ export default {
     return {
       settingsView: 'profile-settings',
       preferencesView: 'editor-preferences',
-      activityView: 'notifications-activity'
+      activityView: 'notification-activity'
     }
   },
   components: {
@@ -82,7 +97,7 @@ export default {
     EditorPreferences,
     TemplatePreferences,
     StoragePreferences,
-    NotificationsActivity,
+    NotificationActivity,
     LogActivity,
     NetworkActivity
   }
