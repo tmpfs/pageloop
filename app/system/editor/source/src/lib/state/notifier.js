@@ -2,6 +2,9 @@
  *  Maintains a list of notifications used by the UI to
  *  render notifications which timeout by default.
  */
+
+let counter = 0
+
 class Notifier {
   constructor () {
     this.notifications = []
@@ -20,7 +23,7 @@ class Notifier {
       return
     }
 
-    info.reveal = true
+    info.id = (++counter)
 
     this.notifications.unshift(info)
   }

@@ -3,7 +3,7 @@
     <transition-group name="reveal" tag="div">
       <div class="notify"
         :class="{error: item.error}"
-        v-bind:key="item"
+        v-bind:key="item.id"
         v-for="item, index in notifications">
           <a class="close" @click="dismiss(item)"></a>
           <h2 v-if="item.title">{{item.title}}</h2>
