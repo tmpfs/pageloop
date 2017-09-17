@@ -36,8 +36,8 @@ func init() {
   Stats.Http = expvar.NewMap("http")
   Stats.Http.Add("requests", 0)
   Stats.Http.Add("responses", 0)
-  Stats.Http.Add("bytes-in", 0)
-  Stats.Http.Add("bytes-out", 0)
+  Stats.Http.Add("body-in", 0)
+  Stats.Http.Add("body-out", 0)
 
   expvar.Publish("uptime", expvar.Func(uptime))
 }

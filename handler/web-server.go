@@ -32,7 +32,7 @@ func (w *ResponseWriterProxy) Write(data []byte) (int, error) {
   if written, err := w.Response.Write(data); err != nil {
     return 0, err
   } else {
-    Stats.Http.Add("bytes-out", int64(written))
+    Stats.Http.Add("body-out", int64(written))
     return written, nil
   }
 }
@@ -45,6 +45,10 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
   Stats.Http.Add("requests", 1)
+
+  if req.ContentLength > -1 {
+    Stats.Http.Add("body-in", req.ContentLength)
+  }
 
   proxy := &ResponseWriterProxy{Response: res}
 
