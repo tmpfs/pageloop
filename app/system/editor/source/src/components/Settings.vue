@@ -7,7 +7,7 @@
         </div>
         <div class="column-options">
           <nav class="tabs">
-            <a>User</a>
+            <a>Profile</a>
             <a>Organization</a>
             <a>About</a>
           </nav>
