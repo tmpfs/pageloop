@@ -42,8 +42,6 @@ export default {
       if (item && !item.persist) {
         const timeout = item.timeout || 4000
         item.timer = setTimeout(() => {
-          console.log('auto remove notification')
-          console.log(id)
           this.dismiss(item)
         }, timeout)
       }
