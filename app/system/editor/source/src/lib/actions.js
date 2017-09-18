@@ -39,7 +39,7 @@ function Actions (router) {
     },
     'load': function (context, {container, application}) {
       context.state.setApplication(container, application)
-      context.dispatch('log', `Loading app from ${context.state.client.url}`)
+      context.dispatch('log', `Loading app ${application}`)
       return context.dispatch('app')
         .then(() => context.dispatch('list-files'))
         .then(() => context.dispatch('list-pages'))
