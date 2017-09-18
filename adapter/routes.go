@@ -97,7 +97,7 @@ func init() {
   push("File.Create", NewAction(OperationCreate, "/apps/*/*/files/*"),
     &CommandDefinition{MethodName: "CreateFile", Status: http.StatusCreated, Arguments: fileArg})
   // POST /apps/{container}/{application}/files/{url}
-  push("File.Update", NewAction(OperationUpdate, "/apps/*/*/files/*"),
+  push("File.Save", NewAction(OperationUpdate, "/apps/*/*/files/*"),
     &CommandDefinition{MethodName: "UpdateFile", Status: http.StatusOK, Arguments: fileArg})
   // GET /apps/{container}/{application}/pages/{url}
   push("File.ReadPage", NewAction(OperationRead, "/apps/*/*/pages/*"),

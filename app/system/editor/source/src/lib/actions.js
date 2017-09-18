@@ -75,7 +75,8 @@ function Actions (router) {
         })
     },
     'run-task': function (context, {app, task}) {
-      return context.state.client.runTask(app, task)
+      const container = context.state.container
+      return context.state.client.runTask(container, app.name, task)
         .then((res) => {
           // Show error response
           if (res.response.status !== 202) {
@@ -136,21 +137,48 @@ function Actions (router) {
         })
     },
     'app': function (context) {
-      return context.state.client.getApplication()
-        .then(({response, document}) => {
-          context.commit('app', document)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.getApplication(container, application)
+        .then((res) => {
+          // Show error response
+          if (res.response.status !== 200) {
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
+          }
+          context.commit('app', res.document)
         })
     },
     'list-files': function (context) {
-      return context.state.client.getFiles()
-        .then(({response, document}) => {
-          context.commit('files', document)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.getFiles(container, application)
+        .then((res) => {
+          // Show error response
+          if (res.response.status !== 200) {
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
+          }
+          context.commit('files', res.document)
         })
     },
     'list-pages': function (context) {
-      return context.state.client.getPages()
-        .then(({response, document}) => {
-          context.commit('pages', document)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.getPages(container, application)
+        .then((res) => {
+          // Show error response
+          if (res.response.status !== 200) {
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
+          }
+          context.commit('pages', res.document)
         })
     },
     'reload': function (context) {
@@ -208,7 +236,9 @@ function Actions (router) {
       if (!/^\//.test(name)) {
         name = '/' + name
       }
-      return context.state.client.createFile(name, template)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.createFile(container, application, name, template)
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
@@ -238,7 +268,9 @@ function Actions (router) {
         file = context.state.current
       }
       let value = file.content
-      return context.state.client.saveFile(file, value)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.saveFile(container, application, file, value)
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {
@@ -248,9 +280,9 @@ function Actions (router) {
               })
           }
 
-          context.state.log.add({level: 'Info', message: `Saved file ${file.url}`})
+          // file.content = value
 
-          // console.log(doc)
+          context.state.log.add({level: 'Info', message: `Saved file ${file.url}`})
 
           // Currently YAML is in the source code and
           // can be edited directly we need to sync
@@ -272,7 +304,9 @@ function Actions (router) {
 
       // let index = list.indexOf(file)
       let len = list.length
-      return context.state.client.deleteFiles(files)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.deleteFiles(container, application, files)
         .then((res) => {
           if (res.response.status !== 200) {
             return context.dispatch('error', error(res))

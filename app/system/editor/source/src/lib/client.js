@@ -6,11 +6,15 @@ let id = 0
 
 function getBodyOptions (rpc, options) {
   if (rpc.body) {
-    options.body = JSON.stringify(rpc.body)
-    options.headers = {
-      'Content-Type': 'application/json; charset=utf-8'
+    let body = rpc.body
+    if (!rpc.raw) {
+      body = JSON.stringify(rpc.body)
     }
-    options.headers['Content-Length'] = rpc.body.length
+    options.body = body
+    options.headers = {
+      'Content-Type': rpc.mime || 'application/json; charset=utf-8'
+    }
+    options.headers['Content-Length'] = body.length
   }
   return options
 }
@@ -24,11 +28,10 @@ function getPutOptions (rpc) {
   return getBodyOptions(rpc, o)
 }
 
-/*
-function getPostOptions () {
-  return {method: 'POST'}
+function getPostOptions (rpc) {
+  const o = {method: 'POST'}
+  return getBodyOptions(rpc, o)
 }
-*/
 
 function getDeleteOptions (rpc) {
   const o = {method: 'DELETE'}
@@ -83,6 +86,9 @@ const URLS = {
   },
   'File.CreateTemplate': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+  },
+  'File.Save': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
   }
 }
 
@@ -101,7 +107,8 @@ const OPTIONS = {
   'Application.RunTask': getPutOptions,
   'Application.Delete': getDeleteOptions,
   'File.Create': getPutOptions,
-  'File.CreateTemplate': getPutOptions
+  'File.CreateTemplate': getPutOptions,
+  'File.Save': getPostOptions
 }
 
 class RpcRequest {
@@ -297,10 +304,8 @@ class ApiClient {
 
   rpc (req) {
     if (this.useWebsocket && this.socket.connected) {
-      /*
-      console.log('sending websocket request')
-      console.log(req)
-      */
+      delete req.mime
+      delete req.raw
       return this.socket.request(req)
     }
 
@@ -409,38 +414,38 @@ class ApiClient {
   }
 
   // Get a single application
-  getApplication () {
-    return this.rpc(Request.rpc('Application.Read', {context: this.container, target: this.application}))
+  getApplication (container, application) {
+    return this.rpc(Request.rpc('Application.Read', {context: container, target: application}))
   }
 
   // Get the files for an application
-  getFiles () {
-    return this.rpc(Request.rpc('Application.ReadFiles', {context: this.container, target: this.application}))
+  getFiles (container, application) {
+    return this.rpc(Request.rpc('Application.ReadFiles', {context: container, target: application}))
   }
 
   // Get the pages for an application
-  getPages () {
-    return this.rpc(Request.rpc('Application.ReadPages', {context: this.container, target: this.application}))
+  getPages (container, application) {
+    return this.rpc(Request.rpc('Application.ReadPages', {context: container, target: application}))
   }
 
   // Delete a list of files from an application
-  deleteFiles (files) {
+  deleteFiles (container, application, files) {
     const urls = files.map((f) => {
       return f.url
     })
     return this.rpc(
       Request.rpc('Application.DeleteFiles',
-      {context: this.container, target: this.application},
+      {context: container, target: application},
       urls)
     )
   }
 
   // Run an application build task
-  runTask (app, task) {
+  runTask (container, application, task) {
     // TODO: get container from app reference
     return this.rpc(
       Request.rpc('Application.RunTask',
-      {context: this.container, target: app.name, item: task})
+      {context: container, target: application, item: task})
     )
   }
 
@@ -462,17 +467,29 @@ class ApiClient {
     )
   }
 
-  saveFile (file, value) {
-    file.content = value
-    const url = this.url + 'files' + file.url
-    const opts = {
-      method: 'POST',
-      headers: {
-        'Content-Type': file.mime
-      },
-      body: value
+  // Create a new file optionally using the specified
+  // template reference.
+  createFile (container, application, url, template) {
+    if (template) {
+      return this.rpc(
+        Request.rpc('File.CreateTemplate',
+        {context: container, target: application, item: url}, template)
+      )
     }
-    return this.request(url, opts)
+    // Create an empty file
+    return this.rpc(
+      Request.rpc('File.Create',
+      {context: container, target: application, item: url}, '')
+    )
+  }
+
+  // Save a file sending value as the new file content
+  saveFile (container, application, file, value) {
+    const req = Request.rpc('File.Save',
+      {context: container, target: application, item: file.url}, value)
+    req.raw = true
+    req.mime = file.mime
+    return this.rpc(req)
   }
 
   renameFile (file, newName) {
@@ -484,36 +501,6 @@ class ApiClient {
       }
     }
     return this.request(url, opts)
-  }
-
-  createFile (name, template) {
-    if (template) {
-      return this.rpc(
-        Request.rpc('File.CreateTemplate',
-        {context: this.container, target: this.application, item: name}, template)
-      )
-    }
-    return this.rpc(
-      Request.rpc('File.Create',
-      {context: this.container, target: this.application, item: name}, '')
-    )
-    /*
-    const url = this.url + 'files' + name
-    const opts = {
-      method: 'PUT',
-      headers: {},
-      body: ''
-    }
-
-    // Create file from template
-    if (template) {
-      opts.body = JSON.stringify(template)
-      opts.headers['Content-Type'] = 'application/json; charset=utf-8'
-    }
-
-    opts.headers['Content-Length'] = opts.body.length
-    return this.request(url, opts)
-    */
   }
 
   // TODO: get binary data over websocket!
