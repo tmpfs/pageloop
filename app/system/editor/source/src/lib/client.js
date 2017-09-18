@@ -142,6 +142,12 @@ class SocketConnection {
   connect () {
     this._conn = new WebSocket(this.url, this.protocols, this.opts)
 
+    // TODO: ping control functions and configurable interval
+    this._pinger = setInterval(() => {
+      // console.log('sending ping message')
+      this.send({})
+    }, 30000)
+
     this._conn.onopen = () => {
       console.log('socket connection opened')
     }
@@ -406,6 +412,7 @@ class ApiClient {
     )
   }
 
+  // Run an application build task
   runTask (app, task) {
     // TODO: get container from app reference
     return this.rpc(
@@ -414,6 +421,7 @@ class ApiClient {
     )
   }
 
+  // Create a new application.
   createNewApp (app) {
     const url = this.api + 'apps/user/'
     const opts = {
