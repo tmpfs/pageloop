@@ -36,7 +36,6 @@ class Request {
     if (rpc.fetch) {
       o.options.raw = true
     }
-    console.log(o)
     return o
   }
 
@@ -102,17 +101,24 @@ class ApiClient {
   }
 
   rpc (req, opts = {}) {
+    const {url, options} = Request.translate(req)
     // Try to send over socket connection first
     if (this.useWebsocket && this.socket.connected && !opts.http) {
+      const log = this.preflight(url, {method: 'RPC'})
       // Clean REST specific flags
       delete req.mime
       delete req.raw
       delete req.fetch
       return this.socket.request(req)
+        .then((res) => {
+          res.url = url
+          res.status = res.response.status
+          this.postflight(log, res)
+          return res
+        })
     }
 
     // Send via standard REST API if the socket is not available
-    const {url, options} = Request.translate(req)
     return this.request(url, options)
   }
 

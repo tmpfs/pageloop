@@ -85,7 +85,7 @@ class SocketConnection {
             status: response.status,
             id: response.id,
             transport: 'ws://json-rpc'}
-          // TODO: reject on error
+          // TODO: reject on error???
           const doc = response.error || response.result
           resolve({response: res, document: doc})
         }
