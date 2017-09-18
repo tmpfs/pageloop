@@ -80,6 +80,7 @@ const OPTIONS = {
   'Core.Meta': getDefaultOptions,
   'Core.Stats': getDefaultOptions,
   'Container.List': getDefaultOptions,
+  // TODO: restore create app from template
   'Container.CreateApp': getPutOptions,
   'Template.ReadApplications': getDefaultOptions,
   'Jobs.ReadActiveJobs': getDefaultOptions,
@@ -98,7 +99,6 @@ class RpcRequest {
       params = [params]
     }
     this.params = params || []
-    console.log(args)
     this.args = args
   }
 
@@ -202,8 +202,10 @@ class SocketConnection {
 
   request (payload) {
     if (this.connected) {
+      /*
       console.log('requesting with websocket connection')
       console.log(payload)
+      */
       return new Promise((resolve, reject) => {
         // TODO: set timeout to remove listener
         this._listeners[payload.id] = (response) => {
@@ -216,7 +218,7 @@ class SocketConnection {
           const doc = response.error || response.result
           resolve({response: res, document: doc})
         }
-        this._conn.send(JSON.stringify(payload))
+        this.send(payload)
       })
     }
   }

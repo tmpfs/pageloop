@@ -1,7 +1,7 @@
 package handler
 
 import (
-  "fmt"
+  //"fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -81,15 +81,17 @@ func (w *WebsocketConnection) ReadRequest() {
         if len(req.Arguments) > 0 {
           // TODO: use proper RPC arguments interface
           if method == "Container.CreateApp" {
-            println("test for create app arguments")
-            fmt.Printf("%#v\n", req.Arguments)
+            //println("test for create app arguments")
+            //fmt.Printf("%#v\n", req.Arguments)
 
             if input, ok := req.Arguments[0].(map[string]interface{}); ok {
               if result, err := utils.ValidateInterface(SchemaAppNew, input); err != nil {
                 w.WriteError(req, CommandError(http.StatusInternalServerError, err.Error()))
+                continue
               } else {
                 if !result.Valid() {
                   w.WriteError(req, CommandError(http.StatusBadRequest,result.Errors()[0].String()))
+                  continue
                 } else {
                   app := &Application{Name: input["name"].(string), Description: input["description"].(string)}
                   act.Push(app)
