@@ -5,7 +5,7 @@ const API = '/api/'
 
 // Maps RPC function names to REST request URLs
 const URLS = {
-  'Core.Version': function () {
+  'Core.Meta': function () {
     return API
   },
   'Core.Stats': function () {
@@ -18,7 +18,7 @@ function getDefaultOptions () {
 }
 
 const OPTIONS = {
-  'Core.Version': getDefaultOptions,
+  'Core.Meta': getDefaultOptions,
   'Core.Stats': getDefaultOptions
 }
 
@@ -260,7 +260,7 @@ class ApiClient {
   }
 
   getVersion () {
-    return this.rpc(Request.rpc('Core.Version'))
+    return this.rpc(Request.rpc('Core.Meta'))
   }
 
   getStats () {

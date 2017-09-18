@@ -52,7 +52,7 @@ func init() {
   }
 
   // GET /
-  push("Core.Version", NewAction(OperationRead, ""),
+  push("Core.Meta", NewAction(OperationRead, ""),
     &CommandDefinition{MethodName: "ReadMeta", Status: http.StatusOK})
   // GET /stats
   push("Core.Stats", NewAction(OperationRead, "/stats"),
