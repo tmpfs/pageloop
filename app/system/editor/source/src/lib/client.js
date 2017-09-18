@@ -77,6 +77,12 @@ const URLS = {
   },
   'Application.Delete': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
+  },
+  'File.Create': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+  },
+  'File.CreateTemplate': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
   }
 }
 
@@ -93,7 +99,9 @@ const OPTIONS = {
   'Application.ReadPages': getDefaultOptions,
   'Application.DeleteFiles': getDeleteOptions,
   'Application.RunTask': getPutOptions,
-  'Application.Delete': getDeleteOptions
+  'Application.Delete': getDeleteOptions,
+  'File.Create': getPutOptions,
+  'File.CreateTemplate': getPutOptions
 }
 
 class RpcRequest {
@@ -454,23 +462,6 @@ class ApiClient {
     )
   }
 
-  // TODO: get binary data over websocket!
-  getFileContents (pathname) {
-    const url = this.raw + pathname
-    return this.request(url, {raw: true})
-  }
-
-  renameFile (file, newName) {
-    const url = this.url + 'files' + file.url
-    const opts = {
-      method: 'POST',
-      headers: {
-        Location: newName
-      }
-    }
-    return this.request(url, opts)
-  }
-
   saveFile (file, value) {
     file.content = value
     const url = this.url + 'files' + file.url
@@ -484,7 +475,29 @@ class ApiClient {
     return this.request(url, opts)
   }
 
-  createNewFile (name, template) {
+  renameFile (file, newName) {
+    const url = this.url + 'files' + file.url
+    const opts = {
+      method: 'POST',
+      headers: {
+        Location: newName
+      }
+    }
+    return this.request(url, opts)
+  }
+
+  createFile (name, template) {
+    if (template) {
+      return this.rpc(
+        Request.rpc('File.CreateTemplate',
+        {context: this.container, target: this.application, item: name}, template)
+      )
+    }
+    return this.rpc(
+      Request.rpc('File.Create',
+      {context: this.container, target: this.application, item: name}, '')
+    )
+    /*
     const url = this.url + 'files' + name
     const opts = {
       method: 'PUT',
@@ -500,6 +513,13 @@ class ApiClient {
 
     opts.headers['Content-Length'] = opts.body.length
     return this.request(url, opts)
+    */
+  }
+
+  // TODO: get binary data over websocket!
+  getFileContents (pathname) {
+    const url = this.raw + pathname
+    return this.request(url, {raw: true})
   }
 }
 

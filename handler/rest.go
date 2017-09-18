@@ -99,7 +99,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
               act.Push(content)
             }
           }
-
       } else if def.MethodName == "UpdateFile" {
           location := req.Header.Get("Location")
           if location != "" {

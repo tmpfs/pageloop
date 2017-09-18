@@ -1,7 +1,7 @@
 package handler
 
 import (
-  //"fmt"
+  "fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -105,6 +105,19 @@ func (w *WebsocketConnection) ReadRequest() {
                 list = append(list, url.(string))
               }
               act.Push(list)
+            }
+          } else if method == "File.Create" {
+            // Create empty document
+            var content []byte
+            act.Push(content)
+          } else if method == "File.CreateTemplate" {
+            // fmt.Printf("%#v\n", req.Arguments)
+            if input, ok := req.Arguments[0].(map[string]interface{}); ok {
+              c := input["container"].(string)
+              a := input["application"].(string)
+              f := input["file"].(string)
+              ref := &ApplicationTemplate{Container: c, Application: a, File: f}
+              act.Push(ref)
             }
           }
         }

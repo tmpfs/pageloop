@@ -208,7 +208,7 @@ function Actions (router) {
       if (!/^\//.test(name)) {
         name = '/' + name
       }
-      return context.state.client.createNewFile(name, template)
+      return context.state.client.createFile(name, template)
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
