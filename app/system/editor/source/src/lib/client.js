@@ -141,6 +141,8 @@ class ApiClient {
     // should be injected
     this.log = null
     this.socket = this.connect()
+
+    this.useWebsocket = true
   }
 
   // Singleton websocket

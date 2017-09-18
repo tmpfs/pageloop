@@ -1,7 +1,7 @@
 package handler
 
 import (
-  // "fmt"
+  "fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -20,16 +20,26 @@ type WebsocketConnection struct {
   Conn *websocket.Conn
 }
 
+type RpcRequest struct {
+  Id uint `json:"id"`
+  Method string `json:"method"`
+  Params []interface{} `json:"params"`
+}
+
 func (w *WebsocketConnection) Read() {
   for {
-    messageType, p, err := w.Conn.ReadMessage()
+    // messageType, p, err := w.Conn.ReadMessage()
+    request := &RpcRequest{}
+    err := w.Conn.ReadJSON(request)
     if err != nil {
       log.Println(err)
       return
     }
 
-    println(string(messageType))
-    println(string(p))
+    fmt.Printf("%#v\n", request)
+
+    //println(string(messageType))
+    //println(string(p))
 
     // TODO: handle write errors
     /*
