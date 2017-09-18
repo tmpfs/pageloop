@@ -5,15 +5,15 @@ let socket
 let id = 0
 
 function getBodyOptions (rpc, options) {
+  options.headers = options.headers || {}
   if (rpc.body) {
     let body = rpc.body
     if (!rpc.raw) {
       body = JSON.stringify(rpc.body)
     }
     options.body = body
-    options.headers = {
-      'Content-Type': rpc.mime || 'application/json; charset=utf-8'
-    }
+    options.headers['Content-Type'] =
+      rpc.mime || 'application/json; charset=utf-8'
     options.headers['Content-Length'] = body.length
   }
   return options
@@ -89,6 +89,9 @@ const URLS = {
   },
   'File.Save': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+  },
+  'File.Move': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
   }
 }
 
@@ -108,7 +111,12 @@ const OPTIONS = {
   'Application.Delete': getDeleteOptions,
   'File.Create': getPutOptions,
   'File.CreateTemplate': getPutOptions,
-  'File.Save': getPostOptions
+  'File.Save': getPostOptions,
+  'File.Move': (rpc) => {
+    const o = getPostOptions(rpc)
+    o.headers.Location = rpc.args[0]
+    return o
+  }
 }
 
 class RpcRequest {
@@ -492,15 +500,11 @@ class ApiClient {
     return this.rpc(req)
   }
 
-  renameFile (file, newName) {
-    const url = this.url + 'files' + file.url
-    const opts = {
-      method: 'POST',
-      headers: {
-        Location: newName
-      }
-    }
-    return this.request(url, opts)
+  // Move a file
+  moveFile (container, application, file, newName) {
+    const req = Request.rpc('File.Move',
+      {context: container, target: application, item: file.url}, newName)
+    return this.rpc(req)
   }
 
   // TODO: get binary data over websocket!

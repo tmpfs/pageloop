@@ -345,7 +345,9 @@ function Actions (router) {
         })
     },
     'rename-file': function (context, {file, newName}) {
-      return context.state.client.renameFile(file, newName)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.moveFile(container, application, file, newName)
         .then((res) => {
           let doc = res.document
           if (res.response.status !== 200) {

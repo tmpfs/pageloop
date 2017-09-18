@@ -114,6 +114,10 @@ func (w *WebsocketConnection) ReadRequest() {
             if content, ok := req.Arguments[0].(string); ok {
               act.Push([]byte(content))
             }
+          } else if method == "File.Move" {
+            if newName, ok := req.Arguments[0].(string); ok {
+              act.Push(newName)
+            }
           } else if method == "File.CreateTemplate" {
             // fmt.Printf("%#v\n", req.Arguments)
             if input, ok := req.Arguments[0].(map[string]interface{}); ok {
