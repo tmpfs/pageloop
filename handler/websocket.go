@@ -1,7 +1,7 @@
 package handler
 
 import (
-  // "fmt"
+  //"fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -25,7 +25,7 @@ type WebsocketConnection struct {
 type RpcRequest struct {
   Id uint `json:"id"`
   Method string `json:"method"`
-  Params []interface{} `json:"params"`
+  Params []*ActionParameters `json:"params"`
 }
 
 type RpcResponse struct {
@@ -49,15 +49,12 @@ func (w *WebsocketConnection) WriteResponse(res *RpcResponse) *StatusError {
 
 func (w *WebsocketConnection) ReadRequest() {
   for {
-    // messageType, p, err := w.Conn.ReadMessage()
     req := &RpcRequest{}
     err := w.Conn.ReadJSON(req)
     if err != nil {
       log.Println(err)
       return
     }
-
-    // fmt.Printf("%#v\n", request)
 
     method := req.Method
 
@@ -67,6 +64,11 @@ func (w *WebsocketConnection) ReadRequest() {
     } else {
       // Create an empty action to hold the arguments
       var act *Action = &Action{}
+      if len(req.Params) == 1 {
+        // Assign parameters to the action
+        req.Params[0].Assign(act)
+      }
+      // Make sure the service method exists
       if _, err := w.Adapter.FindService(method, act); err != nil {
         w.WriteError(req, err)
       } else {

@@ -15,6 +15,29 @@ const(
   OperationDelete
 )
 
+// TODO: remove duplicates with Action type
+type ActionParameters struct {
+  // The operation type, cannot be a wildcard.
+  Type string `json:"type"`
+  // Context for the operation. May be a container reference, job number etc.
+  Context string `json:"context"`
+  // Target for the operation, typically an application.
+  Target string `json:"target"`
+  // A filter operation for the request.
+  Filter string `json:"filter"`
+  // An item, may contain slashes.
+  Item string `json:"item"`
+}
+
+// Assign these parameters to an action.
+func (p *ActionParameters) Assign(act *Action) {
+  act.Type = p.Type
+  act.Context = p.Context
+  act.Target = p.Target
+  act.Filter = p.Filter
+  act.Item = p.Item
+}
+
 // A command action is a simple representation of a command invocation
 // it can be used to execute a command without any object references.
 //

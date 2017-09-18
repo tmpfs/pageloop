@@ -29,6 +29,11 @@ const URLS = {
   },
   'Jobs.ReadActiveJobs': function () {
     return API + 'jobs/'
+  },
+  'Application.Read': function (rpc) {
+    console.log('app read url builder')
+    console.log(rpc)
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
   }
 }
 
@@ -37,7 +42,8 @@ const OPTIONS = {
   'Core.Stats': getDefaultOptions,
   'Container.List': getDefaultOptions,
   'Template.ReadApplications': getDefaultOptions,
-  'Jobs.ReadActiveJobs': getDefaultOptions
+  'Jobs.ReadActiveJobs': getDefaultOptions,
+  'Application.Read': getDefaultOptions
 }
 
 class RpcRequest {
@@ -48,6 +54,10 @@ class RpcRequest {
       params = [params]
     }
     this.params = params || []
+  }
+
+  get parameters () {
+    return this.params[0]
   }
 }
 
@@ -60,6 +70,8 @@ class Request {
     // console.log(rpc)
     o.url = URLS[rpc.method](rpc)
     o.options = OPTIONS[rpc.method](rpc)
+    console.log('translated called: ')
+    console.log(o)
     return o
   }
 
@@ -129,6 +141,8 @@ class SocketConnection {
   // Send a JSON payload and ignore any response
   send (payload) {
     if (this.connected) {
+      console.log('sending websocket request')
+      console.log(payload)
       this._conn.send(JSON.stringify(payload))
     }
   }
@@ -206,8 +220,9 @@ class ApiClient {
   }
 
   rpc (req) {
-    // TODO: implement API requests over websockets
     if (this.useWebsocket && this.socket.connected) {
+      console.log('sending websocket request')
+      console.log(req)
       return this.socket.request(req)
     }
 
@@ -312,6 +327,11 @@ class ApiClient {
     return this.rpc(Request.rpc('Container.List'))
   }
 
+  getApplication () {
+    console.log('get application called')
+    return this.rpc(Request.rpc('Application.Read', {context: this.container, target: this.application}))
+  }
+
   runTask (app, task) {
     const url = this.url + `tasks/${task}`
     const opts = {
@@ -330,11 +350,6 @@ class ApiClient {
       body: JSON.stringify(app)
     }
     return this.request(url, opts)
-  }
-
-  getApplication () {
-    const url = this.url
-    return this.request(url, {})
   }
 
   getPages () {
