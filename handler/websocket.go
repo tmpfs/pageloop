@@ -78,7 +78,6 @@ func (w *WebsocketConnection) ReadRequest() {
         if len(req.Arguments) > 0 {
           // TODO: use proper RPC arguments interface
           if method == "Application.DeleteFiles" {
-            // fmt.Printf("%#v\n", req.Arguments)
             if input, ok := req.Arguments[0].([]interface{}); ok {
               list := UrlList{}
               for _, url := range input {
@@ -122,8 +121,6 @@ func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) 
     log.Println(err)
     return
   }
-
-  // fmt.Printf("%#v\n", conn)
 
   ws := &WebsocketConnection{Conn: conn, Adapter: h.Adapter}
   connections = append(connections, ws)

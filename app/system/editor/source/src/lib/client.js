@@ -8,6 +8,16 @@ function getDefaultOptions () {
   return {method: 'GET'}
 }
 
+function getPutOptions () {
+  return {method: 'PUT'}
+}
+
+/*
+function getPostOptions () {
+  return {method: 'POST'}
+}
+*/
+
 function getBodyOptions (rpc, options) {
   options.body = JSON.stringify(rpc.body)
   options.headers = {
@@ -57,6 +67,9 @@ const URLS = {
   },
   'Application.DeleteFiles': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/`
+  },
+  'Application.RunTask': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/tasks/${rpc.parameters.item}`
   }
 }
 
@@ -69,7 +82,8 @@ const OPTIONS = {
   'Application.Read': getDefaultOptions,
   'Application.ReadFiles': getDefaultOptions,
   'Application.ReadPages': getDefaultOptions,
-  'Application.DeleteFiles': getDeleteBodyOptions
+  'Application.DeleteFiles': getDeleteBodyOptions,
+  'Application.RunTask': getPutOptions
 }
 
 class RpcRequest {
@@ -393,11 +407,11 @@ class ApiClient {
   }
 
   runTask (app, task) {
-    const url = this.url + `tasks/${task}`
-    const opts = {
-      method: 'PUT'
-    }
-    return this.request(url, opts)
+    // TODO: get container from app reference
+    return this.rpc(
+      Request.rpc('Application.RunTask',
+      {context: this.container, target: app.name, item: task})
+    )
   }
 
   createNewApp (app) {
