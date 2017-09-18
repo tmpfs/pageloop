@@ -50,6 +50,9 @@ const URLS = {
   'Container.List': function () {
     return API + 'apps/'
   },
+  'Container.CreateApp': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/`
+  },
   'Template.ReadApplications': function () {
     return API + 'templates/'
   },
@@ -77,6 +80,7 @@ const OPTIONS = {
   'Core.Meta': getDefaultOptions,
   'Core.Stats': getDefaultOptions,
   'Container.List': getDefaultOptions,
+  'Container.CreateApp': getPutOptions,
   'Template.ReadApplications': getDefaultOptions,
   'Jobs.ReadActiveJobs': getDefaultOptions,
   'Application.Read': getDefaultOptions,
@@ -423,6 +427,7 @@ class ApiClient {
 
   // Create a new application.
   createNewApp (app) {
+    /*
     const url = this.api + 'apps/user/'
     const opts = {
       method: 'PUT',
@@ -432,6 +437,13 @@ class ApiClient {
       body: JSON.stringify(app)
     }
     return this.request(url, opts)
+    */
+
+    return this.rpc(
+      Request.rpc('Container.CreateApp',
+      {context: 'user'},
+      app)
+    )
   }
 
   getFileContents (pathname) {

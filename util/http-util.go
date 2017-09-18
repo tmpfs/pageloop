@@ -104,6 +104,13 @@ func (h HttpUtil) ValidateRequest(schema []byte, input interface{}, req *http.Re
 	return result, nil
 }
 
+// Validate a native type.
+func (h HttpUtil) ValidateInterface(schema []byte, input interface{}) (*gojsonschema.Result, error) {
+	schemaLoader := gojsonschema.NewBytesLoader(schema)
+	documentLoader := gojsonschema.NewGoLoader(input)
+	return gojsonschema.Validate(schemaLoader, documentLoader)
+}
+
 // Validate client request data.
 func (h HttpUtil) Validate(schema []byte, input []byte) (*gojsonschema.Result, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schema)

@@ -1,12 +1,13 @@
 package handler
 
 import (
-  //"fmt"
+  "fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
+  . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -65,6 +66,7 @@ func (w *WebsocketConnection) ReadRequest() {
     // NOTE: client keepalive messages
 
     if method != "" {
+      println(method)
       // Create an empty action to hold the arguments
       var act *Action = &Action{}
       if len(req.Params) >= 1 {
@@ -78,7 +80,23 @@ func (w *WebsocketConnection) ReadRequest() {
         // Handle additional arguments
         if len(req.Arguments) > 0 {
           // TODO: use proper RPC arguments interface
-          if method == "Application.DeleteFiles" {
+          if method == "Container.CreateApp" {
+            println("test for create app arguments")
+            fmt.Printf("%#v\n", req.Arguments)
+
+            if input, ok := req.Arguments[0].(map[string]interface{}); ok {
+              if result, err := utils.ValidateInterface(SchemaAppNew, input); err != nil {
+                w.WriteError(req, CommandError(http.StatusInternalServerError, err.Error()))
+              } else {
+                if !result.Valid() {
+                  w.WriteError(req, CommandError(http.StatusBadRequest,result.Errors()[0].String()))
+                } else {
+                  app := &Application{Name: input["name"].(string), Description: input["description"].(string)}
+                  act.Push(app)
+                }
+              }
+            }
+          } else if method == "Application.DeleteFiles" {
             if input, ok := req.Arguments[0].([]interface{}); ok {
               list := UrlList{}
               for _, url := range input {
