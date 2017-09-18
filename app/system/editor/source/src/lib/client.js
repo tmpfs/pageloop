@@ -31,9 +31,13 @@ const URLS = {
     return API + 'jobs/'
   },
   'Application.Read': function (rpc) {
-    console.log('app read url builder')
-    console.log(rpc)
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
+  },
+  'Application.ReadFiles': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/`
+  },
+  'Application.ReadPages': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/pages/`
   }
 }
 
@@ -43,7 +47,9 @@ const OPTIONS = {
   'Container.List': getDefaultOptions,
   'Template.ReadApplications': getDefaultOptions,
   'Jobs.ReadActiveJobs': getDefaultOptions,
-  'Application.Read': getDefaultOptions
+  'Application.Read': getDefaultOptions,
+  'Application.ReadFiles': getDefaultOptions,
+  'Application.ReadPages': getDefaultOptions
 }
 
 class RpcRequest {
@@ -66,12 +72,12 @@ class Request {
   // Translate a JSON RPC request to a standard HTTP request
   static translate (rpc) {
     const o = {}
-    // console.log('translate request: ' + rpc.method)
-    // console.log(rpc)
     o.url = URLS[rpc.method](rpc)
     o.options = OPTIONS[rpc.method](rpc)
+    /*
     console.log('translated called: ')
     console.log(o)
+    */
     return o
   }
 
@@ -97,10 +103,8 @@ class SocketConnection {
   connect () {
     this._conn = new WebSocket(this.url, this.protocols, this.opts)
 
-    console.log(this._conn)
-
     this._conn.onopen = () => {
-      // this.send({message: 'foo'})
+      console.log('socket connection opened')
     }
 
     this._conn.onmessage = (e) => {
@@ -125,8 +129,8 @@ class SocketConnection {
     }
 
     this._conn.onclose = () => {
+      console.log('socket connection closed')
       this.cleanup()
-      console.log('socket conn closed')
     }
   }
 
@@ -151,8 +155,7 @@ class SocketConnection {
     if (this.connected) {
       return new Promise((resolve, reject) => {
         this._listeners[payload.id] = (response) => {
-          // console.log('listener called')
-          console.log(response)
+          // console.log(response)
           const res = {
             status: response.status,
             id: response.id,
@@ -209,6 +212,7 @@ class ApiClient {
     const log = this.preflight(url, opts)
     return fetch(url, opts)
       .then((res) => {
+        res.transport = 'http://rest-api'
         this.postflight(log, res)
         if (opts.raw) {
           return res
@@ -221,14 +225,18 @@ class ApiClient {
 
   rpc (req) {
     if (this.useWebsocket && this.socket.connected) {
+      /*
       console.log('sending websocket request')
       console.log(req)
+      */
       return this.socket.request(req)
     }
 
     const {url, options} = Request.translate(req)
+    /*
     console.log('translated: ' + url)
     console.log(options)
+    */
     return this.request(url, options)
   }
 
@@ -323,13 +331,22 @@ class ApiClient {
     return this.rpc(Request.rpc('Template.ReadApplications'))
   }
 
+  // List all containers
   getContainers () {
     return this.rpc(Request.rpc('Container.List'))
   }
 
+  // Get a single application
   getApplication () {
-    console.log('get application called')
     return this.rpc(Request.rpc('Application.Read', {context: this.container, target: this.application}))
+  }
+
+  getFiles () {
+    return this.rpc(Request.rpc('Application.ReadFiles', {context: this.container, target: this.application}))
+  }
+
+  getPages () {
+    return this.rpc(Request.rpc('Application.ReadPages', {context: this.container, target: this.application}))
   }
 
   runTask (app, task) {
@@ -350,16 +367,6 @@ class ApiClient {
       body: JSON.stringify(app)
     }
     return this.request(url, opts)
-  }
-
-  getPages () {
-    const url = this.url + 'pages/'
-    return this.request(url, {})
-  }
-
-  getFiles () {
-    const url = this.url + 'files/'
-    return this.request(url, {})
   }
 
   getFileContents (pathname) {
