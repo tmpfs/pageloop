@@ -8,6 +8,22 @@ function getDefaultOptions () {
   return {method: 'GET'}
 }
 
+function getBodyOptions (rpc, options) {
+  options.body = JSON.stringify(rpc.body)
+  options.headers = {
+    'Content-Type': 'application/json; charset=utf-8'
+  }
+  options.headers['Content-Length'] = rpc.body.length
+  return options
+}
+
+function getDeleteBodyOptions (rpc) {
+  const o = {
+    method: 'DELETE'
+  }
+  return getBodyOptions(rpc, o)
+}
+
 // REST API endpoint
 const API = '/api/'
 // Websocket endpoint
@@ -38,6 +54,9 @@ const URLS = {
   },
   'Application.ReadPages': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/pages/`
+  },
+  'Application.DeleteFiles': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/`
   }
 }
 
@@ -49,17 +68,20 @@ const OPTIONS = {
   'Jobs.ReadActiveJobs': getDefaultOptions,
   'Application.Read': getDefaultOptions,
   'Application.ReadFiles': getDefaultOptions,
-  'Application.ReadPages': getDefaultOptions
+  'Application.ReadPages': getDefaultOptions,
+  'Application.DeleteFiles': getDeleteBodyOptions
 }
 
 class RpcRequest {
-  constructor (id, method, params) {
+  constructor (id, method, params, ...args) {
     this.id = id
     this.method = method
     if (params && !Array.isArray(params)) {
       params = [params]
     }
     this.params = params || []
+    console.log(args)
+    this.args = args
   }
 
   get parameters () {
@@ -74,16 +96,19 @@ class Request {
     const o = {}
     o.url = URLS[rpc.method](rpc)
     o.options = OPTIONS[rpc.method](rpc)
-    /*
-    console.log('translated called: ')
-    console.log(o)
-    */
     return o
   }
 
   // Get a JSON RPC request object.
-  static rpc (method, params) {
-    return new RpcRequest(++id, method, params)
+  static rpc (method, params, ...args) {
+    const req = new RpcRequest(++id, method, params, ...args)
+    if (!req.params.length) {
+      delete req.params
+    }
+    if (!req.args.length) {
+      delete req.args
+    }
+    return req
   }
 }
 
@@ -108,7 +133,7 @@ class SocketConnection {
     }
 
     this._conn.onmessage = (e) => {
-      console.log(e)
+      // console.log(e)
       if (e.data) {
         let doc
         try {
@@ -153,13 +178,17 @@ class SocketConnection {
 
   request (payload) {
     if (this.connected) {
+      console.log('requesting with websocket connection')
+      console.log(payload)
       return new Promise((resolve, reject) => {
+        // TODO: set timeout to remove listener
         this._listeners[payload.id] = (response) => {
           // console.log(response)
           const res = {
             status: response.status,
             id: response.id,
             transport: 'ws://json-rpc'}
+          // TODO: reject on error
           const doc = response.error || response.result
           resolve({response: res, document: doc})
         }
@@ -341,12 +370,26 @@ class ApiClient {
     return this.rpc(Request.rpc('Application.Read', {context: this.container, target: this.application}))
   }
 
+  // Get the files for an application
   getFiles () {
     return this.rpc(Request.rpc('Application.ReadFiles', {context: this.container, target: this.application}))
   }
 
+  // Get the pages for an application
   getPages () {
     return this.rpc(Request.rpc('Application.ReadPages', {context: this.container, target: this.application}))
+  }
+
+  // Delete a list of files from an application
+  deleteFiles (files) {
+    const urls = files.map((f) => {
+      return f.url
+    })
+    return this.rpc(
+      Request.rpc('Application.DeleteFiles',
+      {context: this.container, target: this.application},
+      urls)
+    )
   }
 
   runTask (app, task) {
@@ -372,22 +415,6 @@ class ApiClient {
   getFileContents (pathname) {
     const url = this.raw + pathname
     return this.request(url, {raw: true})
-  }
-
-  deleteFiles (files) {
-    const urls = files.map((f) => {
-      return f.url
-    })
-    const url = this.url + 'files'
-    const opts = {
-      method: 'DELETE',
-      body: JSON.stringify(urls),
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-      }
-    }
-    opts.headers['Content-Length'] = opts.body.length
-    return this.request(url, opts)
   }
 
   renameFile (file, newName) {

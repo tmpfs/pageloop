@@ -26,6 +26,7 @@ type RpcRequest struct {
   Id uint `json:"id"`
   Method string `json:"method"`
   Params []*ActionParameters `json:"params"`
+  Arguments []interface{} `json:"args"`
 }
 
 type RpcResponse struct {
@@ -64,14 +65,30 @@ func (w *WebsocketConnection) ReadRequest() {
     } else {
       // Create an empty action to hold the arguments
       var act *Action = &Action{}
-      if len(req.Params) == 1 {
-        // Assign parameters to the action
+      if len(req.Params) >= 1 {
         req.Params[0].Assign(act)
       }
+
       // Make sure the service method exists
       if _, err := w.Adapter.FindService(method, act); err != nil {
         w.WriteError(req, err)
       } else {
+
+        // Handle additional arguments
+        if len(req.Arguments) > 0 {
+          // TODO: use proper RPC arguments interface
+          if method == "Application.DeleteFiles" {
+            // fmt.Printf("%#v\n", req.Arguments)
+            if input, ok := req.Arguments[0].([]interface{}); ok {
+              list := UrlList{}
+              for _, url := range input {
+                list = append(list, url.(string))
+              }
+              act.Push(list)
+            }
+          }
+        }
+
         // Handle execution errors
         if result, err := w.Adapter.Execute(act); err != nil {
           w.WriteError(req, err)
@@ -124,6 +141,6 @@ func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) 
     return nil
   })
 
-  // Start reading from socket in goroutine
+  // Start reading messages from socket
   go ws.ReadRequest()
 }

@@ -68,6 +68,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
       def := mapping.CommandDefinition
 
+      // TODO: use proper RPC arguments interface
       if def.MethodName == "CreateApp" {
         var input *Application = &Application{}
         if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
