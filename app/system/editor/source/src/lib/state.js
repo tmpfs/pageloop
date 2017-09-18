@@ -128,7 +128,7 @@ class State {
     this.application = application
 
     // Set up new API client
-    this.client = new ApiClient(container, application)
+    this.client = new ApiClient()
     this.client.log = this.network
   }
 

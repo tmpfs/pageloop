@@ -278,6 +278,11 @@ func (b *CommandExecute) ReadFile(app *Application, url string) (*File, *StatusE
   return file, nil
 }
 
+// Read file content.
+func (b *CommandExecute) ReadFileContent(file *File, raw bool) ([]byte, *StatusError) {
+  return file.Source(raw), nil
+}
+
 // Read a page.
 func (b *CommandExecute) ReadPage(app *Application, url string) (*Page, *StatusError) {
   file := app.Urls[url]

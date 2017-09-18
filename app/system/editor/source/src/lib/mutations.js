@@ -105,7 +105,7 @@ const Mutations = {
       if (!dir) {
         url = '/' + f.name
       } else {
-        url = dir + '/' + f.name
+        url = dir.replace(/\/$/, '') + '/' + f.name
       }
       exists = state.app.getFileByUrl(url)
       list.push({

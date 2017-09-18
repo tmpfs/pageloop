@@ -30,12 +30,15 @@ class RpcRequest {
 }
 
 class Request {
-
   // Translate a JSON RPC request to a standard HTTP request
   static translate (rpc) {
     const o = {}
     o.url = urls[rpc.method](rpc)
     o.options = options[rpc.method](rpc)
+    if (rpc.fetch) {
+      o.options.raw = true
+    }
+    console.log(o)
     return o
   }
 
@@ -147,16 +150,10 @@ class SocketConnection {
 }
 
 class ApiClient {
-  constructor (container, application) {
-    this.host = ''
-    this.container = container
-    this.application = application
-    this.url = `/api/apps/${container}/${application}/`
-    this.raw = `/apps/raw/${container}/${application}`
-    // should be injected
+  constructor () {
+    // log should be injected
     this.log = null
     this.socket = this.connect()
-
     this.useWebsocket = true
   }
 
@@ -183,7 +180,8 @@ class ApiClient {
     }
   }
 
-  // Perform an API request and assume a JSON response.
+  // Perform an API request and assume a JSON response unless
+  // the raw option is set.
   request (url, opts) {
     const log = this.preflight(url, opts)
     return fetch(url, opts)
@@ -199,24 +197,24 @@ class ApiClient {
       })
   }
 
-  rpc (req) {
-    if (this.useWebsocket && this.socket.connected) {
+  rpc (req, opts = {}) {
+    // Try to send over socket connection first
+    if (this.useWebsocket && this.socket.connected && !opts.http) {
+      // Clean REST specific flags
       delete req.mime
       delete req.raw
+      delete req.fetch
       return this.socket.request(req)
     }
 
+    // Send via standard REST API if the socket is not available
     const {url, options} = Request.translate(req)
-    /*
-    console.log('translated: ' + url)
-    console.log(options)
-    */
     return this.request(url, options)
   }
 
-  upload (file) {
+  upload (container, application, file) {
     return new Promise((resolve, reject) => {
-      let u = this.url + 'files'
+      let u = `/api/apps/${container}/${application}/files/`
       let dir = file.dir
       if (dir) {
         u += dir
@@ -229,7 +227,7 @@ class ApiClient {
       u += file.name
 
       // TODO: log file uploads
-
+      //
       const method = file.exists ? 'POST' : 'PUT'
 
       // Need to use XHR for upload progress :(
@@ -287,15 +285,15 @@ class ApiClient {
   // Combine version meta information with server statistics
   getMeta () {
     return this.getVersion()
-      .then(({response, document}) => {
-        if (response.status !== 200) {
-          return {response: response, document: document}
+      .then((res) => {
+        if (res.response.status !== 200) {
+          return res
         }
-        const meta = {info: document}
+        const meta = {info: res.document}
         return this.getStats()
-          .then(({response, document}) => {
-            meta.stats = document
-            return {response: response, document: meta}
+          .then((res) => {
+            meta.stats = res.document
+            return {response: res.response, document: meta}
           })
       })
   }
@@ -396,10 +394,13 @@ class ApiClient {
     return this.rpc(req)
   }
 
-  // TODO: get binary data over websocket!
-  getFileContents (pathname) {
-    const url = this.raw + pathname
-    return this.request(url, {raw: true})
+  // TODO: get binary data over websocket!?
+  getFileSourceRaw (container, application, file) {
+    const req = Request.rpc('File.ReadContentRaw',
+      {context: container, target: application, item: file.url})
+    // passthrough the underlying fetch promise
+    req.fetch = true
+    return this.rpc(req, {http: true})
   }
 }
 

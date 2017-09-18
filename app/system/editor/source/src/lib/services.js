@@ -74,16 +74,22 @@ const urls = {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
   },
   'File.Create': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
   },
   'File.CreateTemplate': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
   },
   'File.Save': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
   },
   'File.Move': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
+  },
+  'File.ReadContent': function (rpc) {
+    return `/apps/src/${rpc.parameters.context}/${rpc.parameters.target}${rpc.parameters.item}`
+  },
+  'File.ReadContentRaw': function (rpc) {
+    return `/apps/raw/${rpc.parameters.context}/${rpc.parameters.target}${rpc.parameters.item}`
   }
 }
 
@@ -108,7 +114,9 @@ const options = {
     const o = getPostOptions(rpc)
     o.headers.Location = rpc.args[0]
     return o
-  }
+  },
+  'File.ReadContent': getDefaultOptions,
+  'File.ReadContentRaw': getDefaultOptions
 }
 
 export {urls, options}

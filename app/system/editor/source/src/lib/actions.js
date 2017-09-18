@@ -185,11 +185,12 @@ function Actions (router) {
       return context.dispatch('list-pages')
         .then(() => context.dispatch('list-files'))
     },
-    'get-file-contents': function (context, item) {
-      return context.state.client.getFileContents(item.url)
+    'get-file-contents': function (context, file) {
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.getFileSourceRaw(container, application, file)
         .then((res) => {
-          // TODO: get blob for binary types
-          return item.binary ? res.blob() : res.text()
+          return file.binary ? res.blob() : res.text()
         })
     },
     'open-file': function (context, file) {
@@ -368,7 +369,9 @@ function Actions (router) {
         })
     },
     'upload': function (context, info) {
-      return context.state.transfer.upload(info.files)
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.transfer.upload(container, application, info.files)
         .then((transfers) => {
           // Reload file list for the moment
           return context.dispatch('reload')

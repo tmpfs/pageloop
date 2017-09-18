@@ -42,7 +42,7 @@ class Transfer {
   }
 
   // Upload all transfers in chunks
-  upload () {
+  upload (container, application) {
     if (this.transfers.length) {
       let chunks = this.getChunks()
       // Transfer a single chunk
@@ -50,7 +50,7 @@ class Transfer {
         return new Promise((resolve, reject) => {
           let loaded = 0
           chunk.forEach((file) => {
-            this.client.upload(file).then((file) => {
+            this.client.upload(container, application, file).then((file) => {
               loaded++
               if (loaded === chunk.length) {
                 // Process next chunk

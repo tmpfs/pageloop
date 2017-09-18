@@ -7,7 +7,6 @@ import (
   "strconv"
   "net"
   "net/http"
-  // "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/core"
 )
 
