@@ -1,7 +1,17 @@
+// Singleton websocket client
 let socket
+
+// Message identifier counter
 let id = 0
 
+function getDefaultOptions () {
+  return {method: 'GET'}
+}
+
+// REST API endpoint
 const API = '/api/'
+// Websocket endpoint
+const WS = '/ws/'
 
 // Maps RPC function names to REST request URLs
 const URLS = {
@@ -9,17 +19,25 @@ const URLS = {
     return API
   },
   'Core.Stats': function () {
-    return API + 'stats'
+    return API + 'stats/'
+  },
+  'Container.List': function () {
+    return API + 'apps/'
+  },
+  'Template.ReadApplications': function () {
+    return API + 'templates/'
+  },
+  'Jobs.ReadActiveJobs': function () {
+    return API + 'jobs/'
   }
-}
-
-function getDefaultOptions () {
-  return {method: 'GET'}
 }
 
 const OPTIONS = {
   'Core.Meta': getDefaultOptions,
-  'Core.Stats': getDefaultOptions
+  'Core.Stats': getDefaultOptions,
+  'Container.List': getDefaultOptions,
+  'Template.ReadApplications': getDefaultOptions,
+  'Jobs.ReadActiveJobs': getDefaultOptions
 }
 
 class RpcRequest {
@@ -53,7 +71,7 @@ class Request {
 
 class SocketConnection {
   constructor () {
-    this.url = document.location.origin.replace(/^http/, 'ws') + '/ws/'
+    this.url = document.location.origin.replace(/^http/, 'ws') + WS
     this.protocols
     this.opts
     this._conn
@@ -259,14 +277,17 @@ class ApiClient {
     })
   }
 
+  // Get meta version information
   getVersion () {
     return this.rpc(Request.rpc('Core.Meta'))
   }
 
+  // Get server statistics
   getStats () {
     return this.rpc(Request.rpc('Core.Stats'))
   }
 
+  // Combine version meta information with server statistics
   getMeta () {
     return this.getVersion()
       .then(({response, document}) => {
@@ -280,6 +301,15 @@ class ApiClient {
             return {response: response, document: meta}
           })
       })
+  }
+
+  // List application templates
+  listTemplates () {
+    return this.rpc(Request.rpc('Template.ReadApplications'))
+  }
+
+  getContainers () {
+    return this.rpc(Request.rpc('Container.List'))
   }
 
   runTask (app, task) {
@@ -300,11 +330,6 @@ class ApiClient {
       body: JSON.stringify(app)
     }
     return this.request(url, opts)
-  }
-
-  getContainers () {
-    const url = this.api + 'apps/'
-    return this.request(url, {})
   }
 
   getApplication () {
@@ -391,11 +416,6 @@ class ApiClient {
 
     opts.headers['Content-Length'] = opts.body.length
     return this.request(url, opts)
-  }
-
-  listTemplates () {
-    const url = this.api + 'templates'
-    return this.request(url, {})
   }
 }
 
