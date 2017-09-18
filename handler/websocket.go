@@ -59,10 +59,12 @@ func (w *WebsocketConnection) ReadRequest() {
 
     method := req.Method
 
-    // Could not find service method
-    if method == "" {
-      w.WriteError(req, CommandError(http.StatusBadRequest, "Service method name required"))
-    } else {
+    // NOTE: client socket keepalive requests send the
+    // NOTE: empty object so we ignore requests with no
+    // NOTE: method to avoid sending error responses to
+    // NOTE: client keepalive messages
+
+    if method != "" {
       // Create an empty action to hold the arguments
       var act *Action = &Action{}
       if len(req.Params) >= 1 {
@@ -73,7 +75,6 @@ func (w *WebsocketConnection) ReadRequest() {
       if _, err := w.Adapter.FindService(method, act); err != nil {
         w.WriteError(req, err)
       } else {
-
         // Handle additional arguments
         if len(req.Arguments) > 0 {
           // TODO: use proper RPC arguments interface
