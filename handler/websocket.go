@@ -20,6 +20,26 @@ type WebsocketConnection struct {
   Conn *websocket.Conn
 }
 
+func (w *WebsocketConnection) Read() {
+  for {
+    messageType, p, err := w.Conn.ReadMessage()
+    if err != nil {
+      log.Println(err)
+      return
+    }
+
+    println(string(messageType))
+    println(string(p))
+
+    // TODO: handle write errors
+    /*
+    if err := conn.WriteMessage(messageType, p); err != nil {
+      return
+    }
+    */
+  }
+}
+
 // Handles requests for application data.
 type WebsocketHandler struct {
   Adapter *CommandAdapter
@@ -59,6 +79,10 @@ func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) 
     return nil
   })
 
+  // Start reading from socket in goroutine
+  go ws.Read()
+
+  /*
   for {
     messageType, p, err := conn.ReadMessage()
     if err != nil {
@@ -72,4 +96,5 @@ func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) 
       return
     }
   }
+  */
 }

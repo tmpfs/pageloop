@@ -1,6 +1,56 @@
 let socket
 let id = 0
 
+const API = '/api/'
+
+// Maps RPC function names to REST request URLs
+const URLS = {
+  'Core.Version': function () {
+    return API
+  },
+  'Core.Stats': function () {
+    return API + 'stats'
+  }
+}
+
+function getDefaultOptions () {
+  return {method: 'GET'}
+}
+
+const OPTIONS = {
+  'Core.Version': getDefaultOptions,
+  'Core.Stats': getDefaultOptions
+}
+
+class RpcRequest {
+  constructor (id, method, params) {
+    this.id = id
+    this.method = method
+    if (params && !Array.isArray(params)) {
+      params = [params]
+    }
+    this.params = params || []
+  }
+}
+
+class Request {
+
+  // Translate a JSON RPC request to a standard HTTP request
+  static translate (rpc) {
+    const o = {}
+    // console.log('translate request: ' + rpc.method)
+    // console.log(rpc)
+    o.url = URLS[rpc.method](rpc)
+    o.options = OPTIONS[rpc.method](rpc)
+    return o
+  }
+
+  // Get a JSON RPC request object.
+  static rpc (method, params) {
+    return new RpcRequest(++id, method, params)
+  }
+}
+
 class SocketConnection {
   constructor () {
     this.url = document.location.origin.replace(/^http/, 'ws') + '/ws/'
@@ -25,7 +75,6 @@ class SocketConnection {
 
     this._conn.onmessage = (e) => {
       console.log(e)
-
       if (e.data) {
         let doc
         try {
@@ -61,7 +110,6 @@ class SocketConnection {
 
   // Send a JSON payload and ignore any response
   send (payload) {
-    payload.id = (++id)
     if (this.connected) {
       this._conn.send(JSON.stringify(payload))
     }
@@ -85,7 +133,7 @@ class SocketConnection {
 class ApiClient {
   constructor (container, application) {
     this.host = ''
-    this.api = `/api/`
+    this.api = API
     this.container = container
     this.application = application
     this.url = `${this.api}apps/${container}/${application}/`
@@ -121,10 +169,6 @@ class ApiClient {
   // Perform an API request and assume a JSON response.
   request (url, opts) {
     const log = this.preflight(url, opts)
-    if (this.socket.connected) {
-      // TODO: implement API requests over websockets
-      // return this.socket.request({url: url, opts: opts})
-    }
     return fetch(url, opts)
       .then((res) => {
         this.postflight(log, res)
@@ -135,6 +179,18 @@ class ApiClient {
           return {response: res, document: doc}
         })
       })
+  }
+
+  rpc (req) {
+    // TODO: implement API requests over websockets
+    if (this.useWebsocket && this.socket.connected) {
+      return this.socket.request(req)
+    }
+
+    const {url, options} = Request.translate(req)
+    console.log('translated: ' + url)
+    console.log(options)
+    return this.request(url, options)
   }
 
   upload (file) {
@@ -198,13 +254,11 @@ class ApiClient {
   }
 
   getVersion () {
-    const url = this.api
-    return this.request(url, {})
+    return this.rpc(Request.rpc('Core.Version'))
   }
 
   getStats () {
-    const url = this.api + 'stats'
-    return this.request(url, {})
+    return this.rpc(Request.rpc('Core.Stats'))
   }
 
   getMeta () {
