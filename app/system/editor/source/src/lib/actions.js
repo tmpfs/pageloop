@@ -13,8 +13,16 @@ function Actions (router) {
   return {
     'get-meta': function (context) {
       return context.state.client.getMeta()
-        .then(({response, document}) => {
-          context.commit('meta', document)
+        .then((res) => {
+          console.log('meta response: ' + res.response.status)
+          console.log(res)
+          if (res.response.status !== 200) {
+            return context.dispatch('error', error(res))
+              .then((err) => {
+                throw err
+              })
+          }
+          context.commit('meta', res.document)
         })
     },
     'reset-current-file': function (context, url) {

@@ -87,6 +87,22 @@ func (b *CommandAdapter) Find(act *Action) (*ActionMap, *StatusError) {
   return mapping, nil
 }
 
+// Find the command definition by service method name.
+func (b *CommandAdapter) FindService(method string, act *Action) (*ActionMap, *StatusError) {
+  if mapping, ok := Services[method]; ok {
+    var m reflect.Method
+    receiver := reflect.ValueOf(b)
+    t := reflect.TypeOf(b)
+    def := mapping.CommandDefinition
+    def.Receiver = receiver
+    m, _ = t.MethodByName(def.MethodName)
+    def.Method = m
+    b.initArguments(act, mapping)
+    return mapping, nil
+  }
+  return nil, CommandError(http.StatusNotFound, "")
+}
+
 // Execute an action.
 //
 // You should have already invoked Find() so that the action has been

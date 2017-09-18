@@ -116,13 +116,17 @@ class SocketConnection {
   }
 
   request (payload) {
-    // console.log(payload)
-    payload.id = (++id)
     if (this.connected) {
       return new Promise((resolve, reject) => {
-        this._listeners[payload.id] = (document) => {
-          console.log('listener called')
-          resolve({response: {}, document: document})
+        this._listeners[payload.id] = (response) => {
+          // console.log('listener called')
+          console.log(response)
+          const res = {
+            status: response.status,
+            id: response.id,
+            transport: 'ws://json-rpc'}
+          const doc = response.error || response.result
+          resolve({response: res, document: doc})
         }
         this._conn.send(JSON.stringify(payload))
       })
@@ -266,6 +270,9 @@ class ApiClient {
   getMeta () {
     return this.getVersion()
       .then(({response, document}) => {
+        if (response.status !== 200) {
+          return {response: response, document: document}
+        }
         const meta = {info: document}
         return this.getStats()
           .then(({response, document}) => {
