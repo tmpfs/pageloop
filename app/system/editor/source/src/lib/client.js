@@ -4,12 +4,24 @@ let socket
 // Message identifier counter
 let id = 0
 
+function getBodyOptions (rpc, options) {
+  if (rpc.body) {
+    options.body = JSON.stringify(rpc.body)
+    options.headers = {
+      'Content-Type': 'application/json; charset=utf-8'
+    }
+    options.headers['Content-Length'] = rpc.body.length
+  }
+  return options
+}
+
 function getDefaultOptions () {
   return {method: 'GET'}
 }
 
-function getPutOptions () {
-  return {method: 'PUT'}
+function getPutOptions (rpc) {
+  const o = {method: 'PUT'}
+  return getBodyOptions(rpc, o)
 }
 
 /*
@@ -18,19 +30,8 @@ function getPostOptions () {
 }
 */
 
-function getBodyOptions (rpc, options) {
-  options.body = JSON.stringify(rpc.body)
-  options.headers = {
-    'Content-Type': 'application/json; charset=utf-8'
-  }
-  options.headers['Content-Length'] = rpc.body.length
-  return options
-}
-
-function getDeleteBodyOptions (rpc) {
-  const o = {
-    method: 'DELETE'
-  }
+function getDeleteOptions (rpc) {
+  const o = {method: 'DELETE'}
   return getBodyOptions(rpc, o)
 }
 
@@ -73,6 +74,9 @@ const URLS = {
   },
   'Application.RunTask': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/tasks/${rpc.parameters.item}`
+  },
+  'Application.Delete': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
   }
 }
 
@@ -87,8 +91,9 @@ const OPTIONS = {
   'Application.Read': getDefaultOptions,
   'Application.ReadFiles': getDefaultOptions,
   'Application.ReadPages': getDefaultOptions,
-  'Application.DeleteFiles': getDeleteBodyOptions,
-  'Application.RunTask': getPutOptions
+  'Application.DeleteFiles': getDeleteOptions,
+  'Application.RunTask': getPutOptions,
+  'Application.Delete': getDeleteOptions
 }
 
 class RpcRequest {
@@ -100,6 +105,10 @@ class RpcRequest {
     }
     this.params = params || []
     this.args = args
+  }
+
+  get body () {
+    return this.args && this.args.length && this.args[0]
   }
 
   get parameters () {
@@ -428,19 +437,8 @@ class ApiClient {
   }
 
   // Create a new application.
-  createNewApp (app) {
-    /*
-    const url = this.api + 'apps/user/'
-    const opts = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(app)
-    }
-    return this.request(url, opts)
-    */
-
+  createApp (app) {
+    // TODO: fix with template reference
     return this.rpc(
       Request.rpc('Container.CreateApp',
       {context: 'user'},
@@ -448,6 +446,15 @@ class ApiClient {
     )
   }
 
+  // Delete an application.
+  deleteApp (container, application) {
+    return this.rpc(
+      Request.rpc('Application.Delete',
+      {context: container, target: application})
+    )
+  }
+
+  // TODO: get binary data over websocket!
   getFileContents (pathname) {
     const url = this.raw + pathname
     return this.request(url, {raw: true})
@@ -460,14 +467,6 @@ class ApiClient {
       headers: {
         Location: newName
       }
-    }
-    return this.request(url, opts)
-  }
-
-  deleteApp (container, application) {
-    const url = this.api + `apps/${container}/${application}`
-    const opts = {
-      method: 'DELETE'
     }
     return this.request(url, opts)
   }

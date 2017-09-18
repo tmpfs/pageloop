@@ -89,7 +89,7 @@ function Actions (router) {
         })
     },
     'new-app': function (context, app) {
-      return context.state.client.createNewApp(app)
+      return context.state.client.createApp(app)
         .then((res) => {
           // Show error response
           if (res.response.status !== 201) {
