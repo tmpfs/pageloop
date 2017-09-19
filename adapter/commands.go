@@ -155,7 +155,6 @@ func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusE
 }
 
 // Move a file
-// TODO: restore and test this
 func (b *CommandAdapter) MoveFile(c, a, f, dest string) (*File, *StatusError) {
   if app, file, err :=  b.ReadFile(c, a, f); err != nil {
     return nil, err

@@ -93,6 +93,15 @@ const urls = {
   }
 }
 
+// Get a binary file response.
+function getBinaryOptions () {
+  const o = getDefaultOptions()
+  o.headers = {
+    'Accept': 'application/octet-stream'
+  }
+  return o
+}
+
 const options = {
   'Core.Meta': getDefaultOptions,
   'Core.Stats': getDefaultOptions,
@@ -115,8 +124,8 @@ const options = {
     o.headers.Location = rpc.args[0]
     return o
   },
-  'File.ReadSource': getDefaultOptions,
-  'File.ReadSourceRaw': getDefaultOptions
+  'File.ReadSource': getBinaryOptions,
+  'File.ReadSourceRaw': getBinaryOptions
 }
 
 export {urls, options}

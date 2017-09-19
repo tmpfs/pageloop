@@ -188,7 +188,7 @@ function Actions (router) {
     'get-file-contents': function (context, file) {
       const container = context.state.container
       const application = context.state.application
-      return context.state.client.getFileSourceRaw(container, application, file)
+      return context.state.client.getFileSource(container, application, file, true)
         .then((res) => {
           return file.binary ? res.blob() : res.text()
         })

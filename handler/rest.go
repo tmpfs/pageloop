@@ -62,8 +62,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, err)
   } else {
 
-    println("rest function find")
-
     // Attempt to match the action
     if mapping, err := h.Adapter.Find(act); err != nil {
       return utils.Errorj(res, err)
@@ -71,7 +69,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
       def := mapping.CommandDefinition
 
-      println(def.MethodName)
+      // println(def.MethodName)
 
       // TODO: use proper RPC arguments interface
       if def.MethodName == "CreateApp" {
@@ -128,6 +126,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
             MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
           }
         }
+
+        accept := req.Header.Get("Accept")
+        // Client is asking for binary response
+        if accept == "application/octet-stream" {
+          // If the method result is a slice of bytes send it back
+          if content, ok := result.Data.([]byte); ok {
+            return utils.Write(res, result.Status, content)
+          }
+        }
+
         // Return the result to the client
         return utils.Json(res, result.Status, result.Data)
       }

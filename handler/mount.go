@@ -19,14 +19,4 @@ func MountApplication(mountpoints map[string]http.Handler, host *Host, app *Appl
 	log.Printf("Serving app %s from %s", url, app.PublicDirectory())
   fileserver := http.FileServer(http.Dir(app.PublicDirectory()))
   mountpoints[url] = http.StripPrefix(url, PublicHandler{Listing: listing, App: app, FileServer: fileserver})
-
-	// Serve the source files with frontmatter stripped.
-	url = app.SourceUrl()
-	log.Printf("Serving src %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app})
-
-	// Serve the raw source files.
-	url = app.RawUrl()
-	log.Printf("Serving raw %s from %s", url, app.SourceDirectory())
-  mountpoints[url] = http.StripPrefix(url, SourceHandler{Listing: listing, App: app, Raw: true})
 }

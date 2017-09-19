@@ -307,9 +307,8 @@ class ApiClient {
   }
 
   // TODO: get binary data over websocket!?
-  getFileSourceRaw (container, application, file) {
-    console.log('get file source raw')
-    const req = Request.rpc('File.ReadSourceRaw',
+  getFileSource (container, application, file, raw) {
+    const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource',
       {context: container, target: application, item: file.url})
     // passthrough the underlying fetch promise
     req.fetch = true
