@@ -22,7 +22,7 @@ type methodType struct {
 	numCalls   uint
 }
 
-type Service struct {
+type service struct {
   name string
   rcvr reflect.Value
   typ reflect.Type
@@ -30,15 +30,15 @@ type Service struct {
 }
 
 type ServiceManager struct {
-  services map[string]*Service
+  services map[string]*service
 }
 
 func (manager *ServiceManager) Register(rcvr interface{}) {
   if manager.services == nil {
-    manager.services = make(map[string]*Service)
+    manager.services = make(map[string]*service)
   }
 
-  s := new(Service)
+  s := new(service)
 
   s.rcvr = reflect.ValueOf(rcvr)
   s.typ = reflect.TypeOf(rcvr)
@@ -113,7 +113,7 @@ func suitableMethods(typ reflect.Type, reportErr bool) map[string]*methodType {
 	return methods
 }
 
-//// Private
+// Private
 
 // Is this an exported - upper case - name?
 func isExported(name string) bool {
