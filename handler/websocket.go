@@ -93,7 +93,21 @@ func (w *WebsocketConnection) ReadRequest() {
                   w.WriteError(req, CommandError(http.StatusBadRequest,result.Errors()[0].String()))
                   continue
                 } else {
+
                   app := &Application{Name: input["name"].(string), Description: input["description"].(string)}
+
+                  // Kludge, TODO: proper argument handling
+                  if tpl, ok := input["template"].(map[string]interface{}); ok {
+                    template := &ApplicationTemplate{}
+                    if container, ok := tpl["container"].(string); ok {
+                      template.Container = container
+                    }
+                    if application, ok := tpl["application"].(string); ok {
+                      template.Application = application
+                    }
+                    app.Template = template
+                  }
+
                   act.Push(app)
                 }
               }
