@@ -5,11 +5,12 @@ import(
   "log"
   "reflect"
   "sync"
+  "strings"
   "unicode"
   "unicode/utf8"
 )
 
-var DefaultServiceManager *ServiceManager = &ServiceManager{}
+var rpc *ServiceManager = &ServiceManager{}
 // Precompute the reflect type for error. Can't use error directly
 // because Typeof takes an empty interface value. This is annoying.
 var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
@@ -33,25 +34,48 @@ type ServiceManager struct {
   services map[string]*service
 }
 
-func (manager *ServiceManager) Register(rcvr interface{}) {
-  if manager.services == nil {
-    manager.services = make(map[string]*service)
+// Register a service with the server.
+func (server *ServiceManager) Register(rcvr interface{}) error {
+  if server.services == nil {
+    server.services = make(map[string]*service)
   }
-
   s := new(service)
-
   s.rcvr = reflect.ValueOf(rcvr)
   s.typ = reflect.TypeOf(rcvr)
-  sname := reflect.Indirect(s.rcvr).Type().Name()
-
-  s.name = sname
+  s.name = reflect.Indirect(s.rcvr).Type().Name()
   s.method = suitableMethods(s.typ, true)
-
-  fmt.Printf("%s\n", sname)
+  fmt.Printf("%s\n", s.name)
   fmt.Printf("%#v\n", s.method)
-
-  manager.services[sname] = s
+  server.services[s.name] = s
+  return nil
 }
+
+// Find a method by name in dot notation (Service.Method).
+func (server *ServiceManager) Method(name string) (service *service, mtype *methodType, err error) {
+  dot := strings.LastIndex(name, ".")
+  if dot < 0 {
+    err = fmt.Errorf("rpc: service/method request ill-formed: %s", name)
+    return
+  }
+
+  serviceName := name[:dot]
+  methodName := name[dot+1:]
+
+  // Look up the request.
+  //server.mu.RLock()
+  service = server.services[serviceName]
+  //server.mu.RUnlock()
+  if service == nil {
+    err = fmt.Errorf("rpc: can't find service %s", serviceName)
+    return
+  }
+  mtype = service.method[methodName]
+  if mtype == nil {
+    err = fmt.Errorf("rpc: can't find method %s", methodName)
+  }
+  return
+}
+
 // suitableMethods returns suitable Rpc methods of typ, it will report
 // error using log if reportErr is true.
 func suitableMethods(typ reflect.Type, reportErr bool) map[string]*methodType {
@@ -132,5 +156,9 @@ func isExportedOrBuiltinType(t reflect.Type) bool {
 }
 
 func init () {
-  DefaultServiceManager.Register(new(Core))
+  rpc.Register(new(Core))
+
+  s, m, _ := rpc.Method("Core.Meta")
+  fmt.Printf("%#v\n", s)
+  fmt.Printf("%#v\n", m)
 }
