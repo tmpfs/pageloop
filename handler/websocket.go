@@ -1,7 +1,7 @@
 package handler
 
 import (
-  //"fmt"
+  "fmt"
   "log"
 	"net/http"
   "github.com/gorilla/websocket"
@@ -82,7 +82,7 @@ func (w *WebsocketConnection) ReadRequest() {
           // TODO: use proper RPC arguments interface
           if method == "Container.CreateApp" {
             //println("test for create app arguments")
-            //fmt.Printf("%#v\n", req.Arguments)
+            fmt.Printf("%#v\n", req.Arguments)
 
             if input, ok := req.Arguments[0].(map[string]interface{}); ok {
               if result, err := utils.ValidateInterface(SchemaAppNew, input); err != nil {
@@ -135,6 +135,14 @@ func (w *WebsocketConnection) ReadRequest() {
           w.WriteError(req, err)
         // Write out the command invocation result
         } else {
+          if method == "Container.CreateApp" {
+            // Mount the application, needs to be done here due to some funky
+            // package cyclic references
+            if app, ok := result.Data.(*Application); ok {
+              MountApplication(w.Adapter.Mountpoints.MountpointMap, w.Adapter.Host, app)
+            }
+          }
+
           res := &RpcResponse{Id: req.Id, Result: result.Data, Status: result.Status}
           w.WriteResponse(res)
         }

@@ -128,4 +128,17 @@ const options = {
   'File.ReadSourceRaw': getBinaryOptions
 }
 
-export {urls, options}
+function fetchFromRpc (rpc) {
+  const o = {}
+  o.url = urls[rpc.method](rpc)
+  o.options = options[rpc.method](rpc)
+  o.options.headers = o.options.headers || {}
+  // Hint for optimized route lookup
+  o.options.headers['X-Method-Name'] = rpc.method
+  if (rpc.fetch) {
+    o.options.raw = true
+  }
+  return o
+}
+
+export {fetchFromRpc}

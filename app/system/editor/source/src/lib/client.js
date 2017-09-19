@@ -1,5 +1,5 @@
 import SocketConnection from './socket'
-import {urls, options} from './services'
+import {fetchFromRpc} from './services'
 
 // Singleton websocket client
 let socket
@@ -28,17 +28,6 @@ class RpcRequest {
 }
 
 class Request {
-  // Translate a JSON RPC request to a standard HTTP request
-  static translate (rpc) {
-    const o = {}
-    o.url = urls[rpc.method](rpc)
-    o.options = options[rpc.method](rpc)
-    if (rpc.fetch) {
-      o.options.raw = true
-    }
-    return o
-  }
-
   // Get a JSON RPC request object.
   static rpc (method, params, ...args) {
     const req = new RpcRequest(++id, method, params, ...args)
@@ -91,8 +80,6 @@ class ApiClient {
       .then((res) => {
         res.transport = 'http://rest-api'
         this.postflight(log, res)
-        console.log('got api response: ' + res.url)
-        console.log('got api response: ' + opts.raw)
         if (opts.raw) {
           return res
         }
@@ -103,7 +90,7 @@ class ApiClient {
   }
 
   rpc (req, opts = {}) {
-    const {url, options} = Request.translate(req)
+    const {url, options} = fetchFromRpc(req)
     // Try to send over socket connection first
     if (this.useWebsocket && this.socket.connected && !opts.http) {
       const log = this.preflight(url, {method: 'RPC'})
