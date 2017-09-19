@@ -254,7 +254,7 @@ func (act *Action) Match(in *Action) bool {
 
     // Final path portion is an item, that is a file or page URL potentially
     // containing the slash character.
-    if act.Item != "" && act.ItemMatch(in) {
+    if (act.Filter != "" && act.Filter == in.Filter) && act.Item != "" && act.ItemMatch(in) {
       return true
     }
   }

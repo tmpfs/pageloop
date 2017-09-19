@@ -91,6 +91,8 @@ class ApiClient {
       .then((res) => {
         res.transport = 'http://rest-api'
         this.postflight(log, res)
+        console.log('got api response: ' + res.url)
+        console.log('got api response: ' + opts.raw)
         if (opts.raw) {
           return res
         }
@@ -306,7 +308,8 @@ class ApiClient {
 
   // TODO: get binary data over websocket!?
   getFileSourceRaw (container, application, file) {
-    const req = Request.rpc('File.ReadContentRaw',
+    console.log('get file source raw')
+    const req = Request.rpc('File.ReadSourceRaw',
       {context: container, target: application, item: file.url})
     // passthrough the underlying fetch promise
     req.fetch = true

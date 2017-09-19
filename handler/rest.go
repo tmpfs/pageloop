@@ -61,12 +61,17 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   if act, err := h.Adapter.HttpAction(req.Method, req.URL); err != nil {
     return utils.Errorj(res, err)
   } else {
+
+    println("rest function find")
+
     // Attempt to match the action
     if mapping, err := h.Adapter.Find(act); err != nil {
       return utils.Errorj(res, err)
     } else {
 
       def := mapping.CommandDefinition
+
+      println(def.MethodName)
 
       // TODO: use proper RPC arguments interface
       if def.MethodName == "CreateApp" {

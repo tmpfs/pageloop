@@ -85,11 +85,11 @@ const urls = {
   'File.Move': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
   },
-  'File.ReadContent': function (rpc) {
-    return `/apps/src/${rpc.parameters.context}/${rpc.parameters.target}${rpc.parameters.item}`
+  'File.ReadSource': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/src${rpc.parameters.item}`
   },
-  'File.ReadContentRaw': function (rpc) {
-    return `/apps/raw/${rpc.parameters.context}/${rpc.parameters.target}${rpc.parameters.item}`
+  'File.ReadSourceRaw': function (rpc) {
+    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/raw${rpc.parameters.item}`
   }
 }
 
@@ -115,8 +115,8 @@ const options = {
     o.headers.Location = rpc.args[0]
     return o
   },
-  'File.ReadContent': getDefaultOptions,
-  'File.ReadContentRaw': getDefaultOptions
+  'File.ReadSource': getDefaultOptions,
+  'File.ReadSourceRaw': getDefaultOptions
 }
 
 export {urls, options}

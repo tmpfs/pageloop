@@ -119,7 +119,6 @@ func (b *CommandAdapter) ReadFile(c string, a string, f string) (*Application, *
   }
 }
 
-/*
 // Read file content.
 func (b *CommandAdapter) ReadFileSource(c string, a string, f string) ([]byte, *StatusError) {
   if _, file, err :=  b.ReadFile(c, a, f); err != nil {
@@ -135,7 +134,6 @@ func (b *CommandAdapter) ReadFileSource(c string, a string, f string) ([]byte, *
 
 // Read file content raw (including frontmatter)
 func (b *CommandAdapter) ReadFileSourceRaw(c string, a string, f string) ([]byte, *StatusError) {
-  println("read file source raw")
   if _, file, err :=  b.ReadFile(c, a, f); err != nil {
     return nil, err
   } else {
@@ -146,7 +144,6 @@ func (b *CommandAdapter) ReadFileSourceRaw(c string, a string, f string) ([]byte
     }
   }
 }
-*/
 
 // Read a page.
 func (b *CommandAdapter) ReadPage(c string, a string, f string) (*Page, *StatusError) {

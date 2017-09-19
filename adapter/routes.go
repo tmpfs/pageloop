@@ -95,11 +95,11 @@ func init() {
     &CommandDefinition{MethodName: "ReadFile", Status: http.StatusOK, Arguments: fileArg})
 
   // GET /apps/{container}/{application}/src/{url}
-  //push("File.ReadSource", NewAction(OperationRead, "/apps/*/*/src/*"),
-    //&CommandDefinition{MethodName: "ReadFileSource", Status: http.StatusOK, Arguments: fileArg})
+  push("File.ReadSource", NewAction(OperationRead, "/apps/*/*/src/*"),
+    &CommandDefinition{MethodName: "ReadFileSource", Status: http.StatusOK, Arguments: fileArg})
   // GET /apps/{container}/{application}/raw/{url}
-  //push("File.ReadSourceRaw", NewAction(OperationRead, "/apps/*/*/raw/*"),
-    //&CommandDefinition{MethodName: "ReadFileSourceRaw", Status: http.StatusOK, Arguments: fileArg})
+  push("File.ReadSourceRaw", NewAction(OperationRead, "/apps/*/*/raw/*"),
+    &CommandDefinition{MethodName: "ReadFileSourceRaw", Status: http.StatusOK, Arguments: fileArg})
 
   // PUT /apps/{container}/{application}/files/{url}
   push("File.Create", NewAction(OperationCreate, "/apps/*/*/files/*"),
