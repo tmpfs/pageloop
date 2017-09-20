@@ -138,7 +138,7 @@ func (l *PageLoop) Listen(server *http.Server) error {
 func (l *PageLoop) initServices() {
   l.Services = &ServiceMap{}
   core := new(Core)
-  l.Services.MustRegister(core)
+  l.Services.MustRegister(core, "Core")
 }
 
 func init() {

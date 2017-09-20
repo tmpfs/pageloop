@@ -23,9 +23,6 @@
 // single distinction that the return value does not need to be error it needs to
 // conform to the error interface (provide an Error() function) which allows our
 // service methods to return custom error implementations.
-//
-// This package does not allow setting custom service names they are always inferred
-// from the receiver name.
 package rpc
 
 import(
@@ -103,21 +100,24 @@ func (req *Request) Argv(args interface{}) {
 }
 
 // Register a service and panic on error.
-func (server *ServiceMap) MustRegister(rcvr interface{}) {
-  if err := server.Register(rcvr); err != nil {
+func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
+  if err := server.Register(rcvr, name); err != nil {
     panic(err)
   }
 }
 
 // Register a service with the server.
-func (server *ServiceMap) Register(rcvr interface{}) error {
+func (server *ServiceMap) Register(rcvr interface{}, name string) error {
   if server.serviceMap == nil {
     server.serviceMap = make(map[string]*service)
   }
   s := new(service)
   s.rcvr = reflect.ValueOf(rcvr)
   s.typ = reflect.TypeOf(rcvr)
-  s.name = reflect.Indirect(s.rcvr).Type().Name()
+  if name == "" {
+    name = reflect.Indirect(s.rcvr).Type().Name()
+  }
+  s.name = name
   if method, err := suitableMethods(s.typ); err != nil {
     return err
   } else {
