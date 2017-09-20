@@ -24,9 +24,72 @@ var(
     http.MethodPut,
     http.MethodDelete,
     http.MethodOptions}
-
 	SchemaAppNew = MustAsset("schema/app-new.json")
 )
+
+// Type that extracts values from an HTTP request
+// and builds the arguments that should be passed
+// to the corresponding rpc service method.
+type HttpArguments struct {
+  req *http.Request
+  *Parameters
+}
+
+func NewHttpArguments(req *http.Request) *HttpArguments {
+  args := &HttpArguments{req: req, Parameters: &Parameters{}}
+  args.Parameters.Parse(req.URL.Path)
+  return args
+}
+
+type Parameters struct {
+  // input path
+  Path string
+  // Slice of parameter parts
+  Parts []string
+  // The operation type, cannot be a wildcard.
+  Type string `json:"type"`
+  // Context for the operation. May be a container reference, job number etc.
+  Context string `json:"context"`
+  // Target for the operation, typically an application.
+  Target string `json:"target"`
+  // A filter operation for the request.
+  Filter string `json:"filter"`
+  // An item, may contain slashes.
+  Item string `json:"item"`
+}
+
+func (act *Parameters) Parse(path string) {
+  act.Path = path
+  if act.Path != "" {
+    path := strings.TrimPrefix(act.Path, SLASH)
+    path = strings.TrimSuffix(path, SLASH)
+    act.Parts = strings.Split(path, SLASH)
+    act.Type = act.Parts[0]
+    if len(act.Parts) > 1 {
+      act.Context = act.Parts[1]
+    }
+    if len(act.Parts) > 2 {
+      act.Target = act.Parts[2]
+    }
+    if len(act.Parts) > 3 {
+      act.Filter = act.Parts[3]
+    }
+    if len(act.Parts) > 4 {
+      act.Item = SLASH + strings.Join(act.Parts[4:], SLASH)
+      // Respect input trailing slash used to indicate
+      // operations on a directory
+      if strings.HasSuffix(act.Path, SLASH) {
+        act.Item += SLASH
+      }
+    }
+  }
+
+  // So that trailing slash with no URL will match
+  // the filter
+  if act.Item == SLASH {
+    act.Item = ""
+  }
+}
 
 // Handles requests for application data.
 type RestHandler struct {
@@ -82,14 +145,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
     if hasServiceMethod {
       println("REST service method name (start invoke): " + serviceMethod)
-      if req, err := h.Services.Request(serviceMethod, seq); err != nil {
+      if rpcreq, err := h.Services.Request(serviceMethod, seq); err != nil {
         return utils.Errorj(
           res, CommandError(http.StatusInternalServerError, err.Error()))
       } else {
 
         // TODO: build arguments list
+        args := NewHttpArguments(req)
+        fmt.Printf("%#v\n", args.Parameters)
 
-        if reply, err := h.Services.Call(req); err != nil {
+        if reply, err := h.Services.Call(rpcreq); err != nil {
           return utils.Errorj(
             res, CommandError(http.StatusInternalServerError, err.Error()))
         } else {
