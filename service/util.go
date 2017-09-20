@@ -47,7 +47,7 @@ func suitableMethods(typ reflect.Type) (map[string]*methodType, error) {
 		}
 		// The return type of the method must be error.
 		if returnType := mtype.Out(0); returnType != typeOfError {
-			return nil, fmt.Errorf("method", mname, "returns", returnType.String(), "not error")
+			return nil, fmt.Errorf("method %s returns %s not error", mname, returnType.String())
 		}
 		methods[mname] = &methodType{method: method, ArgType: argType, ReplyType: replyType}
 	}

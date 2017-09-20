@@ -138,7 +138,9 @@ var rpc *Server = &Server{}
 
 func init() {
 
-  rpc.Register(new(Core))
+  if err := rpc.Register(new(Core)); err != nil {
+    panic(err)
+  }
 
   s, m, _ := rpc.Method("Core.Meta")
   fmt.Printf("%#v\n", s)
