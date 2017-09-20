@@ -22,7 +22,10 @@
 // Services must declare methods in exactly the same way as for net/rpc with the
 // single distinction that the return value does not need to be error it needs to
 // conform to the error interface (provide an Error() function) which allows our
-// service handlers to return custom error implementations.
+// service methods to return custom error implementations.
+//
+// This package does not allow setting custom service names they are always inferred
+// from the receiver name.
 package service
 
 import(
@@ -54,6 +57,8 @@ type Request struct {
 	ServiceMethod string   // format: "Service.Method"
 	Seq           uint64   // sequence number chosen by client
 	next          *Request // for free list in Server
+  service       *service
+  methodType    *methodType
 }
 
 // Response is a header written before every RPC return. It is used internally
@@ -75,6 +80,13 @@ type Server struct {
   freeResp    *Response
 }
 
+// Register a service and panic on error.
+func (server *Server) MustRegister(rcvr interface{}) {
+  if err := server.Register(rcvr); err != nil {
+    panic(err)
+  }
+}
+
 // Register a service with the server.
 func (server *Server) Register(rcvr interface{}) error {
   if server.serviceMap == nil {
@@ -94,7 +106,7 @@ func (server *Server) Register(rcvr interface{}) error {
 }
 
 // Find a method by name in dot notation (Service.Method).
-func (server *Server) Method(name string) (service *service, mtype *methodType, err error) {
+func (server *Server) method(name string) (service *service, mtype *methodType, err error) {
   dot := strings.LastIndex(name, ".")
   if dot < 0 {
     err = fmt.Errorf("rpc: service/method request ill-formed: %s", name)
@@ -116,5 +128,18 @@ func (server *Server) Method(name string) (service *service, mtype *methodType, 
   if mtype == nil {
     err = fmt.Errorf("rpc: can't find method %s", methodName)
   }
+  return
+}
+
+// Get a method call request.
+func (server *Server) Method(name string, seq uint64) (req *Request, err error) {
+  var service *service
+  var mtype *methodType
+
+  if service, mtype, err = server.method(name); err != nil {
+    return
+  }
+
+  req = &Request{ServiceMethod: name, Seq: seq, service: service, methodType: mtype}
   return
 }

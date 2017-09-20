@@ -138,13 +138,13 @@ var rpc *Server = &Server{}
 
 func init() {
 
-  if err := rpc.Register(new(Core)); err != nil {
-    panic(err)
-  }
+  rpc.MustRegister(new(Core))
 
-  s, m, _ := rpc.Method("Core.Meta")
-  fmt.Printf("%#v\n", s)
-  fmt.Printf("%#v\n", m)
+  if req, err := rpc.Method("Core.Meta", 1); err != nil {
+    panic(err)
+  } else {
+    fmt.Printf("%#v\n", req)
+  }
 
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
