@@ -22,28 +22,52 @@ type service struct {
   method map[string]*methodType // registered methods
 }
 
-type ServiceManager struct {
-  services map[string]*service
+// Request is a header written before every RPC call. It is used internally
+// but documented here as an aid to debugging, such as when analyzing
+// network traffic.
+type Request struct {
+	ServiceMethod string   // format: "Service.Method"
+	Seq           uint64   // sequence number chosen by client
+	next          *Request // for free list in Server
+}
+
+// Response is a header written before every RPC return. It is used internally
+// but documented here as an aid to debugging, such as when analyzing
+// network traffic.
+type Response struct {
+	ServiceMethod string    // echoes that of the Request
+	Seq           uint64    // echoes that of the request
+	Error         string    // error, if any.
+	next          *Response // for free list in Server
+}
+
+type Server struct {
+  serviceMap    map[string]*service
+  mu          sync.RWMutex // protects the serviceMap
+  reqLock     sync.Mutex // protects freeReq
+  freeReq     *Request
+  respLock    sync.Mutex // protects freeResp
+  freeResp    *Response
 }
 
 // Register a service with the server.
-func (server *ServiceManager) Register(rcvr interface{}) error {
-  if server.services == nil {
-    server.services = make(map[string]*service)
+func (server *Server) Register(rcvr interface{}) error {
+  if server.serviceMap == nil {
+    server.serviceMap = make(map[string]*service)
   }
   s := new(service)
   s.rcvr = reflect.ValueOf(rcvr)
   s.typ = reflect.TypeOf(rcvr)
   s.name = reflect.Indirect(s.rcvr).Type().Name()
-  s.method = suitableMethods(s.typ, true)
+  s.method = suitableMethods(s.typ)
   fmt.Printf("%s\n", s.name)
   fmt.Printf("%#v\n", s.method)
-  server.services[s.name] = s
+  server.serviceMap[s.name] = s
   return nil
 }
 
 // Find a method by name in dot notation (Service.Method).
-func (server *ServiceManager) Method(name string) (service *service, mtype *methodType, err error) {
+func (server *Server) Method(name string) (service *service, mtype *methodType, err error) {
   dot := strings.LastIndex(name, ".")
   if dot < 0 {
     err = fmt.Errorf("rpc: service/method request ill-formed: %s", name)
@@ -54,9 +78,9 @@ func (server *ServiceManager) Method(name string) (service *service, mtype *meth
   methodName := name[dot+1:]
 
   // Look up the request.
-  //server.mu.RLock()
-  service = server.services[serviceName]
-  //server.mu.RUnlock()
+  server.mu.RLock()
+  service = server.serviceMap[serviceName]
+  server.mu.RUnlock()
   if service == nil {
     err = fmt.Errorf("rpc: can't find service %s", serviceName)
     return

@@ -134,7 +134,7 @@ func (l *PageLoop) Listen(server *http.Server) error {
 }
 
 
-var rpc *ServiceManager = &ServiceManager{}
+var rpc *Server = &Server{}
 
 func init() {
 
