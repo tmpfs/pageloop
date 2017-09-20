@@ -144,7 +144,7 @@ func init() {
 
   rpc.MustRegister(core)
 
-  if req, err := rpc.Request("Core.Meta", 1); err != nil {
+  if req, err := rpc.Request("Core.Stats", 1); err != nil {
     panic(err)
   } else {
     /*

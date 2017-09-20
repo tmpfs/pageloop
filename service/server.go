@@ -35,10 +35,6 @@ import(
   "strings"
 )
 
-// var typeOfNil = reflect.TypeOf(nil)
-
-// var typeOfNil = reflect.TypeOf(nil).Elem()
-
 type methodType struct {
 	sync.Mutex  // protects counters
 	method      reflect.Method
@@ -54,6 +50,9 @@ type service struct {
   method map[string]*methodType // registered methods
 }
 
+// Represents the arguments that may be passed to a method invocation.
+//
+// You can manually set the Argv value by calling Argv() on a Request.
 type RequestArguments struct {
   Argv reflect.Value
   Replyv reflect.Value
@@ -65,20 +64,21 @@ type RequestArguments struct {
 type Request struct {
 	ServiceMethod string   // format: "Service.Method"
 	Seq           uint64   // sequence number chosen by client
-	next          *Request // for free list in Server
   service       *service
   methodType    *methodType
   Arguments     *RequestArguments
+	next          *Request // for free list in Server
 }
 
 // Response is a header written before every RPC return. It is used internally
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
 type Response struct {
-	ServiceMethod string    // echoes that of the Request
-	Seq           uint64    // echoes that of the request
-	Error         string    // error, if any.
-	next          *Response // for free list in Server
+	ServiceMethod string        // echoes that of the Request
+	Seq           uint64        // echoes that of the request
+	Error         error         // error, if any
+  Reply         interface{}   // method invocation reply argument
+	next          *Response     // for free list in Server
 }
 
 type Server struct {
@@ -147,13 +147,34 @@ func (server *Server) Request(name string, seq uint64) (req *Request, err error)
   return
 }
 
+// Call the method using the given request.
+//
+// Returns a Response propagated with the Reply argument from the
+// method invocation and an Error if the method returned an error.
+func (server *Server) Call(req *Request) (res *Response, err error) {
+  var reply interface{}
+  res = &Response{ServiceMethod: req.ServiceMethod, Seq: req.Seq}
+  reply, err = server.call(req)
+  if err != nil {
+    res.Error = err
+  } else {
+    res.Reply = reply
+  }
+  return
+}
+
+// Private
+
 // Call the service method represented by the request.
-func (server *Server) Call(req *Request) (reply interface{}, err error) {
+//
+// Returns the method call reply argument and an error if set.
+func (server *Server) call(req *Request) (reply interface{}, err error) {
   mtype := req.methodType
 	mtype.Lock()
   mtype.numCalls++
   mtype.Unlock()
   function := mtype.method.Func
+
   // Invoke the method, providing a new value for the reply.
   returnValues := function.Call([]reflect.Value{req.service.rcvr, req.Arguments.Argv, req.Arguments.Replyv})
 
@@ -161,28 +182,17 @@ func (server *Server) Call(req *Request) (reply interface{}, err error) {
   reply = req.Arguments.Replyv.Interface()
 
   if !returnValues[0].IsNil() {
-
     // The return value for the method should be an error implementation.
     errResponse := returnValues[0].Interface()
-    /*
-    errInter := returnValues[0].Interface()
-    errmsg := ""
-    */
-
-    fmt.Printf("%#v\n", returnValues[0].IsNil())
-    fmt.Printf("%#v\n", errResponse)
-
     if errResponse != nil {
-      println("Setting error")
       err = errResponse.(error)
     }
   }
+
   return
 }
 
-// Private
-
-// Initialize the method arguments
+// Initialize the method arguments.
 func (server *Server) arguments (mtype *methodType) *RequestArguments {
   var argv, replyv reflect.Value
   // Decode the argument value.
@@ -191,15 +201,7 @@ func (server *Server) arguments (mtype *methodType) *RequestArguments {
   } else {
     argv = reflect.New(mtype.ArgType).Elem()
   }
-
   // argv guaranteed to be a pointer now.
-
-  /*
-  if err = codec.ReadRequestBody(argv.Interface()); err != nil {
-    return
-  }
-  */
-
   replyv = reflect.New(mtype.ReplyType.Elem())
   return &RequestArguments{Argv: argv, Replyv: replyv}
 }
