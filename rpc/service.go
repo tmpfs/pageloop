@@ -67,7 +67,7 @@ type Request struct {
   Arguments     *RequestArguments
   service       *service
   methodType    *methodType
-	next          *Request      // for free list in Server
+	next          *Request      // for free list in ServiceMap
 }
 
 // Response is a header written before every RPC return. It is used internally
@@ -78,10 +78,10 @@ type Response struct {
 	Seq           uint64        // echoes that of the request
 	Error         error         // error, if any
   Reply         interface{}   // method invocation reply argument
-	next          *Response     // for free list in Server
+	next          *Response     // for free list in ServiceMap
 }
 
-type Server struct {
+type ServiceMap struct {
   serviceMap    map[string]*service
   mu          sync.RWMutex    // protects the serviceMap
   reqLock     sync.Mutex      // protects freeReq
@@ -103,14 +103,14 @@ func (req *Request) Argv(args interface{}) {
 }
 
 // Register a service and panic on error.
-func (server *Server) MustRegister(rcvr interface{}) {
+func (server *ServiceMap) MustRegister(rcvr interface{}) {
   if err := server.Register(rcvr); err != nil {
     panic(err)
   }
 }
 
 // Register a service with the server.
-func (server *Server) Register(rcvr interface{}) error {
+func (server *ServiceMap) Register(rcvr interface{}) error {
   if server.serviceMap == nil {
     server.serviceMap = make(map[string]*service)
   }
@@ -128,7 +128,7 @@ func (server *Server) Register(rcvr interface{}) error {
 }
 
 // Get a method call request.
-func (server *Server) Request(name string, seq uint64) (req *Request, err error) {
+func (server *ServiceMap) Request(name string, seq uint64) (req *Request, err error) {
   var service *service
   var mtype *methodType
 
@@ -151,7 +151,7 @@ func (server *Server) Request(name string, seq uint64) (req *Request, err error)
 //
 // Returns a Response propagated with the Reply argument from the
 // method invocation and an Error if the method returned an error.
-func (server *Server) Call(req *Request) (res *Response, err error) {
+func (server *ServiceMap) Call(req *Request) (res *Response, err error) {
   var reply interface{}
   res = &Response{ServiceMethod: req.ServiceMethod, Seq: req.Seq}
   reply, err = server.call(req)
@@ -168,7 +168,7 @@ func (server *Server) Call(req *Request) (res *Response, err error) {
 // Call the service method represented by the request.
 //
 // Returns the method call reply argument and an error if set.
-func (server *Server) call(req *Request) (reply interface{}, err error) {
+func (server *ServiceMap) call(req *Request) (reply interface{}, err error) {
   mtype := req.methodType
 	mtype.Lock()
   mtype.numCalls++
@@ -193,7 +193,7 @@ func (server *Server) call(req *Request) (reply interface{}, err error) {
 }
 
 // Initialize the method arguments.
-func (server *Server) arguments (mtype *methodType) *RequestArguments {
+func (server *ServiceMap) arguments (mtype *methodType) *RequestArguments {
   var argv, replyv reflect.Value
   // Decode the argument value.
   if mtype.ArgType.Kind() == reflect.Ptr {
@@ -207,7 +207,7 @@ func (server *Server) arguments (mtype *methodType) *RequestArguments {
 }
 
 // Find a method by name in dot notation (Service.Method).
-func (server *Server) method(name string) (service *service, mtype *methodType, err error) {
+func (server *ServiceMap) method(name string) (service *service, mtype *methodType, err error) {
   dot := strings.LastIndex(name, ".")
   if dot < 0 {
     err = fmt.Errorf("rpc: service/method request ill-formed: %s", name)

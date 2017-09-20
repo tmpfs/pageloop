@@ -135,7 +135,7 @@ func (l *PageLoop) Listen(server *http.Server) error {
 }
 
 
-var rpc *Server = &Server{}
+var rpc *ServiceMap = &ServiceMap{}
 
 func init() {
 
