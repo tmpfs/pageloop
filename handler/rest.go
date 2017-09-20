@@ -60,10 +60,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
 
-  accept := req.Header.Get("Accept")
+  // accept := req.Header.Get("Accept")
 	methodSeq := req.Header.Get("X-Method-Seq")
-
-  // if seq, ok := methodSeq.(uint64)
 
   // Check sequence number
   if seq, err := strconv.ParseUint(methodSeq, 10, 64); err != nil {
@@ -74,16 +72,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   } else {
 	  serviceMethod := req.Header.Get("X-Method-Name")
 
-    println("REST Service method name: " + serviceMethod)
-    println("REST Service seq: " + methodSeq)
-    println("REST Service accept: " + accept)
+    println("REST method name: " + serviceMethod)
+    //println("REST Service seq: " + methodSeq)
+    //println("REST Service accept: " + accept)
 
     hasServiceMethod := h.Services.HasMethod(serviceMethod)
 
     // TODO: send 404 on no service method once refactor completed
 
     if hasServiceMethod {
-      println("REST Service has service method!!")
+      println("REST service method name (start invoke): " + serviceMethod)
       if req, err := h.Services.Request(serviceMethod, seq); err != nil {
         return utils.Errorj(
           res, CommandError(http.StatusInternalServerError, err.Error()))
