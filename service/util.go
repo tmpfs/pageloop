@@ -13,7 +13,7 @@ var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
 
 // suitableMethods returns suitable Rpc methods of typ, it will report
 // error using log if reportErr is true.
-func suitableMethods(typ reflect.Type, reportErr bool) map[string]*methodType {
+func suitableMethods(typ reflect.Type) map[string]*methodType {
 	methods := make(map[string]*methodType)
 	for m := 0; m < typ.NumMethod(); m++ {
 		method := typ.Method(m)
@@ -25,46 +25,34 @@ func suitableMethods(typ reflect.Type, reportErr bool) map[string]*methodType {
 		}
 		// Method needs three ins: receiver, *args, *reply.
 		if mtype.NumIn() != 3 {
-			if reportErr {
-				log.Println("method", mname, "has wrong number of ins:", mtype.NumIn())
-			}
+			log.Println("method", mname, "has wrong number of ins:", mtype.NumIn())
 			continue
 		}
 		// First arg need not be a pointer.
 		argType := mtype.In(1)
 		if !isExportedOrBuiltinType(argType) {
-			if reportErr {
-				log.Println(mname, "argument type not exported:", argType)
-			}
+			log.Println(mname, "argument type not exported:", argType)
 			continue
 		}
 		// Second arg must be a pointer.
 		replyType := mtype.In(2)
 		if replyType.Kind() != reflect.Ptr {
-			if reportErr {
-				log.Println("method", mname, "reply type not a pointer:", replyType)
-			}
+			log.Println("method", mname, "reply type not a pointer:", replyType)
 			continue
 		}
 		// Reply type must be exported.
 		if !isExportedOrBuiltinType(replyType) {
-			if reportErr {
-				log.Println("method", mname, "reply type not exported:", replyType)
-			}
+			log.Println("method", mname, "reply type not exported:", replyType)
 			continue
 		}
 		// Method needs one out.
 		if mtype.NumOut() != 1 {
-			if reportErr {
-				log.Println("method", mname, "has wrong number of outs:", mtype.NumOut())
-			}
+			log.Println("method", mname, "has wrong number of outs:", mtype.NumOut())
 			continue
 		}
 		// The return type of the method must be error.
 		if returnType := mtype.Out(0); returnType != typeOfError {
-			if reportErr {
-				log.Println("method", mname, "returns", returnType.String(), "not error")
-			}
+			log.Println("method", mname, "returns", returnType.String(), "not error")
 			continue
 		}
 		methods[mname] = &methodType{method: method, ArgType: argType, ReplyType: replyType}
