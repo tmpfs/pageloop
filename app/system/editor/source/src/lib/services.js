@@ -43,7 +43,7 @@ const urls = {
   'Core.Stats': function () {
     return API + 'stats/'
   },
-  'Container.List': function () {
+  'Host.List': function () {
     return API + 'apps/'
   },
   'Container.CreateApp': function (rpc) {
@@ -105,7 +105,7 @@ function getBinaryOptions () {
 const options = {
   'Core.Meta': getDefaultOptions,
   'Core.Stats': getDefaultOptions,
-  'Container.List': getDefaultOptions,
+  'Host.List': getDefaultOptions,
   // TODO: restore create app from template
   'Container.CreateApp': getPutOptions,
   'Template.ReadApplications': getDefaultOptions,

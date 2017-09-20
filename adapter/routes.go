@@ -70,7 +70,7 @@ func init() {
   push("Jobs.DeleteJob", NewAction(OperationDelete, "/jobs/*"),
     &CommandDefinition{MethodName: "DeleteJob", Status: http.StatusOK, Arguments: contextArg})
   // GET /apps
-  push("Container.List", NewAction(OperationRead, "/apps"),
+  push("Host.List", NewAction(OperationRead, "/apps"),
     &CommandDefinition{MethodName: "ReadHost", Status: http.StatusOK})
   // GET /apps/{container}
   push("Container.Read", NewAction(OperationRead, "/apps/*"),

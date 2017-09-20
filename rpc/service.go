@@ -107,6 +107,9 @@ func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
 }
 
 // Register a service with the server.
+//
+// If name is the empty string the service name is inferred from
+// the type name of rcvr.
 func (server *ServiceMap) Register(rcvr interface{}, name string) error {
   if server.serviceMap == nil {
     server.serviceMap = make(map[string]*service)

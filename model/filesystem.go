@@ -23,14 +23,15 @@ var(
 
 
 // Represents types that reference an application.
+/*
 type ApplicationReference interface {
 	App() *Application
 }
+*/
 
 // Type for a file system that references files by URL
 // relative to an application.
 type ApplicationFileSystem interface {
-	ApplicationReference
 	http.FileSystem
 
 	LoadFile(path string) (*File, error)

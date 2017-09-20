@@ -75,9 +75,12 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 
 	// RPC global endpoint (/rpc/)
   // TODO: pass adapter not the host!
+
+  /*
 	handler = RpcService(l.Mux, l.Host)
 	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
+  */
 
 	// REST API global endpoint (/api/)
 	handler = RestService(l.Mux, adapter, l.Services)
@@ -137,8 +140,15 @@ func (l *PageLoop) Listen(server *http.Server) error {
 // Initialize services
 func (l *PageLoop) initServices() {
   l.Services = &ServiceMap{}
-  core := new(Core)
+  core := new(CoreService)
+  host := new(HostService)
+  app := new(AppService)
+
+  host.Host = l.Host
+
   l.Services.MustRegister(core, "Core")
+  l.Services.MustRegister(host, "Host")
+  l.Services.MustRegister(app, "Application")
 }
 
 func init() {

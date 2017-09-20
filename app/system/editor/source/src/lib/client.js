@@ -204,7 +204,7 @@ class ApiClient {
 
   // List all containers
   getContainers () {
-    return this.rpc(Request.rpc('Container.List'))
+    return this.rpc(Request.rpc('Host.List'))
   }
 
   // Get a single application
