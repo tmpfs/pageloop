@@ -53,7 +53,6 @@ func NewHttpArguments(req *http.Request) *HttpArguments {
   return args
 }
 
-
 type Parameters struct {
   // input path
   Path string
@@ -108,7 +107,6 @@ func (act *Parameters) Parse(path string) {
 type RestHandler struct {
   Services *ServiceMap
   Adapter *CommandAdapter
-	Container *Container
 }
 
 // Configure the service. Adds a rest handler for the API URL to
