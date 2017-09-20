@@ -9,5 +9,6 @@ package rpc
 // in service methods and returning to actual Result object
 // rather than a wrapper with a struct field name.
 type ServiceReply struct {
+  Status int
   Reply interface{}
 }

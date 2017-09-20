@@ -147,6 +147,8 @@ func (l *PageLoop) initServices() {
 
   host.Host = l.Host
   ctx.Host = l.Host
+
+  app.ContainerService = ctx
   app.Host = l.Host
 
   l.Services.MustRegister(core, "Core")

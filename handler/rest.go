@@ -40,9 +40,12 @@ type HttpArguments struct {
 // The name argument should be the qualified Service.Method name.
 func (args *HttpArguments) Get(name string) interface{} {
   switch name {
+    case "Application.ReadFiles":
+      fallthrough
+    case "Application.ReadPages":
+      fallthrough
     case "Application.Read":
-      return &ApplicationReference{
-        Container: args.Parameters.Context, Application: args.Parameters.Target}
+      return &Application{Name: args.Parameters.Target, ContainerName: args.Parameters.Context}
   }
   return nil
 }
@@ -106,6 +109,8 @@ func (act *Parameters) Parse(path string) {
 // Handles requests for application data.
 type RestHandler struct {
   Services *ServiceMap
+
+  // Deprecated
   Adapter *CommandAdapter
 }
 

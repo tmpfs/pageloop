@@ -105,7 +105,6 @@ func (b *CommandAdapter) ReadApplicationPages(c string, a string) ([]*Page, *Sta
 
 // FILES / PAGES
 
-
 // Read a file.
 func (b *CommandAdapter) ReadFile(c string, a string, f string) (*Application, *File, *StatusError) {
   if _, app, err :=  b.ReadApplication(c, a); err != nil {
