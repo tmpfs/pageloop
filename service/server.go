@@ -36,11 +36,11 @@ import(
 )
 
 type methodType struct {
-	sync.Mutex // protects counters
-	method     reflect.Method
-	ArgType    reflect.Type
-	ReplyType  reflect.Type
-	numCalls   uint
+	sync.Mutex  // protects counters
+	method      reflect.Method
+	numCalls    uint
+	ArgType     reflect.Type
+	ReplyType   reflect.Type
 }
 
 type service struct {
@@ -48,6 +48,11 @@ type service struct {
   rcvr reflect.Value
   typ reflect.Type
   method map[string]*methodType // registered methods
+}
+
+type RequestArguments struct {
+  Argv reflect.Value
+  Replyv reflect.Value
 }
 
 // Request is a header written before every RPC call. It is used internally
@@ -59,6 +64,7 @@ type Request struct {
 	next          *Request // for free list in Server
   service       *service
   methodType    *methodType
+  Arguments     *RequestArguments
 }
 
 // Response is a header written before every RPC return. It is used internally
@@ -105,6 +111,48 @@ func (server *Server) Register(rcvr interface{}) error {
   }
 }
 
+// Get a method call request.
+func (server *Server) Method(name string, seq uint64) (req *Request, err error) {
+  var service *service
+  var mtype *methodType
+
+  if service, mtype, err = server.method(name); err != nil {
+    return
+  }
+
+  args := server.methodArguments(mtype)
+
+  req = &Request{
+    ServiceMethod: name,
+    Seq: seq,
+    Arguments: args,
+    service: service,
+    methodType: mtype}
+  return
+}
+
+// Initialize the method arguments
+func (server *Server) methodArguments (mtype *methodType) *RequestArguments {
+  var argv, replyv reflect.Value
+  // Decode the argument value.
+  if mtype.ArgType.Kind() == reflect.Ptr {
+    argv = reflect.New(mtype.ArgType.Elem())
+  } else {
+    argv = reflect.New(mtype.ArgType).Elem()
+  }
+
+  // argv guaranteed to be a pointer now.
+
+  /*
+  if err = codec.ReadRequestBody(argv.Interface()); err != nil {
+    return
+  }
+  */
+
+  replyv = reflect.New(mtype.ReplyType.Elem())
+  return &RequestArguments{Argv: argv, Replyv: replyv}
+}
+
 // Find a method by name in dot notation (Service.Method).
 func (server *Server) method(name string) (service *service, mtype *methodType, err error) {
   dot := strings.LastIndex(name, ".")
@@ -128,18 +176,5 @@ func (server *Server) method(name string) (service *service, mtype *methodType, 
   if mtype == nil {
     err = fmt.Errorf("rpc: can't find method %s", methodName)
   }
-  return
-}
-
-// Get a method call request.
-func (server *Server) Method(name string, seq uint64) (req *Request, err error) {
-  var service *service
-  var mtype *methodType
-
-  if service, mtype, err = server.method(name); err != nil {
-    return
-  }
-
-  req = &Request{ServiceMethod: name, Seq: seq, service: service, methodType: mtype}
   return
 }
