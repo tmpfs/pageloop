@@ -120,7 +120,7 @@ func (server *Server) Request(name string, seq uint64) (req *Request, err error)
     return
   }
 
-  args := server.methodArguments(mtype)
+  args := server.arguments(mtype)
 
   req = &Request{
     ServiceMethod: name,
@@ -132,7 +132,7 @@ func (server *Server) Request(name string, seq uint64) (req *Request, err error)
 }
 
 // Initialize the method arguments
-func (server *Server) methodArguments (mtype *methodType) *RequestArguments {
+func (server *Server) arguments (mtype *methodType) *RequestArguments {
   var argv, replyv reflect.Value
   // Decode the argument value.
   if mtype.ArgType.Kind() == reflect.Ptr {
