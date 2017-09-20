@@ -46,7 +46,7 @@ class ApiClient {
     // log should be injected
     this.log = null
     this.socket = this.connect()
-    this.useWebsocket = true
+    // this.useWebsocket = true
   }
 
   // Singleton websocket

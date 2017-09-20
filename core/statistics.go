@@ -3,6 +3,7 @@ package core
 import(
   "expvar"
   "time"
+  "encoding/json"
 )
 
 var(
@@ -17,9 +18,40 @@ type Uptime struct {
 }
 
 type Statistics struct {
-  StartTime time.Time
-  Http *expvar.Map
-  Websocket *expvar.Map
+  // Time the statistics started
+  StartTime time.Time `json:"-"`
+  // Uptime calculation
+  Uptime *Uptime `json:"uptime"`
+  // HTTP server statistics
+  Http *expvar.Map `json:"http"`
+  // Websocket client connections and stats
+  Websocket *expvar.Map `json:"ws"`
+}
+
+// Update the uptime and assign it to the statistics.
+func (s *Statistics) Now() *Statistics {
+  s.Uptime = uptime().(*Uptime)
+  return s
+}
+
+func (s *Statistics) MarshalJSON() ([]byte, error) {
+  o := make(map[string]interface{})
+  o["uptime"] = uptime()
+  o["http"] = mapToInterface(s.Http)
+  o["ws"] = mapToInterface(s.Websocket)
+  return json.Marshal(&o)
+}
+
+// Private
+
+func mapToInterface (hashmap *expvar.Map) map[string]interface{} {
+  vals := make(map[string]interface{})
+  hashmap.Do(func(mkv expvar.KeyValue) {
+    if i, ok := mkv.Value.(*expvar.Int); ok {
+      vals[mkv.Key] = i.Value()
+    }
+  })
+  return vals
 }
 
 func uptime () interface{} {

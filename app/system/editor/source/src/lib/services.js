@@ -133,8 +133,11 @@ function fetchFromRpc (rpc) {
   o.url = urls[rpc.method](rpc)
   o.options = options[rpc.method](rpc)
   o.options.headers = o.options.headers || {}
+
   // Hint for optimized route lookup
   o.options.headers['X-Method-Name'] = rpc.method
+  o.options.headers['X-Method-Seq'] = rpc.id
+
   if (rpc.fetch) {
     o.options.raw = true
   }

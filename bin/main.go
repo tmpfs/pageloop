@@ -17,7 +17,7 @@ func printHelp () {
 }
 
 func printVersion () {
-  fmt.Printf("%s %s\n", pageloop.Name, pageloop.Version)
+  fmt.Printf("%s %s\n", MetaData.Name, MetaData.Version)
   os.Exit(0)
 }
 

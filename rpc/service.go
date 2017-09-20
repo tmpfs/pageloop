@@ -163,6 +163,14 @@ func (server *ServiceMap) Call(req *Request) (res *Response, err error) {
   return
 }
 
+// Determine if a service method exists by name using dot notation (Service.Method).
+func (server *ServiceMap) HasMethod(name string) bool {
+  if _, _, err := server.method(name); err != nil {
+    return false
+  }
+  return true
+}
+
 // Private
 
 // Call the service method represented by the request.

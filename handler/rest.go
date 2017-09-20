@@ -2,14 +2,16 @@
 package handler
 
 import (
-  //"fmt"
+  "fmt"
   "mime"
 	"net/http"
+  "strconv"
   "strings"
   "path/filepath"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/rpc"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -28,14 +30,15 @@ var(
 
 // Handles requests for application data.
 type RestHandler struct {
+  Services *ServiceMap
   Adapter *CommandAdapter
 	Container *Container
 }
 
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
-func RestService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
-  handler := RestHandler{Adapter: adapter}
+func RestService(mux *http.ServeMux, adapter *CommandAdapter, services *ServiceMap) http.Handler {
+  handler := RestHandler{Adapter: adapter, Services: services}
   mux.Handle(API_URL, http.StripPrefix(API_URL, handler))
 	return handler
 }
@@ -47,6 +50,70 @@ func (h RestHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Primary handler, decoupled from ServeHTTP so we can return from the function.
 func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (int, error) {
+	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
+    return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
+	}
+
+	ct := req.Header.Get("Content-Type")
+
+	if ct == "" {
+    ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
+	}
+
+  accept := req.Header.Get("Accept")
+	methodSeq := req.Header.Get("X-Method-Seq")
+
+  // if seq, ok := methodSeq.(uint64)
+
+  // Check sequence number
+  if seq, err := strconv.ParseUint(methodSeq, 10, 64); err != nil {
+    return utils.Errorj(
+      res, CommandError(
+        http.StatusBadRequest, "Invalid sequence number: %s", err.Error()))
+  // Got a valid sequence number
+  } else {
+	  serviceMethod := req.Header.Get("X-Method-Name")
+
+    println("REST Service method name: " + serviceMethod)
+    println("REST Service seq: " + methodSeq)
+    println("REST Service accept: " + accept)
+
+    hasServiceMethod := h.Services.HasMethod(serviceMethod)
+
+    // TODO: send 404 on no service method once refactor completed
+
+    if hasServiceMethod {
+      println("REST Service has service method!!")
+      if req, err := h.Services.Request(serviceMethod, seq); err != nil {
+        return utils.Errorj(
+          res, CommandError(http.StatusInternalServerError, err.Error()))
+      } else {
+
+        // TODO: build arguments list
+
+        if reply, err := h.Services.Call(req); err != nil {
+          return utils.Errorj(
+            res, CommandError(http.StatusInternalServerError, err.Error()))
+        } else {
+          if reply.Error != nil {
+            // TODO: test for comand error response
+            return utils.Errorj(
+              res, CommandError(http.StatusInternalServerError, err.Error()))
+          } else {
+            fmt.Printf("%#v\n", reply.Reply)
+            // TODO: get correct status code
+            return utils.Json(res, http.StatusOK, reply.Reply)
+          }
+        }
+      }
+    }
+  }
+
+  return h.doDeprecatedHttp(res, req)
+}
+
+
+func (h RestHandler) doDeprecatedHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}

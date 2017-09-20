@@ -15,11 +15,6 @@ import (
   . "github.com/tmpfs/pageloop/rpc"
 )
 
-const(
-  Name string = "pageloop"
-  Version string = "1.0"
-)
-
 type PageLoop struct {
   // Server configuration
   Config *ServerConfig
@@ -35,6 +30,9 @@ type PageLoop struct {
 
 	// Application host
 	Host *Host
+
+  // Map of services
+  Services *ServiceMap
 }
 
 // Creates an HTTP server.
@@ -60,6 +58,8 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   // for all operations on the model.
   adapter := NewCommandAdapter(Name, Version, l.Host, l.MountpointManager)
 
+  l.initServices()
+
 	// Configure application containers.
 	sys := NewContainer("system", "System applications.", true)
 	tpl := NewContainer("template", "Application & document templates.", true)
@@ -80,7 +80,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	log.Printf("Serving rpc service from %s", RPC_URL)
 
 	// REST API global endpoint (/api/)
-	handler = RestService(l.Mux, adapter)
+	handler = RestService(l.Mux, adapter, l.Services)
 	l.MountpointManager.MountpointMap[API_URL] = handler
 	log.Printf("Serving rest service from %s", API_URL)
 
@@ -134,31 +134,14 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	return nil
 }
 
-
-var rpc *ServiceMap = &ServiceMap{}
+// Initialize services
+func (l *PageLoop) initServices() {
+  l.Services = &ServiceMap{}
+  core := new(Core)
+  l.Services.MustRegister(core)
+}
 
 func init() {
-
-  core := new(Core)
-  core.Name = Name
-  core.Version = Version
-
-  rpc.MustRegister(core)
-
-  if req, err := rpc.Request("Core.Stats", 1); err != nil {
-    panic(err)
-  } else {
-    /*
-    args := MetaArgs{Num: 2}
-    req.Argv(args)
-    */
-    if res, err := rpc.Call(req); err != nil {
-      panic(err)
-    } else {
-      fmt.Printf("%#v\n", res)
-    }
-  }
-
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".babelrc", "application/json")

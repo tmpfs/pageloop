@@ -66,7 +66,7 @@ func (w *WebsocketConnection) ReadRequest() {
     // NOTE: client keepalive messages
 
     if method != "" {
-      println(method)
+      println("Websocket RPC service method name: " + method)
       // Create an empty action to hold the arguments
       var act *Action = &Action{}
       if len(req.Params) >= 1 {
