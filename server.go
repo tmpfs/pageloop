@@ -137,12 +137,25 @@ func (l *PageLoop) Listen(server *http.Server) error {
 var rpc *Server = &Server{}
 
 func init() {
-  rpc.MustRegister(new(Core))
+
+  core := new(Core)
+  core.Name = Name
+  core.Version = Version
+
+  rpc.MustRegister(core)
 
   if req, err := rpc.Request("Core.Meta", 1); err != nil {
     panic(err)
   } else {
-    fmt.Printf("%#v\n", req)
+    /*
+    args := MetaArgs{Num: 2}
+    req.Argv(args)
+    */
+    if res, err := rpc.Call(req); err != nil {
+      panic(err)
+    } else {
+      fmt.Printf("%#v\n", res)
+    }
   }
 
   // Mime types set to those for code mirror modes

@@ -35,6 +35,10 @@ import(
   "strings"
 )
 
+// var typeOfNil = reflect.TypeOf(nil)
+
+// var typeOfNil = reflect.TypeOf(nil).Elem()
+
 type methodType struct {
 	sync.Mutex  // protects counters
 	method      reflect.Method
@@ -86,6 +90,18 @@ type Server struct {
   freeResp    *Response
 }
 
+// Set argv for a service method call request.
+//
+// This is for the case when you need to build the arguments
+// manually from various input sources such as an HTTP request
+// where input can come from URL parameters, query string, body data etc.
+//
+// You need to be sure you pass the correct type here otherwise you will
+// get a runtime panic when you attempt to call the underlying method.
+func (req *Request) Argv(args interface{}) {
+  req.Arguments.Argv = reflect.ValueOf(args)
+}
+
 // Register a service and panic on error.
 func (server *Server) MustRegister(rcvr interface{}) {
   if err := server.Register(rcvr); err != nil {
@@ -130,6 +146,41 @@ func (server *Server) Request(name string, seq uint64) (req *Request, err error)
     methodType: mtype}
   return
 }
+
+// Call the service method represented by the request.
+func (server *Server) Call(req *Request) (reply interface{}, err error) {
+  mtype := req.methodType
+	mtype.Lock()
+  mtype.numCalls++
+  mtype.Unlock()
+  function := mtype.method.Func
+  // Invoke the method, providing a new value for the reply.
+  returnValues := function.Call([]reflect.Value{req.service.rcvr, req.Arguments.Argv, req.Arguments.Replyv})
+
+  // Set up the reply to return
+  reply = req.Arguments.Replyv.Interface()
+
+  if !returnValues[0].IsNil() {
+
+    // The return value for the method should be an error implementation.
+    errResponse := returnValues[0].Interface()
+    /*
+    errInter := returnValues[0].Interface()
+    errmsg := ""
+    */
+
+    fmt.Printf("%#v\n", returnValues[0].IsNil())
+    fmt.Printf("%#v\n", errResponse)
+
+    if errResponse != nil {
+      println("Setting error")
+      err = errResponse.(error)
+    }
+  }
+  return
+}
+
+// Private
 
 // Initialize the method arguments
 func (server *Server) arguments (mtype *methodType) *RequestArguments {

@@ -1,21 +1,24 @@
 package service
 
-type Core struct {}
-type MetaArgs struct {}
-type MetaReply struct {}
+import(
+  //"fmt"
+)
 
-type FooError struct {}
+// Type for service methods that do not accept any arguments.
+type VoidArgs struct {}
 
-func (f *FooError) Error() string {
-  return "Foo error"
+type Core struct {
+  Name string
+  Version string
 }
 
-func (c *Core) Meta(args MetaArgs, reply *MetaReply) error {
-  return nil
+type MetaReply struct {
+  Name string `json:"name"`
+  Version string `json:"version"`
 }
 
-type fooReply struct{}
-
-func (c *Core) Foo (args MetaArgs, reply *MetaReply) *FooError {
+func (s *Core) Meta(args VoidArgs, reply *MetaReply) error {
+  reply.Name = s.Name
+  reply.Version = s.Version
   return nil
 }
