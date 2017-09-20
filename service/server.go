@@ -59,11 +59,15 @@ func (server *Server) Register(rcvr interface{}) error {
   s.rcvr = reflect.ValueOf(rcvr)
   s.typ = reflect.TypeOf(rcvr)
   s.name = reflect.Indirect(s.rcvr).Type().Name()
-  s.method = suitableMethods(s.typ)
-  fmt.Printf("%s\n", s.name)
-  fmt.Printf("%#v\n", s.method)
-  server.serviceMap[s.name] = s
-  return nil
+  if method, err := suitableMethods(s.typ); err != nil {
+    return err
+  } else {
+    s.method = method
+    fmt.Printf("%s\n", s.name)
+    fmt.Printf("%#v\n", s.method)
+    server.serviceMap[s.name] = s
+    return nil
+  }
 }
 
 // Find a method by name in dot notation (Service.Method).

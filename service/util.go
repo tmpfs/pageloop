@@ -1,7 +1,7 @@
 package service
 
 import(
-  "log"
+  "fmt"
   "reflect"
   "unicode"
   "unicode/utf8"
@@ -13,7 +13,7 @@ var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
 
 // suitableMethods returns suitable Rpc methods of typ, it will report
 // error using log if reportErr is true.
-func suitableMethods(typ reflect.Type) map[string]*methodType {
+func suitableMethods(typ reflect.Type) (map[string]*methodType, error) {
 	methods := make(map[string]*methodType)
 	for m := 0; m < typ.NumMethod(); m++ {
 		method := typ.Method(m)
@@ -25,39 +25,33 @@ func suitableMethods(typ reflect.Type) map[string]*methodType {
 		}
 		// Method needs three ins: receiver, *args, *reply.
 		if mtype.NumIn() != 3 {
-			log.Println("method", mname, "has wrong number of ins:", mtype.NumIn())
-			continue
+			return nil, fmt.Errorf("method %s has wrong number of ins: %d", mname, mtype.NumIn())
 		}
 		// First arg need not be a pointer.
 		argType := mtype.In(1)
 		if !isExportedOrBuiltinType(argType) {
-			log.Println(mname, "argument type not exported:", argType)
-			continue
+			return nil, fmt.Errorf("%s argument type not exported: %v", mname, argType)
 		}
 		// Second arg must be a pointer.
 		replyType := mtype.In(2)
 		if replyType.Kind() != reflect.Ptr {
-			log.Println("method", mname, "reply type not a pointer:", replyType)
-			continue
+			return nil, fmt.Errorf("method %s reply type not a pointer: %v", mname, replyType)
 		}
 		// Reply type must be exported.
 		if !isExportedOrBuiltinType(replyType) {
-			log.Println("method", mname, "reply type not exported:", replyType)
-			continue
+			return nil, fmt.Errorf("method %s reply type not exported: %v", mname, replyType)
 		}
 		// Method needs one out.
 		if mtype.NumOut() != 1 {
-			log.Println("method", mname, "has wrong number of outs:", mtype.NumOut())
-			continue
+			return nil, fmt.Errorf("method %s has wrong number of outs: %d", mname, mtype.NumOut())
 		}
 		// The return type of the method must be error.
 		if returnType := mtype.Out(0); returnType != typeOfError {
-			log.Println("method", mname, "returns", returnType.String(), "not error")
-			continue
+			return nil, fmt.Errorf("method", mname, "returns", returnType.String(), "not error")
 		}
 		methods[mname] = &methodType{method: method, ArgType: argType, ReplyType: replyType}
 	}
-	return methods
+	return methods, nil
 }
 
 // Private
