@@ -35,11 +35,24 @@ type HttpArguments struct {
   *Parameters
 }
 
+// Determine the arguments to use for an rpc method call.
+//
+// The name argument should be the qualified Service.Method name.
+func (args *HttpArguments) Get(name string) interface{} {
+  switch name {
+    case "Application.Read":
+      return &ApplicationReference{
+        Container: args.Parameters.Context, Application: args.Parameters.Target}
+  }
+  return nil
+}
+
 func NewHttpArguments(req *http.Request) *HttpArguments {
   args := &HttpArguments{req: req, Parameters: &Parameters{}}
   args.Parameters.Parse(req.URL.Path)
   return args
 }
+
 
 type Parameters struct {
   // input path
@@ -152,7 +165,12 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
         // TODO: build arguments list
         args := NewHttpArguments(req)
+        argv := args.Get(serviceMethod)
         fmt.Printf("%#v\n", args.Parameters)
+        // Got some arguments to use for the request
+        if argv != nil {
+          rpcreq.Argv(argv)
+        }
 
         if reply, err := h.Services.Call(rpcreq); err != nil {
           return utils.Errorj(

@@ -29,6 +29,11 @@ var(
 	types = []string{YAML, JSON}
 )
 
+type ApplicationReference struct {
+  Container string `json:"container"`
+  Application string `json:"application"`
+}
+
 type Application struct {
 	// Mountpoint URL
 	Url string `json:"url"`
