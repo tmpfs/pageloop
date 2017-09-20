@@ -1,3 +1,4 @@
+// Package service exposes methods that may be used over the network.
 package service
 
 import(

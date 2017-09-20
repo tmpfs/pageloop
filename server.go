@@ -140,21 +140,22 @@ func (l *PageLoop) Listen(server *http.Server) error {
 // Initialize services
 func (l *PageLoop) initServices() {
   l.Services = &ServiceMap{}
+
   core := new(CoreService)
   host := new(HostService)
   ctx := new(ContainerService)
   app := new(AppService)
+  job := new(JobService)
 
   host.Host = l.Host
   ctx.Host = l.Host
-
-  app.ContainerService = ctx
   app.Host = l.Host
 
   l.Services.MustRegister(core, "Core")
   l.Services.MustRegister(host, "Host")
   l.Services.MustRegister(ctx, "Container")
   l.Services.MustRegister(app, "Application")
+  l.Services.MustRegister(job, "Job")
 }
 
 func init() {

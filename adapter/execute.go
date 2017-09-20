@@ -308,7 +308,7 @@ func (b *CommandExecute) ReadActiveJobs() []*Job {
 func (b *CommandExecute) ReadJob(id string) (*Job, *StatusError) {
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
-    return nil, CommandError(http.StatusNotFound, "")
+    return nil, CommandError(http.StatusNotFound, "Job not found %s", id)
   }
   return job, nil
 }
@@ -318,7 +318,7 @@ func(b *CommandExecute) DeleteJob(id string) (*Job, *StatusError) {
   var err error
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
-    return nil, CommandError(http.StatusNotFound, "")
+    return nil, CommandError(http.StatusNotFound, "Job not found %s", id)
   }
 
   if err = Jobs.Abort(job); err != nil {

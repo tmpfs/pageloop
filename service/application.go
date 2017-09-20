@@ -9,7 +9,6 @@ import(
 )
 
 type AppService struct {
-  *ContainerService
   Host *Host
 }
 
