@@ -11,6 +11,7 @@ import (
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/service"
 )
 
 const(
@@ -132,7 +133,17 @@ func (l *PageLoop) Listen(server *http.Server) error {
 	return nil
 }
 
+
+var rpc *ServiceManager = &ServiceManager{}
+
 func init() {
+
+  rpc.Register(new(Core))
+
+  s, m, _ := rpc.Method("Core.Meta")
+  fmt.Printf("%#v\n", s)
+  fmt.Printf("%#v\n", m)
+
   // Mime types set to those for code mirror modes
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".babelrc", "application/json")

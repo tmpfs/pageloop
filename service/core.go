@@ -1,4 +1,4 @@
-package adapter
+package service
 
 type Core struct {}
 type MetaArgs struct {}

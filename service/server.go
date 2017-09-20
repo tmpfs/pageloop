@@ -1,4 +1,4 @@
-package adapter
+package service
 
 import(
   "fmt"
@@ -10,7 +10,6 @@ import(
   "unicode/utf8"
 )
 
-var rpc *ServiceManager = &ServiceManager{}
 // Precompute the reflect type for error. Can't use error directly
 // because Typeof takes an empty interface value. This is annoying.
 var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
@@ -153,12 +152,4 @@ func isExportedOrBuiltinType(t reflect.Type) bool {
 	// PkgPath will be non-empty even for an exported type,
 	// so we need to check the type name as well.
 	return isExported(t.Name()) || t.PkgPath() == ""
-}
-
-func init () {
-  rpc.Register(new(Core))
-
-  s, m, _ := rpc.Method("Core.Meta")
-  fmt.Printf("%#v\n", s)
-  fmt.Printf("%#v\n", m)
 }
