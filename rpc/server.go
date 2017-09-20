@@ -1,4 +1,4 @@
-// Package service provides a transport agnostic rpc service manager.
+// Package rpc provides a transport agnostic rpc service manager.
 //
 // It borrows from the net/rpc package for the reflection code but does
 // not provide any networking code.
@@ -26,7 +26,7 @@
 //
 // This package does not allow setting custom service names they are always inferred
 // from the receiver name.
-package service
+package rpc
 
 import(
   "fmt"
@@ -62,12 +62,12 @@ type RequestArguments struct {
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
 type Request struct {
-	ServiceMethod string   // format: "Service.Method"
-	Seq           uint64   // sequence number chosen by client
+	ServiceMethod string        // format: "Service.Method"
+	Seq           uint64        // sequence number chosen by client
+  Arguments     *RequestArguments
   service       *service
   methodType    *methodType
-  Arguments     *RequestArguments
-	next          *Request // for free list in Server
+	next          *Request      // for free list in Server
 }
 
 // Response is a header written before every RPC return. It is used internally
@@ -83,10 +83,10 @@ type Response struct {
 
 type Server struct {
   serviceMap    map[string]*service
-  mu          sync.RWMutex // protects the serviceMap
-  reqLock     sync.Mutex // protects freeReq
+  mu          sync.RWMutex    // protects the serviceMap
+  reqLock     sync.Mutex      // protects freeReq
   freeReq     *Request
-  respLock    sync.Mutex // protects freeResp
+  respLock    sync.Mutex      // protects freeResp
   freeResp    *Response
 }
 
@@ -123,8 +123,8 @@ func (server *Server) Register(rcvr interface{}) error {
   } else {
     s.method = method
     server.serviceMap[s.name] = s
-    return nil
   }
+  return nil
 }
 
 // Get a method call request.

@@ -12,6 +12,7 @@ import (
   . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/service"
+  . "github.com/tmpfs/pageloop/rpc"
 )
 
 const(
