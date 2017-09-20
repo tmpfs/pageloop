@@ -10,9 +10,10 @@ import(
 // Precompute the reflect type for error. Can't use error directly
 // because Typeof takes an empty interface value. This is annoying.
 var typeOfError = reflect.TypeOf((*error)(nil)).Elem()
+var typeOfString = reflect.TypeOf((*string)(nil)).Elem()
 
-// suitableMethods returns suitable Rpc methods of typ, it will report
-// error using log if reportErr is true.
+// suitableMethods returns suitable Rpc methods of typ, it will return error
+// on the first error condition encountered.
 func suitableMethods(typ reflect.Type) (map[string]*methodType, error) {
 	methods := make(map[string]*methodType)
 	for m := 0; m < typ.NumMethod(); m++ {
@@ -45,11 +46,40 @@ func suitableMethods(typ reflect.Type) (map[string]*methodType, error) {
 		if mtype.NumOut() != 1 {
 			return nil, fmt.Errorf("method %s has wrong number of outs: %d", mname, mtype.NumOut())
 		}
-		// The return type of the method must be error.
-		if returnType := mtype.Out(0); returnType != typeOfError {
-			return nil, fmt.Errorf("method %s returns %s not error", mname, returnType.String())
-		}
-		methods[mname] = &methodType{method: method, ArgType: argType, ReplyType: replyType}
+		// The return type of the method must implement the error interface.
+    returnType := mtype.Out(0)
+    // Check for Error() function
+    if returnErrorMethod, ok := returnType.MethodByName("Error"); !ok {
+			return nil, fmt.Errorf(
+        "method %s return value %s does not have an Error() method", mname, returnType.String())
+    } else {
+      rmtype := returnErrorMethod.Type
+      // Error() should just have a receiver argument (or no receiver in the case of error)
+      if rmtype.NumIn() > 1 {
+        return nil, fmt.Errorf(
+          "method %s return type %s Error() method has wrong number of ins: %d",
+          mname, returnType.String(), rmtype.NumIn())
+      }
+
+      // Error() method needs one out (string)
+      if rmtype.NumOut() != 1 {
+        return nil, fmt.Errorf(
+          "method %s return type %s Error() method has wrong number of outs: %d",
+          mname, returnType.String(), rmtype.NumOut())
+      }
+
+
+      // Check that Error() return type is string
+      errorReturnType := rmtype.Out(0)
+      //fmt.Printf("%#v\n", errorReturnType)
+      //fmt.Printf("%#v\n", errorReturnType == typeOfString)
+
+      if errorReturnType != typeOfString {
+        return nil, fmt.Errorf(
+          "method %s return type %s Error() method does not return string", mname, returnType.String())
+      }
+      methods[mname] = &methodType{method: method, ArgType: argType, ReplyType: replyType}
+    }
 	}
 	return methods, nil
 }

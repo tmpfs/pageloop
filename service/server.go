@@ -1,3 +1,28 @@
+// Package service provides a transport agnostic rpc service manager.
+//
+// It borrows from the net/rpc package for the reflection code but does
+// not provide any networking code.
+//
+// Useful when you want to expose the same service API methods over different
+// transports. Likely this can be done with the net/rpc package I just couldn't
+// figure out how to make it work nicely.
+//
+// The problem is that we want to expose a REST API and JSON-RPC over websockets.
+// However if we use the JSON-RPC package then we have to declare an initial
+// *http.Request argument but for websockets we don't have an HTTP request.
+//
+// Also in the case of JSON-RPC over websockets deserializing to an RPC call is
+// simple but in the case of the REST API we need to dynamically build the arguments
+// list from the HTTP request information.
+//
+// This modified rpc implementation allows us to provide services in a consistent
+// fashion (no initial *http.Request argument) and allow for arguments to be collated
+// in the case of the REST API.
+//
+// Services must declare methods in exactly the same way as for net/rpc with the
+// single distinction that the return value does not need to be error it needs to
+// conform to the error interface (provide an Error() function) which allows our
+// service handlers to return custom error implementations.
 package service
 
 import(
@@ -63,8 +88,6 @@ func (server *Server) Register(rcvr interface{}) error {
     return err
   } else {
     s.method = method
-    fmt.Printf("%s\n", s.name)
-    fmt.Printf("%#v\n", s.method)
     server.serviceMap[s.name] = s
     return nil
   }
