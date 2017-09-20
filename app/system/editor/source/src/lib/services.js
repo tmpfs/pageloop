@@ -49,10 +49,10 @@ const urls = {
   'Container.CreateApp': function (rpc) {
     return API + `apps/${rpc.parameters.context}/`
   },
-  'Template.ReadApplications': function () {
+  'Template.List': function () {
     return API + 'templates/'
   },
-  'Jobs.ReadActiveJobs': function () {
+  'Job.ActiveJobs': function () {
     return API + 'jobs/'
   },
   'Application.Read': function (rpc) {
@@ -108,8 +108,8 @@ const options = {
   'Host.List': getDefaultOptions,
   // TODO: restore create app from template
   'Container.CreateApp': getPutOptions,
-  'Template.ReadApplications': getDefaultOptions,
-  'Jobs.ReadActiveJobs': getDefaultOptions,
+  'Template.List': getDefaultOptions,
+  'Job.ActiveJobs': getDefaultOptions,
   'Application.Read': getDefaultOptions,
   'Application.ReadFiles': getDefaultOptions,
   'Application.ReadPages': getDefaultOptions,

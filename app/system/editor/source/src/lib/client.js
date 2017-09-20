@@ -199,7 +199,7 @@ class ApiClient {
 
   // List application templates
   listTemplates () {
-    return this.rpc(Request.rpc('Template.ReadApplications'))
+    return this.rpc(Request.rpc('Template.List'))
   }
 
   // List all containers

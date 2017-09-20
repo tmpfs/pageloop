@@ -146,16 +146,19 @@ func (l *PageLoop) initServices() {
   ctx := new(ContainerService)
   app := new(AppService)
   job := new(JobService)
+  tpl := new(TemplateService)
 
   host.Host = l.Host
   ctx.Host = l.Host
   app.Host = l.Host
+  tpl.Host = l.Host
 
   l.Services.MustRegister(core, "Core")
   l.Services.MustRegister(host, "Host")
   l.Services.MustRegister(ctx, "Container")
   l.Services.MustRegister(app, "Application")
   l.Services.MustRegister(job, "Job")
+  l.Services.MustRegister(tpl, "Template")
 }
 
 func init() {
