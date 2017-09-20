@@ -112,7 +112,7 @@ func (server *Server) Register(rcvr interface{}) error {
 }
 
 // Get a method call request.
-func (server *Server) Method(name string, seq uint64) (req *Request, err error) {
+func (server *Server) Request(name string, seq uint64) (req *Request, err error) {
   var service *service
   var mtype *methodType
 

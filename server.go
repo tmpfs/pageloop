@@ -137,10 +137,9 @@ func (l *PageLoop) Listen(server *http.Server) error {
 var rpc *Server = &Server{}
 
 func init() {
-
   rpc.MustRegister(new(Core))
 
-  if req, err := rpc.Method("Core.Meta", 1); err != nil {
+  if req, err := rpc.Request("Core.Meta", 1); err != nil {
     panic(err)
   } else {
     fmt.Printf("%#v\n", req)
