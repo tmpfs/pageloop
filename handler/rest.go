@@ -69,9 +69,11 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
         Name: args.Parameters.Target,
         ContainerName: args.Parameters.Context,
         Batch: &list}
-
-
-      // fmt.Printf("list: %#v\n", argv.Batch)
+    case "Application.RunTask":
+      argv = &Application{
+        Name: args.Parameters.Target,
+        ContainerName: args.Parameters.Context,
+        Task: args.Parameters.Item}
   }
   return argv, nil
 }

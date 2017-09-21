@@ -76,19 +76,23 @@ func (b *CommandExecute) ReadContainer(container *Container) (*Container, *Statu
 
 // Run an application build task.
 func(b *CommandExecute) RunTask(a *Application, task string) (*Job, *StatusError) {
-  var err error
+  // var err error
   var job *Job
   // No build configuration of missing build task
   if !a.HasBuilder() || a.Builder.Tasks[task] == "" {
-    return nil, CommandError(http.StatusNotFound, "")
+    return nil, CommandError(
+      http.StatusNotFound, "Build configuration or task not found")
   }
 
   // Run the task and get a job
+
+  /*
   if job, err = a.Builder.Run(task, &TaskJobComplete{}); err != nil {
     // Send conflict if job already running, this is a bit flaky is Run()
     // starts returning errors for other reasons :(
     return nil, CommandError(http.StatusConflict, err.Error())
   }
+  */
 
   // Accepted for processing
   fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)

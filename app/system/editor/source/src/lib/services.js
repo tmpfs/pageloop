@@ -112,8 +112,8 @@ const options = {
   'Application.Read': getDefaultOptions,          // v3
   'Application.ReadFiles': getDefaultOptions,     // v3
   'Application.ReadPages': getDefaultOptions,     // v3
-  'Application.DeleteFiles': getDeleteOptions,
-  'Application.RunTask': getPutOptions,
+  'Application.DeleteFiles': getDeleteOptions,    // v3
+  'Application.RunTask': getPutOptions,           // v3
   'Application.Delete': getDeleteOptions,         // v3
   'File.Create': getPutOptions,
   'File.CreateTemplate': getPutOptions,

@@ -3,7 +3,7 @@
 package adapter
 
 import (
-  "fmt"
+  //"fmt"
   "net/url"
   "net/http"
   "reflect"
@@ -12,6 +12,7 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
+/*
 // Handler for asynchronous background tasks.
 type TaskJobComplete struct {}
 
@@ -20,6 +21,7 @@ func (tj *TaskJobComplete) Done(err error, job *Job) {
   fmt.Printf("[job:%d] completed %s\n", job.Number, job.Id)
   Jobs.Stop(job)
 }
+*/
 
 // Abstraction that allows many different interfaces to
 // the data model whether it is a string command interpreter,

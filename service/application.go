@@ -1,12 +1,22 @@
 package service
 
 import(
-  // "fmt"
+  "fmt"
   "net/http"
+  "strings"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
+
+// Handler for asynchronous background tasks.
+type TaskJobComplete struct {}
+
+func (tj *TaskJobComplete) Done(err error, job *Job) {
+  // TODO: send reply to the client over websocket
+  fmt.Printf("[job:%d] completed %s\n", job.Number, job.Id)
+  Jobs.Stop(job)
+}
 
 type AppService struct {
   Host *Host
@@ -95,6 +105,40 @@ func (s *AppService) DeleteFiles(in *Application, reply *ServiceReply) *StatusEr
       files = append(files, file)
     }
     reply.Reply = files
+  }
+  return nil
+}
+
+// Run an application build task.
+func(s *AppService) RunTask(app *Application, reply *ServiceReply) *StatusError {
+  var task = app.Task
+  if _, app, err := s.lookup(app); err != nil {
+    return err
+  } else {
+    task = strings.TrimPrefix(task, SLASH)
+    // No build configuration of missing build task
+    if !app.HasBuilder() {
+      return CommandError(
+        http.StatusNotFound, "Application %s does not have a build configuration (needs build.yml)", app.Name)
+    }
+
+    if app.Builder.Tasks[task] == "" {
+      return CommandError(
+        http.StatusNotFound, "Build configuration task %s not found", task)
+    }
+
+    // Run the task and get a job
+    if job, err := app.Builder.Run(task, &TaskJobComplete{}); err != nil {
+      // Send conflict if job already running, this is a bit flaky is Run()
+      // starts returning errors for other reasons :(
+      return CommandError(http.StatusConflict, err.Error())
+    } else {
+      // Accepted for processing
+      fmt.Printf("[job:%d] started %s\n", job.Number, job.Id)
+
+      reply.Reply = job
+      reply.Status = http.StatusAccepted
+    }
   }
   return nil
 }

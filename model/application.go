@@ -64,6 +64,7 @@ type Application struct {
 
   ContainerName string `json:"container"`
 
+  Task string `json:"task"`
   Batch *UrlList `json:"batch"`
 
 	Container *Container `json:"-"`
