@@ -54,8 +54,12 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
       fallthrough
     case "Application.ReadPages":
       fallthrough
+    case "Application.Delete":
+      fallthrough
     case "Application.Read":
-      argv = &Application{Name: args.Parameters.Target, ContainerName: args.Parameters.Context}
+      argv = &Application{
+        Name: args.Parameters.Target,
+        ContainerName: args.Parameters.Context}
   }
   return argv, nil
 }
@@ -193,13 +197,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
               res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
             if reply.Error != nil {
-              // TODO: test for comand error response
-              return utils.Errorj(
-                res, CommandError(http.StatusInternalServerError, err.Error()))
+              // Send status error if we can
+              if err, ok := reply.Error.(*StatusError); ok {
+                return utils.Errorj(res, err)
+              // Otherwise handle as plain error
+              } else {
+                return utils.Errorj(
+                  res, CommandError(http.StatusInternalServerError, err.Error()))
+              }
             } else {
-
               var replyData = reply.Reply
-
               status := http.StatusOK
 
               if result, ok := replyData.(*ServiceReply); ok {
@@ -209,7 +216,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 }
               }
 
-              fmt.Printf("%#v\n", reply)
+              //fmt.Printf("%#v\n", reply)
+              //fmt.Printf("status: %d\n", status)
 
               if serviceMethod == "Container.CreateApp" {
                 // Mount the application, needs to be done here due to some funky
@@ -217,12 +225,10 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 if app, ok := replyData.(*Application); ok {
                   MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
                 }
-
-                return utils.Json(res, status, replyData)
               }
+              return utils.Json(res, status, replyData)
             }
           }
-
         }
       }
     }

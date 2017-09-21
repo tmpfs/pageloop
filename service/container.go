@@ -13,7 +13,7 @@ type ContainerService struct {
   Host *Host
 
   // Reference to the mountpoint manager
-  Mountpoints *MountpointManager `json:"-"`
+  Mountpoints *MountpointManager
 }
 
 // Read a container.
