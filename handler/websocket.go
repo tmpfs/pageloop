@@ -3,15 +3,18 @@ package handler
 import (
   //"fmt"
   "log"
+  "bytes"
 	"net/http"
+  "github.com/gorilla/rpc/json"
   "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   //. "github.com/tmpfs/pageloop/model"
-  . "github.com/tmpfs/pageloop/util"
+  //. "github.com/tmpfs/pageloop/util"
 )
 
 var(
+  codec *json.Codec = json.NewCodec()
   connections []*WebsocketConnection
   upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
@@ -23,6 +26,7 @@ type WebsocketConnection struct {
   Conn *websocket.Conn
 }
 
+/*
 type RpcRequest struct {
   Id uint `json:"id"`
   Method string `json:"method"`
@@ -36,7 +40,28 @@ type RpcResponse struct {
   Error *StatusError `json:"error,omitempty"`
   Result interface{} `json:"result,omitempty"`
 }
+*/
 
+// Implements http.ResponseWriter for JSON-RPC responses
+type WebsocketWriter struct {
+  MessageType int
+  Socket *WebsocketConnection
+}
+
+func (writer *WebsocketWriter) WriteHeader(int) {}
+
+func (writer *WebsocketWriter) Header() http.Header {
+  return http.Header{}
+}
+
+func (writer *WebsocketWriter) Write(p []byte) (int, error) {
+  if err := writer.Socket.Conn.WriteMessage(writer.MessageType, p); err != nil {
+    return 0, err
+  }
+  return len(p), nil
+}
+
+/*
 func (w *WebsocketConnection) WriteError(req *RpcRequest, err *StatusError) *StatusError {
   res:= &RpcResponse{Id: req.Id, Status: err.Status, Error: err}
   return w.WriteResponse(res)
@@ -48,19 +73,41 @@ func (w *WebsocketConnection) WriteResponse(res *RpcResponse) *StatusError {
   }
   return nil
 }
+*/
 
 func (w *WebsocketConnection) ReadRequest() {
   for {
-    req := &RpcRequest{}
-    err := w.Conn.ReadJSON(req)
+    // Read in the message
+    messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
-      log.Println(err)
       return
     }
 
-    method := req.Method
-    if method != "" {
-      println("got websocket request")
+    // Treat text messages as JSON-RPC
+    if messageType == websocket.TextMessage {
+      println("request bytes: " + string(p))
+      writer := &WebsocketWriter{Socket: w, MessageType: messageType}
+      r := bytes.NewBuffer(p)
+      if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
+        log.Println(err)
+      } else {
+        req := codec.NewRequest(fake)
+
+        // TODO: get response writer
+
+        if method, err := req.Method(); err != nil {
+          log.Println(err)
+          req.WriteResponse(writer, nil, err)
+        } else {
+          println("method: " + method)
+          println(string(p))
+
+          // TODO: call function and get reply
+          var reply interface{}
+          req.WriteResponse(writer, reply, err)
+        }
+
+      }
     }
   }
 }
