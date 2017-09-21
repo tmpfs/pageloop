@@ -1,7 +1,7 @@
 package service
 
 import(
-  "fmt"
+  // "fmt"
   "net/http"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -9,6 +9,7 @@ import(
 )
 
 type ContainerService struct {
+  // Reference to the host
   Host *Host
 
   // Reference to the mountpoint manager
@@ -35,7 +36,7 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
       return CommandError(http.StatusForbidden, "Cannot create applications in a protected container.")
     }
 
-    fmt.Printf("%#v\n", app)
+    // fmt.Printf("%#v\n", app)
 
     existing := container.GetByName(app.Name)
     if existing != nil {

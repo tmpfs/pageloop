@@ -103,16 +103,16 @@ function getBinaryOptions () {
 }
 
 const options = {
-  'Core.Meta': getDefaultOptions,
-  'Core.Stats': getDefaultOptions,
-  'Host.List': getDefaultOptions,
+  'Core.Meta': getDefaultOptions,                 // v3
+  'Core.Stats': getDefaultOptions,                // v3
+  'Host.List': getDefaultOptions,                 // v3
   // TODO: restore create app from template
-  'Container.CreateApp': getPutOptions,
-  'Template.List': getDefaultOptions,
-  'Job.ActiveJobs': getDefaultOptions,
-  'Application.Read': getDefaultOptions,
-  'Application.ReadFiles': getDefaultOptions,
-  'Application.ReadPages': getDefaultOptions,
+  'Container.CreateApp': getPutOptions,           // v3
+  'Template.List': getDefaultOptions,             // v3
+  'Job.ActiveJobs': getDefaultOptions,            // v3 - requires testing
+  'Application.Read': getDefaultOptions,          // v3
+  'Application.ReadFiles': getDefaultOptions,     // v3
+  'Application.ReadPages': getDefaultOptions,     // v3
   'Application.DeleteFiles': getDeleteOptions,
   'Application.RunTask': getPutOptions,
   'Application.Delete': getDeleteOptions,
