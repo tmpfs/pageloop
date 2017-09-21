@@ -127,9 +127,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 
               // Determine how we should reply to the client
               if route.ResponseType == ResponseTypeByte {
-
-                // TODO: restore cache busting headers!
-
                 // TODO: work out correct MIME type from file???
 
                 // If the method result is a slice of bytes send it back
@@ -139,7 +136,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                   return utils.Errorj(
                     res, CommandError(
                       http.StatusInternalServerError,
-                      "Service method failed to return []byte for binary repsonse type"))
+                      "Service method failed to return []byte for binary response type"))
                 }
               }
 
