@@ -205,7 +205,6 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
     match.Seq = sequence
   }
 
-  // TODO: shortcut lookup on X-Method-Seq / X-Method-Name
   return match, nil
 }
 
@@ -257,7 +256,7 @@ func init() {
 
   route("Core.Meta", "", http.MethodGet, http.StatusOK)
   route("Core.Stats", "/stats", http.MethodGet, http.StatusOK)
-  route("Template.ReadApplications", "/templates", http.MethodGet, http.StatusOK)
+  route("Template.List", "/templates", http.MethodGet, http.StatusOK)
   route("Job.ActiveJob", "/jobs", http.MethodGet, http.StatusOK)
   route("Job.Read", "/jobs/*", http.MethodGet, http.StatusOK)
   route("Job.Delete", "/jobs/*", http.MethodDelete, http.StatusOK)

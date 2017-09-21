@@ -5,7 +5,6 @@ import (
   "fmt"
   "mime"
 	"net/http"
-  "strconv"
   "strings"
   "path/filepath"
   . "github.com/tmpfs/pageloop/adapter"
@@ -150,6 +149,12 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
 
+  // Keep uploads working using old api
+	methodSeq := req.Header.Get("X-Method-Seq")
+  if methodSeq == "" {
+    return h.doDeprecatedHttp(res, req)
+  }
+
   if route, err := router.Find(req); err != nil {
     return utils.Errorj(res, err)
   } else {
@@ -160,43 +165,24 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     }
 
     fmt.Printf("route: %#v\n", route)
-  }
+    println("REST method name: " + route.ServiceMethod)
 
-	methodSeq := req.Header.Get("X-Method-Seq")
+    hasServiceMethod := h.Services.HasMethod(route.ServiceMethod)
 
-  // Keep uploads working using old api
-  if methodSeq == "" {
-    return h.doDeprecatedHttp(res, req)
-  }
-
-  // TODO: automatically find matching route and validate request is well formed
-
-  // Check sequence number
-  if seq, err := strconv.ParseUint(methodSeq, 10, 64); err != nil {
-    return utils.Errorj(
-      res, CommandError(
-        http.StatusBadRequest, "Invalid sequence number: %s", err.Error()))
-  // Got a valid sequence number
-  } else {
-	  serviceMethod := req.Header.Get("X-Method-Name")
-
-    println("REST method name: " + serviceMethod)
-    //println("REST Service seq: " + methodSeq)
-    //println("REST Service accept: " + accept)
-
-    hasServiceMethod := h.Services.HasMethod(serviceMethod)
-
-    // TODO: send 404 on no service method once refactor completed
-    if hasServiceMethod {
-      println("REST service method name (start invoke): " + serviceMethod)
-      if rpcreq, err := h.Services.Request(serviceMethod, seq); err != nil {
+    if !hasServiceMethod {
+      return utils.Errorj(
+        res, CommandError(http.StatusNotFound,
+        "No service available for method name %s using path %s", route.ServiceMethod, req.URL.Path))
+    } else {
+      println("REST service method name (start invoke): " + route.ServiceMethod)
+      if rpcreq, err := h.Services.Request(route.ServiceMethod, route.Seq); err != nil {
         return utils.Errorj(
           res, CommandError(http.StatusInternalServerError, err.Error()))
       } else {
 
         // Build rpc arguments
         args := NewHttpArguments(req)
-        if argv, err := args.Get(serviceMethod, req); err != nil {
+        if argv, err := args.Get(route.ServiceMethod, req); err != nil {
           return utils.Errorj(res, err)
         } else {
 
@@ -233,7 +219,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
               //fmt.Printf("%#v\n", reply)
               //fmt.Printf("status: %d\n", status)
 
-              if serviceMethod == "Container.CreateApp" {
+              if route.ServiceMethod == "Container.CreateApp" {
                 // Mount the application, needs to be done here due to some funky
                 // package cyclic references
                 if app, ok := replyData.(*Application); ok {
@@ -257,9 +243,10 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     }
   }
 
-  return h.doDeprecatedHttp(res, req)
+  // Default response is not found
+  return utils.Errorj(
+    res, CommandError(http.StatusNotFound, ""))
 }
-
 
 func (h RestHandler) doDeprecatedHttp(res http.ResponseWriter, req *http.Request) (int, error) {
 	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
@@ -283,8 +270,6 @@ func (h RestHandler) doDeprecatedHttp(res http.ResponseWriter, req *http.Request
     } else {
 
       def := mapping.CommandDefinition
-
-      // println(def.MethodName)
 
       // TODO: use proper RPC arguments interface
       if def.MethodName == "CreateApp" {
