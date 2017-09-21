@@ -51,6 +51,9 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
+  // Never cache API requests
+  res.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+
   if route, err := router.Find(req); err != nil {
     return utils.Errorj(res, err)
   } else {
