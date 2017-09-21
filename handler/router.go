@@ -9,6 +9,11 @@ import(
   . "github.com/tmpfs/pageloop/util"
 )
 
+const(
+  ResponseTypeJson = iota
+  ResponseTypeByte
+)
+
 var(
   router *Router
 )
@@ -84,6 +89,8 @@ type Route struct {
   *Parameters
   // Condition used to match route
   Condition func(req *http.Request) bool
+  // Indicate how the response should be sent
+  ResponseType int
 }
 
 // Determine if this route matches the given request and parameters.
@@ -141,6 +148,7 @@ func (r *Route) Clone() *Route {
     Method: r.Method,
     Status: r.Status,
     Parameters: r.Parameters,
+    ResponseType: r.ResponseType,
     Condition: r.Condition}
 }
 
@@ -365,11 +373,14 @@ func init() {
   route("Application.RunTask", "/apps/*/*/tasks/", http.MethodPut, http.StatusAccepted)
   route("File.Read", "/apps/*/*/files/*", http.MethodGet, http.StatusOK)
   route("File.ReadPage", "/apps/*/*/pages/*", http.MethodGet, http.StatusOK)
-  route("File.ReadSource", "/apps/*/*/src/*", http.MethodGet, http.StatusOK)
-  route("File.ReadSourceRaw", "/apps/*/*/raw/*", http.MethodGet, http.StatusOK)
   route("File.Create", "/apps/*/*/files/*", http.MethodPut, http.StatusCreated)
   route("File.Save", "/apps/*/*/files/*", http.MethodPost, http.StatusOK)
   route("File.Delete", "/apps/*/*/files/*", http.MethodDelete, http.StatusOK)
+
+  r = route("File.ReadSource", "/apps/*/*/src/*", http.MethodGet, http.StatusOK)
+  r.ResponseType = ResponseTypeByte
+  r = route("File.ReadSourceRaw", "/apps/*/*/raw/*", http.MethodGet, http.StatusOK)
+  r.ResponseType = ResponseTypeByte
 
   // Conditional on location header
   r = route("File.Move", "/apps/*/*/files/*", http.MethodPost, http.StatusOK)

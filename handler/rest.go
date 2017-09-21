@@ -143,6 +143,20 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
               }
 
               // Determine how we should reply to the client
+              if route.ResponseType == ResponseTypeByte {
+                // TODO: work out correct MIME type from file???
+                // If the method result is a slice of bytes send it back
+                if content, ok := replyData.([]byte); ok {
+                  return utils.Write(res, status, content)
+                } else {
+                  return utils.Errorj(
+                    res, CommandError(
+                      http.StatusInternalServerError,
+                      "Service method failed to return []byte for binary repsonse type"))
+                }
+              }
+
+              /*
               accept := req.Header.Get("Accept")
               // Client is asking for binary response
               if accept == "application/octet-stream" {
@@ -151,6 +165,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                   return utils.Write(res, status, content)
                 }
               }
+              */
+
               return utils.Json(res, status, replyData)
             }
           }
