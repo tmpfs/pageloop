@@ -7,7 +7,7 @@ import (
 	"mime"
   "net/http"
   "time"
-  . "github.com/tmpfs/pageloop/adapter"
+  //. "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/handler"
   . "github.com/tmpfs/pageloop/model"
@@ -54,10 +54,6 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   // so they need special care.
   l.MountpointManager = NewMountpointManager(l.Config, l.Host)
 
-  // Initialize the command adapter, services invoke the command adapter
-  // for all operations on the model.
-  adapter := NewCommandAdapter(Name, Version, l.Host, l.MountpointManager)
-
   l.initServices()
 
 	// Configure application containers.
@@ -68,24 +64,22 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	l.Host.Add(tpl)
 	l.Host.Add(usr)
 
+	// REST API global endpoint (/api/)
+	handler = RestService(l.Mux, l.Services, l.Host, l.MountpointManager)
+	l.MountpointManager.MountpointMap[API_URL] = handler
+	log.Printf("Serving rest service from %s", API_URL)
+
 	// Websocket global endpoint (/ws/)
-	handler = WebsocketService(l.Mux, adapter)
+	handler = WebsocketService(l.Mux, l.Services, l.Host, l.MountpointManager)
 	l.MountpointManager.MountpointMap[WEBSOCKET_URL] = handler
 	log.Printf("Serving websocket service from %s", WEBSOCKET_URL)
 
 	// RPC global endpoint (/rpc/)
-  // TODO: pass adapter not the host!
-
   /*
 	handler = RpcService(l.Mux, l.Host)
 	l.MountpointManager.MountpointMap[RPC_URL] = handler
 	log.Printf("Serving rpc service from %s", RPC_URL)
   */
-
-	// REST API global endpoint (/api/)
-	handler = RestService(l.Mux, l.Services, l.Host, l.MountpointManager)
-	l.MountpointManager.MountpointMap[API_URL] = handler
-	log.Printf("Serving rest service from %s", API_URL)
 
   // Collect mountpoints by container name
   if collection, err := l.MountpointManager.Collect(config.Mountpoints, config.UserConfig().Mountpoints); err != nil {

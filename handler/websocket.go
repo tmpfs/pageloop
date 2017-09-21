@@ -5,12 +5,13 @@ import (
   "log"
   "bytes"
 	"net/http"
+  "github.com/gorilla/rpc"
   "github.com/gorilla/rpc/json"
   "github.com/gorilla/websocket"
-  . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
-  //. "github.com/tmpfs/pageloop/model"
-  //. "github.com/tmpfs/pageloop/util"
+  . "github.com/tmpfs/pageloop/model"
+  . "github.com/tmpfs/pageloop/rpc"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 var(
@@ -22,30 +23,15 @@ var(
 )
 
 type WebsocketConnection struct {
-  Adapter *CommandAdapter
+  Handler WebsocketHandler
   Conn *websocket.Conn
 }
-
-/*
-type RpcRequest struct {
-  Id uint `json:"id"`
-  Method string `json:"method"`
-  Params []*ActionParameters `json:"params"`
-  Arguments []interface{} `json:"args"`
-}
-
-type RpcResponse struct {
-  Id uint `json:"id"`
-  Status int `json:"status"`
-  Error *StatusError `json:"error,omitempty"`
-  Result interface{} `json:"result,omitempty"`
-}
-*/
 
 // Implements http.ResponseWriter for JSON-RPC responses
 type WebsocketWriter struct {
   MessageType int
   Socket *WebsocketConnection
+  Request rpc.CodecRequest
 }
 
 func (writer *WebsocketWriter) WriteHeader(int) {}
@@ -55,10 +41,21 @@ func (writer *WebsocketWriter) Header() http.Header {
 }
 
 func (writer *WebsocketWriter) Write(p []byte) (int, error) {
+  println("Writing response: " + string(p))
   if err := writer.Socket.Conn.WriteMessage(writer.MessageType, p); err != nil {
     return 0, err
   }
   return len(p), nil
+}
+
+/*
+func (writer *WebsocketWriter) WriteJson(args interface{}) error {
+  return writer.Socket.Conn.WriteJSON(args)
+}
+*/
+
+func (writer *WebsocketWriter) WriteError(err *StatusError) error {
+  return writer.Request.WriteResponse(writer, nil, err)
 }
 
 /*
@@ -86,15 +83,12 @@ func (w *WebsocketConnection) ReadRequest() {
     // Treat text messages as JSON-RPC
     if messageType == websocket.TextMessage {
       println("request bytes: " + string(p))
-      writer := &WebsocketWriter{Socket: w, MessageType: messageType}
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
         log.Println(err)
       } else {
         req := codec.NewRequest(fake)
-
-        // TODO: get response writer
-
+        writer := &WebsocketWriter{Socket: w, MessageType: messageType, Request: req}
         if method, err := req.Method(); err != nil {
           log.Println(err)
           req.WriteResponse(writer, nil, err)
@@ -102,11 +96,44 @@ func (w *WebsocketConnection) ReadRequest() {
           println("method: " + method)
           println(string(p))
 
-          // TODO: call function and get reply
-          var reply interface{}
-          req.WriteResponse(writer, reply, err)
-        }
+          hasServiceMethod := w.Handler.Services.HasMethod(method)
+          // Check if the service method is available
+          if !hasServiceMethod {
+            writer.WriteError(CommandError(http.StatusNotFound, "Service %s does not exist", method))
+            return
+          }
 
+          // Get a service method call request
+          if rpcreq, err := w.Handler.Services.Request(method, 0); err != nil {
+            writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+            return
+          } else {
+            // TODO: read params into correct type
+
+            if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
+              writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+              return
+            } else {
+              // Reply with error when available
+              if reply.Error != nil {
+                // Send status error if we can
+                if err, ok := reply.Error.(*StatusError); ok {
+                  writer.WriteError(err)
+                  return
+                // Otherwise handle as plain error
+                } else {
+                  // TODO: wrap error
+                  req.WriteResponse(writer, reply, err)
+                  return
+                }
+              // Success send the response to the client
+              } else {
+                println("Sending reply!!!")
+                req.WriteResponse(writer, reply, nil)
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -114,13 +141,15 @@ func (w *WebsocketConnection) ReadRequest() {
 
 // Handles requests for application data.
 type WebsocketHandler struct {
-  Adapter *CommandAdapter
+  Services *ServiceMap
+  Host *Host
+  Mountpoints *MountpointManager
 }
 
 // Configure the service. Adds a handler for the websocket URL to
 // the passed servemux.
-func WebsocketService(mux *http.ServeMux, adapter *CommandAdapter) http.Handler {
-  handler := WebsocketHandler{Adapter: adapter}
+func WebsocketService(mux *http.ServeMux, services *ServiceMap, host *Host, mountpoints *MountpointManager) http.Handler {
+  handler := WebsocketHandler{Services: services, Host: host, Mountpoints: mountpoints}
   mux.Handle(WEBSOCKET_URL, http.StripPrefix(WEBSOCKET_URL, handler))
 	return handler
 }
@@ -133,7 +162,7 @@ func (h WebsocketHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) 
     return
   }
 
-  ws := &WebsocketConnection{Conn: conn, Adapter: h.Adapter}
+  ws := &WebsocketConnection{Conn: conn, Handler: h}
   connections = append(connections, ws)
   Stats.Websocket.Add("connections", 1)
 
