@@ -83,7 +83,7 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   */
 
 	// REST API global endpoint (/api/)
-	handler = RestService(l.Mux, adapter, l.Services)
+	handler = RestService(l.Mux, l.Services, l.Host, l.MountpointManager)
 	l.MountpointManager.MountpointMap[API_URL] = handler
 	log.Printf("Serving rest service from %s", API_URL)
 

@@ -5,8 +5,6 @@ import (
   // "fmt"
   //"mime"
 	"net/http"
-  //"strings"
-  //"path/filepath"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -30,15 +28,14 @@ var(
 // Handles requests for application data.
 type RestHandler struct {
   Services *ServiceMap
-
-  // Deprecated
-  Adapter *CommandAdapter
+  Host *Host
+  Mountpoints *MountpointManager
 }
 
 // Configure the service. Adds a rest handler for the API URL to
 // the passed servemux.
-func RestService(mux *http.ServeMux, adapter *CommandAdapter, services *ServiceMap) http.Handler {
-  handler := RestHandler{Adapter: adapter, Services: services}
+func RestService(mux *http.ServeMux, services *ServiceMap, host *Host, mountpoints *MountpointManager) http.Handler {
+  handler := RestHandler{Services: services, Host: host, Mountpoints: mountpoints}
   mux.Handle(API_URL, http.StripPrefix(API_URL, handler))
 	return handler
 }
@@ -121,13 +118,17 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 // Mount the application, needs to be done here due to some funky
                 // package cyclic references
                 if app, ok := replyData.(*Application); ok {
-                  MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
+                  MountApplication(h.Mountpoints.MountpointMap, h.Host, app)
                 }
               }
 
               // Determine how we should reply to the client
               if route.ResponseType == ResponseTypeByte {
+
+                // TODO: restore cache busting headers!
+
                 // TODO: work out correct MIME type from file???
+
                 // If the method result is a slice of bytes send it back
                 if content, ok := replyData.([]byte); ok {
                   return utils.Write(res, status, content)
