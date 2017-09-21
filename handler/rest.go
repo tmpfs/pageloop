@@ -107,6 +107,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
             // Success send the response to the client
             } else {
               var replyData = reply.Reply
+
+              // TODO: use route status and remove from ServiceReply
               status := http.StatusOK
 
               if result, ok := replyData.(*ServiceReply); ok {
@@ -140,6 +142,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 }
               }
 
+              // Assume JSON response if response type not already handled
               return utils.Json(res, status, replyData)
             }
           }
