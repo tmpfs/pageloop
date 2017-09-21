@@ -13,14 +13,14 @@ type VoidArgs struct {}
 type CoreService struct {}
 
 // Meta information (/).
-func (s *CoreService) Meta(argv VoidArgs, reply *MetaInfo) error {
+func (s *CoreService) Meta(argv *VoidArgs, reply *MetaInfo) error {
   reply.Name = MetaData.Name
   reply.Version = MetaData.Version
   return nil
 }
 
 // Stats information (/stats)
-func (c *CoreService) Stats(argv VoidArgs, reply *Statistics) error {
+func (c *CoreService) Stats(argv *VoidArgs, reply *Statistics) error {
   // Update uptime stats
   Stats.Now()
 

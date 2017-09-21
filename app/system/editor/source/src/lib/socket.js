@@ -36,6 +36,7 @@ class SocketConnection {
         } catch (e) {
           throw e
         }
+        console.log(doc)
         if (doc.id && this._listeners[doc.id]) {
           this._listeners[doc.id](doc)
           delete this._listeners[doc.id]
@@ -101,6 +102,8 @@ class SocketConnection {
             console.log('got rpc error response!!!:' + response.error)
             // res.status = doc.error.status || 500
           }
+
+          console.log(doc)
 
           resolve({response: res, document: doc})
         }

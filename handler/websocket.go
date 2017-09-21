@@ -69,14 +69,35 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) error {
 //
 func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}) {
   println("Read request : " + method)
-  argv = VoidArgs{}
+  argv = &VoidArgs{}
   switch(method) {
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":
       fallthrough
+    case "Application.DeleteFiles":
+      fallthrough
+    case "Application.RunTask":
+      fallthrough
     case "Application.Read":
       argv = &Application{}
+    // TODO: Container.CreateApp
+    case "Container.Read":
+      argv = &Container{}
+    case "File.ReadSource":
+      fallthrough
+    case "File.ReadSourceRaw":
+      fallthrough
+    case "File.Read":
+      fallthrough
+    case "File.Create":
+      fallthrough
+    case "File.Move":
+      fallthrough
+    case "File.CreateTemplate":
+      fallthrough
+    case "File.Save":
+      argv = &File{}
   }
   if argv != nil {
     fmt.Printf("argv %#v\n", argv)
@@ -144,6 +165,9 @@ func (w *WebsocketConnection) ReadRequest() {
                 }
               // Success send the response to the client
               } else {
+
+                println("Writing reply!!")
+
                 status := http.StatusOK
                 replyData := reply.Reply
 
@@ -157,6 +181,8 @@ func (w *WebsocketConnection) ReadRequest() {
                 // Wrap the result object so we can extract
                 // status code client side
                 replyData = &RpcWebsocketReply{Document: replyData, Status: status}
+
+                fmt.Printf("reply data %#v\n", replyData)
 
                 req.WriteResponse(writer, replyData, nil)
               }

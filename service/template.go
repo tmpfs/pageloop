@@ -11,7 +11,7 @@ type TemplateService struct {
 
 // List all system templates and user applications
 // that have been marked as a template.
-func (s *TemplateService) List(argv VoidArgs, reply *ServiceReply) *StatusError {
+func (s *TemplateService) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
   // Get built in and user templates
   c := s.Host.GetByName("template")
   u := s.Host.GetByName("user")

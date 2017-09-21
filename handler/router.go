@@ -253,6 +253,8 @@ func (r *Router) Argv(route *Route, req *http.Request) (argv interface{}, err *S
     case "Container.CreateApp":
       c := &Container{Name: route.Parameters.Context}
       var app *Application = &Application{Container: c}
+
+      // TODO: move validation to service logic
       if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
         return nil, CommandError(http.StatusBadRequest, err.Error())
       }

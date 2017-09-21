@@ -9,7 +9,7 @@ import(
 type JobService struct {}
 
 // List active jobs.
-func (s *JobService) ActiveJobs(argv VoidArgs, reply *ServiceReply) *StatusError {
+func (s *JobService) ActiveJobs(argv *VoidArgs, reply *ServiceReply) *StatusError {
   reply.Reply = Jobs.Active
   return nil
 }
