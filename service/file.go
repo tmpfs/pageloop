@@ -11,6 +11,16 @@ type FileService struct {
   Host *Host
 }
 
+// Read a file.
+func (s *FileService) Read(file *File, reply *ServiceReply) *StatusError {
+  if _, _, f, err := s.lookup(file, false); err != nil {
+    return err
+  } else {
+    reply.Reply = f
+  }
+  return nil
+}
+
 // Move a file.
 func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
   if file.Destination == "" {

@@ -287,15 +287,17 @@ func (r *Router) Argv(route *Route, req *http.Request) (argv interface{}, err *S
       fallthrough
     case "File.ReadSourceRaw":
       fallthrough
-    case "File.Move":
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
+    case "File.Read":
+      fallthrough
     case "File.Create":
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: route.Parameters.Item}
       argv = f
+    case "File.Move":
+      c := &Container{Name: route.Parameters.Context}
+      a := &Application{Name: route.Parameters.Target, Container: c}
+      argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
     case "File.CreateTemplate":
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
