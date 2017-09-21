@@ -150,6 +150,8 @@ func (l *PageLoop) initServices() {
 
   host.Host = l.Host
   ctx.Host = l.Host
+  ctx.Mountpoints = l.MountpointManager
+
   app.Host = l.Host
   tpl.Host = l.Host
 

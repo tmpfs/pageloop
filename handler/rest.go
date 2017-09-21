@@ -39,16 +39,25 @@ type HttpArguments struct {
 // Determine the arguments to use for an rpc method call.
 //
 // The name argument should be the qualified Service.Method name.
-func (args *HttpArguments) Get(name string) interface{} {
+func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}, err *StatusError) {
   switch name {
+    case "Container.CreateApp":
+      c := &Container{Name: args.Parameters.Context}
+      var app *Application = &Application{Container: c}
+      if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
+        return nil, CommandError(http.StatusBadRequest, err.Error())
+      }
+      argv = app
+    case "Container.Read":
+      argv = &Container{Name: args.Parameters.Context}
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":
       fallthrough
     case "Application.Read":
-      return &Application{Name: args.Parameters.Target, ContainerName: args.Parameters.Context}
+      argv = &Application{Name: args.Parameters.Target, ContainerName: args.Parameters.Context}
   }
-  return nil
+  return argv, nil
 }
 
 func NewHttpArguments(req *http.Request) *HttpArguments {
@@ -167,35 +176,53 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           res, CommandError(http.StatusInternalServerError, err.Error()))
       } else {
 
-        // TODO: build arguments list
+        // Build rpc arguments
         args := NewHttpArguments(req)
-        argv := args.Get(serviceMethod)
-        fmt.Printf("%#v\n", args.Parameters)
-        // Got some arguments to use for the request
-        if argv != nil {
-          rpcreq.Argv(argv)
-        }
-
-        if reply, err := h.Services.Call(rpcreq); err != nil {
-          return utils.Errorj(
-            res, CommandError(http.StatusInternalServerError, err.Error()))
+        if argv, err := args.Get(serviceMethod, req); err != nil {
+          return utils.Errorj(res, err)
         } else {
-          if reply.Error != nil {
-            // TODO: test for comand error response
+
+          fmt.Printf("%#v\n", args.Parameters)
+          // Got some arguments to use for the request
+          if argv != nil {
+            rpcreq.Argv(argv)
+          }
+
+          if reply, err := h.Services.Call(rpcreq); err != nil {
             return utils.Errorj(
               res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
+            if reply.Error != nil {
+              // TODO: test for comand error response
+              return utils.Errorj(
+                res, CommandError(http.StatusInternalServerError, err.Error()))
+            } else {
 
-            var replyData = reply.Reply
+              var replyData = reply.Reply
 
-            if result, ok := replyData.(*ServiceReply); ok {
-              replyData = result.Reply
+              status := http.StatusOK
+
+              if result, ok := replyData.(*ServiceReply); ok {
+                replyData = result.Reply
+                if result.Status != 0 {
+                  status = result.Status
+                }
+              }
+
+              fmt.Printf("%#v\n", reply)
+
+              if serviceMethod == "Container.CreateApp" {
+                // Mount the application, needs to be done here due to some funky
+                // package cyclic references
+                if app, ok := replyData.(*Application); ok {
+                  MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
+                }
+
+                return utils.Json(res, status, replyData)
+              }
             }
-
-            fmt.Printf("%#v\n", reply.Reply)
-            // TODO: get correct status code
-            return utils.Json(res, http.StatusOK, replyData)
           }
+
         }
       }
     }
