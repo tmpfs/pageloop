@@ -1,4 +1,4 @@
-package rpc
+package service
 
 // A helper type for service methods to declare as the
 // reply (second) argument. When this type is used the

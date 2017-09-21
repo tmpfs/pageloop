@@ -12,6 +12,7 @@ import (
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/rpc"
+  . "github.com/tmpfs/pageloop/service"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -184,9 +185,16 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
             return utils.Errorj(
               res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
+
+            var replyData = reply.Reply
+
+            if result, ok := replyData.(*ServiceReply); ok {
+              replyData = result.Reply
+            }
+
             fmt.Printf("%#v\n", reply.Reply)
             // TODO: get correct status code
-            return utils.Json(res, http.StatusOK, reply.Reply)
+            return utils.Json(res, http.StatusOK, replyData)
           }
         }
       }

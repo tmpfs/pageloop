@@ -3,7 +3,6 @@ package service
 import(
   "fmt"
   "net/http"
-  . "github.com/tmpfs/pageloop/rpc"
   . "github.com/tmpfs/pageloop/util"
 )
 

@@ -2,7 +2,6 @@ package service
 
 import(
   . "github.com/tmpfs/pageloop/model"
-  . "github.com/tmpfs/pageloop/rpc"
   . "github.com/tmpfs/pageloop/util"
 )
 

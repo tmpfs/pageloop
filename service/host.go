@@ -11,7 +11,7 @@ type HostService struct {
 }
 
 // List containers.
-func (s *HostService) List(argv VoidArgs, reply *Host) *StatusError {
-  reply.Containers = s.Host.Containers
+func (s *HostService) List(argv VoidArgs, reply *ServiceReply) *StatusError {
+  reply.Reply = s.Host.Containers
   return nil
 }

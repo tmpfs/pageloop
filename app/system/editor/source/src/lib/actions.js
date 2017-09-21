@@ -71,7 +71,7 @@ function Actions (router) {
                 throw err
               })
           }
-          context.commit('containers', res.document.containers)
+          context.commit('containers', res.document)
         })
     },
     'run-task': function (context, {app, task}) {
