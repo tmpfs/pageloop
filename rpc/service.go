@@ -200,12 +200,6 @@ func (server *ServiceMap) call(req *Request) (reply interface{}, err error) {
     }
   }
 
-  /*
-  if result, ok := reply.(*ServiceReply); ok {
-    reply = result.Reply
-  }
-  */
-
   return
 }
 

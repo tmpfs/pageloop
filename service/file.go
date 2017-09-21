@@ -27,6 +27,26 @@ func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
   return nil
 }
 
+// Read file content.
+func (s *FileService) ReadSource(file *File, reply *ServiceReply) *StatusError {
+  if _, _, f, err := s.lookup(file); err != nil {
+    return err
+  } else {
+    reply.Reply = f.Source(false)
+  }
+  return nil
+}
+
+// Read raw file content (includes frontmatter).
+func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusError {
+  if _, _, f, err := s.lookup(file); err != nil {
+    return err
+  } else {
+    reply.Reply = f.Source(true)
+  }
+  return nil
+}
+
 // Private
 
 func (s *FileService) lookup(f *File) (*Container, *Application, *File, *StatusError) {

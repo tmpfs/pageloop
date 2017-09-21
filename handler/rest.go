@@ -40,6 +40,7 @@ type HttpArguments struct {
 //
 // The name argument should be the qualified Service.Method name.
 func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}, err *StatusError) {
+
   switch name {
     case "Container.CreateApp":
       c := &Container{Name: args.Parameters.Context}
@@ -74,6 +75,10 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
         Name: args.Parameters.Target,
         ContainerName: args.Parameters.Context,
         Task: args.Parameters.Item}
+    case "File.ReadSource":
+      fallthrough
+    case "File.ReadSourceRaw":
+      fallthrough
     case "File.Move":
       c := &Container{Name: args.Parameters.Context}
       a := &Application{Name: args.Parameters.Target, Container: c}
@@ -171,7 +176,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
 
-  // accept := req.Header.Get("Accept")
 	methodSeq := req.Header.Get("X-Method-Seq")
 
   // Keep uploads working using old api
@@ -246,6 +250,15 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 // package cyclic references
                 if app, ok := replyData.(*Application); ok {
                   MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
+                }
+              }
+
+              accept := req.Header.Get("Accept")
+              // Client is asking for binary response
+              if accept == "application/octet-stream" {
+                // If the method result is a slice of bytes send it back
+                if content, ok := replyData.([]byte); ok {
+                  return utils.Write(res, status, content)
                 }
               }
               return utils.Json(res, status, replyData)
