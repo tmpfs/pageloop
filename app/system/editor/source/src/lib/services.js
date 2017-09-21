@@ -47,7 +47,7 @@ const urls = {
     return API + 'apps/'
   },
   'Container.CreateApp': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/`
+    return API + `apps/${rpc.parameters.container}/`
   },
   'Template.List': function () {
     return API + 'templates/'
@@ -68,28 +68,28 @@ const urls = {
     return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/files/`
   },
   'Application.RunTask': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/tasks/${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/tasks/${rpc.parameters.url}`
   },
   'Application.Delete': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}`
   },
   'File.Create': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
   },
   'File.CreateTemplate': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
   },
   'File.Save': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
   },
   'File.Move': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
   },
   'File.ReadSource': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/src${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/src${rpc.parameters.url}`
   },
   'File.ReadSourceRaw': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/raw${rpc.parameters.item}`
+    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/raw${rpc.parameters.url}`
   }
 }
 

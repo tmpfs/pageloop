@@ -67,7 +67,7 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) error {
 }
 
 //
-func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}) {
+func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err error) {
   println("Read request : " + method)
   argv = &VoidArgs{}
   switch(method) {
@@ -77,13 +77,16 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}) {
       fallthrough
     case "Application.DeleteFiles":
       fallthrough
+    case "Application.Delete":
+      fallthrough
     case "Application.RunTask":
       fallthrough
     case "Application.Read":
       argv = &Application{}
-    // TODO: Container.CreateApp
     case "Container.Read":
       argv = &Container{}
+    case "Container.CreateApp":
+      fallthrough
     case "File.ReadSource":
       fallthrough
     case "File.ReadSourceRaw":
@@ -101,7 +104,7 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}) {
   }
   if argv != nil {
     fmt.Printf("argv %#v\n", argv)
-    writer.Request.ReadRequest(argv)
+    err = writer.Request.ReadRequest(argv)
   }
   return
 }
@@ -142,9 +145,12 @@ func (w *WebsocketConnection) ReadRequest() {
           } else {
             // TODO: read params into correct type
 
-            argv := writer.ReadRequest(method)
-            if argv != nil {
-              rpcreq.Argv(argv)
+            if argv, err := writer.ReadRequest(method); err != nil {
+              writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+            } else {
+              if argv != nil {
+                rpcreq.Argv(argv)
+              }
             }
 
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
@@ -184,6 +190,7 @@ func (w *WebsocketConnection) ReadRequest() {
 
                 fmt.Printf("reply data %#v\n", replyData)
 
+                println("calling write response")
                 req.WriteResponse(writer, replyData, nil)
               }
             }

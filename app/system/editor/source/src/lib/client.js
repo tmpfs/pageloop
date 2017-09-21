@@ -7,7 +7,7 @@ let socket
 // Message identifier counter
 let id = 0
 
-class RpcRequest {
+class Request {
   constructor (id, method, params) {
     this.id = id
     this.method = method
@@ -17,26 +17,13 @@ class RpcRequest {
     this.params = params || []
   }
 
-  /*
-  get body () {
-    return this.args && this.args.length && this.args[0]
-  }
-  */
-
   get parameters () {
     return this.params[0]
   }
-}
 
-class Request {
   // Get a JSON RPC request object.
   static rpc (method, params) {
-    const req = new RpcRequest(++id, method, params)
-    if (!req.params.length) {
-      delete req.params
-    }
-    console.log(req)
-    return req
+    return new Request(++id, method, params)
   }
 }
 
@@ -214,21 +201,32 @@ class ApiClient {
     }
   }
 
+  getFileReference (container, application, url) {
+    return {
+      url: url,
+      owner: {
+        name: application,
+        container: container
+      }
+    }
+  }
+
   // Get a single application
   getApplication (container, application) {
-    console.log('getApplication called')
-    return this.rpc(Request.rpc('Application.Read', this.getApplicationReference(container, application)))
+    const ref = this.getApplicationReference(container, application)
+    return this.rpc(Request.rpc('Application.Read', ref))
   }
 
   // Get the files for an application
   getFiles (container, application) {
-    console.log('getFiles called')
-    return this.rpc(Request.rpc('Application.ReadFiles', this.getApplicationReference(container, application)))
+    const ref = this.getApplicationReference(container, application)
+    return this.rpc(Request.rpc('Application.ReadFiles', ref))
   }
 
   // Get the pages for an application
   getPages (container, application) {
-    return this.rpc(Request.rpc('Application.ReadPages', this.getApplicationReference(container, application)))
+    const ref = this.getApplicationReference(container, application)
+    return this.rpc(Request.rpc('Application.ReadPages', ref))
   }
 
   // Delete a list of files from an application
@@ -236,13 +234,9 @@ class ApiClient {
     const urls = files.map((f) => {
       return f.url
     })
-    console.log('delete files')
-    console.log(urls)
-    return this.rpc(
-      Request.rpc('Application.DeleteFiles',
-      {context: container, target: application},
-      urls)
-    )
+    const ref = this.getApplicationReference(container, application)
+    ref.batch = urls
+    return this.rpc(Request.rpc('Application.DeleteFiles', ref))
   }
 
   // Run an application build task
@@ -257,39 +251,31 @@ class ApiClient {
   // Create a new application.
   createApp (app) {
     // TODO: fix with template reference
-    return this.rpc(
-      Request.rpc('Container.CreateApp',
-      {context: 'user'},
-      app)
-    )
+    app.container = 'user'
+    return this.rpc(Request.rpc('Container.CreateApp', app))
   }
 
   // Delete an application.
   deleteApp (container, application) {
-    return this.rpc(
-      Request.rpc('Application.Delete',
-      {context: container, target: application})
-    )
+    const ref = this.getApplicationReference(container, application)
+    return this.rpc(Request.rpc('Application.Delete', ref))
   }
 
   // Create a new file optionally using the specified
   // template reference.
   createFile (container, application, url, template) {
+    const ref = this.getFileReference(container, application, url)
     if (template) {
-      return this.rpc(
-        Request.rpc('File.CreateTemplate',
-        {context: container, target: application, item: url}, template)
-      )
+      ref.template = template
+      return this.rpc(Request.rpc('File.CreateTemplate', ref))
     }
     // Create an empty file
-    return this.rpc(
-      Request.rpc('File.Create',
-      {context: container, target: application, item: url}, '')
-    )
+    return this.rpc(Request.rpc('File.Create', ref))
   }
 
   // Save a file sending value as the new file content
   saveFile (container, application, file, value) {
+    // const ref = this.getFileReference(container, application, file.url)
     const req = Request.rpc('File.Save',
       {context: container, target: application, item: file.url}, value)
     req.raw = true
@@ -299,15 +285,16 @@ class ApiClient {
 
   // Move a file
   moveFile (container, application, file, newName) {
-    const req = Request.rpc('File.Move',
-      {context: container, target: application, item: file.url}, newName)
+    const ref = this.getFileReference(container, application, file.url)
+    ref.destination = newName
+    const req = Request.rpc('File.Move', ref)
     return this.rpc(req)
   }
 
   // TODO: get binary data over websocket!?
   getFileSource (container, application, file, raw) {
-    const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource',
-      {context: container, target: application, item: file.url})
+    const ref = this.getFileReference(container, application, file.url)
+    const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource', ref)
     // passthrough the underlying fetch promise
     req.fetch = true
     return this.rpc(req, {http: true})
