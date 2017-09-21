@@ -3,10 +3,10 @@ package handler
 
 import (
   // "fmt"
-  "mime"
+  //"mime"
 	"net/http"
-  "strings"
-  "path/filepath"
+  //"strings"
+  //"path/filepath"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -53,14 +53,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
 	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
-
-  // Keep uploads working using old api
-  /*
-	methodSeq := req.Header.Get("X-Method-Seq")
-  if methodSeq == "" {
-    return h.doDeprecatedHttp(res, req)
-  }
-  */
 
   if route, err := router.Find(req); err != nil {
     return utils.Errorj(res, err)
@@ -158,101 +150,4 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   // Default response is not found
   return utils.Errorj(
     res, CommandError(http.StatusNotFound, ""))
-}
-
-func (h RestHandler) doDeprecatedHttp(res http.ResponseWriter, req *http.Request) (int, error) {
-	if !utils.IsMethodAllowed(req.Method, RestAllowedMethods) {
-    return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
-	}
-
-	ct := req.Header.Get("Content-Type")
-
-	if ct == "" {
-    ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
-	}
-
-  // Parse out an action from the request
-  if act, err := h.Adapter.HttpAction(req.Method, req.URL); err != nil {
-    return utils.Errorj(res, err)
-  } else {
-
-    // Attempt to match the action
-    if mapping, err := h.Adapter.Find(act); err != nil {
-      return utils.Errorj(res, err)
-    } else {
-
-      def := mapping.CommandDefinition
-
-      // TODO: use proper RPC arguments interface
-      if def.MethodName == "CreateApp" {
-        var input *Application = &Application{}
-        if _, err := utils.ValidateRequest(SchemaAppNew, input, req); err != nil {
-          return utils.Errorj(res, CommandError(http.StatusBadRequest, err.Error()))
-        }
-        act.Push(input)
-      } else if def.MethodName == "DeleteFiles" {
-        var input UrlList = make(UrlList, 0)
-        if err := utils.ReadJson(req, &input); err != nil {
-          return utils.Errorj(res, err)
-        }
-        act.Push(input)
-      } else if def.MethodName == "CreateFile" {
-          isDir := strings.HasSuffix(act.Item, SLASH)
-          // Create from a template
-          if !isDir && ct == JSON_MIME {
-            ref := &ApplicationTemplate{}
-            if err := utils.ReadJson(req, ref); err != nil {
-              return utils.Errorj(res, err)
-            }
-            act = h.Adapter.Mutate(act, "CreateFileTemplate")
-            act.Push(ref)
-          // File content bytes creation
-          } else {
-            if content, err := utils.ReadBody(req); err != nil {
-              return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
-            } else {
-              act.Push(content)
-            }
-          }
-      } else if def.MethodName == "UpdateFile" {
-          location := req.Header.Get("Location")
-          if location != "" {
-            act = h.Adapter.Mutate(act, "MoveFile")
-            act.Push(location)
-          } else {
-            if content, err := utils.ReadBody(req); err != nil {
-              return utils.Errorj(res, CommandError(http.StatusInternalServerError, err.Error()))
-            } else {
-              act.Push(content)
-            }
-          }
-        }
-      // Invoke the command
-      if result, err := h.Adapter.Execute(act); err != nil {
-        return utils.Errorj(res, err)
-      } else {
-        if def.MethodName == "CreateApp" {
-          // Mount the application, needs to be done here due to some funky
-          // package cyclic references
-          if app, ok := result.Data.(*Application); ok {
-            MountApplication(h.Adapter.Mountpoints.MountpointMap, h.Adapter.Host, app)
-          }
-        }
-
-        accept := req.Header.Get("Accept")
-        // Client is asking for binary response
-        if accept == "application/octet-stream" {
-          // If the method result is a slice of bytes send it back
-          if content, ok := result.Data.([]byte); ok {
-            return utils.Write(res, result.Status, content)
-          }
-        }
-
-        // Return the result to the client
-        return utils.Json(res, result.Status, result.Data)
-      }
-    }
-    return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
-  }
-  return utils.Errorj(res, CommandError(http.StatusNotFound, ""))
 }
