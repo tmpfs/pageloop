@@ -7,9 +7,6 @@ import (
   . "github.com/tmpfs/pageloop/util"
 )
 
-// List of URLs used for bulk file operations.
-type UrlList []string
-
 // Command functions
 
 // ROOT

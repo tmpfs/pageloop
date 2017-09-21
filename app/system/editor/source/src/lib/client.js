@@ -227,6 +227,8 @@ class ApiClient {
     const urls = files.map((f) => {
       return f.url
     })
+    console.log('delete files')
+    console.log(urls)
     return this.rpc(
       Request.rpc('Application.DeleteFiles',
       {context: container, target: application},

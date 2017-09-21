@@ -29,10 +29,15 @@ var(
 	types = []string{YAML, JSON}
 )
 
+// List of URLs used for bulk file operations.
+type UrlList []string
+
+/*
 type ApplicationReference struct {
   Container string `json:"container"`
   Application string `json:"application"`
 }
+*/
 
 type Application struct {
 	// Mountpoint URL
@@ -58,6 +63,8 @@ type Application struct {
   IsTemplate bool `json:"is-template,omitempty"`
 
   ContainerName string `json:"container"`
+
+  Batch *UrlList `json:"batch"`
 
 	Container *Container `json:"-"`
 

@@ -60,6 +60,18 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
       argv = &Application{
         Name: args.Parameters.Target,
         ContainerName: args.Parameters.Context}
+    case "Application.DeleteFiles":
+      var list UrlList = make(UrlList, 0)
+      if err := utils.ReadJson(req, &list); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      }
+      argv = &Application{
+        Name: args.Parameters.Target,
+        ContainerName: args.Parameters.Context,
+        Batch: &list}
+
+
+      // fmt.Printf("list: %#v\n", argv.Batch)
   }
   return argv, nil
 }
@@ -156,6 +168,11 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   // accept := req.Header.Get("Accept")
 	methodSeq := req.Header.Get("X-Method-Seq")
 
+  // Keep uploads working using old api
+  if methodSeq == "" {
+    return h.doDeprecatedHttp(res, req)
+  }
+
   // Check sequence number
   if seq, err := strconv.ParseUint(methodSeq, 10, 64); err != nil {
     return utils.Errorj(
@@ -172,7 +189,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     hasServiceMethod := h.Services.HasMethod(serviceMethod)
 
     // TODO: send 404 on no service method once refactor completed
-
     if hasServiceMethod {
       println("REST service method name (start invoke): " + serviceMethod)
       if rpcreq, err := h.Services.Request(serviceMethod, seq); err != nil {
