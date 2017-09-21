@@ -1,4 +1,4 @@
-// Exposes a REST API to the application
+// Package handler provides HTTP and network handlers.
 package handler
 
 import (
