@@ -108,7 +108,6 @@ func (w *WebsocketConnection) ReadRequest() {
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
       log.Println(err)
-      // println("returning on error")
       return
     }
 
@@ -128,19 +127,22 @@ func (w *WebsocketConnection) ReadRequest() {
           hasServiceMethod := w.Handler.Services.HasMethod(method)
           // Check if the service method is available
           if !hasServiceMethod {
-            writer.WriteError(CommandError(http.StatusNotFound, "Service %s does not exist", method))
+            writer.WriteError(
+              CommandError(http.StatusNotFound, "Service %s does not exist", method))
             return
           }
 
           // Get a service method call request
           if rpcreq, err := w.Handler.Services.Request(method, 0); err != nil {
-            writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+            writer.WriteError(
+              CommandError(http.StatusInternalServerError, err.Error()))
             return
           } else {
             // TODO: read params into correct type
 
             if argv, err := writer.ReadRequest(method); err != nil {
-              writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+              writer.WriteError(
+                CommandError(http.StatusInternalServerError, err.Error()))
             } else {
               if argv != nil {
                 rpcreq.Argv(argv)
@@ -148,7 +150,8 @@ func (w *WebsocketConnection) ReadRequest() {
             }
 
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
-              writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+              writer.WriteError(
+                CommandError(http.StatusInternalServerError, err.Error()))
               return
             } else {
               // Reply with error when available
@@ -178,8 +181,6 @@ func (w *WebsocketConnection) ReadRequest() {
                 // Wrap the result object so we can extract
                 // status code client side
                 replyData = &RpcWebsocketReply{Document: replyData, Status: status}
-
-                // fmt.Printf("reply data %#v\n", replyData)
 
                 req.WriteResponse(writer, replyData, nil)
               }
