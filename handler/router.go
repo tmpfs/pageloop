@@ -109,12 +109,13 @@ func (r *Router) Add(route *Route) *Route {
 func (r *Router) Find(req *http.Request) *Route {
   var res *Route
   list := r.list(req.Method)
-  res = r.matchPath(req.URL.Path, list)
+  res = r.matches(req, list)
   // TODO: shortcut lookup on X-Method-Seq / X-Method-Name
   return res
 }
 
-func (r *Router) matchPath(path string, list []*Route) *Route {
+func (r *Router) matches(req *http.Request, list []*Route) *Route {
+  path := req.URL.Path
   params := &Parameters{}
   params.Parse(path)
 
@@ -122,6 +123,13 @@ func (r *Router) matchPath(path string, list []*Route) *Route {
     // Root match
     if mapped.Path == "" && (path == "" || path == "/") {
       return true
+    }
+
+    // Must pass conditional function test
+    if mapped.Condition != nil {
+      if !mapped.Condition(req) {
+        return false
+      }
     }
 
     // Must be same length
