@@ -35,93 +35,130 @@ function getDeleteOptions (rpc) {
   return getBodyOptions(rpc, o)
 }
 
-// Maps RPC function names to REST request URLs
-const urls = {
-  'Core.Meta': function () {
-    return API
-  },
-  'Core.Stats': function () {
-    return API + 'stats/'
-  },
-  'Host.List': function () {
-    return API + 'apps/'
-  },
-  'Container.CreateApp': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/`
-  },
-  'Template.List': function () {
-    return API + 'templates/'
-  },
-  'Job.ActiveJobs': function () {
-    return API + 'jobs/'
-  },
-  'Application.Read': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}`
-  },
-  'Application.ReadFiles': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/files/`
-  },
-  'Application.ReadPages': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/pages/`
-  },
-  'Application.DeleteFiles': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/files/`
-  },
-  'Application.RunTask': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/tasks/${rpc.parameters.url}`
-  },
-  'Application.Delete': function (rpc) {
-    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}`
-  },
-  'File.Create': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
-  },
-  'File.CreateTemplate': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
-  },
-  'File.Save': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
-  },
-  'File.Move': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/files${rpc.parameters.url}`
-  },
-  'File.ReadSource': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/src${rpc.parameters.url}`
-  },
-  'File.ReadSourceRaw': function (rpc) {
-    return API + `apps/${rpc.parameters.owner.container}/${rpc.parameters.owner.name}/raw${rpc.parameters.url}`
-  }
+function getFileUrl (params, filter) {
+  return API + `apps/${params.owner.container}/${params.owner.name}/${filter}${params.url}`
 }
 
-const options = {
-  'Core.Meta': getDefaultOptions,                 // v3
-  'Core.Stats': getDefaultOptions,                // v3
-  'Host.List': getDefaultOptions,                 // v3
-  'Container.CreateApp': getPutOptions,           // v3
-  'Template.List': getDefaultOptions,             // v3
-  'Job.ActiveJobs': getDefaultOptions,            // v3 - requires testing
-  'Application.Read': getDefaultOptions,          // v3
-  'Application.ReadFiles': getDefaultOptions,     // v3
-  'Application.ReadPages': getDefaultOptions,     // v3
-  'Application.DeleteFiles': getDeleteOptions,    // v3
-  'Application.RunTask': getPutOptions,           // v3
-  'Application.Delete': getDeleteOptions,         // v3
-  'File.Create': getPutOptions,                   // v3
-  'File.CreateTemplate': getPutOptions,           // v3
-  'File.Save': getPostOptions,                    // v3
-  'File.Move': (rpc) => {                         // v3
-    const o = getPostOptions(rpc)
-    o.headers.Location = rpc.args[0]
-    return o
+// Maps RPC service method names to REST request URLs and fetch options.
+const services = {
+  'Core.Meta': (rpc, params) => {
+    return {
+      url: API,
+      options: getDefaultOptions(rpc)
+    }
   },
-  'File.ReadSource': getDefaultOptions,            // v3
-  'File.ReadSourceRaw': getDefaultOptions          // v3
+  'Core.Stats': (rpc, params) => {
+    return {
+      url: API + 'stats/',
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Host.List': (rpc, params) => {
+    return {
+      url: API + 'apps/',
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Container.CreateApp': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/`,
+      options: getPutOptions(rpc)
+    }
+  },
+  'Template.List': (rpc, params) => {
+    return {
+      url: API + 'templates/',
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Job.ActiveJobs': (rpc, params) => {
+    return {
+      url: API + 'jobs/',
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Application.Read': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Application.ReadFiles': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}/files/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Application.ReadPages': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}/pages/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Application.DeleteFiles': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}/files/`,
+      options: getDeleteOptions(rpc)
+    }
+  },
+  'Application.RunTask': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}/tasks/${params.url}`,
+      options: getPutOptions(rpc)
+    }
+  },
+  'Application.Delete': (rpc, params) => {
+    return {
+      url: API + `apps/${params.container}/${params.name}`,
+      options: getDeleteOptions(rpc)
+    }
+  },
+  'File.Create': (rpc, params) => {
+    return {
+      url: getFileUrl(params, 'files'),
+      options: getPutOptions(rpc)
+    }
+  },
+  'File.CreateTemplate': (rpc, params) => {
+    return {
+      url: getFileUrl(params, 'files'),
+      options: getPutOptions(rpc)
+    }
+  },
+  'File.Save': (rpc, params) => {
+    return {
+      url: getFileUrl(params, 'files'),
+      options: getPostOptions(rpc)
+    }
+  },
+  'File.Move': (rpc, params) => {
+    const o = getPostOptions(rpc)
+    o.headers.Location = params.destination
+    return {
+      url: getFileUrl(params, 'files'),
+      options: o
+    }
+  },
+  'File.ReadSource': (rpc, params) => {
+    return {
+      url: getFileUrl(params, 'src'),
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'File.ReadSourceRaw': (rpc, params) => {
+    return {
+      url: getFileUrl(params, 'raw'),
+      options: getDefaultOptions(rpc)
+    }
+  }
 }
 
 function fetchFromRpc (rpc) {
   const o = {}
-  o.url = urls[rpc.method](rpc)
-  o.options = options[rpc.method](rpc)
+  const {url, opts} = services[rpc.method](rpc, rpc.parameters)
+  o.url = url
+  o.options = opts || {}
+
   o.options.headers = o.options.headers || {}
 
   // Hint for optimized route lookup

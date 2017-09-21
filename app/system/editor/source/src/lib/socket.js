@@ -88,22 +88,21 @@ class SocketConnection {
             transport: 'ws://json-rpc'}
 
           // TODO: reject on error???
-          let doc = response.error || response.result
+          let doc = response.result || {}
 
-          // Unwrap result object for status code
-          if (response.result) {
+          // Just vanilla rpc error, no status code available
+          if (response.error) {
+            doc.error = response.error
+            res.status = 500
+          } else if (response.result) {
+            // Unwrap result object for status code
             doc = response.result.document
             res.status = response.result.status
+
+            // TODO: handle wrapper error responses
           }
 
-          // Work out how to get the error status
-          if (response.error) {
-            console.log('got rpc error response!!!:' + response.id)
-            console.log('got rpc error response!!!:' + response.error)
-            // res.status = doc.error.status || 500
-          }
-
-          console.log(doc)
+          // console.log(doc)
 
           resolve({response: res, document: doc})
         }
