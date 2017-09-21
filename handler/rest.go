@@ -83,6 +83,11 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
       c := &Container{Name: args.Parameters.Context}
       a := &Application{Name: args.Parameters.Target, Container: c}
       argv = &File{Owner: a, Url: args.Parameters.Item, Destination: req.Header.Get("Location")}
+    case "File.Create":
+      c := &Container{Name: args.Parameters.Context}
+      a := &Application{Name: args.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: args.Parameters.Item}
+      argv = f
     case "File.Save":
       c := &Container{Name: args.Parameters.Context}
       a := &Application{Name: args.Parameters.Target, Container: c}

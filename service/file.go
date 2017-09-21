@@ -16,7 +16,7 @@ func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
   if file.Destination == "" {
     return CommandError(http.StatusBadRequest, "No destination for move operation")
   }
-  if _, app, f, err := s.lookup(file); err != nil {
+  if _, app, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
     if err := app.Move(f, file.Destination); err != nil {
@@ -29,7 +29,7 @@ func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
 
 // Read file content.
 func (s *FileService) ReadSource(file *File, reply *ServiceReply) *StatusError {
-  if _, _, f, err := s.lookup(file); err != nil {
+  if _, _, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
     reply.Reply = f.Source(false)
@@ -39,7 +39,7 @@ func (s *FileService) ReadSource(file *File, reply *ServiceReply) *StatusError {
 
 // Read raw file content (includes frontmatter).
 func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusError {
-  if _, _, f, err := s.lookup(file); err != nil {
+  if _, _, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
     reply.Reply = f.Source(true)
@@ -49,7 +49,7 @@ func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusErro
 
 // Save file content.
 func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
-  if _, app, f, err := s.lookup(file); err != nil {
+  if _, app, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
 
@@ -64,26 +64,57 @@ func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
     reply.Reply = f
   }
   return nil
+}
 
-  /*
-  if app, file, err :=  b.ReadFile(c, a, f); err != nil {
-    return nil, err
+// Create a new file and publish it, the file cannot already exist on disc.
+func (s *FileService) Create(file *File, reply *ServiceReply) *StatusError {
+  if _, app, _, err := s.lookup(file, true); err != nil {
+    return err
   } else {
-    if file, err := b.CommandExecute.UpdateFile(app, file, content); err != nil {
-      return nil, err
+    var exists *File = app.Urls[file.Url]
+
+    if exists != nil {
+      return CommandError(http.StatusConflict,"File already exists %s", file.Url)
+    }
+    if app.ExistsConflict(file.Url) {
+      return CommandError(http.StatusConflict,"File already exists, publish conflict on %s", file.Url)
+    }
+
+    if file, err := app.Create(file.Url, file.Source(false)); err != nil {
+      return CommandError(http.StatusInternalServerError, err.Error())
     } else {
-      if file.Page() != nil {
-        return file.Page(), nil
-      }
-      return file, nil
+      reply.Reply = file
+      reply.Status = http.StatusCreated
     }
   }
+
+  return nil
+}
+
+// Create a file from a template.
+func (b *CommandExecute) CreateFileTemplate(app *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
+
+  /*
+  var err error
+  var file *File
+  var content []byte
+
+  if file, err = b.Host.LookupTemplateFile(template); err != nil {
+    return nil, CommandError(http.StatusInternalServerError, err.Error())
+  }
+
+  if file == nil {
+    return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", template.File)
+  }
+
+  content = file.Source(true)
+  return b.CreateFile(app, url, content)
   */
 }
 
 // Private
 
-func (s *FileService) lookup(f *File) (*Container, *Application, *File, *StatusError) {
+func (s *FileService) lookup(f *File, appOnly bool) (*Container, *Application, *File, *StatusError) {
   if f.Owner == nil {
     return nil, nil, nil, CommandError(
       http.StatusNotFound, "File %s missing owner application (detached file)", f.Url)
@@ -102,6 +133,10 @@ func (s *FileService) lookup(f *File) (*Container, *Application, *File, *StatusE
   app := c.GetByName(f.Owner.Name)
   if app == nil {
     return nil, nil, nil, CommandError(http.StatusNotFound, "Application %s not found", f.Owner.Name)
+  }
+
+  if appOnly {
+    return c, app, nil, nil
   }
 
   file := app.Urls[f.Url]
