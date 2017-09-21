@@ -1,7 +1,7 @@
 package handler
 
 import(
-  //"fmt"
+  // "fmt"
   "net/http"
   "strings"
   "strconv"
@@ -55,6 +55,11 @@ func (act *Parameters) Parse(path string) {
     }
     if len(act.Parts) > 4 {
       act.Item = SLASH + strings.Join(act.Parts[4:], SLASH)
+
+      // Keep part lengths correct
+      act.Parts = act.Parts[0:4]
+      act.Parts = append(act.Parts, act.Item)
+
       // Respect input trailing slash used to indicate
       // operations on a directory
       if strings.HasSuffix(act.Path, SLASH) {
@@ -124,7 +129,8 @@ func (r *Route) Match(req *http.Request, params *Parameters) bool {
   var p string
 
   for i, p = range r.Parameters.Parts {
-    if p == "*" {
+    // When definitions are parsed the Item with wildcard is /* :(
+    if p == "*" || p == "/*" {
       continue
     } else if (p != params.Parts[i]) {
       return false

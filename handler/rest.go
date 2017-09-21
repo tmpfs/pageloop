@@ -54,26 +54,17 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
-  /*
-	ct := req.Header.Get("Content-Type")
-
-	if ct == "" {
-    ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
-	}
-  */
-
   // Keep uploads working using old api
+  /*
 	methodSeq := req.Header.Get("X-Method-Seq")
   if methodSeq == "" {
     return h.doDeprecatedHttp(res, req)
   }
+  */
 
   if route, err := router.Find(req); err != nil {
     return utils.Errorj(res, err)
   } else {
-
-    // TODO: test if the path matches any route and send MethodNotAllowed
-
     // No matching route
     if route == nil {
       return utils.Errorj(
@@ -155,17 +146,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                       "Service method failed to return []byte for binary repsonse type"))
                 }
               }
-
-              /*
-              accept := req.Header.Get("Accept")
-              // Client is asking for binary response
-              if accept == "application/octet-stream" {
-                // If the method result is a slice of bytes send it back
-                if content, ok := replyData.([]byte); ok {
-                  return utils.Write(res, status, content)
-                }
-              }
-              */
 
               return utils.Json(res, status, replyData)
             }
