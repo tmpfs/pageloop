@@ -54,11 +54,13 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     return utils.Errorj(res, CommandError(http.StatusMethodNotAllowed, ""))
 	}
 
+  /*
 	ct := req.Header.Get("Content-Type")
 
 	if ct == "" {
     ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
+  */
 
   // Keep uploads working using old api
 	methodSeq := req.Header.Get("X-Method-Seq")
