@@ -92,24 +92,26 @@ func (s *FileService) Create(file *File, reply *ServiceReply) *StatusError {
 }
 
 // Create a file from a template.
-func (b *CommandExecute) CreateFileTemplate(app *Application, url string, template *ApplicationTemplate) (*File, *StatusError) {
-
-  /*
-  var err error
-  var file *File
-  var content []byte
-
-  if file, err = b.Host.LookupTemplateFile(template); err != nil {
-    return nil, CommandError(http.StatusInternalServerError, err.Error())
+func (s *FileService) CreateFileTemplate(file *File, reply *ServiceReply) *StatusError {
+  template := file.Template
+  if template == nil {
+    return CommandError(http.StatusBadRequest, "No template given")
+  }
+  if _, _, _, err := s.lookup(file, true); err != nil {
+    return err
+  } else {
+    if tpl, err := s.Host.LookupTemplateFile(template); err != nil {
+      return CommandError(http.StatusInternalServerError, err.Error())
+    } else {
+      if tpl == nil {
+        return CommandError(http.StatusNotFound, "Template file %s does not exist", template.File)
+      }
+      file.Bytes(tpl.Source(true))
+      return s.Create(file, reply)
+    }
   }
 
-  if file == nil {
-    return nil, CommandError(http.StatusNotFound, "Template file %s does not exist", template.File)
-  }
-
-  content = file.Source(true)
-  return b.CreateFile(app, url, content)
-  */
+  return nil
 }
 
 // Private

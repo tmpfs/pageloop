@@ -115,8 +115,8 @@ const options = {
   'Application.DeleteFiles': getDeleteOptions,    // v3
   'Application.RunTask': getPutOptions,           // v3
   'Application.Delete': getDeleteOptions,         // v3
-  'File.Create': getPutOptions,
-  'File.CreateTemplate': getPutOptions,
+  'File.Create': getPutOptions,                   // v3
+  'File.CreateTemplate': getPutOptions,           // v3
   'File.Save': getPostOptions,                    // v3
   'File.Move': (rpc) => {                         // v3
     const o = getPostOptions(rpc)

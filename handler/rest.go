@@ -88,6 +88,15 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
       a := &Application{Name: args.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: args.Parameters.Item}
       argv = f
+    case "File.CreateTemplate":
+      c := &Container{Name: args.Parameters.Context}
+      a := &Application{Name: args.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: args.Parameters.Item}
+      f.Template = &ApplicationTemplate{}
+      if err := utils.ReadJson(req, f.Template); err != nil {
+        return nil, err
+      }
+      argv = f
     case "File.Save":
       c := &Container{Name: args.Parameters.Context}
       a := &Application{Name: args.Parameters.Target, Container: c}

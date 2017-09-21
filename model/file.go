@@ -38,6 +38,9 @@ type File struct {
 	// Owner application
   Owner *Application `json:"-"`
 
+	// A source template for this file
+	Template *ApplicationTemplate `json:"template,omitempty"`
+
 	// File stat information.
   info os.FileInfo
 
