@@ -83,6 +83,16 @@ func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}
       c := &Container{Name: args.Parameters.Context}
       a := &Application{Name: args.Parameters.Target, Container: c}
       argv = &File{Owner: a, Url: args.Parameters.Item, Destination: req.Header.Get("Location")}
+    case "File.Save":
+      c := &Container{Name: args.Parameters.Context}
+      a := &Application{Name: args.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: args.Parameters.Item}
+      if content, err := utils.ReadBody(req); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      } else {
+        f.Bytes(content)
+      }
+      argv = f
   }
   return argv, nil
 }
@@ -182,6 +192,8 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   if methodSeq == "" {
     return h.doDeprecatedHttp(res, req)
   }
+
+  // TODO: automatically find matching route and validate request is well formed
 
   // Check sequence number
   if seq, err := strconv.ParseUint(methodSeq, 10, 64); err != nil {

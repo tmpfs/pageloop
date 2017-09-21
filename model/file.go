@@ -115,6 +115,11 @@ func (f *File) Source(raw bool) []byte {
 	return f.source
 }
 
+// Set the file source bytes.
+func (f *File) Bytes(src []byte) {
+  f.source = src
+}
+
 // Read only access to the data outside this package.
 func (f *File) Data() []byte {
 	return f.data

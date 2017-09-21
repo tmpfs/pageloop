@@ -47,6 +47,40 @@ func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusErro
   return nil
 }
 
+// Save file content.
+func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
+  if _, app, f, err := s.lookup(file); err != nil {
+    return err
+  } else {
+
+    if err := app.Update(f, file.Source(false)); err != nil {
+      return CommandError(http.StatusInternalServerError, err.Error())
+    }
+
+    if f.Page() != nil {
+      reply.Reply = f.Page()
+      return nil
+    }
+    reply.Reply = f
+  }
+  return nil
+
+  /*
+  if app, file, err :=  b.ReadFile(c, a, f); err != nil {
+    return nil, err
+  } else {
+    if file, err := b.CommandExecute.UpdateFile(app, file, content); err != nil {
+      return nil, err
+    } else {
+      if file.Page() != nil {
+        return file.Page(), nil
+      }
+      return file, nil
+    }
+  }
+  */
+}
+
 // Private
 
 func (s *FileService) lookup(f *File) (*Container, *Application, *File, *StatusError) {

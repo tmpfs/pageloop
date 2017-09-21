@@ -117,14 +117,14 @@ const options = {
   'Application.Delete': getDeleteOptions,         // v3
   'File.Create': getPutOptions,
   'File.CreateTemplate': getPutOptions,
-  'File.Save': getPostOptions,
+  'File.Save': getPostOptions,                    // v3
   'File.Move': (rpc) => {                         // v3
     const o = getPostOptions(rpc)
     o.headers.Location = rpc.args[0]
     return o
   },
-  'File.ReadSource': getBinaryOptions,
-  'File.ReadSourceRaw': getBinaryOptions
+  'File.ReadSource': getBinaryOptions,            // v3
+  'File.ReadSourceRaw': getBinaryOptions          // v3
 }
 
 function fetchFromRpc (rpc) {
