@@ -1,7 +1,7 @@
 package handler
 
 import (
-  //"fmt"
+  "fmt"
   "log"
   "bytes"
 	"net/http"
@@ -11,6 +11,7 @@ import (
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/rpc"
+  . "github.com/tmpfs/pageloop/service"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -21,6 +22,13 @@ var(
     ReadBufferSize:  1024,
     WriteBufferSize: 1024}
 )
+
+// Wrapped result object for JSON-RPC messages so the client
+// can test on status code
+type RpcWebsocketReply struct {
+  Document interface{} `json:"document"`
+  Status int `json:"status"`
+}
 
 type WebsocketConnection struct {
   Handler WebsocketHandler
@@ -58,25 +66,31 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) error {
   return writer.Request.WriteResponse(writer, nil, err)
 }
 
-/*
-func (w *WebsocketConnection) WriteError(req *RpcRequest, err *StatusError) *StatusError {
-  res:= &RpcResponse{Id: req.Id, Status: err.Status, Error: err}
-  return w.WriteResponse(res)
-}
-
-func (w *WebsocketConnection) WriteResponse(res *RpcResponse) *StatusError {
-  if err := w.Conn.WriteJSON(res); err != nil {
-    return CommandError(http.StatusInternalServerError, err.Error())
+//
+func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}) {
+  println("Read request : " + method)
+  argv = VoidArgs{}
+  switch(method) {
+    case "Application.ReadFiles":
+      fallthrough
+    case "Application.ReadPages":
+      fallthrough
+    case "Application.Read":
+      argv = &Application{}
   }
-  return nil
+  if argv != nil {
+    fmt.Printf("argv %#v\n", argv)
+    writer.Request.ReadRequest(argv)
+  }
+  return
 }
-*/
 
 func (w *WebsocketConnection) ReadRequest() {
   for {
     // Read in the message
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
+      println("returning on error")
       return
     }
 
@@ -93,9 +107,6 @@ func (w *WebsocketConnection) ReadRequest() {
           log.Println(err)
           req.WriteResponse(writer, nil, err)
         } else {
-          println("method: " + method)
-          println(string(p))
-
           hasServiceMethod := w.Handler.Services.HasMethod(method)
           // Check if the service method is available
           if !hasServiceMethod {
@@ -109,6 +120,11 @@ func (w *WebsocketConnection) ReadRequest() {
             return
           } else {
             // TODO: read params into correct type
+
+            argv := writer.ReadRequest(method)
+            if argv != nil {
+              rpcreq.Argv(argv)
+            }
 
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
               writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
@@ -128,8 +144,21 @@ func (w *WebsocketConnection) ReadRequest() {
                 }
               // Success send the response to the client
               } else {
-                println("Sending reply!!!")
-                req.WriteResponse(writer, reply, nil)
+                status := http.StatusOK
+                replyData := reply.Reply
+
+                if result, ok := replyData.(*ServiceReply); ok {
+                  replyData = result.Reply
+                  if result.Status != 0 {
+                    status = result.Status
+                  }
+                }
+
+                // Wrap the result object so we can extract
+                // status code client side
+                replyData = &RpcWebsocketReply{Document: replyData, Status: status}
+
+                req.WriteResponse(writer, replyData, nil)
               }
             }
           }

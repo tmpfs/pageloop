@@ -56,16 +56,16 @@ const urls = {
     return API + 'jobs/'
   },
   'Application.Read': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}`
   },
   'Application.ReadFiles': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/files/`
   },
   'Application.ReadPages': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/pages/`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/pages/`
   },
   'Application.DeleteFiles': function (rpc) {
-    return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/files/`
+    return API + `apps/${rpc.parameters.container}/${rpc.parameters.name}/files/`
   },
   'Application.RunTask': function (rpc) {
     return API + `apps/${rpc.parameters.context}/${rpc.parameters.target}/tasks/${rpc.parameters.item}`

@@ -8,19 +8,20 @@ let socket
 let id = 0
 
 class RpcRequest {
-  constructor (id, method, params, ...args) {
+  constructor (id, method, params) {
     this.id = id
     this.method = method
     if (params && !Array.isArray(params)) {
       params = [params]
     }
     this.params = params || []
-    this.args = args
   }
 
+  /*
   get body () {
     return this.args && this.args.length && this.args[0]
   }
+  */
 
   get parameters () {
     return this.params[0]
@@ -29,14 +30,12 @@ class RpcRequest {
 
 class Request {
   // Get a JSON RPC request object.
-  static rpc (method, params, ...args) {
-    const req = new RpcRequest(++id, method, params, ...args)
+  static rpc (method, params) {
+    const req = new RpcRequest(++id, method, params)
     if (!req.params.length) {
       delete req.params
     }
-    if (!req.args.length) {
-      delete req.args
-    }
+    console.log(req)
     return req
   }
 }
@@ -100,6 +99,7 @@ class ApiClient {
       delete req.fetch
       return this.socket.request(req)
         .then((res) => {
+          // console.log(res)
           res.url = url
           res.status = res.response.status
           this.postflight(log, res)
@@ -207,19 +207,28 @@ class ApiClient {
     return this.rpc(Request.rpc('Host.List'))
   }
 
+  getApplicationReference (container, application) {
+    return {
+      name: application,
+      container: container
+    }
+  }
+
   // Get a single application
   getApplication (container, application) {
-    return this.rpc(Request.rpc('Application.Read', {context: container, target: application}))
+    console.log('getApplication called')
+    return this.rpc(Request.rpc('Application.Read', this.getApplicationReference(container, application)))
   }
 
   // Get the files for an application
   getFiles (container, application) {
-    return this.rpc(Request.rpc('Application.ReadFiles', {context: container, target: application}))
+    console.log('getFiles called')
+    return this.rpc(Request.rpc('Application.ReadFiles', this.getApplicationReference(container, application)))
   }
 
   // Get the pages for an application
   getPages (container, application) {
-    return this.rpc(Request.rpc('Application.ReadPages', {context: container, target: application}))
+    return this.rpc(Request.rpc('Application.ReadPages', this.getApplicationReference(container, application)))
   }
 
   // Delete a list of files from an application
