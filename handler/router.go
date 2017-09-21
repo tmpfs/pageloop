@@ -4,6 +4,7 @@ import(
   //"fmt"
   "net/http"
   "strings"
+  "strconv"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -65,6 +66,8 @@ func (act *Parameters) Parse(path string) {
 type Route struct {
   // Name of a service method to invoke.
   ServiceMethod string
+  // Sequence number supplied in HTTP header when available
+  Seq uint64
   // Route definition path or request path
   Path string
   // Request method
@@ -75,6 +78,17 @@ type Route struct {
   *Parameters
   // Condition used to match route
   Condition func(req *http.Request) bool
+}
+
+func (r *Route) Clone() *Route {
+  return &Route{
+    ServiceMethod: r.ServiceMethod,
+    Seq: r.Seq,
+    Path: r.Path,
+    Method: r.Method,
+    Status: r.Status,
+    Parameters: r.Parameters,
+    Condition: r.Condition}
 }
 
 type Router struct {
@@ -106,72 +120,87 @@ func (r *Router) Add(route *Route) *Route {
   return route
 }
 
-func (r *Router) Find(req *http.Request) *Route {
-  var res *Route
-  list := r.list(req.Method)
-  res = r.matches(req, list)
-  // TODO: shortcut lookup on X-Method-Seq / X-Method-Name
-  return res
+func (r *Route) Match(req *http.Request, params *Parameters) bool {
+  path := params.Path
+  // Root match
+  if r.Path == "" && (path == "" || path == "/") {
+    return true
+  }
+
+  // Must pass conditional function test
+  if r.Condition != nil {
+    if !r.Condition(req) {
+      return false
+    }
+  }
+
+  // Must be same length
+  if len(r.Parameters.Parts) != len(params.Parts) {
+    return false
+  }
+
+  var i int
+  var l int = len(r.Parameters.Parts)
+  var p string
+
+  for i, p = range r.Parameters.Parts {
+    if p == "*" {
+      continue
+    } else if (p != params.Parts[i]) {
+      return false
+    }
+  }
+
+  //fmt.Printf("i is: %d\n", i)
+  //fmt.Printf("l is: %d\n", l)
+
+  // Everything matched
+  if i == (l - 1) {
+    return true
+  }
+
+  return false
 }
 
+func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
+  var match *Route
+  // Find a list for the request method first
+  list := r.list(req.Method)
+  match = r.matches(req, list)
+
+  // Assign client specified sequence number when available
+	seq := req.Header.Get("X-Method-Seq")
+  if seq != "" {
+    if seq, err := strconv.ParseUint(seq, 10, 64); err != nil {
+      return nil, CommandError(
+          http.StatusBadRequest, "Invalid sequence number: %s", err.Error())
+    // Got a valid sequence number
+    } else {
+      match.Seq = seq
+    }
+  }
+
+  // TODO: shortcut lookup on X-Method-Seq / X-Method-Name
+  return match, nil
+}
+
+// Attempts to do path parameter matching against the routes given in list
+// using the specified request.
+//
+// If a match is found a clone of the mapped route is returned with parameters
+// propagated using the request path.
 func (r *Router) matches(req *http.Request, list []*Route) *Route {
   path := req.URL.Path
   params := &Parameters{}
   params.Parse(path)
-
-  matches := func(mapped *Route, params *Parameters) bool {
-    // Root match
-    if mapped.Path == "" && (path == "" || path == "/") {
-      return true
-    }
-
-    // Must pass conditional function test
-    if mapped.Condition != nil {
-      if !mapped.Condition(req) {
-        return false
-      }
-    }
-
-    // Must be same length
-    if len(mapped.Parameters.Parts) != len(params.Parts) {
-      return false
-    }
-
-    var i int
-    var l int = len(mapped.Parameters.Parts)
-    var p string
-
-    for i, p = range mapped.Parameters.Parts {
-      if p == "*" {
-        continue
-      } else if (p != params.Parts[i]) {
-        return false
-      }
-    }
-
-    //fmt.Printf("i is: %d\n", i)
-    //fmt.Printf("l is: %d\n", l)
-
-    // Everything matched
-    if i == (l - 1) {
-      return true
-    }
-
-    return false
-  }
-
   for _, mapped := range list {
-    if matches(mapped, params) {
-      r := &Route{
-        ServiceMethod: mapped.ServiceMethod,
-        Path: path,
-        Parameters: params,
-        Method: mapped.Method,
-        Status: mapped.Status}
-      return r
+    if mapped.Match(req, params) {
+      c := mapped.Clone()
+      c.Path = path
+      c.Parameters = params
+      return c
     }
   }
-
   return nil
 }
 

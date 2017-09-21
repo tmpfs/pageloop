@@ -150,9 +150,17 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
     ct = mime.TypeByExtension(filepath.Ext(req.URL.Path))
 	}
 
-  r := router.Find(req)
+  if route, err := router.Find(req); err != nil {
+    return utils.Errorj(res, err)
+  } else {
+    // No matching route
+    if route == nil {
+      return utils.Errorj(
+        res, CommandError(http.StatusNotFound, "No route matched for path %s", req.URL.Path))
+    }
 
-  fmt.Printf("route: %#v\n", r)
+    fmt.Printf("route: %#v\n", route)
+  }
 
 	methodSeq := req.Header.Get("X-Method-Seq")
 
