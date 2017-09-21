@@ -32,13 +32,6 @@ var(
 // List of URLs used for bulk file operations.
 type UrlList []string
 
-/*
-type ApplicationReference struct {
-  Container string `json:"container"`
-  Application string `json:"application"`
-}
-*/
-
 type Application struct {
 	// Mountpoint URL
 	Url string `json:"url"`
@@ -64,8 +57,8 @@ type Application struct {
 
   ContainerName string `json:"container"`
 
-  Task string `json:"task"`
-  Batch *UrlList `json:"batch"`
+  Task string `json:"task,omitempty"`
+  Batch *UrlList `json:"batch,omitempty"`
 
 	Container *Container `json:"-"`
 
