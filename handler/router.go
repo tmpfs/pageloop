@@ -164,11 +164,12 @@ func (r *Route) Match(req *http.Request, params *Parameters) bool {
 
 func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
   var match *Route
-  // Find a list for the request method first
-  list := r.list(req.Method)
-  match = r.matches(req, list)
+  var sequence uint64
 
-  // Assign client specified sequence number when available
+  params := &Parameters{}
+  params.Parse(req.URL.Path)
+
+  // Get client specified sequence number when available
 	seq := req.Header.Get("X-Method-Seq")
   if seq != "" {
     if seq, err := strconv.ParseUint(seq, 10, 64); err != nil {
@@ -176,8 +177,32 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
           http.StatusBadRequest, "Invalid sequence number: %s", err.Error())
     // Got a valid sequence number
     } else {
-      match.Seq = seq
+      sequence = seq
     }
+  }
+
+	name := req.Header.Get("X-Method-Name")
+  // Client provided the service method name hint
+  // we can save a few iterations on a match
+  if name != "" {
+    if rt, ok := r.methods[name]; ok {
+      // Got a valid route for the service name
+      if rt.Match(req, params) && rt.Method == req.Method {
+        match = rt.Clone()
+        match.Path = req.URL.Path
+        match.Parameters = params
+      }
+    }
+  }
+
+  // Find a match in the list for the request method
+  if match == nil {
+    list := r.list(req.Method)
+    match = r.matches(req, list, params)
+  }
+
+  if match != nil {
+    match.Seq = sequence
   }
 
   // TODO: shortcut lookup on X-Method-Seq / X-Method-Name
@@ -189,14 +214,11 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
 //
 // If a match is found a clone of the mapped route is returned with parameters
 // propagated using the request path.
-func (r *Router) matches(req *http.Request, list []*Route) *Route {
-  path := req.URL.Path
-  params := &Parameters{}
-  params.Parse(path)
+func (r *Router) matches(req *http.Request, list []*Route, params *Parameters) *Route {
   for _, mapped := range list {
     if mapped.Match(req, params) {
       c := mapped.Clone()
-      c.Path = path
+      c.Path = req.URL.Path
       c.Parameters = params
       return c
     }
