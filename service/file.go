@@ -1,7 +1,6 @@
 package service
 
 import(
-  // "fmt"
   "net/http"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
@@ -127,10 +126,22 @@ func (s *FileService) CreateFileTemplate(file *File, reply *ServiceReply) *Statu
 // Private
 
 func (s *FileService) lookup(f *File, appOnly bool) (*Container, *Application, *File, *StatusError) {
+  // Parse file URL references
+  if f.Ref != "" {
+    if ref, err := ParseFileUrl(f.Ref); err != nil {
+      return nil, nil, nil, CommandError(http.StatusInternalServerError, err.Error())
+    } else {
+      f.Owner = &Application{Name: ref.Application, Container: &Container{Name: ref.Container}}
+      f.Url = ref.Url
+    }
+  }
+
   if f.Owner == nil {
     return nil, nil, nil, CommandError(
       http.StatusNotFound, "File %s missing owner application (detached file)", f.Url)
   }
+
+  // if f.Owner.ContainerName != "" &&
 
   if f.Owner.Container == nil {
     return nil, nil, nil, CommandError(

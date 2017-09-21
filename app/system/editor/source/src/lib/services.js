@@ -36,7 +36,10 @@ function getDeleteOptions (rpc) {
 }
 
 function getFileUrl (params, filter) {
-  return API + `apps/${params.owner.container}/${params.owner.name}/${filter}${params.url}`
+  const u = API + `apps/${params.container}/${params.application}/${filter}${params.url}`
+  delete params.container
+  delete params.application
+  return u
 }
 
 // Maps RPC service method names to REST request URLs and fetch options.

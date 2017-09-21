@@ -203,11 +203,13 @@ class ApiClient {
 
   getFileReference (container, application, url) {
     return {
-      url: url,
-      owner: {
-        name: application,
-        container: container
-      }
+      // For websocket file refs
+      ref: `file://${container}/${application}#${url}`,
+
+      // For rest parameter path building
+      container: container,
+      application: application,
+      url: url
     }
   }
 
