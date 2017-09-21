@@ -1,7 +1,7 @@
 package handler
 
 import (
-  "fmt"
+  //"fmt"
   "log"
   "bytes"
 	"net/http"
@@ -49,18 +49,12 @@ func (writer *WebsocketWriter) Header() http.Header {
 }
 
 func (writer *WebsocketWriter) Write(p []byte) (int, error) {
-  println("Writing response: " + string(p))
+  // println("Writing response: " + string(p))
   if err := writer.Socket.Conn.WriteMessage(writer.MessageType, p); err != nil {
     return 0, err
   }
   return len(p), nil
 }
-
-/*
-func (writer *WebsocketWriter) WriteJson(args interface{}) error {
-  return writer.Socket.Conn.WriteJSON(args)
-}
-*/
 
 func (writer *WebsocketWriter) WriteError(err *StatusError) error {
   return writer.Request.WriteResponse(writer, nil, err)
@@ -68,7 +62,7 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) error {
 
 //
 func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err error) {
-  println("Read request : " + method)
+  // println("Read request : " + method)
   argv = &VoidArgs{}
   switch(method) {
     case "Application.ReadFiles":
@@ -103,7 +97,6 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
       argv = &File{}
   }
   if argv != nil {
-    fmt.Printf("argv %#v\n", argv)
     err = writer.Request.ReadRequest(argv)
   }
   return
@@ -114,13 +107,14 @@ func (w *WebsocketConnection) ReadRequest() {
     // Read in the message
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
-      println("returning on error")
+      log.Println(err)
+      // println("returning on error")
       return
     }
 
     // Treat text messages as JSON-RPC
     if messageType == websocket.TextMessage {
-      println("request bytes: " + string(p))
+      // println("request bytes: " + string(p))
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
         log.Println(err)
@@ -128,7 +122,7 @@ func (w *WebsocketConnection) ReadRequest() {
         req := codec.NewRequest(fake)
         writer := &WebsocketWriter{Socket: w, MessageType: messageType, Request: req}
         if method, err := req.Method(); err != nil {
-          log.Println(err)
+          // log.Println(err)
           req.WriteResponse(writer, nil, err)
         } else {
           hasServiceMethod := w.Handler.Services.HasMethod(method)
@@ -171,9 +165,6 @@ func (w *WebsocketConnection) ReadRequest() {
                 }
               // Success send the response to the client
               } else {
-
-                println("Writing reply!!")
-
                 status := http.StatusOK
                 replyData := reply.Reply
 
@@ -188,9 +179,8 @@ func (w *WebsocketConnection) ReadRequest() {
                 // status code client side
                 replyData = &RpcWebsocketReply{Document: replyData, Status: status}
 
-                fmt.Printf("reply data %#v\n", replyData)
+                // fmt.Printf("reply data %#v\n", replyData)
 
-                println("calling write response")
                 req.WriteResponse(writer, replyData, nil)
               }
             }
