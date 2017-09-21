@@ -106,7 +106,6 @@ const options = {
   'Core.Meta': getDefaultOptions,                 // v3
   'Core.Stats': getDefaultOptions,                // v3
   'Host.List': getDefaultOptions,                 // v3
-  // TODO: restore create app from template
   'Container.CreateApp': getPutOptions,           // v3
   'Template.List': getDefaultOptions,             // v3
   'Job.ActiveJobs': getDefaultOptions,            // v3 - requires testing
@@ -115,7 +114,7 @@ const options = {
   'Application.ReadPages': getDefaultOptions,     // v3
   'Application.DeleteFiles': getDeleteOptions,
   'Application.RunTask': getPutOptions,
-  'Application.Delete': getDeleteOptions,
+  'Application.Delete': getDeleteOptions,         // v3
   'File.Create': getPutOptions,
   'File.CreateTemplate': getPutOptions,
   'File.Save': getPostOptions,
