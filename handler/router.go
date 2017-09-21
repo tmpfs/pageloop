@@ -31,6 +31,7 @@ type Parameters struct {
   Item string `json:"item"`
 }
 
+// Parse a path into parameters.
 func (act *Parameters) Parse(path string) {
   act.Path = path
   if act.Path != "" {
@@ -64,6 +65,10 @@ func (act *Parameters) Parse(path string) {
   }
 }
 
+// Route represents a definition (wildcards are permitted in the path)
+// and an incoming API request.
+//
+// Care should be taken to ensure that definition routes are not modified.
 type Route struct {
   // Name of a service method to invoke.
   ServiceMethod string
@@ -81,46 +86,13 @@ type Route struct {
   Condition func(req *http.Request) bool
 }
 
-func (r *Route) Clone() *Route {
-  return &Route{
-    ServiceMethod: r.ServiceMethod,
-    Seq: r.Seq,
-    Path: r.Path,
-    Method: r.Method,
-    Status: r.Status,
-    Parameters: r.Parameters,
-    Condition: r.Condition}
-}
-
-type Router struct {
-  get []*Route
-  put []*Route
-  post []*Route
-  del []*Route
-  methods map[string]*Route
-}
-
-// Adds a route to the router.
-func (r *Router) Add(route *Route) *Route {
-  route.Parameters = &Parameters{}
-  route.Parameters.Parse(route.Path)
-  if r.methods == nil {
-    r.methods = make(map[string]*Route)
-  }
-  r.methods[route.ServiceMethod] = route
-  switch(route.Method) {
-    case http.MethodGet:
-      r.get = append(r.get, route)
-    case http.MethodPut:
-      r.put = append(r.put, route)
-    case http.MethodPost:
-      r.post = append(r.post, route)
-    case http.MethodDelete:
-      r.del = append(r.del, route)
-  }
-  return route
-}
-
+// Determine if this route matches the given request and parameters.
+//
+// - The route Condition function if available must return true.
+// - The definition (receiver) parameters and supplied parameters must be of equal length.
+// - All path parts must match, wildcards (*) in the definition (receiver) always match.
+//
+// The request method is not tested.
 func (r *Route) Match(req *http.Request, params *Parameters) bool {
   path := params.Path
   // Root match
@@ -152,9 +124,6 @@ func (r *Route) Match(req *http.Request, params *Parameters) bool {
     }
   }
 
-  //fmt.Printf("i is: %d\n", i)
-  //fmt.Printf("l is: %d\n", l)
-
   // Everything matched
   if i == (l - 1) {
     return true
@@ -163,6 +132,60 @@ func (r *Route) Match(req *http.Request, params *Parameters) bool {
   return false
 }
 
+// Create a clone of the route.
+func (r *Route) Clone() *Route {
+  return &Route{
+    ServiceMethod: r.ServiceMethod,
+    Seq: r.Seq,
+    Path: r.Path,
+    Method: r.Method,
+    Status: r.Status,
+    Parameters: r.Parameters,
+    Condition: r.Condition}
+}
+
+// Router manages the available routes and provides methods
+// for finding routes.
+type Router struct {
+  get []*Route
+  put []*Route
+  post []*Route
+  del []*Route
+  methods map[string]*Route
+}
+
+// Adds a route to the router.
+func (r *Router) Add(route *Route) *Route {
+  route.Parameters = &Parameters{}
+  route.Parameters.Parse(route.Path)
+  if r.methods == nil {
+    r.methods = make(map[string]*Route)
+  }
+  r.methods[route.ServiceMethod] = route
+  switch(route.Method) {
+    case http.MethodGet:
+      r.get = append(r.get, route)
+    case http.MethodPut:
+      r.put = append(r.put, route)
+    case http.MethodPost:
+      r.post = append(r.post, route)
+    case http.MethodDelete:
+      r.del = append(r.del, route)
+  }
+  return route
+}
+
+// Find the first route that matches the incoming request.
+//
+// The request method must match the route and all path parameters
+// must match.
+//
+// If the client has provided X-Method-Seq it is parsed and assigned.
+// If the client has provided X-Method-Name and the request matches the
+// corresponding route a shorter lookup path is taken.
+//
+// Returns bad request error if a sequence number was given but could
+// not be parsed to uint64.
 func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
   var match *Route
   var sequence uint64

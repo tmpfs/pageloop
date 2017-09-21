@@ -69,6 +69,9 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
   if route, err := router.Find(req); err != nil {
     return utils.Errorj(res, err)
   } else {
+
+    // TODO: test if the path matches any route and send MethodNotAllowed
+
     // No matching route
     if route == nil {
       return utils.Errorj(
