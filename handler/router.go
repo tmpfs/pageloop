@@ -341,14 +341,9 @@ func (r *Router) list(method string) []*Route {
 func init() {
   router = &Router{}
 
-  add := func(route *Route) *Route {
-    // router.routes = append(router.routes, route)
-    return router.Add(route)
-  }
-
   route := func(service string, path string, method string, status int) *Route {
     r := &Route{ServiceMethod: service, Path: path, Method: method, Status: status}
-    return add(r)
+    return router.Add(r)
   }
 
   var r *Route
@@ -376,7 +371,7 @@ func init() {
   route("File.Save", "/apps/*/*/files/*", http.MethodPost, http.StatusOK)
   route("File.Delete", "/apps/*/*/files/*", http.MethodDelete, http.StatusOK)
 
-  // TODO: conditional on location header
+  // Conditional on location header
   r = route("File.Move", "/apps/*/*/files/*", http.MethodPost, http.StatusOK)
   r.Condition = func(req *http.Request) bool {
     return req.Header.Get("Location") != ""
