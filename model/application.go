@@ -290,7 +290,7 @@ func (app *Application) NewFile(path string, info os.FileInfo, data []byte) *Fil
 // Add a file to this application.
 func (app *Application) AddFile(file *File) int {
 	app.setComputedFileFields(file)
-	file.owner = app
+	file.Owner = app
 	file.Mime = getMimeType(file.Path)
   file.Binary = isBinaryMime(file.Name, file.Mime)
 	app.Files = append(app.Files, file)
@@ -300,7 +300,7 @@ func (app *Application) AddFile(file *File) int {
 // Add a page to this application.
 func (app *Application) AddPage(page *Page) int {
 	app.setComputedPageFields(page)
-	page.owner = app
+	page.Owner = app
 	page.Mime = getMimeType(page.Path)
   page.Binary = isBinaryMime(page.Name, page.Mime)
 	app.Pages = append(app.Pages, page)

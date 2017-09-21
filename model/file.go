@@ -32,8 +32,11 @@ type File struct {
   Mime string `json:"mime"`
   Binary bool `json:"binary"`
 
+  // Destination for file move operations
+  Destination string `json:"-"`
+
 	// Owner application
-	owner *Application
+  Owner *Application `json:"-"`
 
 	// File stat information.
   info os.FileInfo
@@ -62,7 +65,7 @@ type DirectoryListing struct {
 
 func (f *File) DirectoryListing () *DirectoryListing {
   listing := &DirectoryListing{Parent: f}
-  for _, child := range f.owner.Urls {
+  for _, child := range f.Owner.Urls {
     if child == f {
       continue
     }

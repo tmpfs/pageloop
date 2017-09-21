@@ -104,7 +104,7 @@ func (fs *UrlFileSystem) MoveFile(f *File, url string, target string, filter Fil
     filter = &DefaultPublishFilter{}
   }
 
-  base := f.owner.SourceDirectory()
+  base := f.Owner.SourceDirectory()
   parts := strings.Split(url, SLASH)
   destPath := filepath.Join(parts...)
   destPath = filepath.Join(base, destPath)
@@ -114,7 +114,7 @@ func (fs *UrlFileSystem) MoveFile(f *File, url string, target string, filter Fil
     return err
   }
 
-  base = f.owner.PublicDirectory()
+  base = f.Owner.PublicDirectory()
   parts = strings.Split(f.Uri, SLASH)
   publishPath := filepath.Join(parts...)
   publishPath = filepath.Join(base, publishPath)

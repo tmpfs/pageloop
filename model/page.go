@@ -52,7 +52,7 @@ type Page struct {
 	Type int `json:"-"`
 
 	// Owner application
-	owner *Application
+  Owner *Application `json:"-"`
 
 	// The underlying file data.
   file *File
@@ -135,7 +135,7 @@ func (p *Page) FindLayout() *Page {
   }
 	var path string = p.Path
 	var dir string = filepath.Dir(path)
-	var appRoot string = strings.TrimSuffix(p.owner.SourceDirectory(), "/")
+	var appRoot string = strings.TrimSuffix(p.Owner.SourceDirectory(), "/")
 
 	// Do not process layout files
 	//if p.Name == name {
@@ -145,7 +145,7 @@ func (p *Page) FindLayout() *Page {
 	var search func(dir string) *Page
 	search = func(dir string) *Page {
 		var target string = filepath.Join(dir, name)
-		for _, p := range p.owner.Pages {
+		for _, p := range p.Owner.Pages {
 			if p.file.Path == target {
 				return p
 			}
@@ -166,7 +166,7 @@ func (p *Page) DefaultFuncMap() template.FuncMap {
 	// Get a URL relative to the application root mountpoint.
 	funcs["root"] = func(path string) string {
 		path = strings.TrimPrefix(path, SLASH)
-		return p.owner.Url + path
+		return p.Owner.Url + path
 	}
 
   // Render markdown inline in an HTML template
@@ -308,7 +308,7 @@ func (p *Page) Render(vdom *vdom.Vdom, node *html.Node) ([]byte, error) {
       for _, inc := range includes {
         if includePath, ok := inc.(string); ok {
           includePath = filepath.Clean(includePath)
-          fullPath := filepath.Join(p.owner.SourceDirectory(), strings.TrimPrefix(includePath, "/"))
+          fullPath := filepath.Join(p.Owner.SourceDirectory(), strings.TrimPrefix(includePath, "/"))
           if content, err = ioutil.ReadFile(fullPath); err != nil {
             return err
           }

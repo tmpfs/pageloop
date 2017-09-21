@@ -118,7 +118,7 @@ const options = {
   'File.Create': getPutOptions,
   'File.CreateTemplate': getPutOptions,
   'File.Save': getPostOptions,
-  'File.Move': (rpc) => {
+  'File.Move': (rpc) => {                         // v3
     const o = getPostOptions(rpc)
     o.headers.Location = rpc.args[0]
     return o

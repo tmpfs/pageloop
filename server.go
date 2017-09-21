@@ -145,12 +145,14 @@ func (l *PageLoop) initServices() {
   host := new(HostService)
   ctx := new(ContainerService)
   app := new(AppService)
+  file := new(FileService)
   job := new(JobService)
   tpl := new(TemplateService)
 
   host.Host = l.Host
   ctx.Host = l.Host
   app.Host = l.Host
+  file.Host = l.Host
   tpl.Host = l.Host
 
   ctx.Mountpoints = l.MountpointManager
@@ -160,6 +162,7 @@ func (l *PageLoop) initServices() {
   l.Services.MustRegister(host, "Host")
   l.Services.MustRegister(ctx, "Container")
   l.Services.MustRegister(app, "Application")
+  l.Services.MustRegister(file, "File")
   l.Services.MustRegister(job, "Job")
   l.Services.MustRegister(tpl, "Template")
 }
