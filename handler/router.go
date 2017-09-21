@@ -5,6 +5,7 @@ import(
   "net/http"
   "strings"
   "strconv"
+  . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -207,6 +208,81 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
 
   return match, nil
 }
+
+// Get the service method arguments for the given request and matched route.
+func (r *Router) Argv(route *Route, req *http.Request) (argv interface{}, err *StatusError) {
+  name := route.ServiceMethod
+  switch name {
+    case "Container.CreateApp":
+      c := &Container{Name: route.Parameters.Context}
+      var app *Application = &Application{Container: c}
+      if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
+        return nil, CommandError(http.StatusBadRequest, err.Error())
+      }
+      argv = app
+    case "Container.Read":
+      argv = &Container{Name: route.Parameters.Context}
+    case "Application.ReadFiles":
+      fallthrough
+    case "Application.ReadPages":
+      fallthrough
+    case "Application.Delete":
+      fallthrough
+    case "Application.Read":
+      argv = &Application{
+        Name: route.Parameters.Target,
+        ContainerName: route.Parameters.Context}
+    case "Application.DeleteFiles":
+      var list UrlList = make(UrlList, 0)
+      if err := utils.ReadJson(req, &list); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      }
+      argv = &Application{
+        Name: route.Parameters.Target,
+        ContainerName: route.Parameters.Context,
+        Batch: &list}
+    case "Application.RunTask":
+      argv = &Application{
+        Name: route.Parameters.Target,
+        ContainerName: route.Parameters.Context,
+        Task: route.Parameters.Item}
+    case "File.ReadSource":
+      fallthrough
+    case "File.ReadSourceRaw":
+      fallthrough
+    case "File.Move":
+      c := &Container{Name: route.Parameters.Context}
+      a := &Application{Name: route.Parameters.Target, Container: c}
+      argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
+    case "File.Create":
+      c := &Container{Name: route.Parameters.Context}
+      a := &Application{Name: route.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: route.Parameters.Item}
+      argv = f
+    case "File.CreateTemplate":
+      c := &Container{Name: route.Parameters.Context}
+      a := &Application{Name: route.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: route.Parameters.Item}
+      f.Template = &ApplicationTemplate{}
+      if err := utils.ReadJson(req, f.Template); err != nil {
+        return nil, err
+      }
+      argv = f
+    case "File.Save":
+      c := &Container{Name: route.Parameters.Context}
+      a := &Application{Name: route.Parameters.Target, Container: c}
+      f := &File{Owner: a, Url: route.Parameters.Item}
+      if content, err := utils.ReadBody(req); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      } else {
+        f.Bytes(content)
+      }
+      argv = f
+  }
+  return argv, nil
+}
+
+// Private
 
 // Attempts to do path parameter matching against the routes given in list
 // using the specified request.

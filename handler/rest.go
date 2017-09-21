@@ -2,7 +2,7 @@
 package handler
 
 import (
-  "fmt"
+  // "fmt"
   "mime"
 	"net/http"
   "strings"
@@ -26,95 +26,6 @@ var(
     http.MethodOptions}
 	SchemaAppNew = MustAsset("schema/app-new.json")
 )
-
-// Type that extracts values from an HTTP request
-// and builds the arguments that should be passed
-// to the corresponding rpc service method.
-type HttpArguments struct {
-  req *http.Request
-  *Parameters
-}
-
-// Determine the arguments to use for an rpc method call.
-//
-// The name argument should be the qualified Service.Method name.
-func (args *HttpArguments) Get(name string, req *http.Request) (argv interface{}, err *StatusError) {
-
-  switch name {
-    case "Container.CreateApp":
-      c := &Container{Name: args.Parameters.Context}
-      var app *Application = &Application{Container: c}
-      if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
-        return nil, CommandError(http.StatusBadRequest, err.Error())
-      }
-      argv = app
-    case "Container.Read":
-      argv = &Container{Name: args.Parameters.Context}
-    case "Application.ReadFiles":
-      fallthrough
-    case "Application.ReadPages":
-      fallthrough
-    case "Application.Delete":
-      fallthrough
-    case "Application.Read":
-      argv = &Application{
-        Name: args.Parameters.Target,
-        ContainerName: args.Parameters.Context}
-    case "Application.DeleteFiles":
-      var list UrlList = make(UrlList, 0)
-      if err := utils.ReadJson(req, &list); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      }
-      argv = &Application{
-        Name: args.Parameters.Target,
-        ContainerName: args.Parameters.Context,
-        Batch: &list}
-    case "Application.RunTask":
-      argv = &Application{
-        Name: args.Parameters.Target,
-        ContainerName: args.Parameters.Context,
-        Task: args.Parameters.Item}
-    case "File.ReadSource":
-      fallthrough
-    case "File.ReadSourceRaw":
-      fallthrough
-    case "File.Move":
-      c := &Container{Name: args.Parameters.Context}
-      a := &Application{Name: args.Parameters.Target, Container: c}
-      argv = &File{Owner: a, Url: args.Parameters.Item, Destination: req.Header.Get("Location")}
-    case "File.Create":
-      c := &Container{Name: args.Parameters.Context}
-      a := &Application{Name: args.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: args.Parameters.Item}
-      argv = f
-    case "File.CreateTemplate":
-      c := &Container{Name: args.Parameters.Context}
-      a := &Application{Name: args.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: args.Parameters.Item}
-      f.Template = &ApplicationTemplate{}
-      if err := utils.ReadJson(req, f.Template); err != nil {
-        return nil, err
-      }
-      argv = f
-    case "File.Save":
-      c := &Container{Name: args.Parameters.Context}
-      a := &Application{Name: args.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: args.Parameters.Item}
-      if content, err := utils.ReadBody(req); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      } else {
-        f.Bytes(content)
-      }
-      argv = f
-  }
-  return argv, nil
-}
-
-func NewHttpArguments(req *http.Request) *HttpArguments {
-  args := &HttpArguments{req: req, Parameters: &Parameters{}}
-  args.Parameters.Parse(req.URL.Path)
-  return args
-}
 
 // Handles requests for application data.
 type RestHandler struct {
@@ -164,38 +75,38 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
         res, CommandError(http.StatusNotFound, "No route matched for path %s", req.URL.Path))
     }
 
-    fmt.Printf("route: %#v\n", route)
-    println("REST method name: " + route.ServiceMethod)
-
+    // fmt.Printf("route: %#v\n", route)
     hasServiceMethod := h.Services.HasMethod(route.ServiceMethod)
 
+    // Check if the service method is available
     if !hasServiceMethod {
       return utils.Errorj(
         res, CommandError(http.StatusNotFound,
         "No service available for method name %s using path %s", route.ServiceMethod, req.URL.Path))
     } else {
-      println("REST service method name (start invoke): " + route.ServiceMethod)
+      // println("REST service method name (start invoke): " + route.ServiceMethod)
+
+      // Get a service method call request
       if rpcreq, err := h.Services.Request(route.ServiceMethod, route.Seq); err != nil {
         return utils.Errorj(
           res, CommandError(http.StatusInternalServerError, err.Error()))
       } else {
-
-        // Build rpc arguments
-        args := NewHttpArguments(req)
-        if argv, err := args.Get(route.ServiceMethod, req); err != nil {
+        // Get rpc arguments
+        if argv, err := router.Argv(route, req); err != nil {
           return utils.Errorj(res, err)
         } else {
 
-          fmt.Printf("%#v\n", args.Parameters)
           // Got some arguments to use for the request
           if argv != nil {
             rpcreq.Argv(argv)
           }
 
+          // Call the service function
           if reply, err := h.Services.Call(rpcreq); err != nil {
             return utils.Errorj(
               res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
+            // Reply with error when available
             if reply.Error != nil {
               // Send status error if we can
               if err, ok := reply.Error.(*StatusError); ok {
@@ -205,6 +116,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 return utils.Errorj(
                   res, CommandError(http.StatusInternalServerError, err.Error()))
               }
+            // Success send the response to the client
             } else {
               var replyData = reply.Reply
               status := http.StatusOK
@@ -216,9 +128,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 }
               }
 
-              //fmt.Printf("%#v\n", reply)
-              //fmt.Printf("status: %d\n", status)
-
+              // NOTE: After functions need some thought!
               if route.ServiceMethod == "Container.CreateApp" {
                 // Mount the application, needs to be done here due to some funky
                 // package cyclic references
@@ -227,6 +137,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                 }
               }
 
+              // Determine how we should reply to the client
               accept := req.Header.Get("Accept")
               // Client is asking for binary response
               if accept == "application/octet-stream" {
