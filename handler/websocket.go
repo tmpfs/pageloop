@@ -103,14 +103,16 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
   return
 }
 
-func (w *WebsocketConnection) ReadRequest() {
+func (w *WebsocketConnection) ReadRequest() bool {
   for {
     // Read in the message
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
       log.Println(err)
       println("got error reading ws message")
-      continue
+      // Cannot re-read now, we need to stop reading
+      // TODO: close the socket connection - cannot recover
+      return true
     }
 
     println("message: " + string(p))

@@ -1,6 +1,28 @@
 // Websocket endpoint
 const WS = '/ws/'
 
+class SocketKeepalive {
+  constructor (conn, duration) {
+    this.conn = conn
+    this.duration = duration
+  }
+
+  stop () {
+    clearInterval(this._interval)
+  }
+
+  ping () {
+    this.conn.send({})
+  }
+
+  start () {
+    this.stop()
+    this._interval = setInterval(() => {
+      this.ping()
+    }, this.duration)
+  }
+}
+
 class SocketConnection {
   constructor () {
     this.url = document.location.origin.replace(/^http/, 'ws') + WS
@@ -8,6 +30,8 @@ class SocketConnection {
     this.opts
     this._conn
     this._listeners = []
+
+    this._keepalive = new SocketKeepalive(this, 30000)
   }
 
   get connected () {
@@ -17,16 +41,9 @@ class SocketConnection {
   connect () {
     this._conn = new WebSocket(this.url, this.protocols, this.opts)
 
-    // TODO: ping control functions and configurable interval
-    /*
-    this._pinger = setInterval(() => {
-      // console.log('sending ping message')
-      this.send({})
-    }, 30000)
-    */
-
     this._conn.onopen = () => {
       // console.log('socket connection opened')
+      this._keepalive.start()
     }
 
     this._conn.onmessage = (e) => {
@@ -58,6 +75,7 @@ class SocketConnection {
   }
 
   cleanup () {
+    this._keepalive.stop()
     this._conn.onopen = null
     this._conn.onmessage = null
     this._conn.onerror = null
