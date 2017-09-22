@@ -15,12 +15,15 @@ import Hints from './state/hints'
 import Transfer from './transfer'
 import Log from './state/log'
 import Activity from './state/activity'
+import Settings from './state/settings'
 
 import {KeyManager} from './keymap'
 
 class State {
   constructor () {
     this.keymap = new KeyManager()
+
+    this.settings = new Settings()
 
     this.meta = new Meta()
 

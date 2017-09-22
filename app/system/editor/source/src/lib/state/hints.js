@@ -1,13 +1,13 @@
+const prefix = 'hint:'
+
 class Hints {
   constructor () {
-    this.prefix = 'hint:'
-
     this.reset()
 
     // Test localStorage so hints are only displayed until dismissed
     // and not displayed again on subsequent visits
     for (let k in this.messages) {
-      if (localStorage[this.prefix + k]) {
+      if (localStorage[prefix + k]) {
         delete this.messages[k]
       }
     }
@@ -30,7 +30,7 @@ class Hints {
 
   dismiss (id) {
     this.messages[id] = null
-    localStorage[this.prefix + id] = true
+    localStorage[prefix + id] = true
   }
 }
 
