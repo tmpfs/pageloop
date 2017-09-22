@@ -1,6 +1,6 @@
 <template>
   <div class="notification-activity">
-    <p class="small empty" v-if="!activity.length">No notification activity detected.</p>
+    <p class="small empty" v-if="!activity.length">No notification activity.</p>
     <ul v-else>
       <li class="item"
         :class="{error: item.error}"

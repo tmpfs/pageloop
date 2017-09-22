@@ -1,6 +1,6 @@
 <template>
   <div class="network-activity">
-    <p class="small empty" v-if="!activity.length">No log activity detected.</p>
+    <p class="small empty" v-if="!activity.length">No network activity.</p>
     <ul v-else>
       <li class="item"
         :class="{error: item.error}"

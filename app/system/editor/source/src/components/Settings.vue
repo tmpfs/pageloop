@@ -53,6 +53,9 @@
               :class="{selected: activityView === 'notification-activity'}"
               @click="activityView = 'notification-activity'">Notifications</a>
             <a
+              :class="{selected: activityView === 'job-activity'}"
+              @click="activityView = 'job-activity'">Jobs</a>
+            <a
               :class="{selected: activityView === 'log-activity'}"
               @click="activityView = 'log-activity'">Logs</a>
             <a
@@ -78,6 +81,7 @@ import TemplatePreferences from '@/components/settings/TemplatePreferences'
 import StoragePreferences from '@/components/settings/StoragePreferences'
 
 import NotificationActivity from '@/components/settings/NotificationActivity'
+import JobActivity from '@/components/settings/JobActivity'
 import LogActivity from '@/components/settings/LogActivity'
 import NetworkActivity from '@/components/settings/NetworkActivity'
 
@@ -98,6 +102,7 @@ export default {
     TemplatePreferences,
     StoragePreferences,
     NotificationActivity,
+    JobActivity,
     LogActivity,
     NetworkActivity
   }
