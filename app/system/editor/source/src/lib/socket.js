@@ -1,5 +1,6 @@
 // Websocket endpoint
 const WS = '/ws/'
+const MaxListeners = 128
 
 /**
  *  Sends ping messages over the socket at regular intervals
@@ -101,6 +102,7 @@ class SocketConnection {
 
     this._conn
     this._listeners = []
+    this._numListeners = 0
     if (options.keepalive === undefined || options.keepalive) {
       this._keepalive = new SocketKeepalive(this, options.keepaliveDuration || 30000)
     }
@@ -147,7 +149,8 @@ class SocketConnection {
 
   onMessage (e) {
     // console.log(e)
-    if (e.data) {
+    // TODO: handle binary messages
+    if (e.data && e.type === 'message') {
       let doc
       try {
         doc = JSON.parse(e.data)
@@ -155,9 +158,8 @@ class SocketConnection {
         throw e
       }
       // console.log(doc)
-      if (doc.id && this._listeners[doc.id]) {
-        this._listeners[doc.id](doc)
-        delete this._listeners[doc.id]
+      if (doc.id && this.hasListener(doc.id)) {
+        this.once(doc.id, doc)
       }
     }
   }
@@ -192,11 +194,42 @@ class SocketConnection {
     }
   }
 
+  addListener (id, fn) {
+    if (this.numListeners() > MaxListeners) {
+      throw new Error(
+        'Websocket client reached listener limit: ' + MaxListeners)
+    }
+    this._listeners[id] = fn
+    this._numListeners++
+    // TODO: set timeout to remove listener?
+  }
+
+  hasListener (id) {
+    return this._listeners[id] !== undefined
+  }
+
+  removeListener (id) {
+    delete this._listeners[id]
+    this._numListeners--
+  }
+
+  numListeners () {
+    return this._numListeners
+  }
+
+  once (id, argv) {
+    const fn = this._listeners[id]
+    if (typeof fn === 'function') {
+      fn(argv)
+    }
+    this.removeListener(id)
+  }
+
   request (payload) {
+    // TODO: queue request when not connected?
     if (this.connected) {
       return new Promise((resolve, reject) => {
-        // TODO: set timeout to remove listener
-        this._listeners[payload.id] = (response) => {
+        this.addListener(payload.id, (response) => {
           const res = {
             status: response.status,
             id: response.id,
@@ -224,7 +257,7 @@ class SocketConnection {
           }
 
           resolve({response: res, document: doc})
-        }
+        })
         this.send(payload)
       })
     }
