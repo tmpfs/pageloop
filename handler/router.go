@@ -380,7 +380,7 @@ func init() {
   route("Application.ReadFiles", "/apps/*/*/files", http.MethodGet, http.StatusOK)
   route("Application.ReadPages", "/apps/*/*/pages", http.MethodGet, http.StatusOK)
   route("Application.DeleteFiles", "/apps/*/*/files", http.MethodDelete, http.StatusOK)
-  route("Application.RunTask", "/apps/*/*/tasks/", http.MethodPut, http.StatusAccepted)
+  route("Application.RunTask", "/apps/*/*/tasks/*", http.MethodPut, http.StatusAccepted)
   route("File.Read", "/apps/*/*/files/*", http.MethodGet, http.StatusOK)
   route("File.ReadPage", "/apps/*/*/pages/*", http.MethodGet, http.StatusOK)
   route("File.Create", "/apps/*/*/files/*", http.MethodPut, http.StatusCreated)

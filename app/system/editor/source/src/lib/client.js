@@ -280,11 +280,8 @@ class ApiClient {
 
   // Run an application build task
   runTask (container, application, task) {
-    // TODO: get container from app reference
-    return this.rpc(
-      Request.rpc('Application.RunTask',
-      {context: container, target: application, item: task})
-    )
+    const ref = this.getFileReference(container, application, task)
+    return this.rpc(Request.rpc('Application.RunTask', ref))
   }
 
   // Create a new application.
