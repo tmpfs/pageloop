@@ -1,19 +1,18 @@
 <template>
-  <div class="storage-preferences">
+  <div class="storage-preferences" v-bind="keys">
     <p class="small">We store the state of the application and your preferences in the browser's local storage. Clearing the local storage will revert the interface to it's default state.</p>
 
     <div class="form-actions">
       <button
         @click="clearLocalStorage"
-        v-bind:length="settings.length"
         :class="{disabled: count === 0}"
         class="primary">Reset to defaults</button>
     </div>
-    <p class="small title" v-bind="settings.length">{{count}} items in storage</p>
+    <p class="small title">{{count}} items in storage</p>
     <ul class="storage">
-      <li v-for="_, key in keys" :class="{disabled: localStorage[key] === undefined}" v-bind="storage">
+      <li v-for="_, key in keys" :class="{disabled: localStorage[key] === undefined}">
         <div class="storage-key">{{key}}</div>
-        <div class="storage-value" v-bind:val="storage[key]">{{settings.get(key)}}</div>
+        <div class="storage-value">{{settings.get(key)}}</div>
       </li>
     </ul>
   </div>
@@ -25,19 +24,23 @@ export default {
   name: 'storage-preferences',
   data: function () {
     return {
-      count: this.$store.state.settings.length,
       localStorage: window.localStorage,
+      count: window.localStorage.length,
       settings: this.$store.state.settings,
       storage: this.$store.state.settings.storage,
       keys: this.$store.state.settings.keys
     }
   },
+  updated: function () {
+    console.log('updated')
+    this.count = localStorage.length
+  },
   methods: {
     clearLocalStorage: function () {
       this.$store.commit('clear-local-storage')
-      const cache = this.$store.state.settings.storage
-      this.storage = null
-      this.storage = cache
+      // Trigger update :(
+      this.keys['setting:show-notifications'] = !this.storage.showNotifications
+      this.keys['setting:show-notifications'] = this.storage.showNotifications
     }
   }
 }

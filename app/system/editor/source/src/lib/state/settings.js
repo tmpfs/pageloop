@@ -73,6 +73,9 @@ class Settings {
     localStorage[key] = value
     // Store for reactive values by key
     this.storage[key] = value
+
+    // mutate keys for bindings
+    this.keys[key] = value
   }
 
   get length () {
