@@ -40,7 +40,6 @@ class Settings {
 
       // Import from storage on load
       if (localStorage[key] !== undefined) {
-        // this[nm] = localStorage[key]
         this.storage[key] = this.coerce(localStorage[key])
       }
     }
@@ -62,7 +61,6 @@ class Settings {
   }
 
   get (key) {
-    // Local storage is string and we need booleans
     return this.storage[key]
   }
 
@@ -77,11 +75,8 @@ class Settings {
     this.storage[key] = value
   }
 
-  saved (key) {
-    return localStorage[key] !== undefined
-  }
-
   get length () {
+    console.log('getting length: ' + localStorage.length)
     return localStorage.length
   }
 }

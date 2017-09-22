@@ -10,9 +10,9 @@
     </div>
     <p class="small title">{{count}} items in storage</p>
     <ul class="storage">
-      <li v-for="name, key in keys" :class="{disabled: localStorage[key] === undefined}">
+      <li v-for="_, key in keys" :class="{disabled: localStorage[key] === undefined}" v-bind="storage">
         <div class="storage-key">{{key}}</div>
-        <div class="storage-value" v-bind:name="settings[name]">{{settings.get(key)}}</div>
+        <div class="storage-value" v-bind:val="storage[key]">{{settings.get(key)}}</div>
       </li>
     </ul>
   </div>

@@ -132,7 +132,7 @@ const Mutations = {
     // Reset all hint messages
     state.hints.reset()
     for (let k in localStorage) {
-      delete localStorage[k]
+      localStorage.removeItem(k)
     }
   }
 }
