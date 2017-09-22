@@ -10,7 +10,7 @@
     </div>
     <p class="small title">{{count}} items in storage</p>
     <ul class="storage">
-      <li v-for="name, key in storage">
+      <li v-for="name, key in keys" :class="{disabled: localStorage[key] === undefined}">
         <div class="storage-key">{{key}}</div>
         <div class="storage-value" v-bind:name="settings[name]">{{settings.get(key)}}</div>
       </li>
@@ -19,34 +19,25 @@
 </template>
 
 <script>
+
 export default {
   name: 'storage-preferences',
   data: function () {
     return {
-      // storage: window.localStorage
+      localStorage: window.localStorage,
+      settings: this.$store.state.settings,
       storage: this.$store.state.settings.storage,
       keys: this.$store.state.settings.keys
     }
   },
   computed: {
     count: function () {
-      if (!this.storage) {
-        return 0
-      }
-      return this.storage.length
-    },
-    settings: function () {
-      return this.$store.state.settings
+      return this.settings.length
     }
-  },
-  // TODO: update as settings change
-  mounted: function () {
-    // this.storage = this.$store.state.settings.storage
   },
   methods: {
     clearLocalStorage: function () {
       this.$store.commit('clear-local-storage')
-      this.storage = null
     }
   }
 }

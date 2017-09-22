@@ -16,14 +16,20 @@ function camel (k) {
 class Settings {
   constructor () {
     this.storage = {}
+    this.keys = {}
     for (let key in defaults) {
       const nm = camel(key.replace(/^[^:]+:/, ''))
+      this.keys[key] = nm
+
       // Set up properties
       Object.defineProperty(this, nm, {
         enumerable: true,
         configurable: false,
         get: () => {
           let val = this.get(key)
+          if (val === undefined) {
+            return defaults[key]
+          }
           val = this.coerce(val)
           return val
         },
@@ -32,11 +38,10 @@ class Settings {
         }
       })
 
-      // Set up defaults
-      if (localStorage[key] === undefined) {
-        this[nm] = defaults[key]
-      } else {
-        this[nm] = localStorage[key]
+      // Import from storage on load
+      if (localStorage[key] !== undefined) {
+        // this[nm] = localStorage[key]
+        this.storage[key] = this.coerce(localStorage[key])
       }
     }
   }
@@ -58,11 +63,11 @@ class Settings {
 
   get (key) {
     // Local storage is string and we need booleans
-    return localStorage[key]
+    return this.storage[key]
   }
 
   del (key) {
-    delete localStorage[key]
+    localStorage[key] = null
     delete this.storage[key]
   }
 
@@ -72,16 +77,12 @@ class Settings {
     this.storage[key] = value
   }
 
-  get length () {
-    return localStorage.length
+  saved (key) {
+    return localStorage[key] !== undefined
   }
 
-  get keys () {
-    const defs = {}
-    for (let k in defaults) {
-      defs[k] = camel(k.replace(/^[^:]+:/, ''))
-    }
-    return defs
+  get length () {
+    return localStorage.length
   }
 }
 
