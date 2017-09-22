@@ -55,7 +55,7 @@ type File struct {
   Binary bool `json:"binary"`
 
   // Destination for file move operations
-  Destination string `json:"-"`
+  Destination string `json:"destination,omitempty"`
 
 	// Owner application
   Owner *Application `json:"-"`
