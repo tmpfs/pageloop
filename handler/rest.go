@@ -4,6 +4,7 @@ package handler
 import (
   // "fmt"
   //"mime"
+  "strconv"
 	"net/http"
   . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
@@ -126,6 +127,12 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
                   MountApplication(h.Mountpoints.MountpointMap, h.Host, app)
                 }
               }
+
+              // Indicate to the client the response type.
+
+              // Allows the client to determine whether a response should
+              // be parsed as JSON or not.
+              res.Header().Set("X-Response-Type", strconv.Itoa(route.ResponseType))
 
               // Determine how we should reply to the client
               if route.ResponseType == ResponseTypeByte {

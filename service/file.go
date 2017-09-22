@@ -61,6 +61,7 @@ func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
   if _, app, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
+
     // File content from string value
     if file.Value != "" {
       file.Bytes([]byte(file.Value))

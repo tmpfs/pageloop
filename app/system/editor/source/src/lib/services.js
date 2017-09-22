@@ -3,6 +3,30 @@ const API = '/api/'
 
 function getBodyOptions (rpc, options) {
   options.headers = options.headers || {}
+
+  console.log('get body options')
+  console.log(rpc.rawRequest)
+
+  // Use input raw request body
+  if (rpc.rawRequest) {
+    options.body = rpc.rawRequest.value
+    options.headers['Content-Type'] =
+      rpc.rawRequest.mime || 'application/octet-stream'
+    options.headers['Content-Length'] = options.body.length
+    console.log(options)
+    /*
+    let body = rpc.body
+    if (!rpc.raw) {
+      body = JSON.stringify(rpc.body)
+    }
+    options.body = body
+    options.headers['Content-Type'] =
+      rpc.mime || 'application/json; charset=utf-8'
+    options.headers['Content-Length'] = body.length
+    */
+  }
+
+  /*
   if (rpc.body) {
     let body = rpc.body
     if (!rpc.raw) {
@@ -13,6 +37,7 @@ function getBodyOptions (rpc, options) {
       rpc.mime || 'application/json; charset=utf-8'
     options.headers['Content-Length'] = body.length
   }
+  */
   return options
 }
 
@@ -158,19 +183,14 @@ const services = {
 
 function fetchFromRpc (rpc) {
   const o = {}
-  const {url, opts} = services[rpc.method](rpc, rpc.parameters)
+  const {url, options} = services[rpc.method](rpc, rpc.parameters)
   o.url = url
-  o.options = opts || {}
-
+  o.options = options || {}
   o.options.headers = o.options.headers || {}
 
   // Hint for optimized route lookup
   o.options.headers['X-Method-Name'] = rpc.method
   o.options.headers['X-Method-Seq'] = rpc.id
-
-  if (rpc.fetch) {
-    o.options.raw = true
-  }
   return o
 }
 

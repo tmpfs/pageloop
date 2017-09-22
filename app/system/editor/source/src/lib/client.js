@@ -7,6 +7,9 @@ let socket
 // Message identifier counter
 let id = 0
 
+// const ResponseTypeJson = 0
+const ResponseTypeByte = 1
+
 class Request {
   constructor (id, method, params) {
     this.id = id
@@ -15,6 +18,20 @@ class Request {
       params = [params]
     }
     this.params = params || []
+
+    Object.defineProperty(this, 'rawRequest', {
+      enumerable: false,
+      configurable: false,
+      writable: true
+    })
+  }
+
+  // Set a raw body for the request.
+  body (value, mime) {
+    this.rawRequest = {
+      value: value,
+      mime: mime
+    }
   }
 
   get parameters () {
@@ -32,7 +49,7 @@ class ApiClient {
     // log should be injected
     this.log = null
     this.socket = this.connect()
-    this.useWebsocket = true
+    // this.useWebsocket = true
   }
 
   // Singleton websocket
@@ -62,12 +79,19 @@ class ApiClient {
   // the raw option is set.
   request (url, opts) {
     const log = this.preflight(url, opts)
+
+    console.log(opts)
+
+    console.log(`[rest] ${opts.method} ${url}`)
     return fetch(url, opts)
       .then((res) => {
         res.transport = 'http://rest-api'
         this.postflight(log, res)
-        if (opts.raw) {
-          return res
+        const resType = parseInt(res.headers.get('x-response-type'))
+        if (!isNaN(resType)) {
+          if (resType === ResponseTypeByte) {
+            return res
+          }
         }
         return res.json().then((doc) => {
           return {response: res, document: doc}
@@ -278,12 +302,23 @@ class ApiClient {
   // Save a file sending value as the new file content
   saveFile (container, application, file, value) {
     const ref = this.getFileReference(container, application, file.url)
-    ref.value = value
+
+    // Text files can be sent as strings over websocket
+    if (!file.binary) {
+      ref.value = value
+    } else {
+      // TODO: send as binary when file is binary
+    }
+
     const req = Request.rpc('File.Save', ref)
 
-    // Send as raw request for REST requests
+      /*
     req.raw = true
     req.mime = file.mime
+    */
+
+    // Send as raw request for REST requests
+    req.body(value, file.mime)
 
     return this.rpc(req)
   }
@@ -300,8 +335,6 @@ class ApiClient {
   getFileSource (container, application, file, raw) {
     const ref = this.getFileReference(container, application, file.url)
     const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource', ref)
-    // passthrough the underlying fetch promise
-    req.fetch = true
     return this.rpc(req, {http: true})
   }
 }
