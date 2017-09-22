@@ -16,38 +16,44 @@ function camel (k) {
 class Settings {
   constructor () {
     this.storage = {}
-    for (let k in defaults) {
-      const key = k
-      const nm = camel(k.replace(/^[^:]+:/, ''))
-      console.log(nm)
-
-      // Set up defaults
-      if (localStorage[key] === undefined) {
-        this.set(key, defaults[k])
-      } else {
-        this.storage[key] = this.get(key)
-      }
-
+    for (let key in defaults) {
+      const nm = camel(key.replace(/^[^:]+:/, ''))
       // Set up properties
       Object.defineProperty(this, nm, {
         enumerable: true,
         configurable: false,
         get: () => {
           let val = this.get(key)
-          console.log(val)
-          if (typeof (defaults[key]) === 'boolean') {
-            return val === '1'
-          }
-          return val === '1'
+          val = this.coerce(val)
+          return val
         },
         set: (v) => {
-          if (typeof (v) === 'boolean') {
-            v = v ? '1' : '0'
-          }
           this.set(key, v)
         }
       })
+
+      // Set up defaults
+      if (localStorage[key] === undefined) {
+        this[nm] = defaults[key]
+      } else {
+        this[nm] = localStorage[key]
+      }
     }
+  }
+
+  coerce (val) {
+    if (val === 'null') {
+      return null
+    } else if (val === 'true') {
+      return true
+    } else if (val === 'false') {
+      return false
+    } else if (parseInt(val).toString() === val) {
+      return parseInt(val)
+    } else if (!isNaN(Number(val))) {
+      return Number(val)
+    }
+    return val
   }
 
   get (key) {
