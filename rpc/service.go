@@ -140,7 +140,7 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
         Name: mt.method.Name}
       info.Methods = append(info.Methods, mi)
     }
-
+    key = strings.ToLower(key)
     m[key] = info
   }
   return m
