@@ -6,9 +6,6 @@ function error (res) {
   err.status = res.response.status
   err.response = res
   err.document = doc
-
-  console.log('error status is: ' + err.status)
-
   return err
 }
 

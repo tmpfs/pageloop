@@ -154,7 +154,7 @@ class SocketConnection {
       } catch (e) {
         throw e
       }
-      console.log(doc)
+      // console.log(doc)
       if (doc.id && this._listeners[doc.id]) {
         this._listeners[doc.id](doc)
         delete this._listeners[doc.id]
@@ -209,12 +209,13 @@ class SocketConnection {
             doc.error = response.error
             res.status = 500
           } else if (response.result) {
-            if (response.result.error) {
-              console.log(response.result.error)
+            // Server replied with result containing custom error data
+            if (doc.error) {
               // Unwrap error from rpc result object
               // allows passing custom status codes
-              doc.error = response.result.error.message
-              res.status = response.result.error.status
+              res.status = doc.error.status
+              doc.error = doc.error.message
+            // Server replied with valid result
             } else {
               // Unwrap result object for status code
               doc = response.result.document
