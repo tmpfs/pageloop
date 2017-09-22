@@ -8,36 +8,26 @@ function getBodyOptions (rpc, options) {
   console.log(rpc.rawRequest)
 
   // Use input raw request body
-  if (rpc.rawRequest) {
-    options.body = rpc.rawRequest.value
-    options.headers['Content-Type'] =
-      rpc.rawRequest.mime || 'application/octet-stream'
-    options.headers['Content-Length'] = options.body.length
-    console.log(options)
-    /*
-    let body = rpc.body
-    if (!rpc.raw) {
-      body = JSON.stringify(rpc.body)
+  if (rpc.request) {
+    let body = rpc.request.value
+
+    // Sending JSON body
+    if (rpc.request.type === 0) {
+      body = JSON.stringify(body)
     }
+
     options.body = body
-    options.headers['Content-Type'] =
-      rpc.mime || 'application/json; charset=utf-8'
+
+    if (rpc.request.type === 0) {
+      options.headers['Content-Type'] = 'application/json; charset=utf-8'
+    } else {
+      options.headers['Content-Type'] =
+        rpc.request.mime || 'application/octet-stream'
+    }
+
     options.headers['Content-Length'] = body.length
-    */
   }
 
-  /*
-  if (rpc.body) {
-    let body = rpc.body
-    if (!rpc.raw) {
-      body = JSON.stringify(rpc.body)
-    }
-    options.body = body
-    options.headers['Content-Type'] =
-      rpc.mime || 'application/json; charset=utf-8'
-    options.headers['Content-Length'] = body.length
-  }
-  */
   return options
 }
 

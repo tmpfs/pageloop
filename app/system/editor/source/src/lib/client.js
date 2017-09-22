@@ -7,8 +7,8 @@ let socket
 // Message identifier counter
 let id = 0
 
-// const ResponseTypeJson = 0
-const ResponseTypeByte = 1
+const TypeJson = 0
+const TypeByte = 1
 
 class Request {
   constructor (id, method, params) {
@@ -19,16 +19,26 @@ class Request {
     }
     this.params = params || []
 
-    Object.defineProperty(this, 'rawRequest', {
+    Object.defineProperty(this, 'request', {
       enumerable: false,
       configurable: false,
       writable: true
     })
   }
 
+  // Set an object to be serialized to JSON and
+  // sent as the request body (REST only).
+  json (value) {
+    this.request = {
+      type: TypeJson,
+      value: value
+    }
+  }
+
   // Set a raw body for the request.
   body (value, mime) {
-    this.rawRequest = {
+    this.request = {
+      type: TypeByte,
       value: value,
       mime: mime
     }
@@ -80,16 +90,17 @@ class ApiClient {
   request (url, opts) {
     const log = this.preflight(url, opts)
 
-    console.log(opts)
-
-    console.log(`[rest] ${opts.method} ${url}`)
+    // console.log(opts)
+    // console.log(`[rest] ${opts.method} ${url}`)
     return fetch(url, opts)
       .then((res) => {
         res.transport = 'http://rest-api'
         this.postflight(log, res)
         const resType = parseInt(res.headers.get('x-response-type'))
         if (!isNaN(resType)) {
-          if (resType === ResponseTypeByte) {
+          // Server says this is a binary response, do not
+          // interpret it as JSON
+          if (resType === TypeByte) {
             return res
           }
         }
@@ -262,7 +273,9 @@ class ApiClient {
     })
     const ref = this.getApplicationReference(container, application)
     ref.batch = urls
-    return this.rpc(Request.rpc('Application.DeleteFiles', ref))
+    const req = Request.rpc('Application.DeleteFiles', ref)
+    req.json(urls)
+    return this.rpc(req)
   }
 
   // Run an application build task
@@ -303,7 +316,7 @@ class ApiClient {
   saveFile (container, application, file, value) {
     const ref = this.getFileReference(container, application, file.url)
 
-    // Text files can be sent as strings over websocket
+    // Text files can be sent as strings (websocket only)
     if (!file.binary) {
       ref.value = value
     } else {
@@ -312,12 +325,7 @@ class ApiClient {
 
     const req = Request.rpc('File.Save', ref)
 
-      /*
-    req.raw = true
-    req.mime = file.mime
-    */
-
-    // Send as raw request for REST requests
+    // Send as raw request (REST requests only)
     req.body(value, file.mime)
 
     return this.rpc(req)
@@ -331,10 +339,15 @@ class ApiClient {
     return this.rpc(req)
   }
 
-  // TODO: get binary data over websocket!?
+  // Get file contet.
+  //
+  // When the raw option is given the response document will include
+  // frontmatter data when available.
   getFileSource (container, application, file, raw) {
     const ref = this.getFileReference(container, application, file.url)
     const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource', ref)
+
+    // TODO: allow this over websocket so we don't need to force a transport
     return this.rpc(req, {http: true})
   }
 }
