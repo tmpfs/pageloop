@@ -6,7 +6,6 @@ import (
   //"mime"
   "strconv"
 	"net/http"
-  . "github.com/tmpfs/pageloop/adapter"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/rpc"
