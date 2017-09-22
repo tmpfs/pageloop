@@ -61,9 +61,10 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) error {
   return writer.Request.WriteResponse(writer, nil, err)
 }
 
-//
-func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err error) {
-  // println("Read request : " + method)
+// Determine the type of argument for the given service method and
+// call ReadRequest() on the CodecRequest to parse the input params
+// into the correct type.
+func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (argv interface{}, err error) {
   argv = &VoidArgs{}
   switch(method) {
     case "Container.Read":
@@ -98,7 +99,8 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
       argv = &File{}
   }
   if argv != nil {
-    err = writer.Request.ReadRequest(argv)
+    // Read in the request params to the type we expect
+    err = req.ReadRequest(argv)
   }
   return
 }
@@ -151,7 +153,7 @@ func (w *WebsocketConnection) ReadRequest() {
           } else {
             // TODO: read params into correct type
 
-            if argv, err := writer.ReadRequest(method); err != nil {
+            if argv, err := w.RequestArgv(req, method); err != nil {
               writer.WriteError(
                 CommandError(http.StatusInternalServerError, err.Error()))
             } else {
