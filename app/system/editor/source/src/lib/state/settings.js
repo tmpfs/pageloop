@@ -1,14 +1,14 @@
 const prefix = 'setting:'
 
 const defaults = {
-  'show-notifications': true,
-  'show-system-applications': false,
-  'show-template-applications': false
+  'show-notifications': 1,
+  'show-system-applications': 0,
+  'show-template-applications': 0
 }
 
 class Settings {
-  constructor (storage) {
-    storage = storage || localStorage
+  constructor () {
+    const storage = localStorage
     for (let k in defaults) {
       const key = prefix + k
       let nm = k.split('-').map((p, i) => {
@@ -28,9 +28,11 @@ class Settings {
         enumerable: true,
         configurable: false,
         get: () => {
-          return storage[key]
+          // Local storage is string and we need booleans
+          return storage[key] === '1'
         },
         set: (v) => {
+          v = v ? '1' : '0'
           storage[key] = v
         }
       })

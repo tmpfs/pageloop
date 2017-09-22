@@ -19,11 +19,30 @@
 <script>
 export default {
   name: 'profile-settings',
-  data: function () {
-    return {
-      showSystemApplications: false,
-      showTemplateApplications: false,
-      showNotifications: true
+  computed: {
+    showNotifications: {
+      get: function () {
+        return this.$store.state.settings.showNotifications
+      },
+      set: function (val) {
+        this.$store.state.settings.showNotifications = val
+      }
+    },
+    showSystemApplications: {
+      get: function () {
+        return this.$store.state.settings.showSystemApplications
+      },
+      set: function (val) {
+        this.$store.state.settings.showSystemApplications = val
+      }
+    },
+    showTemplateApplications: {
+      get: function () {
+        return this.$store.state.settings.showTemplateApplications
+      },
+      set: function (val) {
+        this.$store.state.settings.showTemplateApplications = val
+      }
     }
   }
 }

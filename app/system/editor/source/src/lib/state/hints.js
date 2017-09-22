@@ -7,7 +7,7 @@ class Hints {
     // Test localStorage so hints are only displayed until dismissed
     // and not displayed again on subsequent visits
     for (let k in this.messages) {
-      if (localStorage[prefix + k]) {
+      if (localStorage[prefix + k] === '1') {
         delete this.messages[k]
       }
     }
@@ -30,7 +30,7 @@ class Hints {
 
   dismiss (id) {
     this.messages[id] = null
-    localStorage[prefix + id] = true
+    localStorage[prefix + id] = 1
   }
 }
 

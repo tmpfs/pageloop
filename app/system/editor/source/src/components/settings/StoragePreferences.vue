@@ -34,6 +34,7 @@ export default {
       return Object.keys(this.storage).length
     }
   },
+  watch: {},
   mounted: function () {
     this.storage = window.localStorage
   },
