@@ -277,11 +277,14 @@ class ApiClient {
 
   // Save a file sending value as the new file content
   saveFile (container, application, file, value) {
-    // const ref = this.getFileReference(container, application, file.url)
-    const req = Request.rpc('File.Save',
-      {context: container, target: application, item: file.url}, value)
+    const ref = this.getFileReference(container, application, file.url)
+    ref.value = value
+    const req = Request.rpc('File.Save', ref)
+
+    // Send as raw request for REST requests
     req.raw = true
     req.mime = file.mime
+
     return this.rpc(req)
   }
 

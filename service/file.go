@@ -61,8 +61,15 @@ func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
   if _, app, f, err := s.lookup(file, false); err != nil {
     return err
   } else {
+    // File content from string value
+    if file.Value != "" {
+      file.Bytes([]byte(file.Value))
+      file.Value = ""
+    }
 
-    if err := app.Update(f, file.Source(false)); err != nil {
+    var content []byte = file.Source(false)
+
+    if err := app.Update(f, content); err != nil {
       return CommandError(http.StatusInternalServerError, err.Error())
     }
 
@@ -70,6 +77,7 @@ func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
       reply.Reply = f.Page()
       return nil
     }
+
     reply.Reply = f
   }
   return nil
