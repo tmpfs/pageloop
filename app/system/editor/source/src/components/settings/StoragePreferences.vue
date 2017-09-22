@@ -5,10 +5,11 @@
     <div class="form-actions">
       <button
         @click="clearLocalStorage"
-        :class="{disabled: count == 0}"
+        v-bind:length="settings.length"
+        :class="{disabled: count === 0}"
         class="primary">Reset to defaults</button>
     </div>
-    <p class="small title">{{count}} items in storage</p>
+    <p class="small title" v-bind="settings.length">{{count}} items in storage</p>
     <ul class="storage">
       <li v-for="_, key in keys" :class="{disabled: localStorage[key] === undefined}" v-bind="storage">
         <div class="storage-key">{{key}}</div>
@@ -24,20 +25,19 @@ export default {
   name: 'storage-preferences',
   data: function () {
     return {
+      count: this.$store.state.settings.length,
       localStorage: window.localStorage,
       settings: this.$store.state.settings,
       storage: this.$store.state.settings.storage,
       keys: this.$store.state.settings.keys
     }
   },
-  computed: {
-    count: function () {
-      return this.settings.length
-    }
-  },
   methods: {
     clearLocalStorage: function () {
       this.$store.commit('clear-local-storage')
+      const cache = this.$store.state.settings.storage
+      this.storage = null
+      this.storage = cache
     }
   }
 }
