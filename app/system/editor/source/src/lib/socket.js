@@ -1,6 +1,12 @@
 // Websocket endpoint
 const WS = '/ws/'
 
+/**
+ *  Sends ping messages over the socket at regular intervals
+ *  to keep the connection alive.
+ *
+ *  A ping message is the empty object: {}.
+ */
 class SocketKeepalive {
   constructor (conn, duration) {
     this.conn = conn
@@ -23,54 +29,127 @@ class SocketKeepalive {
   }
 }
 
+/**
+ *  Attempts to open a closed socket connection.
+ */
+class SocketOpener {
+  constructor (conn, duration, limit) {
+    this.conn = conn
+    this.duration = duration
+    this.limit = limit
+    this._connecting = false
+  }
+
+  retry () {
+    if (this._connecting) {
+      return false
+    }
+    this._connecting = true
+    this.connect(0)
+    return true
+  }
+
+  /**
+   *  @private
+   */
+  connect (retries) {
+    const attempts = retries + 1
+    const duration = this.duration
+    const exp = duration * attempts
+
+    if (this.limit !== undefined && retries === this.limit) {
+      console.log(`[sock] retry limit ${this.limit} reached`)
+      return false
+    }
+
+    console.log(`[sock] retry attempt ${attempts}, timeout in ${exp / 1000}s`)
+
+    const timeout = setTimeout(() => {
+      this.connect(retries + 1)
+    }, exp)
+
+    this.conn.connect(() => {
+      // Connection re-established
+      this._connecting = false
+      clearTimeout(timeout)
+      console.log(`[sock] connection re-established`)
+    })
+  }
+}
+
 class SocketConnection {
-  constructor () {
+  constructor (options = {}) {
     this.url = document.location.origin.replace(/^http/, 'ws') + WS
-    this.protocols
-    this.opts
+    this.opts = options.websocket
+    this.protocols = options.protocols
     this._conn
     this._listeners = []
-    this._keepalive = new SocketKeepalive(this, 30000)
+    this._keepalive = new SocketKeepalive(this, options.pingDuration || 30000)
+    this._opener = new SocketOpener(this, options.retryTimeout || 2000, options.retryLimit || 64)
+  }
+
+  get socket () {
+    return this._conn
   }
 
   get connected () {
     return this._conn && this._conn.readyState === WebSocket.OPEN
   }
 
-  connect () {
+  connect (cb) {
     this._conn = new WebSocket(this.url, this.protocols, this.opts)
 
-    this._conn.onopen = () => {
-      // console.log('socket connection opened')
-      this._keepalive.start()
+    this._conn.onopen = (e) => {
+      if (typeof cb === 'function') {
+        cb(e)
+      }
+      this.onOpen(e)
     }
 
     this._conn.onmessage = (e) => {
-      // console.log(e)
-      if (e.data) {
-        let doc
-        try {
-          doc = JSON.parse(e.data)
-        } catch (e) {
-          throw e
-        }
-        // console.log(doc)
-        if (doc.id && this._listeners[doc.id]) {
-          this._listeners[doc.id](doc)
-          delete this._listeners[doc.id]
-        }
-      }
+      this.onMessage(e)
     }
 
     this._conn.onerror = (err) => {
-      // TODO: log this error
-      console.error(err)
+      this.onError(err)
     }
 
-    this._conn.onclose = () => {
-      console.log('socket connection closed')
-      this.cleanup()
+    this._conn.onclose = (e) => {
+      this.onClose(e)
     }
+  }
+
+  onOpen (e) {
+    // console.log('socket connection opened')
+    this._keepalive.start()
+  }
+
+  onMessage (e) {
+    // console.log(e)
+    if (e.data) {
+      let doc
+      try {
+        doc = JSON.parse(e.data)
+      } catch (e) {
+        throw e
+      }
+      // console.log(doc)
+      if (doc.id && this._listeners[doc.id]) {
+        this._listeners[doc.id](doc)
+        delete this._listeners[doc.id]
+      }
+    }
+  }
+
+  onError (err) {
+    // TODO: log this error
+    console.error(err)
+  }
+
+  onClose (e) {
+    console.log('socket connection closed')
+    this.cleanup()
+    this._opener.retry()
   }
 
   cleanup () {
@@ -79,7 +158,7 @@ class SocketConnection {
     this._conn.onmessage = null
     this._conn.onerror = null
     this._conn.onclose = null
-    this._conn = null
+    // this._conn = null
   }
 
   // Send a JSON payload and ignore any response
