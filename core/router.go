@@ -1,11 +1,10 @@
-package handler
+package core
 
 import(
   // "fmt"
   "net/http"
   "strings"
   "strconv"
-  . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
 
@@ -15,15 +14,15 @@ const(
 )
 
 var(
-  router *Router
+  DefaultRouter *Router
 )
 
 // Parameters represents the parsed URL path parameters.
 type Parameters struct {
   // input path
-  Path string
+  Path string `json:"-"`
   // Slice of parameter parts
-  Parts []string
+  Parts []string `json:"parts"`
   // The operation type, cannot be a wildcard.
   Type string `json:"type"`
   // Context for the operation. May be a container reference, job number etc.
@@ -81,21 +80,21 @@ func (act *Parameters) Parse(path string) {
 // Care should be taken to ensure that definition routes are not modified.
 type Route struct {
   // Name of a service method to invoke.
-  ServiceMethod string
+  ServiceMethod string `json:"-"`
   // Sequence number supplied in HTTP header when available
-  Seq uint64
+  Seq uint64 `json:"-"`
   // Route definition path or request path
-  Path string
+  Path string `json:"path"`
   // Request method
-  Method string
+  Method string `json:"method"`
   // Status code to send when ok
-  Status int
+  Status int `json:"status"`
   // Parsed path parameters
-  *Parameters
+  *Parameters `json:"parameters"`
   // Condition used to match route
-  Condition func(req *http.Request) bool
+  Condition func(req *http.Request) bool `json:"-"`
   // Indicate how the response should be sent
-  ResponseType int
+  ResponseType int `json:"response-type"`
 }
 
 // Determine if this route matches the given request and parameters.
@@ -189,6 +188,11 @@ func (r *Router) Add(route *Route) *Route {
   return route
 }
 
+// Get a route by service method name.
+func (r *Router) Get(name string) *Route {
+  return r.methods[name]
+}
+
 // Find the first route that matches the incoming request.
 //
 // The request method must match the route and all path parameters
@@ -246,83 +250,6 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
   return match, nil
 }
 
-// Get the service method arguments for the given request and matched route.
-func (r *Router) Argv(route *Route, req *http.Request) (argv interface{}, err *StatusError) {
-  name := route.ServiceMethod
-  switch name {
-    case "Container.CreateApp":
-      c := &Container{Name: route.Parameters.Context}
-      var app *Application = &Application{Container: c}
-
-      // TODO: move validation to service logic
-      if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
-        return nil, CommandError(http.StatusBadRequest, err.Error())
-      }
-      argv = app
-    case "Container.Read":
-      argv = &Container{Name: route.Parameters.Context}
-    case "Application.ReadFiles":
-      fallthrough
-    case "Application.ReadPages":
-      fallthrough
-    case "Application.Delete":
-      fallthrough
-    case "Application.Read":
-      argv = &Application{
-        Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context}
-    case "Application.DeleteFiles":
-      var list UrlList = make(UrlList, 0)
-      if err := utils.ReadJson(req, &list); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      }
-      argv = &Application{
-        Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context,
-        Batch: &list}
-    case "Application.RunTask":
-      argv = &Application{
-        Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context,
-        Task: route.Parameters.Item}
-    case "File.ReadSource":
-      fallthrough
-    case "File.ReadSourceRaw":
-      fallthrough
-    case "File.Read":
-      fallthrough
-    case "File.Create":
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      argv = f
-    case "File.Move":
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
-    case "File.CreateTemplate":
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      f.Template = &ApplicationTemplate{}
-      if err := utils.ReadJson(req, f.Template); err != nil {
-        return nil, err
-      }
-      argv = f
-    case "File.Save":
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      if content, err := utils.ReadBody(req); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      } else {
-        f.Bytes(content)
-      }
-      argv = f
-  }
-  return argv, nil
-}
-
 // Private
 
 // Attempts to do path parameter matching against the routes given in list
@@ -357,17 +284,18 @@ func (r *Router) list(method string) []*Route {
 }
 
 func init() {
-  router = &Router{}
+  DefaultRouter = &Router{}
 
   route := func(service string, path string, method string, status int) *Route {
     r := &Route{ServiceMethod: service, Path: path, Method: method, Status: status}
-    return router.Add(r)
+    return DefaultRouter.Add(r)
   }
 
   var r *Route
 
   route("Core.Meta", "", http.MethodGet, http.StatusOK)
   route("Core.Stats", "/stats", http.MethodGet, http.StatusOK)
+  route("Services.List", "/services", http.MethodGet, http.StatusOK)
   route("Template.List", "/templates", http.MethodGet, http.StatusOK)
   route("Job.ActiveJob", "/jobs", http.MethodGet, http.StatusOK)
   route("Job.Read", "/jobs/*", http.MethodGet, http.StatusOK)

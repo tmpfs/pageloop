@@ -135,6 +135,7 @@ func (l *PageLoop) Listen(server *http.Server) error {
 func (l *PageLoop) initServices() {
   l.Services = &ServiceMap{}
 
+  srv := new(RpcServices)
   core := new(CoreService)
   host := new(HostService)
   ctx := new(ContainerService)
@@ -142,6 +143,9 @@ func (l *PageLoop) initServices() {
   file := new(FileService)
   job := new(JobService)
   tpl := new(TemplateService)
+
+  srv.Services = l.Services
+  srv.Router = DefaultRouter
 
   host.Host = l.Host
   ctx.Host = l.Host
@@ -152,6 +156,7 @@ func (l *PageLoop) initServices() {
   ctx.Mountpoints = l.MountpointManager
   app.Mountpoints = l.MountpointManager
 
+  l.Services.MustRegister(srv, "Services")
   l.Services.MustRegister(core, "Core")
   l.Services.MustRegister(host, "Host")
   l.Services.MustRegister(ctx, "Container")

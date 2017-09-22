@@ -79,12 +79,32 @@ type Response struct {
 }
 
 type ServiceMap struct {
-  serviceMap    map[string]*service
+  serviceMap  map[string]*service
   mu          sync.RWMutex    // protects the serviceMap
   reqLock     sync.Mutex      // protects freeReq
   freeReq     *Request
   respLock    sync.Mutex      // protects freeResp
   freeResp    *Response
+}
+
+type ServiceInfo struct {
+  Name string `json:"name"`
+  Methods []*ServiceMethodInfo `json:"methods"`
+}
+
+type ServiceMethodInfo struct {
+  // Fully qualified method name
+  ServiceMethod string `json:"method"`
+  // Method name
+  Name string `json:"name"`
+  // Number of calls for this method
+  Calls uint `json:"calls"`
+  // Type for the argument (first argument)
+  ArgType string `json:"arg"`
+  // Type for the reply value (second argument)
+  ReplyType string `json:"reply"`
+  // Placeholder for user data associated with the service (route information)
+  UserData interface{} `json:"info,omitempty"`
 }
 
 // Set argv for a service method call request.
@@ -104,6 +124,26 @@ func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
   if err := server.Register(rcvr, name); err != nil {
     panic(err)
   }
+}
+
+func (server *ServiceMap) Map() map[string]*ServiceInfo {
+  m := make(map[string]*ServiceInfo)
+  for key, srv := range server.serviceMap {
+    info := &ServiceInfo{Name: key}
+
+    for _, mt := range srv.method {
+      mi := &ServiceMethodInfo{
+        ServiceMethod: key + "." + mt.method.Name,
+        Calls: mt.numCalls,
+        ArgType: mt.ArgType.String(),
+        ReplyType: mt.ReplyType.String(),
+        Name: mt.method.Name}
+      info.Methods = append(info.Methods, mi)
+    }
+
+    m[key] = info
+  }
+  return m
 }
 
 // Register a service with the server.
@@ -140,7 +180,6 @@ func (server *ServiceMap) Request(name string, seq uint64) (req *Request, err er
   }
 
   args := server.arguments(mtype)
-
   req = &Request{
     ServiceMethod: name,
     Seq: seq,
@@ -217,16 +256,24 @@ func (server *ServiceMap) arguments (mtype *methodType) *RequestArguments {
   return &RequestArguments{Argv: argv, Replyv: replyv}
 }
 
-// Find a method by name in dot notation (Service.Method).
-func (server *ServiceMap) method(name string) (service *service, mtype *methodType, err error) {
+// Split a fully qualified service name, error if there is no dot in the name.
+func (server *ServiceMap) split(name string) (service string, method string, err error) {
   dot := strings.LastIndex(name, ".")
   if dot < 0 {
     err = fmt.Errorf("rpc: service/method request ill-formed: %s", name)
     return
   }
-
-  serviceName := name[:dot]
-  methodName := name[dot+1:]
+  service = name[:dot]
+  method = name[dot+1:]
+  return
+}
+// Find a method by name in dot notation (Service.Method).
+func (server *ServiceMap) method(name string) (service *service, mtype *methodType, err error) {
+  var serviceName string
+  var methodName string
+  if serviceName, methodName, err = server.split(name); err != nil {
+    return
+  }
 
   // Look up the request.
   server.mu.RLock()
