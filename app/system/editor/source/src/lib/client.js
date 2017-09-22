@@ -291,7 +291,9 @@ class ApiClient {
   createApp (app) {
     // TODO: fix with template reference
     app.container = 'user'
-    return this.rpc(Request.rpc('Container.CreateApp', app))
+    const req = Request.rpc('Container.CreateApp', app)
+    req.json(app)
+    return this.rpc(req)
   }
 
   // Delete an application.

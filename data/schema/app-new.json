@@ -2,6 +2,7 @@
 	"properties": {
 		"name": {"type": "string"},
 		"description": {"type": "string"},
+		"container": {"type": "string"},
     "template": {"type": "object"}
 	},
 	"required": ["name", "description"],
