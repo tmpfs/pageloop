@@ -80,6 +80,7 @@ func init() {
 
   Stats.Rpc = expvar.NewMap("rpc")
   Stats.Rpc.Add("calls", 0)
+  Stats.Rpc.Add("errors", 0)
 
   expvar.Publish("uptime", expvar.Func(uptime))
 }

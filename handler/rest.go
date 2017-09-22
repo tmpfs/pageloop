@@ -170,11 +170,13 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           // Call the service function
           Stats.Rpc.Add("calls", 1)
           if reply, err := h.Services.Call(rpcreq); err != nil {
+            Stats.Rpc.Add("errors", 1)
             return utils.Errorj(
               res, CommandError(http.StatusInternalServerError, err.Error()))
           } else {
             // Reply with error when available
             if reply.Error != nil {
+              Stats.Rpc.Add("errors", 1)
               // Send status error if we can
               if err, ok := reply.Error.(*StatusError); ok {
                 return utils.Errorj(res, err)

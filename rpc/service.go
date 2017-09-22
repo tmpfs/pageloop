@@ -126,6 +126,7 @@ func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
   }
 }
 
+// Get a map of public service information.
 func (server *ServiceMap) Map() map[string]*ServiceInfo {
   m := make(map[string]*ServiceInfo)
   for key, srv := range server.serviceMap {

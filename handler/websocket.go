@@ -164,6 +164,7 @@ func (w *WebsocketConnection) ReadRequest() {
             // Call the service function
             Stats.Rpc.Add("calls", 1)
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
+              Stats.Rpc.Add("errors", 1)
               if ex, ok := err.(*StatusError); ok {
                 writer.WriteError(ex)
               } else {
@@ -173,6 +174,7 @@ func (w *WebsocketConnection) ReadRequest() {
             } else {
               // Reply with error when available
               if reply.Error != nil {
+                Stats.Rpc.Add("errors", 1)
                 // Send status error if we can
                 if err, ok := reply.Error.(*StatusError); ok {
                   writer.WriteError(err)
