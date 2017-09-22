@@ -30,7 +30,6 @@ class SocketConnection {
     this.opts
     this._conn
     this._listeners = []
-
     this._keepalive = new SocketKeepalive(this, 30000)
   }
 

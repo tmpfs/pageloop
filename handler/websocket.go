@@ -103,19 +103,19 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
   return
 }
 
-func (w *WebsocketConnection) ReadRequest() bool {
+func (w *WebsocketConnection) ReadRequest() {
   for {
     // Read in the message
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
-      log.Println(err)
-      println("got error reading ws message")
+      log.Println(err.Error())
       // Cannot re-read now, we need to stop reading
-      // TODO: close the socket connection - cannot recover
-      return true
+      // close the socket connection on unrecoverable error
+      w.Conn.Close()
+      return
     }
 
-    println("message: " + string(p))
+    // println("message: " + string(p))
 
     // Treat text messages as JSON-RPC
     if messageType == websocket.TextMessage {
@@ -126,8 +126,7 @@ func (w *WebsocketConnection) ReadRequest() bool {
 
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
-        println("got error creating request")
-        log.Println(err)
+        log.Println(err.Error())
       } else {
         req := codec.NewRequest(fake)
         writer := &WebsocketWriter{Socket: w, MessageType: messageType, Request: req}
@@ -135,7 +134,7 @@ func (w *WebsocketConnection) ReadRequest() bool {
           // log.Println(err)
           req.WriteResponse(writer, nil, err)
         } else {
-          println("websocket method: " + method)
+          // println("websocket method: " + method)
           hasServiceMethod := w.Handler.Services.HasMethod(method)
           // Check if the service method is available
           if !hasServiceMethod {
