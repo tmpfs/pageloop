@@ -18,10 +18,12 @@ class SocketConnection {
     this._conn = new WebSocket(this.url, this.protocols, this.opts)
 
     // TODO: ping control functions and configurable interval
+    /*
     this._pinger = setInterval(() => {
       // console.log('sending ping message')
       this.send({})
     }, 30000)
+    */
 
     this._conn.onopen = () => {
       // console.log('socket connection opened')
@@ -50,7 +52,7 @@ class SocketConnection {
     }
 
     this._conn.onclose = () => {
-      // console.log('socket connection closed')
+      console.log('socket connection closed')
       this.cleanup()
     }
   }

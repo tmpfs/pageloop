@@ -3,10 +3,6 @@ const API = '/api/'
 
 function getBodyOptions (rpc, options) {
   options.headers = options.headers || {}
-
-  console.log('get body options')
-  console.log(rpc.rawRequest)
-
   // Use input raw request body
   if (rpc.request) {
     let body = rpc.request.value

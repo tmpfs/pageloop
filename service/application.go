@@ -79,8 +79,6 @@ func (s *AppService) Delete(app *Application, reply *ServiceReply) *StatusError 
 
     // Delete the in-memory application
     container.Del(app)
-
-    println("deletion completed.")
   }
   return nil
 }

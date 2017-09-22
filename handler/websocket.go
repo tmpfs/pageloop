@@ -16,6 +16,7 @@ import (
 )
 
 var(
+  ping = []byte("{}")
   codec *json.Codec = json.NewCodec()
   connections []*WebsocketConnection
   upgrader = websocket.Upgrader{
@@ -49,7 +50,7 @@ func (writer *WebsocketWriter) Header() http.Header {
 }
 
 func (writer *WebsocketWriter) Write(p []byte) (int, error) {
-  // println("Writing response: " + string(p))
+  println("Writing response: " + string(p))
   if err := writer.Socket.Conn.WriteMessage(writer.MessageType, p); err != nil {
     return 0, err
   }
@@ -65,6 +66,10 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
   // println("Read request : " + method)
   argv = &VoidArgs{}
   switch(method) {
+    case "Container.Read":
+      argv = &Container{}
+    case "Container.CreateApp":
+      fallthrough
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":
@@ -77,10 +82,6 @@ func (writer *WebsocketWriter) ReadRequest(method string) (argv interface{}, err
       fallthrough
     case "Application.Read":
       argv = &Application{}
-    case "Container.Read":
-      argv = &Container{}
-    case "Container.CreateApp":
-      fallthrough
     case "File.ReadSource":
       fallthrough
     case "File.ReadSourceRaw":
@@ -108,14 +109,22 @@ func (w *WebsocketConnection) ReadRequest() {
     messageType, p, err := w.Conn.ReadMessage()
     if err != nil {
       log.Println(err)
-      return
+      println("got error reading ws message")
+      continue
     }
+
+    println("message: " + string(p))
 
     // Treat text messages as JSON-RPC
     if messageType == websocket.TextMessage {
-      // println("request bytes: " + string(p))
+      // Drop ping requests
+      if bytes.Equal(p, ping) {
+        continue
+      }
+
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
+        println("got error creating request")
         log.Println(err)
       } else {
         req := codec.NewRequest(fake)
@@ -124,19 +133,20 @@ func (w *WebsocketConnection) ReadRequest() {
           // log.Println(err)
           req.WriteResponse(writer, nil, err)
         } else {
+          println("websocket method: " + method)
           hasServiceMethod := w.Handler.Services.HasMethod(method)
           // Check if the service method is available
           if !hasServiceMethod {
             writer.WriteError(
               CommandError(http.StatusNotFound, "Service %s does not exist", method))
-            return
+            continue
           }
 
           // Get a service method call request
           if rpcreq, err := w.Handler.Services.Request(method, 0); err != nil {
             writer.WriteError(
               CommandError(http.StatusInternalServerError, err.Error()))
-            return
+            continue
           } else {
             // TODO: read params into correct type
 
@@ -152,19 +162,19 @@ func (w *WebsocketConnection) ReadRequest() {
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
               writer.WriteError(
                 CommandError(http.StatusInternalServerError, err.Error()))
-              return
+              continue
             } else {
               // Reply with error when available
               if reply.Error != nil {
                 // Send status error if we can
                 if err, ok := reply.Error.(*StatusError); ok {
                   writer.WriteError(err)
-                  return
+                  continue
                 // Otherwise handle as plain error
                 } else {
                   // TODO: wrap error
                   req.WriteResponse(writer, reply, err)
-                  return
+                  continue
                 }
               // Success send the response to the client
               } else {
@@ -175,6 +185,14 @@ func (w *WebsocketConnection) ReadRequest() {
                   replyData = result.Reply
                   if result.Status != 0 {
                     status = result.Status
+                  }
+                }
+
+                if method == "Container.CreateApp" {
+                  // Mount the application, needs to be done here due to some funky
+                  // package cyclic references
+                  if app, ok := replyData.(*Application); ok {
+                    MountApplication(w.Handler.Mountpoints.MountpointMap, w.Handler.Host, app)
                   }
                 }
 

@@ -28,6 +28,9 @@ func (s *ContainerService) Read(container *Container, reply *ServiceReply) *Stat
 
 // Create application.
 func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *StatusError {
+  if app.ContainerName != "" && app.Container == nil {
+    app.Container = &Container{Name: app.ContainerName}
+  }
   if container, err := s.lookup(app.Container); err != nil {
     return err
   } else {
