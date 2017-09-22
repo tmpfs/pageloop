@@ -75,6 +75,9 @@ class State {
     if (!del) {
       this.activity.add(info)
     }
+    if (!info.error && !this.settings.showNotifications) {
+      return false
+    }
     return this.notifier.notify(info, del)
   }
 

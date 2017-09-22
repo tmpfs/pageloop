@@ -10,7 +10,7 @@
           <h2 v-if="item.title">{{item.title}}</h2>
           <h2 v-if="item.error">Error!</h2>
           <p v-if="item.message">{{item.message}}</p>
-          <p v-if="item.error">{{item.error.toString()}}</p>
+          <p v-if="item.error">{{item.error.message}}</p>
       </div>
     </transition-group>
   </div>

@@ -4,6 +4,7 @@
       <nav class="tabs">
         <a
           @click="currentView = 'new-app'"
+          class="new-app-trigger"
           :class="{selected: currentView === 'new-app'}"
           title="Create a new application">➕ New Application</a>
 
@@ -11,7 +12,7 @@
           @click="listApplications(container, $event)"
           :title="getLinkTitle(container)"
           :class="{selected: isSelected(container)}"
-          v-for="container in list">{{container.name}} Apps</a>
+          v-for="container in list" v-if="enabled[container.name]">{{container.name}}</a>
       </nav>
     </div>
     <div class="content">
@@ -30,12 +31,39 @@ export default {
   data: function () {
     return {
       currentView: 'apps-list',
-      containerName: 'user'
+      containerName: 'user',
+      user: true
     }
   },
   computed: {
     list: function () {
       return this.$store.state.containers
+    },
+    enabled: function () {
+      const o = {
+        system: this.system,
+        template: this.template
+      }
+
+      o.user = this.system || this.template
+
+      return o
+    },
+    system: {
+      get: function () {
+        return this.$store.state.settings.showSystemApplications
+      },
+      set: function (val) {
+        this.$store.state.settings.showSystemApplications = val
+      }
+    },
+    template: {
+      get: function () {
+        return this.$store.state.settings.showTemplateApplications
+      },
+      set: function (val) {
+        this.$store.state.settings.showTemplateApplications = val
+      }
     }
   },
   methods: {
@@ -108,6 +136,10 @@ export default {
 <style scoped>
   .scroll {
     height: calc(100% - 2.4rem);
+  }
+
+  .new-app-trigger {
+    max-width: 20rem;
   }
 
 </style>
