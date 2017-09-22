@@ -10,9 +10,9 @@
     </div>
     <p class="small title">{{count}} items in storage</p>
     <ul class="storage">
-      <li v-for="v, k in storage">
-        <div class="storage-key">{{k}}</div>
-        <div class="storage-value">{{v}}</div>
+      <li v-for="name, key in storage">
+        <div class="storage-key">{{key}}</div>
+        <div class="storage-value" v-bind:name="settings[name]">{{settings.get(key)}}</div>
       </li>
     </ul>
   </div>
@@ -23,7 +23,9 @@ export default {
   name: 'storage-preferences',
   data: function () {
     return {
-      storage: window.localStorage
+      // storage: window.localStorage
+      storage: this.$store.state.settings.storage,
+      keys: this.$store.state.settings.keys
     }
   },
   computed: {
@@ -32,11 +34,14 @@ export default {
         return 0
       }
       return this.storage.length
+    },
+    settings: function () {
+      return this.$store.state.settings
     }
   },
   // TODO: update as settings change
   mounted: function () {
-    this.storage = window.localStorage
+    // this.storage = this.$store.state.settings.storage
   },
   methods: {
     clearLocalStorage: function () {
