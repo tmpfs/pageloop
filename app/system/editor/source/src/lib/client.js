@@ -87,11 +87,13 @@ class ApiClient {
 
   // Perform an API request and assume a JSON response unless
   // the raw option is set.
-  request (url, opts) {
+  request (url, opts, id, method) {
     const log = this.preflight(url, opts)
 
+    console.log(`[rest] (${id}) ${method} ${opts.method} ${url}`)
+    console.log(JSON.stringify(opts))
+
     // console.log(opts)
-    // console.log(`[rest] ${opts.method} ${url}`)
     return fetch(url, opts)
       .then((res) => {
         res.transport = 'http://rest-api'
@@ -115,10 +117,6 @@ class ApiClient {
     // Try to send over socket connection first
     if (this.useWebsocket && this.socket.connected && !opts.http) {
       const log = this.preflight(url, {method: 'RPC'})
-      // Clean REST specific flags
-      delete req.mime
-      delete req.raw
-      delete req.fetch
       return this.socket.request(req)
         .then((res) => {
           // console.log(res)
@@ -130,7 +128,7 @@ class ApiClient {
     }
 
     // Send via standard REST API if the socket is not available
-    return this.request(url, options)
+    return this.request(url, options, req.id, req.method)
   }
 
   upload (container, application, file) {
@@ -279,9 +277,8 @@ class ApiClient {
   }
 
   // Run an application build task
-  runTask (container, application, task) {
-    const ref = this.getFileReference(container, application, task)
-    return this.rpc(Request.rpc('Application.RunTask', ref))
+  runTask (container, name, task) {
+    return this.rpc(Request.rpc('Application.RunTask', {container, name, task}))
   }
 
   // Create a new application.

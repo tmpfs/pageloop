@@ -150,9 +150,9 @@ func (s *AppService) lookup(app *Application) (*Container, *Application, *Status
   if c == nil {
     return nil, nil, CommandError(http.StatusNotFound, "Container %s not found", app.ContainerName)
   }
-  app = c.GetByName(app.Name)
-  if app == nil {
+  a := c.GetByName(app.Name)
+  if a == nil {
     return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", app.Name)
   }
-  return c, app, nil
+  return c, a, nil
 }

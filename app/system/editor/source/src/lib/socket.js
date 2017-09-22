@@ -24,7 +24,7 @@ class SocketConnection {
     }, 30000)
 
     this._conn.onopen = () => {
-      console.log('socket connection opened')
+      // console.log('socket connection opened')
     }
 
     this._conn.onmessage = (e) => {
@@ -36,7 +36,7 @@ class SocketConnection {
         } catch (e) {
           throw e
         }
-        console.log(doc)
+        // console.log(doc)
         if (doc.id && this._listeners[doc.id]) {
           this._listeners[doc.id](doc)
           delete this._listeners[doc.id]
@@ -50,7 +50,7 @@ class SocketConnection {
     }
 
     this._conn.onclose = () => {
-      console.log('socket connection closed')
+      // console.log('socket connection closed')
       this.cleanup()
     }
   }
@@ -66,22 +66,18 @@ class SocketConnection {
   // Send a JSON payload and ignore any response
   send (payload) {
     if (this.connected) {
-      console.log('sending websocket request')
-      console.log(payload)
-      this._conn.send(JSON.stringify(payload))
+      const encoded = JSON.stringify(payload)
+      console.log(`[sock] (${payload.id}) ${payload.method}`)
+      console.log(encoded)
+      this._conn.send(encoded)
     }
   }
 
   request (payload) {
     if (this.connected) {
-      /*
-      console.log('requesting with websocket connection')
-      console.log(payload)
-      */
       return new Promise((resolve, reject) => {
         // TODO: set timeout to remove listener
         this._listeners[payload.id] = (response) => {
-          // console.log(response)
           const res = {
             status: response.status,
             id: response.id,
@@ -101,8 +97,6 @@ class SocketConnection {
 
             // TODO: handle wrapper error responses
           }
-
-          // console.log(doc)
 
           resolve({response: res, document: doc})
         }

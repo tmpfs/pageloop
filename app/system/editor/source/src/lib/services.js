@@ -121,7 +121,7 @@ const services = {
   },
   'Application.RunTask': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.application}/tasks/${params.url}`,
+      url: API + `apps/${params.container}/${params.name}/tasks/${params.task}`,
       options: getPutOptions(rpc)
     }
   },
