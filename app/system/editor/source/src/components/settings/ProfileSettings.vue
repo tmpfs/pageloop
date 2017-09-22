@@ -58,4 +58,8 @@ export default {
     margin-left: 2.5rem;
   }
 
+  label {
+    user-select: none;
+  }
+
 </style>

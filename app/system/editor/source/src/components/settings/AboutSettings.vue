@@ -5,7 +5,7 @@
       <span v-if="meta.stats && meta.stats.uptime" class="uptime">{{meta.stats.uptime.value}}</span>
     </div>
     <div class="stats">
-      <div v-for="group, key in meta.stats">
+      <div v-for="group, key in meta.stats" v-if="key !== 'uptime'">
         <h4>{{key}}</h4>
         <ul class="stat">
           <li v-for="v, k in group">

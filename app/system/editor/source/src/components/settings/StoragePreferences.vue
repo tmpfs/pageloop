@@ -34,7 +34,7 @@ export default {
       return Object.keys(this.storage).length
     }
   },
-  watch: {},
+  // TODO: update as settings change
   mounted: function () {
     this.storage = window.localStorage
   },
