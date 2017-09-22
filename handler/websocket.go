@@ -50,7 +50,6 @@ func (writer *WebsocketWriter) Header() http.Header {
 }
 
 func (writer *WebsocketWriter) Write(p []byte) (int, error) {
-  println("Writing response: " + string(p))
   if err := writer.Socket.Conn.WriteMessage(writer.MessageType, p); err != nil {
     return 0, err
   }
@@ -117,8 +116,6 @@ func (w *WebsocketConnection) ReadRequest() {
       return
     }
 
-    // println("message: " + string(p))
-
     // Treat text messages as JSON-RPC
     if messageType == websocket.TextMessage {
       // Drop ping requests
@@ -133,8 +130,8 @@ func (w *WebsocketConnection) ReadRequest() {
         req := codec.NewRequest(fake)
         writer := &WebsocketWriter{Socket: w, MessageType: messageType, Request: req}
         if method, err := req.Method(); err != nil {
-          // log.Println(err)
           req.WriteResponse(writer, nil, err)
+          continue
         } else {
           // println("websocket method: " + method)
           hasServiceMethod := w.Handler.Services.HasMethod(method)
@@ -151,8 +148,6 @@ func (w *WebsocketConnection) ReadRequest() {
               CommandError(http.StatusInternalServerError, err.Error()))
             continue
           } else {
-            // TODO: read params into correct type
-
             if argv, err := w.RequestArgv(req, method); err != nil {
               writer.WriteError(
                 CommandError(http.StatusInternalServerError, err.Error()))
