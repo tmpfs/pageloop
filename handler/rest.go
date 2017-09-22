@@ -168,6 +168,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           }
 
           // Call the service function
+          Stats.Rpc.Add("calls", 1)
           if reply, err := h.Services.Call(rpcreq); err != nil {
             return utils.Errorj(
               res, CommandError(http.StatusInternalServerError, err.Error()))

@@ -161,6 +161,8 @@ func (w *WebsocketConnection) ReadRequest() {
               }
             }
 
+            // Call the service function
+            Stats.Rpc.Add("calls", 1)
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
               if ex, ok := err.(*StatusError); ok {
                 writer.WriteError(ex)

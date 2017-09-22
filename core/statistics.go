@@ -24,6 +24,8 @@ type Statistics struct {
   Uptime *Uptime `json:"uptime"`
   // HTTP server statistics
   Http *expvar.Map `json:"http"`
+  // RPC service statistics
+  Rpc *expvar.Map `json:"rpc"`
   // Websocket client connections and stats
   Websocket *expvar.Map `json:"ws"`
 }
@@ -39,6 +41,7 @@ func (s *Statistics) MarshalJSON() ([]byte, error) {
   o["uptime"] = uptime()
   o["http"] = mapToInterface(s.Http)
   o["ws"] = mapToInterface(s.Websocket)
+  o["rpc"] = mapToInterface(s.Rpc)
   return json.Marshal(&o)
 }
 
@@ -74,6 +77,9 @@ func init() {
 
   Stats.Websocket = expvar.NewMap("ws")
   Stats.Websocket.Add("connections", 0)
+
+  Stats.Rpc = expvar.NewMap("rpc")
+  Stats.Rpc.Add("calls", 0)
 
   expvar.Publish("uptime", expvar.Func(uptime))
 }

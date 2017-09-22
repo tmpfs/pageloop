@@ -27,6 +27,7 @@ func (c *CoreService) Stats(argv *VoidArgs, reply *Statistics) error {
   // Assign statistics fields for reply
   reply.Uptime = Stats.Uptime
   reply.Http = Stats.Http
+  reply.Rpc = Stats.Rpc
   reply.Websocket = Stats.Websocket
 
   return nil

@@ -2,7 +2,7 @@
   <div class="small">
     <div class="info">
       <span class="meta">{{meta.info.name}} v{{meta.info.version}}</span>
-      <span class="uptime">{{meta.stats.uptime.value}}</span>
+      <span v-if="meta.stats && meta.stats.uptime" class="uptime">{{meta.stats.uptime.value}}</span>
     </div>
     <div class="stats">
       <div v-for="group, key in meta.stats">
@@ -76,5 +76,9 @@ export default {
   li > span {
     display: table-cell;
     width: 50%;
+  }
+
+  li span:first-child {
+    padding-left: 0.5rem;
   }
 </style>
