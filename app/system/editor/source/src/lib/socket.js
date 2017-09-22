@@ -77,15 +77,36 @@ class SocketOpener {
   }
 }
 
+/**
+ *  Represents a socket connection.
+ *
+ *  Note that retryTimeout is multiplied on each attempt so it is ok
+ *  to use a low value like 2000.
+ *
+ *  @param {Object} options
+ *
+ *  @option {Object} protocols protocols for Websocket.
+ *  @option {Object} websocket options for Websocket.
+ *  @option {Boolean=true} keepalive send keepalive ping requests.
+ *  @option {Number=30000} keepaliveDuration interval for keepalive ping messages.
+ *  @option {Boolean=true} retry attempt to re-connect on close event.
+ *  @option {Number=2000} retryTimeout interval for re-connection attempts.
+ *  @option {Number=64} retryLimit number of re-connection attempts before giving up.
+ */
 class SocketConnection {
   constructor (options = {}) {
     this.url = document.location.origin.replace(/^http/, 'ws') + WS
-    this.opts = options.websocket
     this.protocols = options.protocols
+    this.opts = options.websocket
+
     this._conn
     this._listeners = []
-    this._keepalive = new SocketKeepalive(this, options.pingDuration || 30000)
-    this._opener = new SocketOpener(this, options.retryTimeout || 2000, options.retryLimit || 64)
+    if (options.keepalive === undefined || options.keepalive) {
+      this._keepalive = new SocketKeepalive(this, options.keepaliveDuration || 30000)
+    }
+    if (options.retry === undefined || options.retry) {
+      this._opener = new SocketOpener(this, options.retryTimeout || 2000, options.retryLimit || 64)
+    }
   }
 
   get socket () {
