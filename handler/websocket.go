@@ -172,45 +172,32 @@ func (w *WebsocketConnection) ReadRequest() {
               }
               continue
             } else {
-              // Reply with error when available
-              if reply.Error != nil {
-                Stats.Rpc.Add("errors", 1)
-                // Send status error if we can
-                if err, ok := reply.Error.(*StatusError); ok {
-                  writer.WriteError(err)
-                  continue
-                // Otherwise handle as plain error
-                } else {
-                  // TODO: wrap error
-                  req.WriteResponse(writer, reply, err)
-                  continue
-                }
+              // NOTE: we don't need to test reply.Error as the error is always returned
+
               // Success send the response to the client
-              } else {
-                status := http.StatusOK
-                replyData := reply.Reply
+              status := http.StatusOK
+              replyData := reply.Reply
 
-                if result, ok := replyData.(*ServiceReply); ok {
-                  replyData = result.Reply
-                  if result.Status != 0 {
-                    status = result.Status
-                  }
+              if result, ok := replyData.(*ServiceReply); ok {
+                replyData = result.Reply
+                if result.Status != 0 {
+                  status = result.Status
                 }
-
-                if method == "Container.CreateApp" {
-                  // Mount the application, needs to be done here due to some funky
-                  // package cyclic references
-                  if app, ok := replyData.(*Application); ok {
-                    MountApplication(w.Handler.Mountpoints.MountpointMap, w.Handler.Host, app)
-                  }
-                }
-
-                // Wrap the result object so we can extract
-                // status code client side
-                replyData = &RpcWebsocketReply{Document: replyData, Status: status}
-
-                req.WriteResponse(writer, replyData, nil)
               }
+
+              if method == "Container.CreateApp" {
+                // Mount the application, needs to be done here due to some funky
+                // package cyclic references
+                if app, ok := replyData.(*Application); ok {
+                  MountApplication(w.Handler.Mountpoints.MountpointMap, w.Handler.Host, app)
+                }
+              }
+
+              // Wrap the result object so we can extract
+              // status code client side
+              replyData = &RpcWebsocketReply{Document: replyData, Status: status}
+
+              req.WriteResponse(writer, replyData, nil)
             }
           }
         }

@@ -171,67 +171,62 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           Stats.Rpc.Add("calls", 1)
           if reply, err := h.Services.Call(rpcreq); err != nil {
             Stats.Rpc.Add("errors", 1)
-            return utils.Errorj(
-              res, CommandError(http.StatusInternalServerError, err.Error()))
+            // Send status error if we can
+            if err, ok := reply.Error.(*StatusError); ok {
+              return utils.Errorj(res, err)
+            // Otherwise handle as plain error
+            } else {
+              return utils.Errorj(
+                res, CommandError(http.StatusInternalServerError, err.Error()))
+            }
           } else {
-            // Reply with error when available
-            if reply.Error != nil {
-              Stats.Rpc.Add("errors", 1)
-              // Send status error if we can
-              if err, ok := reply.Error.(*StatusError); ok {
-                return utils.Errorj(res, err)
-              // Otherwise handle as plain error
+            // NOTE: we don't need to test reply.Error as the error is always returned
+
+            // Success send the response to the client
+            var replyData = reply.Reply
+
+            // TODO: use route status and remove from ServiceReply
+            status := http.StatusOK
+
+            if result, ok := replyData.(*ServiceReply); ok {
+              replyData = result.Reply
+              if result.Status != 0 {
+                status = result.Status
+              }
+            }
+
+            // NOTE: After functions need some thought!
+            if route.ServiceMethod == "Container.CreateApp" {
+              // Mount the application, needs to be done here due to some funky
+              // package cyclic references
+              if app, ok := replyData.(*Application); ok {
+                MountApplication(h.Mountpoints.MountpointMap, h.Host, app)
+              }
+            }
+
+            // Indicate to the client the response type.
+
+            // Allows the client to determine whether a response should
+            // be parsed as JSON or not.
+            res.Header().Set("X-Response-Type", strconv.Itoa(route.ResponseType))
+
+            // Determine how we should reply to the client
+            if route.ResponseType == ResponseTypeByte {
+              // TODO: work out correct MIME type from file???
+
+              // If the method result is a slice of bytes send it back
+              if content, ok := replyData.([]byte); ok {
+                return utils.Write(res, status, content)
               } else {
                 return utils.Errorj(
-                  res, CommandError(http.StatusInternalServerError, err.Error()))
+                  res, CommandError(
+                    http.StatusInternalServerError,
+                    "Service method failed to return []byte for binary response type"))
               }
-            // Success send the response to the client
-            } else {
-              var replyData = reply.Reply
-
-              // TODO: use route status and remove from ServiceReply
-              status := http.StatusOK
-
-              if result, ok := replyData.(*ServiceReply); ok {
-                replyData = result.Reply
-                if result.Status != 0 {
-                  status = result.Status
-                }
-              }
-
-              // NOTE: After functions need some thought!
-              if route.ServiceMethod == "Container.CreateApp" {
-                // Mount the application, needs to be done here due to some funky
-                // package cyclic references
-                if app, ok := replyData.(*Application); ok {
-                  MountApplication(h.Mountpoints.MountpointMap, h.Host, app)
-                }
-              }
-
-              // Indicate to the client the response type.
-
-              // Allows the client to determine whether a response should
-              // be parsed as JSON or not.
-              res.Header().Set("X-Response-Type", strconv.Itoa(route.ResponseType))
-
-              // Determine how we should reply to the client
-              if route.ResponseType == ResponseTypeByte {
-                // TODO: work out correct MIME type from file???
-
-                // If the method result is a slice of bytes send it back
-                if content, ok := replyData.([]byte); ok {
-                  return utils.Write(res, status, content)
-                } else {
-                  return utils.Errorj(
-                    res, CommandError(
-                      http.StatusInternalServerError,
-                      "Service method failed to return []byte for binary response type"))
-                }
-              }
-
-              // Assume JSON response if response type not already handled
-              return utils.Json(res, status, replyData)
             }
+
+            // Assume JSON response if response type not already handled
+            return utils.Json(res, status, replyData)
           }
         }
       }
