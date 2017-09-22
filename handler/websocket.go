@@ -56,8 +56,12 @@ func (writer *WebsocketWriter) Write(p []byte) (int, error) {
   return len(p), nil
 }
 
+// Write an error response to the result object so that clients
+// can inspect the status code for the error.
 func (writer *WebsocketWriter) WriteError(err *StatusError) error {
-  return writer.Request.WriteResponse(writer, nil, err)
+  m := make(map[string]*StatusError)
+  m["error"] = err
+  return writer.Request.WriteResponse(writer, m, nil)
 }
 
 // Determine the type of argument for the given service method and
@@ -158,8 +162,11 @@ func (w *WebsocketConnection) ReadRequest() {
             }
 
             if reply, err := w.Handler.Services.Call(rpcreq); err != nil {
-              writer.WriteError(
-                CommandError(http.StatusInternalServerError, err.Error()))
+              if ex, ok := err.(*StatusError); ok {
+                writer.WriteError(ex)
+              } else {
+                writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
+              }
               continue
             } else {
               // Reply with error when available

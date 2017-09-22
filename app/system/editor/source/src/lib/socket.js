@@ -154,7 +154,7 @@ class SocketConnection {
       } catch (e) {
         throw e
       }
-      // console.log(doc)
+      console.log(doc)
       if (doc.id && this._listeners[doc.id]) {
         this._listeners[doc.id](doc)
         delete this._listeners[doc.id]
@@ -202,7 +202,6 @@ class SocketConnection {
             id: response.id,
             transport: 'ws://json-rpc'}
 
-          // TODO: reject on error???
           let doc = response.result || {}
 
           // Just vanilla rpc error, no status code available
@@ -210,11 +209,17 @@ class SocketConnection {
             doc.error = response.error
             res.status = 500
           } else if (response.result) {
-            // Unwrap result object for status code
-            doc = response.result.document
-            res.status = response.result.status
-
-            // TODO: handle wrapper error responses
+            if (response.result.error) {
+              console.log(response.result.error)
+              // Unwrap error from rpc result object
+              // allows passing custom status codes
+              doc.error = response.result.error.message
+              res.status = response.result.error.status
+            } else {
+              // Unwrap result object for status code
+              doc = response.result.document
+              res.status = response.result.status
+            }
           }
 
           resolve({response: res, document: doc})
