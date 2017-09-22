@@ -31,7 +31,7 @@ export default {
       if (!this.storage) {
         return 0
       }
-      return Object.keys(this.storage).length
+      return this.storage.length
     }
   },
   // TODO: update as settings change

@@ -5,8 +5,8 @@
       <label for="show-data-editor">Show data editor</label>
     </div>
     <div>
-      <input id="show-code-editor" type="checkbox" v-model="showCodeEditor" />
-      <label for="show-code-editor">Show code editor</label>
+      <input id="show-text-editor" type="checkbox" v-model="showTextEditor" />
+      <label for="show-text-editor">Show text editor</label>
     </div>
     <div>
       <input id="use-vim-mode" type="checkbox" v-model="useVimCodeEditor" />
@@ -25,7 +25,7 @@ export default {
   data: function () {
     return {
       showDataEditor: true,
-      showCodeEditor: true,
+      showTextEditor: true,
       useVimCodeEditor: true,
       frontmatterDisplay: true
     }

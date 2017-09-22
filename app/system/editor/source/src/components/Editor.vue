@@ -30,10 +30,10 @@
           title="Show data editor">Data</a>
         <a v-bind:class="{selected: currentView === 'code-editor', disabled: codeHidden}"
           @click="currentView = 'code-editor'"
-          title="Show source editor">Code</a>
+          title="Show text editor">Text</a>
         <a v-bind:class="{selected: currentView === 'visual-editor', disabled: hidden}"
           @click="currentView = 'visual-editor'"
-          title="Show visual editor">Visual</a>
+          title="Show visual editor">View</a>
       </nav>
     </div>
     <component v-bind:is="currentView"></component>
