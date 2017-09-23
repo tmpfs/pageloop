@@ -26,7 +26,7 @@ class Settings {
       // Set up properties
       Object.defineProperty(this, nm, {
         enumerable: true,
-        configurable: false,
+        configurable: true,
         get: () => {
           return this.get(key)
         },
@@ -60,11 +60,6 @@ class Settings {
     }
     val = this.coerce(val)
     return val
-  }
-
-  getDefault (key) {
-    // Go via the property for coercion and default value
-    return this[this.propName(key)]
   }
 
   /*
