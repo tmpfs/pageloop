@@ -17,13 +17,11 @@ class Settings {
   constructor () {
     this.keys = {}
     for (let key in defaults) {
-      const nm = this.propName(key)
-
       // All keys for data bindings
       this.keys[key] = defaults[key]
 
       // Set up properties
-      Object.defineProperty(this, nm, {
+      Object.defineProperty(this, this.propName(key), {
         enumerable: true,
         configurable: true,
         get: () => {
@@ -47,12 +45,23 @@ class Settings {
     return val
   }
 
-  get (key) {
+  prettify (val) {
+    // Slightly nicer for users to see than true/false
+    if (typeof (val) === 'boolean') {
+      return val ? 1 : 0
+    }
+    return val
+  }
+
+  get (key, pretty) {
     let val = localStorage[key]
     if (val === undefined) {
-      return defaults[key]
+      return pretty ? this.prettify(defaults[key]) : defaults[key]
     }
     val = this.coerce(val)
+    if (pretty) {
+      val = this.prettify(val)
+    }
     return val
   }
 
@@ -63,22 +72,16 @@ class Settings {
   set (key, value) {
     // Update the backing storage
     localStorage[key] = JSON.stringify(value)
-
     // All keys for reactive properties need to be mutated
     // so that data bindings fire
     this.keys[key] = value
   }
 
   reset () {
-    let k
-    for (k in this.keys) {
+    for (let k in this.keys) {
       this[this.propName(k)] = defaults[k]
       localStorage.removeItem(k)
     }
-  }
-
-  get length () {
-    return localStorage.length
   }
 }
 
