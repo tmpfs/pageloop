@@ -155,7 +155,9 @@ export default {
   .CodeMirror {
     font-size: 1.6rem;
     height: 100%;
-    /* flex: 1 0 auto; */
+    font-family: 'Pragmata Pro', monospace;
+    /* TODO: specify font sizes with families - I forget the syntax :( */
+    font-size: 1.2rem;
   }
 
   .CodeMirror-dialog {

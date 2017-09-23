@@ -30,6 +30,10 @@ class Settings {
       // All keys for data bindings
       this.keys[key] = defaults[key]
 
+      if (localStorage[key] !== undefined) {
+        this.keys[key] = this.coerce(localStorage[key])
+      }
+
       // Set up properties
       Object.defineProperty(this, this.propName(key), {
         enumerable: true,
