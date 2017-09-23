@@ -150,8 +150,6 @@ func (s *FileService) lookup(f *File, appOnly bool) (*Container, *Application, *
       http.StatusNotFound, "File %s missing owner application (detached file)", f.Url)
   }
 
-  // if f.Owner.ContainerName != "" &&
-
   if f.Owner.Container == nil {
     return nil, nil, nil, CommandError(
       http.StatusNotFound, "Application %s missing container (detached app)", f.Owner.Name)

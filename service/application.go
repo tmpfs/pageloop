@@ -27,7 +27,7 @@ type AppService struct {
 
 // Read an application.
 func (s *AppService) Read(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := s.lookup(app); err != nil {
+  if _, app, err := s.lookupApplication(app); err != nil {
     return err
   } else {
     reply.Reply = app
@@ -37,7 +37,7 @@ func (s *AppService) Read(app *Application, reply *ServiceReply) *StatusError {
 
 // Read the files for an application.
 func (s *AppService) ReadFiles(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := s.lookup(app); err != nil {
+  if _, app, err := s.lookupApplication(app); err != nil {
     return err
   } else {
     reply.Reply = app.Files
@@ -47,7 +47,7 @@ func (s *AppService) ReadFiles(app *Application, reply *ServiceReply) *StatusErr
 
 // Read the pages for an application.
 func (s *AppService) ReadPages(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := s.lookup(app); err != nil {
+  if _, app, err := s.lookupApplication(app); err != nil {
     return err
   } else {
     reply.Reply = app.Pages
@@ -57,7 +57,7 @@ func (s *AppService) ReadPages(app *Application, reply *ServiceReply) *StatusErr
 
 // Delete an application.
 func (s *AppService) Delete(app *Application, reply *ServiceReply) *StatusError {
-  if container, app, err := s.lookup(app); err != nil {
+  if container, app, err := s.lookupApplication(app); err != nil {
     return err
   } else {
     if app.Protected {
@@ -85,7 +85,7 @@ func (s *AppService) Delete(app *Application, reply *ServiceReply) *StatusError 
 
 // Batch delete files.
 func (s *AppService) DeleteFiles(in *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := s.lookup(in); err != nil {
+  if _, app, err := s.lookupApplication(in); err != nil {
     return err
   } else {
     var file *File
@@ -110,7 +110,7 @@ func (s *AppService) DeleteFiles(in *Application, reply *ServiceReply) *StatusEr
 // Run an application build task.
 func(s *AppService) RunTask(app *Application, reply *ServiceReply) *StatusError {
   var task = app.Task
-  if _, app, err := s.lookup(app); err != nil {
+  if _, app, err := s.lookupApplication(app); err != nil {
     return err
   } else {
     task = strings.TrimPrefix(task, SLASH)
@@ -141,9 +141,7 @@ func(s *AppService) RunTask(app *Application, reply *ServiceReply) *StatusError 
   return nil
 }
 
-// Private
-
-func (s *AppService) lookup(app *Application) (*Container, *Application, *StatusError) {
+func (s *AppService) lookupApplication(app *Application) (*Container, *Application, *StatusError) {
   c := s.Host.GetByName(app.ContainerName)
   if c == nil {
     return nil, nil, CommandError(http.StatusNotFound, "Container %s not found", app.ContainerName)
