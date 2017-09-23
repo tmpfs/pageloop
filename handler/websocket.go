@@ -127,6 +127,8 @@ func (w *WebsocketConnection) ReadRequest() {
         continue
       }
 
+      // TODO: restore create app validation!
+
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
         log.Println(err.Error())
