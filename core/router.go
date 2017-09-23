@@ -11,6 +11,9 @@ import(
 const(
   ResponseTypeJson = iota
   ResponseTypeByte
+  // Used when a service method writes to the outgoing
+  // body directly (zip archives etc)
+  ResponseTypeNone
 )
 
 var(
@@ -328,4 +331,7 @@ func init() {
 
   // TODO: conditional on template object
   route("File.CreateTemplate", "/apps/*/*/files/*", http.MethodPut, http.StatusCreated)
+
+  r = route("Archive.Export", "/apps/*/*/zip", http.MethodGet, http.StatusOK)
+  r.ResponseType = ResponseTypeNone
 }

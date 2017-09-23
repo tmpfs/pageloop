@@ -26,7 +26,7 @@ var(
 )
 
 // Get the service method arguments for the given request and matched route.
-func Argv(route *Route, req *http.Request) (argv interface{}, err *StatusError) {
+func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interface{}, err *StatusError) {
   name := route.ServiceMethod
   switch name {
     case "Container.CreateApp":
@@ -40,6 +40,19 @@ func Argv(route *Route, req *http.Request) (argv interface{}, err *StatusError) 
       argv = app
     case "Container.Read":
       argv = &Container{Name: route.Parameters.Context}
+    case "Archive.Import":
+      fallthrough
+    case "Archive.Export":
+      app := &Application{
+        Name: route.Parameters.Target,
+        ContainerName: route.Parameters.Context}
+
+      name := app.Name + ".zip"
+
+      res.Header().Set("Content-Disposition", "attachment; filename=" + name)
+
+      // TODO: set response headers
+      argv = &ArchiveRequest{Application: app, Writer: res, Type: ArchiveSource, Name: name}
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":
@@ -158,7 +171,7 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
           res, CommandError(http.StatusInternalServerError, err.Error()))
       } else {
         // Get rpc arguments
-        if argv, err := Argv(route, req); err != nil {
+        if argv, err := Argv(route, req, res); err != nil {
           return utils.Errorj(res, err)
         } else {
 
@@ -211,7 +224,10 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
             res.Header().Set("X-Response-Type", strconv.Itoa(route.ResponseType))
 
             // Determine how we should reply to the client
-            if route.ResponseType == ResponseTypeByte {
+            if route.ResponseType == ResponseTypeNone {
+              // Service method wrote the response body
+              return 0, nil
+            } else if route.ResponseType == ResponseTypeByte {
               // TODO: work out correct MIME type from file???
 
               // If the method result is a slice of bytes send it back
