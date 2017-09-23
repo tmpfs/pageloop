@@ -10,8 +10,7 @@ import(
 )
 
 const(
-  ArchiveFull = iota
-  ArchiveSource
+  ArchiveSource = iota
   ArchivePublic
 )
 
