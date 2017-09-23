@@ -18,7 +18,7 @@ type ContainerService struct {
 
 // Read a container.
 func (s *ContainerService) Read(container *Container, reply *ServiceReply) *StatusError {
-  if c, err := s.lookup(container); err != nil {
+  if c, err := LookupContainer(s.Host, container); err != nil {
     return err
   } else {
     reply.Reply = c
@@ -31,7 +31,7 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
   if app.ContainerName != "" && app.Container == nil {
     app.Container = &Container{Name: app.ContainerName}
   }
-  if container, err := s.lookup(app.Container); err != nil {
+  if container, err := LookupContainer(s.Host, app.Container); err != nil {
     return err
   } else {
     // TODO: do not allow creating apps on non-user containers!
@@ -87,10 +87,8 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
   return nil
 }
 
-// Private
-
-func (s *ContainerService) lookup(container *Container) (*Container, *StatusError) {
-  c := s.Host.GetByName(container.Name)
+func LookupContainer(host *Host, container *Container) (*Container, *StatusError) {
+  c := host.GetByName(container.Name)
   if c == nil {
     return nil, CommandError(http.StatusNotFound, "Container %s not found", container.Name)
   }
