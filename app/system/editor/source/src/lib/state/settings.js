@@ -18,7 +18,7 @@ class Settings {
     this.storage = {}
     this.keys = {}
     for (let key in defaults) {
-      const nm = camel(key.replace(/^[^:]+:/, ''))
+      const nm = this.propName(key)
       this.keys[key] = nm
 
       // Set up properties
@@ -45,6 +45,10 @@ class Settings {
     }
   }
 
+  propName (key) {
+    return camel(key.replace(/^[^:]+:/, ''))
+  }
+
   coerce (val) {
     if (val === 'null') {
       return null
@@ -64,12 +68,18 @@ class Settings {
     return this.storage[key]
   }
 
+  getDefault (key) {
+    return this.get(key) || defaults[key]
+  }
+
   del (key) {
     localStorage[key] = null
     delete this.storage[key]
   }
 
   set (key, value) {
+    console.log(`set ${key} to ${value}`)
+
     localStorage[key] = value
     // Store for reactive values by key
     this.storage[key] = value
@@ -78,8 +88,23 @@ class Settings {
     this.keys[key] = value
   }
 
+  reset () {
+    console.log('settings reset')
+    let k
+    for (k in this.keys) {
+      // Trigger properties for bindings to fire
+      this[this.propName(k)] = defaults[k]
+      console.log('settings prop name ' + this.propName(k))
+      console.log('settings prop name ' + defaults[k])
+    }
+
+    // Clear all local storage items
+    for (k in localStorage) {
+      localStorage.removeItem(k)
+    }
+  }
+
   get length () {
-    console.log('getting length: ' + localStorage.length)
     return localStorage.length
   }
 }

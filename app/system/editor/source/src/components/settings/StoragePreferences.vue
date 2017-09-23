@@ -12,7 +12,7 @@
     <ul class="storage">
       <li v-for="_, key in keys" :class="{disabled: localStorage[key] === undefined}">
         <div class="storage-key">{{key}}</div>
-        <div class="storage-value">{{settings.get(key)}}</div>
+        <div class="storage-value">{{settings.getDefault(key)}}</div>
       </li>
     </ul>
   </div>

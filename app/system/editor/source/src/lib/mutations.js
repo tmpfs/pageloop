@@ -129,11 +129,9 @@ const Mutations = {
     state.templates = templates
   },
   'clear-local-storage': function (state) {
+    state.settings.reset()
     // Reset all hint messages
     state.hints.reset()
-    for (let k in localStorage) {
-      localStorage.removeItem(k)
-    }
   }
 }
 
