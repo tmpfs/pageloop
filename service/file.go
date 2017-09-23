@@ -12,7 +12,7 @@ type FileService struct {
 
 // Read a file.
 func (s *FileService) Read(file *File, reply *ServiceReply) *StatusError {
-  if _, _, f, err := s.lookup(file, false); err != nil {
+  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
     return err
   } else {
     reply.Reply = f
@@ -25,7 +25,7 @@ func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
   if file.Destination == "" {
     return CommandError(http.StatusBadRequest, "No destination for move operation")
   }
-  if _, app, f, err := s.lookup(file, false); err != nil {
+  if _, app, f, err := LookupFile(s.Host, file, false); err != nil {
     return err
   } else {
     if err := app.Move(f, file.Destination); err != nil {
@@ -38,7 +38,7 @@ func (s *FileService) Move(file *File, reply *ServiceReply) *StatusError {
 
 // Read file content.
 func (s *FileService) ReadSource(file *File, reply *ServiceReply) *StatusError {
-  if _, _, f, err := s.lookup(file, false); err != nil {
+  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
     return err
   } else {
     reply.Reply = f.Source(false)
@@ -48,7 +48,7 @@ func (s *FileService) ReadSource(file *File, reply *ServiceReply) *StatusError {
 
 // Read raw file content (includes frontmatter).
 func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusError {
-  if _, _, f, err := s.lookup(file, false); err != nil {
+  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
     return err
   } else {
     reply.Reply = f.Source(true)
@@ -58,7 +58,7 @@ func (s *FileService) ReadSourceRaw(file *File, reply *ServiceReply) *StatusErro
 
 // Save file content.
 func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
-  if _, app, f, err := s.lookup(file, false); err != nil {
+  if _, app, f, err := LookupFile(s.Host, file, false); err != nil {
     return err
   } else {
 
@@ -86,7 +86,7 @@ func (s *FileService) Save(file *File, reply *ServiceReply) *StatusError {
 
 // Create a new file and publish it, the file cannot already exist on disc.
 func (s *FileService) Create(file *File, reply *ServiceReply) *StatusError {
-  if _, app, _, err := s.lookup(file, true); err != nil {
+  if _, app, _, err := LookupFile(s.Host, file, true); err != nil {
     return err
   } else {
     var exists *File = app.Urls[file.Url]
@@ -115,7 +115,7 @@ func (s *FileService) CreateFileTemplate(file *File, reply *ServiceReply) *Statu
   if template == nil {
     return CommandError(http.StatusBadRequest, "No template given")
   }
-  if _, _, _, err := s.lookup(file, true); err != nil {
+  if _, _, _, err := LookupFile(s.Host, file, true); err != nil {
     return err
   } else {
     if tpl, err := s.Host.LookupTemplateFile(template); err != nil {
@@ -132,9 +132,7 @@ func (s *FileService) CreateFileTemplate(file *File, reply *ServiceReply) *Statu
   return nil
 }
 
-// Private
-
-func (s *FileService) lookup(f *File, appOnly bool) (*Container, *Application, *File, *StatusError) {
+func LookupFile(host *Host, f *File, appOnly bool) (*Container, *Application, *File, *StatusError) {
   // Parse file URL references
   if f.Ref != "" {
     if ref, err := ParseFileUrl(f.Ref); err != nil {
@@ -155,7 +153,7 @@ func (s *FileService) lookup(f *File, appOnly bool) (*Container, *Application, *
       http.StatusNotFound, "Application %s missing container (detached app)", f.Owner.Name)
   }
 
-  c := s.Host.GetByName(f.Owner.Container.Name)
+  c := host.GetByName(f.Owner.Container.Name)
   if c == nil {
     return nil, nil, nil, CommandError(http.StatusNotFound, "Container %s not found", f.Owner.Container.Name)
   }
