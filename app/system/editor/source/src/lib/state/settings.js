@@ -82,18 +82,9 @@ class Settings {
   }
 
   reset () {
-    console.log('reset to defaults')
     let k
     for (k in this.keys) {
-      // v = this.coerce('' + defaults[k])
-      console.log('setting key : ' + k)
-      console.log('setting key value : ' + defaults[k])
-      console.log('setting prop : ' + this.propName(k))
-
       this[this.propName(k)] = defaults[k]
-      this.set(k, defaults[k])
-
-      console.log('prop value: ' + this[this.propName(k)])
     }
 
     // Clear all local storage items
