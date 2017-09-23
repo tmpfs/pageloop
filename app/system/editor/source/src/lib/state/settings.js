@@ -28,7 +28,8 @@ class Settings {
         get: () => {
           let val = this.get(key)
           if (val === undefined) {
-            return defaults[key]
+            // Coerce defaults so booleans are displayed as 0 or 1
+            return this.coerce('' + defaults[key])
           }
           val = this.coerce(val)
           return val
@@ -40,6 +41,7 @@ class Settings {
 
       // Import from storage on load
       if (localStorage[key] !== undefined) {
+        console.log('got local storage value: ' + localStorage[key])
         this.storage[key] = this.coerce(localStorage[key])
       }
     }
@@ -53,9 +55,9 @@ class Settings {
     if (val === 'null') {
       return null
     } else if (val === 'true') {
-      return true
+      return 1
     } else if (val === 'false') {
-      return false
+      return 0
     } else if (parseInt(val).toString() === val) {
       return parseInt(val)
     } else if (!isNaN(Number(val))) {
@@ -65,11 +67,12 @@ class Settings {
   }
 
   get (key) {
-    return this.storage[key]
+    return localStorage[key]
   }
 
   getDefault (key) {
-    return this.get(key) || defaults[key]
+    // Go via the property for coercion and default value
+    return this[this.propName(key)]
   }
 
   del (key) {
@@ -78,28 +81,23 @@ class Settings {
   }
 
   set (key, value) {
-    console.log(`set ${key} to ${value}`)
-
+    // Update the backing storage
     localStorage[key] = value
-    // Store for reactive values by key
+
+    // Sparse storage for reactive values by key
     this.storage[key] = value
 
-    // mutate keys for bindings
+    // All keys for reactive properties need to be mutated
+    // so that data bindings fire
     this.keys[key] = value
   }
 
   reset () {
-    console.log('settings reset')
-    let k
+    let k, v
     for (k in this.keys) {
-      // Trigger properties for bindings to fire
-
-      // console.log('settings prop name ' + this.propName(k))
-      // console.log('settings prop name ' + defaults[k])
-
-      // this[this.propName(k)] = defaults[k]
-
-      this.set(k, defaults[k])
+      v = this.coerce('' + defaults[k])
+      this.set(k, v)
+      this[this.propName(k)] = v
     }
 
     this.storage = {}
