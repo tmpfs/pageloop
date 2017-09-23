@@ -27,20 +27,15 @@ export default {
       localStorage: window.localStorage,
       count: window.localStorage.length,
       settings: this.$store.state.settings,
-      storage: this.$store.state.settings.storage,
       keys: this.$store.state.settings.keys
     }
   },
   updated: function () {
-    console.log('updated')
     this.count = localStorage.length
   },
   methods: {
     clearLocalStorage: function () {
       this.$store.commit('clear-local-storage')
-      // Trigger update :(
-      this.keys['setting:show-notifications'] = !this.storage.showNotifications
-      this.keys['setting:show-notifications'] = this.storage.showNotifications
     }
   }
 }

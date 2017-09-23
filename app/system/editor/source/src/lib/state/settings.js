@@ -93,10 +93,16 @@ class Settings {
     let k
     for (k in this.keys) {
       // Trigger properties for bindings to fire
-      this[this.propName(k)] = defaults[k]
-      console.log('settings prop name ' + this.propName(k))
-      console.log('settings prop name ' + defaults[k])
+
+      // console.log('settings prop name ' + this.propName(k))
+      // console.log('settings prop name ' + defaults[k])
+
+      // this[this.propName(k)] = defaults[k]
+
+      this.set(k, defaults[k])
     }
+
+    this.storage = {}
 
     // Clear all local storage items
     for (k in localStorage) {
