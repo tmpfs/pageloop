@@ -54,7 +54,7 @@
           <div class="progress" :class="{complete: file.complete}" :style="progress(file)"></div>
         </div>
       </div>
-      <hint id="drop-upload" class="compact" v-if="currentView !== 'new-file'"></hint>
+      <hint id="hint:drop-upload" class="compact" v-if="currentView !== 'new-file'"></hint>
       <component v-bind:is="currentView" :filter="filter"></component>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>

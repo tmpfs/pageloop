@@ -1,6 +1,6 @@
 <template>
   <div class="source-editor">
-    <hint id="file-save" class="compact"></hint>
+    <hint id="hint:file-save" class="compact"></hint>
     <div class="text-editor"></div>
   </div>
 </template>

@@ -66,9 +66,14 @@ export default {
 
   .storage li > * {
     display: table-cell;
+    width: 50%;
   }
 
   .storage .storage-value {
     text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 16rem;
   }
 </style>

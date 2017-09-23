@@ -123,15 +123,13 @@ const Mutations = {
     state.transfer.transfers = list
   },
   'dismiss-hint': function (state, id) {
-    state.hints.dismiss(id)
+    state.settings.set(id, false)
   },
   'templates': function (state, templates) {
     state.templates = templates
   },
   'clear-local-storage': function (state) {
     state.settings.reset()
-    // Reset all hint messages
-    state.hints.reset()
   }
 }
 

@@ -4,7 +4,7 @@
       <h3>File Name</h3>
       <form @submit="createNewFile">
         <input v-model="fileName" type="text" name="name" :value="fileName" />
-        <hint id="new-file"></hint>
+        <hint id="hint:new-file"></hint>
         <div class="template-select">
           <h3>Template</h3>
           <p class="small">Select an optional file template:</p>

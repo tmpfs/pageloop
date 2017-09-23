@@ -14,7 +14,7 @@ export default {
   props: ['id'],
   computed: {
     message: function () {
-      return this.$store.state.hints.messages[this.id]
+      return this.$store.state.settings.getRaw(this.id)
     }
   },
   methods: {

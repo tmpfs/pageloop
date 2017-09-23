@@ -10,7 +10,6 @@ import Meta from './state/meta'
 import Notifier from './state/notifier'
 import Alert from './state/alert'
 import Flash from './state/flash'
-import Hints from './state/hints'
 
 import Transfer from './transfer'
 import Log from './state/log'
@@ -35,7 +34,6 @@ class State {
     this.notifier = new Notifier()
     this.alert = new Alert()
     this.flash = new Flash()
-    this.hints = new Hints()
 
     this.transfer = new Transfer()
     this.log = new Log()

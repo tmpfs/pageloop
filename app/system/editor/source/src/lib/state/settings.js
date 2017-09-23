@@ -1,7 +1,17 @@
 const defaults = {
   'setting:show-notifications': true,
   'setting:show-system-applications': false,
-  'setting:show-template-applications': false
+  'setting:show-template-applications': false,
+  'hint:new-file': `
+    Use <code>/path/to/file/document.md</code> to create directories when adding new files.
+    To create a directory end the name with a slash (<code>/path/to/dir/</code>).
+  `,
+  'hint:drop-upload': `
+    Drag and drop files here to upload.
+  `,
+  'hint:file-save': `
+    Hit <kbd>Ctrl+s</kbd> (or <kbd>:w</kbd> in vim mode) to save and preview your changes.
+  `
 }
 
 function camel (k) {
@@ -46,8 +56,9 @@ class Settings {
   }
 
   prettify (val) {
+    const type = typeof (val)
     // Slightly nicer for users to see than true/false
-    if (typeof (val) === 'boolean') {
+    if (type === 'boolean') {
       return val ? 1 : 0
     }
     return val
@@ -67,6 +78,11 @@ class Settings {
 
   del (key) {
     localStorage.removeItem(key)
+  }
+
+  // Returns the raw native value with no default lookup.
+  getRaw (key) {
+    return this.keys[key]
   }
 
   set (key, value) {
