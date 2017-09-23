@@ -15,7 +15,6 @@ function camel (k) {
 
 class Settings {
   constructor () {
-    this.storage = {}
     this.keys = {}
     for (let key in defaults) {
       const nm = this.propName(key)
@@ -34,11 +33,6 @@ class Settings {
           this.set(key, v)
         }
       })
-
-      // Import from storage on load
-      if (localStorage[key] !== undefined) {
-        this.storage[key] = this.coerce(localStorage[key])
-      }
     }
   }
 
@@ -54,7 +48,7 @@ class Settings {
   }
 
   get (key) {
-    let val = this.storage[key]
+    let val = localStorage[key]
     if (val === undefined) {
       return defaults[key]
     }
@@ -62,19 +56,13 @@ class Settings {
     return val
   }
 
-  /*
   del (key) {
-    localStorage[key] = null
-    delete this.storage[key]
+    localStorage.removeItem(key)
   }
-  */
 
   set (key, value) {
     // Update the backing storage
     localStorage[key] = JSON.stringify(value)
-
-    // Sparse storage for reactive values by key
-    this.storage[key] = value
 
     // All keys for reactive properties need to be mutated
     // so that data bindings fire
@@ -85,10 +73,6 @@ class Settings {
     let k
     for (k in this.keys) {
       this[this.propName(k)] = defaults[k]
-    }
-
-    // Clear all local storage items
-    for (k in localStorage) {
       localStorage.removeItem(k)
     }
   }
