@@ -6,6 +6,8 @@
     <div class="column-header">
       <h2>Preview</h2>
         <nav class="toolbar clearfix">
+          <a @click="exportArchive()"
+             title="Export website as zip archive">Export</a>
           <a @click="reload()"
              title="Refresh preview"
              :class="{hidden: path == ''}">Refresh</a>
@@ -98,6 +100,9 @@ export default {
     }
   },
   methods: {
+    exportArchive: function (e) {
+      this.$store.dispatch('app-export', 'public')
+    },
     loaded: function (e) {
       const app = this.$store.state.app
       const base = app.publicUrl

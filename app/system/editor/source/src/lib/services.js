@@ -53,6 +53,10 @@ function getFileUrl (params, filter) {
   return u
 }
 
+function getArchiveUrl (params) {
+  return API + `apps/${params.container}/${params.name}/zip/${params.filter}`
+}
+
 // Maps RPC service method names to REST request URLs and fetch options.
 const services = {
   'Core.Meta': (rpc, params) => {
@@ -162,6 +166,12 @@ const services = {
   'File.ReadSourceRaw': (rpc, params) => {
     return {
       url: getFileUrl(params, 'raw'),
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Archive.Export': (rpc, params) => {
+    return {
+      url: getArchiveUrl(params),
       options: getDefaultOptions(rpc)
     }
   }

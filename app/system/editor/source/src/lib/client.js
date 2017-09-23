@@ -346,6 +346,16 @@ class ApiClient {
     // TODO: allow this over websocket so we don't need to force a transport
     return this.rpc(req, {http: true})
   }
+
+  // Export public zip
+  exportArchive (container, application, filter) {
+    const ref = this.getApplicationReference(container, application)
+    ref.filter = filter
+    const req = Request.rpc('Archive.Export', ref)
+    const fetch = fetchFromRpc(req)
+    document.location.replace(fetch.url)
+    // return this.rpc(req, {http: true})
+  }
 }
 
 export default ApiClient

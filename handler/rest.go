@@ -4,6 +4,7 @@ package handler
 import (
   // "fmt"
   //"mime"
+  "strings"
   "strconv"
 	"net/http"
   . "github.com/tmpfs/pageloop/core"
@@ -47,12 +48,16 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         Name: route.Parameters.Target,
         ContainerName: route.Parameters.Context}
 
-      name := app.Name + ".zip"
+      // Switch archive type
+      archiveType := ArchiveSource
+      if strings.HasSuffix(route.Parameters.Item, "public") {
+        archiveType = ArchivePublic
+      }
 
+      name := app.Name + ".zip"
       res.Header().Set("Content-Disposition", "attachment; filename=" + name)
 
-      // TODO: set response headers
-      argv = &ArchiveRequest{Application: app, Writer: res, Type: ArchiveSource, Name: name}
+      argv = &ArchiveRequest{Application: app, Writer: res, Type: archiveType, Name: name}
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":

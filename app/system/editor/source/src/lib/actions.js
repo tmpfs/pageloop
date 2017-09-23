@@ -383,6 +383,11 @@ function Actions (router) {
         .then(({response, document}) => {
           context.commit('templates', document)
         })
+    },
+    'app-export': function (context, filter) {
+      const container = context.state.container
+      const application = context.state.application
+      return context.state.client.exportArchive(container, application, filter)
     }
   }
 }

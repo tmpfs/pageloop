@@ -70,8 +70,6 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
         // Assuming POSIX style fs
         url := strings.TrimPrefix(path, dir)
 
-        println(url)
-
         f, err := z.Create(url)
         if err != nil {
           return CommandError(http.StatusInternalServerError, err.Error())
