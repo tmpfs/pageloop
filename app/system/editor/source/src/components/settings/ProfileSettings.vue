@@ -1,16 +1,25 @@
 <template>
   <div class="profile-settings small">
     <div>
-      <input id="show-notifications" type="checkbox" v-model="showNotifications" />
+      <input
+        id="show-notifications"
+        type="checkbox"
+        v-model="showNotifications" />
       <label for="show-notifications">Show notifications</label>
       <p class="small">When notifications are disabled you will not be notified as events occur but can view them in the notification activity (errors are always shown).</p>
     </div>
     <div>
-      <input id="show-system" type="checkbox" v-model="showSystemApplications" />
+      <input
+        id="show-system"
+        type="checkbox"
+        v-model="showSystemApplications" />
       <label for="show-system">List system applications</label>
     </div>
     <div>
-      <input id="show-template" type="checkbox" v-model="showTemplateApplications" />
+      <input
+        id="show-template"
+        type="checkbox"
+        v-model="showTemplateApplications" />
       <label for="show-template">List template applications</label>
     </div>
   </div>
