@@ -218,7 +218,6 @@ func (h RestHandler) doServeHttp(res http.ResponseWriter, req *http.Request) (in
             }
 
             // Indicate to the client the response type.
-
             // Allows the client to determine whether a response should
             // be parsed as JSON or not.
             res.Header().Set("X-Response-Type", strconv.Itoa(route.ResponseType))
