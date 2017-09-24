@@ -1,5 +1,6 @@
 <template>
   <div class="new-app-info">
+    <p class="small">Step 1/3: Enter application info</p>
     <form @submit="nextStep">
       <label class="small">Name:</label>
       <input type="text" name="name" placeholder="Enter an app name"
@@ -48,15 +49,11 @@ export default {
         // TODO: highlight fields
         return
       }
-
-      console.log('new app info > next step')
+      this.$store.commit('new-app-view', 'new-app-template')
     }
   }
 }
 </script>
 
 <style scoped>
-  .new-app-info {
-    padding: 1rem;
-  }
 </style>

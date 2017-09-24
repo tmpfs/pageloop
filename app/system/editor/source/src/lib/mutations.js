@@ -130,6 +130,9 @@ const Mutations = {
   },
   'clear-local-storage': function (state) {
     state.settings.reset()
+  },
+  'new-app-view': function (state, view) {
+    state.newApp.view = view
   }
 }
 

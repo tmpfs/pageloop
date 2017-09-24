@@ -105,13 +105,20 @@ export default {
   name: 'apps',
   data: function () {
     return {
-      newAppView: 'new-app-info',
       currentView: 'apps-list',
       containerName: 'user',
       user: true
     }
   },
   computed: {
+    newAppView: {
+      get: function () {
+        return this.$store.state.newApp.view
+      },
+      set: function (val) {
+        this.$store.commit('new-app-view', val)
+      }
+    },
     newAppValid: function () {
       return this.$store.state.newApp.valid
     },

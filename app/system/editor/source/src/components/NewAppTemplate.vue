@@ -1,7 +1,7 @@
 <template>
   <div class="new-app-template">
+    <p class="small">Step 2/3: Choose a template</p>
     <form @submit="nextStep">
-      <label class="small">Choose a template:</label>
       <div class="templates-list">
         <div
           @click="selectTemplate"
@@ -78,7 +78,7 @@ export default {
     },
     nextStep: function (e) {
       e.preventDefault()
-      console.log('new app template > next step')
+      this.$store.commit('new-app-view', 'new-app-create')
     }
   }
 }

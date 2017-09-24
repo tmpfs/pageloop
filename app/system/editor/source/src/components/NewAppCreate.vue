@@ -1,5 +1,6 @@
 <template>
   <div class="new-app-create small">
+    <p class="small">Step 3/3: Confirm details</p>
     <form @submit="createApplication">
       <label>Name: {{applicationName}}</label>
       <label>Description: {{applicationDescription}}</label>
@@ -47,6 +48,7 @@ export default {
       }
       this.$store.dispatch('new-app', app)
         .then(() => {
+          this.$store.state.newApp.reset()
           return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
         })
         .catch((e) => console.error(e))
@@ -56,10 +58,6 @@ export default {
 </script>
 
 <style scoped>
-  .new-app-create {
-    padding: 1rem;
-  }
-
   label {
     display: block;
   }

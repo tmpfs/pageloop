@@ -1,5 +1,6 @@
 class NewApp {
   constructor () {
+    this.view = 'new-app-info'
     this.templateUrl = ''
     this.template = undefined
     this.description = ''
@@ -26,7 +27,6 @@ class NewApp {
     id = id.replace(/^-/, '')
     // Should be lowercase
     id = id.toLowerCase()
-
     this._id = id
   }
 
