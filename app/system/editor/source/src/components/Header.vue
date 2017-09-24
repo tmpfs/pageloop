@@ -4,8 +4,10 @@
       <a
         tabindex="0"
         @click="$store.dispatch('navigate', {href: 'edit'})"
-        :class="{selected: selectedView === 'edit', hidden: !this.$store.state.hasApplication()}"
-        title="Edit Current Application">{{name}}</a>
+        title="Applications">
+          <span>Apps</span>
+          <span v-if="name"> / {{name}}</span>
+        </a>
         <build-tasks v-if="buildable"></build-tasks>
     </nav>
     <nav class="main">

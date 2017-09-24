@@ -40,7 +40,6 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
     return err
   } else {
     z := zip.NewWriter(archive.Writer)
-
     // Send using in-memory file data
     if archive.Type == ArchiveSource {
       for _, file := range a.Files {
@@ -54,7 +53,6 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
           return CommandError(http.StatusInternalServerError, err.Error())
         }
       }
-
     // Walk the public files.
     } else {
       dir := a.PublicDirectory()

@@ -1,5 +1,89 @@
 <template>
   <div class="content-main">
+    <div class="content">
+      <div class="content-column settings">
+        <div class="column-header">
+          <h2>New Application</h2>
+        </div>
+        <div class="column-options">
+          <!--
+          <nav class="tabs">
+            <a
+              :class="{selected: settingsView === 'profile-settings'}"
+              @click="settingsView = 'profile-settings'">Profile</a>
+            <a
+              :class="{selected: settingsView === 'organization-settings'}"
+              @click="settingsView = 'organization-settings'">Organization</a>
+            <a
+              :class="{selected: settingsView === 'about-settings'}"
+              @click="settingsView = 'about-settings'">About</a>
+          </nav>
+          -->
+        </div>
+        <!--
+        <div class="scroll">
+          <component v-bind:is="settingsView"></component>
+        </div>
+        -->
+      </div>
+      <div class="content-column preferences">
+        <div class="column-header">
+          <h2>Apps</h2>
+        </div>
+        <div class="column-options">
+          <!--
+          <nav class="tabs">
+            <a
+              :class="{selected: preferencesView === 'editor-preferences'}"
+              @click="preferencesView = 'editor-preferences'">Editor</a>
+            <a
+              :class="{selected: preferencesView === 'template-preferences'}"
+              @click="preferencesView = 'template-preferences'">Templates</a>
+            <a
+              :class="{selected: preferencesView === 'storage-preferences'}"
+             @click="preferencesView = 'storage-preferences'">Storage</a>
+          </nav>
+          -->
+        </div>
+        <!--
+        <div class="scroll">
+          <component v-bind:is="preferencesView"></component>
+        </div>
+        -->
+      </div>
+      <div class="content-column activity">
+        <div class="column-header">
+          <h2>Config</h2>
+        </div>
+        <div class="column-options">
+          <!--
+          <nav class="tabs">
+            <a
+              :class="{selected: activityView === 'notification-activity'}"
+              @click="activityView = 'notification-activity'">Notifications</a>
+            <a
+              :class="{selected: activityView === 'job-activity'}"
+              @click="activityView = 'job-activity'">Jobs</a>
+            <a
+              :class="{selected: activityView === 'log-activity'}"
+              @click="activityView = 'log-activity'">Logs</a>
+            <a
+              :class="{selected: activityView === 'network-activity'}"
+              @click="activityView = 'network-activity'">Network</a>
+          </nav>
+          -->
+        </div>
+        <!--
+        <div class="scroll">
+          <component v-bind:is="activityView"></component>
+        </div>
+        -->
+      </div>
+    </div>
+  </div>
+
+  <!--
+  <div class="content-main">
     <div class="apps-nav">
       <nav class="tabs">
         <a
@@ -19,6 +103,7 @@
       <component v-bind:is="currentView" :containerName="containerName"></component>
     </div>
   </div>
+  -->
 </template>
 
 <script>
@@ -140,6 +225,29 @@ export default {
 
   .new-app-trigger {
     max-width: 20rem;
+  }
+
+</style>
+
+<style scoped>
+  .content-main {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .content > * {
+    width: 33.3%;
+  }
+
+  .content-column:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+  }
+
+  .settings .scroll, .preferences .scroll {
+    padding: 0 1rem;
   }
 
 </style>

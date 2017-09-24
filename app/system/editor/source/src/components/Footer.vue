@@ -4,11 +4,17 @@
     <nav>
       <!--<a></a>-->
       <a
-        class="reset"
+        class="icon reset"
         :class="{hidden: !canReset, disabled: !needsReset}"
         @click="reset"
         title="Reset columns"></a>
 
+      <!--
+      <a
+        class="icon"
+        @click="reset"
+        title="Application Settings">🟓</a>
+      -->
     </nav>
   </footer>
 </template>
@@ -57,6 +63,7 @@ export default {
     height: 3rem;
     /*min-height: 3.2rem;*/
     border-top: 1px solid var(--border-color);
+    user-select: none;
   }
 
   footer p {
@@ -69,7 +76,6 @@ export default {
 
   nav {
     text-align: right;
-    user-select: none;
   }
 
   nav a:hover {
@@ -86,8 +92,11 @@ export default {
     text-align: center;
   }
 
+  .icon {
+    font-size: 2.2rem;
+  }
+
   a.reset {
     transform: rotate(90deg);
-    font-size: 2.2rem;
   }
 </style>
