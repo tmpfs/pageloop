@@ -21,17 +21,17 @@
         tabindex="2"
         @click="$store.dispatch('navigate', {href: 'apps'})"
         :class="{selected: selectedView === 'apps'}"
-        title="View and edit applications"><span class="icon">🖸</span> Apps</a>
+        title="View and edit applications">Apps</a>
       <a
         tabindex="3"
         @click="$store.dispatch('navigate', {href: 'docs'})"
         :class="{selected: selectedView === 'docs'}"
-        title="Documentation"><span class="icon">🗊</span> Docs</a>
+        title="Documentation">Docs</a>
       <a
         tabindex="4"
         @click="$store.dispatch('navigate', {href: 'settings'})"
         :class="{selected: selectedView === 'settings'}"
-        title="Settings"><span class="icon">⛭</span> Settings</a>
+        title="Settings">Settings</a>
     </nav>
   </header>
 </template>
@@ -103,11 +103,6 @@ export default {
 
   header nav.home {
     float: left;
-  }
-
-  .main a .icon {
-    font-size: 1.6rem;
-    vertical-align: center;
   }
 
 </style>
