@@ -69,29 +69,6 @@
       </div>
     </div>
   </div>
-
-  <!--
-  <div class="content-main">
-    <div class="apps-nav">
-      <nav class="tabs">
-        <a
-          @click="currentView = 'new-app'"
-          class="new-app-trigger"
-          :class="{selected: currentView === 'new-app'}"
-          title="Create a new application">➕ New Application</a>
-
-        <a
-          @click="listApplications(container, $event)"
-          :title="getLinkTitle(container)"
-          :class="{selected: isSelected(container)}"
-          v-for="container in list" v-if="enabled[container.name]">{{container.name}}</a>
-      </nav>
-    </div>
-    <div class="content">
-      <component v-bind:is="currentView" :containerName="containerName"></component>
-    </div>
-  </div>
-  -->
 </template>
 
 <script>
@@ -179,17 +156,18 @@ export default {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    */
     padding: 2rem;
     width: 100%;
+    */
   }
 
   .app {
-    /* flex: 1 0; */
+    /* flex: 1 0;
     margin-right: 2rem;
-    min-width: 24rem;
+    min-width: 24rem; */
   }
 
+  /*
   .app > p.small {
     margin-bottom: 0;
   }
@@ -212,6 +190,7 @@ export default {
   .name + p.small {
     margin-top: 0.2rem;
   }
+  */
 
   .apps-nav {
     border-top: 1px solid var(--border-color);
@@ -226,16 +205,9 @@ export default {
 
 <style scoped>
   .scroll {
-    height: calc(100% - 2.4rem);
+    height: calc(100% - 4.6rem);
   }
 
-  .new-app-trigger {
-    max-width: 20rem;
-  }
-
-</style>
-
-<style scoped>
   .content-main {
     border-top: 1px solid var(--border-color);
   }

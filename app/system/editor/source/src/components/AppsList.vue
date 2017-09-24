@@ -1,5 +1,5 @@
 <template>
-  <div class="apps-list scroll">
+  <div class="apps-list">
    <div class="app" v-for="app in container.apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
         <span class="name">{{app.name}}</span>
@@ -67,6 +67,10 @@ export default {
 </script>
 
 <style scoped>
+
+  .apps-list {
+    padding-top: 1rem;
+  }
 
   .app > p.small {
     margin-bottom: 0;
