@@ -44,22 +44,17 @@
           <h2>Settings</h2>
         </div>
         <div class="column-options">
-          <!--
           <nav class="tabs">
             <a
               :class="{selected: activityView === 'notification-activity'}"
-              @click="activityView = 'notification-activity'">Notifications</a>
+              @click="activityView = 'notification-activity'">General</a>
             <a
               :class="{selected: activityView === 'job-activity'}"
-              @click="activityView = 'job-activity'">Jobs</a>
+              @click="activityView = 'job-activity'">Export</a>
             <a
               :class="{selected: activityView === 'log-activity'}"
-              @click="activityView = 'log-activity'">Logs</a>
-            <a
-              :class="{selected: activityView === 'network-activity'}"
-              @click="activityView = 'network-activity'">Network</a>
+              @click="activityView = 'log-activity'">Import</a>
           </nav>
-          -->
         </div>
         <!--
         <div class="scroll">
