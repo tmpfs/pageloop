@@ -8,7 +8,7 @@
         <label>Template: {{template.name}} ({{template.description}})</label>
       </div>
       <div class="form-actions">
-        <input type="submit" value="Create Application" class="primary" />
+        <input type="submit" value="Create Application" class="primary" v-focus />
       </div>
     </form>
   </div>

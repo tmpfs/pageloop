@@ -31,6 +31,12 @@ class Application {
   }
 
   ui (store) {
+    // Register a global custom directive called v-focus
+    Vue.directive('focus', {
+      inserted: function (el) {
+        el.focus()
+      }
+    })
     /* eslint-disable no-new */
     new Vue({
       el: 'main',

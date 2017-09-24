@@ -26,7 +26,7 @@
       </div>
 
       <div class="form-actions">
-        <input type="submit" value="Next: Create" class="primary" />
+        <input type="submit" value="Next: Create" class="primary" v-focus />
       </div>
     </form>
   </div>

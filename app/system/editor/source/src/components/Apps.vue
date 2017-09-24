@@ -175,15 +175,17 @@ export default {
 <style>
 
   .apps-list {
+    /*
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    */
     padding: 2rem;
     width: 100%;
   }
 
   .app {
-    flex: 1 0;
+    /* flex: 1 0; */
     margin-right: 2rem;
     min-width: 24rem;
   }

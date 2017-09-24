@@ -3,10 +3,14 @@
     <p class="small">Step 1/3: Enter application info</p>
     <form @submit="nextStep">
       <label class="small">Name:</label>
-      <input type="text" name="name" placeholder="Enter an app name"
+      <input
+        type="text" v-focus
+        name="name" placeholder="Enter an app name"
         :value="applicationName" v-model="applicationName" />
       <label class="small">Description:</label>
-      <input type="text" name="description" placeholder="Enter an app description"
+      <input
+        type="text"
+        name="description" placeholder="Enter an app description"
         :value="applicationDescription" v-model="applicationDescription" />
       <div class="form-actions">
         <input type="submit"
