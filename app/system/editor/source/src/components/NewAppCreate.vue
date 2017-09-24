@@ -1,15 +1,13 @@
 <template>
-  <div class="new-app-create">
+  <div class="new-app-create small">
     <form @submit="createApplication">
 
-      <!--
-      <label class="small">Application name:</label>
-      <input type="text" name="name"
-        :value="applicationName" v-model="applicationName" />
-      <label class="small">Short description:</label>
-      <input type="text" name="description"
-        :value="applicationDescription" v-model="applicationDescription" />
-      -->
+      <label>Name: {{applicationName}}</label>
+      <label>Description: {{applicationDescription}}</label>
+      <div v-if="template">
+        <label>{{template.name}}</label>
+        <label>{{template.description}}</label>
+      </div>
 
       <div class="form-actions">
         <input type="submit" value="Create Application" class="primary" />
@@ -23,9 +21,10 @@ export default {
   name: 'new-app-create',
   data: function () {
     return {
-      applicationName: 'new-app',
-      applicationDescription: 'New application',
-      applicationTemplate: ''
+      applicationName: this.$store.state.newApp.name,
+      applicationDescription: this.$store.state.newApp.description,
+      applicationTemplate: this.$store.state.newApp.templateUrl,
+      template: this.$store.state.newApp.template
     }
   },
   methods: {
@@ -56,50 +55,11 @@ export default {
 </script>
 
 <style scoped>
-  .new-app {
-    width: 100%;
+  .new-app-create {
     padding: 1rem;
   }
 
-  .new-app-fields {
-  }
-
-  input[type="radio"] {
-    display: inline-block;
-    line-height: 3rem;
-    padding-top: 0.4rem;
-    pointer-events: none;
-    vertical-align: middle;
-  }
-
-  .new-app-templates {
-    margin-left: 1rem;
-    padding: 1rem 0;
-  }
-
-  iframe {
-    width: 100%;
-    height: 240px;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .app-template {
-    background: var(--base03-color);
-    border: 1px solid var(--base00-color);
-    transition: all 0.3s ease-out;
-    cursor: pointer;
-  }
-
-  .app-template label {
-    vertical-align: middle;
-  }
-
-  .app-template p {
-    margin: 0;
-  }
-
-  .app-template.selected {
-    border: 1px solid var(--base3-color);
+  label {
+    display: block;
   }
 </style>

@@ -6,9 +6,13 @@
         :value="applicationName" v-model="applicationName" />
       <label class="small">Description:</label>
       <input type="text" name="description" placeholder="Enter an app description"
+        @change="applicationDescription = this.value"
         :value="applicationDescription" v-model="applicationDescription" />
       <div class="form-actions">
-        <input type="submit" value="Next: Select a template" class="primary" />
+        <input type="submit"
+          value="Next: Select a template"
+          :class="{disabled: !newAppValid}"
+          class="primary" />
       </div>
     </form>
   </div>
@@ -17,40 +21,37 @@
 <script>
 export default {
   name: 'new-app-info',
-  data: function () {
-    return {
-      applicationName: '',
-      applicationDescription: ''
+  computed: {
+    newAppValid: function () {
+      return this.$store.state.newApp.valid
+    },
+    applicationName: {
+      get: function () {
+        return this.$store.state.newApp.name
+      },
+      set: function (val) {
+        this.$store.state.newApp.name = val
+      }
+    },
+    applicationDescription: {
+      get: function () {
+        return this.$store.state.newApp.description
+      },
+      set: function (val) {
+        this.$store.state.newApp.description = val
+      }
     }
   },
   methods: {
     nextStep: function (e) {
-
-    }
-    /*
-    createApplication: function (e) {
       e.preventDefault()
+      if (!this.newAppValid) {
+        // TODO: highlight fields
+        return
+      }
 
-      let app = {}
-      if (this.applicationName) {
-        app.name = this.applicationName
-      }
-      if (this.applicationDescription) {
-        app.description = this.applicationDescription
-      }
-      if (this.template) {
-        app.template = {
-          container: this.template.container,
-          application: this.template.name
-        }
-      }
-      this.$store.dispatch('new-app', app)
-        .then(() => {
-          return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
-        })
-        .catch((e) => console.error(e))
+      console.log('new app info > next step')
     }
-    */
   }
 }
 </script>

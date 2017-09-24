@@ -3,7 +3,7 @@
     <div class="content">
       <div class="content-column settings">
         <div class="column-header">
-          <h2>New App</h2>
+          <h2>New App<span v-if="newAppId">/ {{newAppId}}</span></h2>
         </div>
         <div class="column-options">
           <nav class="tabs">
@@ -11,10 +11,10 @@
               :class="{selected: newAppView === 'new-app-info'}"
               @click="newAppView = 'new-app-info'">Info</a>
             <a
-              :class="{selected: newAppView === 'new-app-template'}"
+              :class="{selected: newAppView === 'new-app-template', disabled: !newAppValid}"
               @click="newAppView = 'new-app-template'">Template</a>
             <a
-              :class="{selected: newAppView === 'new-app-create'}"
+              :class="{selected: newAppView === 'new-app-create', disabled: !newAppValid}"
               @click="newAppView = 'new-app-create'">Create</a>
           </nav>
         </div>
@@ -112,6 +112,9 @@ export default {
     }
   },
   computed: {
+    newAppValid: function () {
+      return this.$store.state.newApp.valid
+    },
     list: function () {
       return this.$store.state.containers
     },

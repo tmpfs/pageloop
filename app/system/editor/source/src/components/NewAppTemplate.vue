@@ -35,14 +35,25 @@
 <script>
 export default {
   name: 'new-app-template',
-  data: function () {
-    return {
-      applicationTemplate: ''
-    }
-  },
   computed: {
     templates: function () {
       return this.$store.state.templates
+    },
+    applicationTemplate: {
+      get: function () {
+        return this.$store.state.newApp.templateUrl
+      },
+      set: function (val) {
+        this.$store.state.newApp.templateUrl = val
+      }
+    },
+    template: {
+      get: function () {
+        return this.$store.state.newApp.template
+      },
+      set: function (val) {
+        this.$store.state.newApp.template = val
+      }
     }
   },
   mounted: function () {
@@ -66,32 +77,9 @@ export default {
       }
     },
     nextStep: function (e) {
-
-    }
-    /*
-    createApplication: function (e) {
       e.preventDefault()
-
-      let app = {}
-      if (this.applicationName) {
-        app.name = this.applicationName
-      }
-      if (this.applicationDescription) {
-        app.description = this.applicationDescription
-      }
-      if (this.template) {
-        app.template = {
-          container: this.template.container,
-          application: this.template.name
-        }
-      }
-      this.$store.dispatch('new-app', app)
-        .then(() => {
-          return this.$store.dispatch('navigate', {href: `apps/user/${app.name}`})
-        })
-        .catch((e) => console.error(e))
+      console.log('new app template > next step')
     }
-    */
   }
 }
 </script>
