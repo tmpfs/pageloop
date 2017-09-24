@@ -3,7 +3,7 @@
     <div class="content">
       <div class="content-column settings">
         <div class="column-header">
-          <h2>New App<span v-if="newAppId">/ {{newAppId}}</span></h2>
+          <h2>New<span v-if="newAppId">/ {{newAppId}}</span></h2>
         </div>
         <div class="column-options">
           <nav class="tabs">
@@ -24,7 +24,7 @@
       </div>
       <div class="content-column preferences">
         <div class="column-header">
-          <h2>App List</h2>
+          <h2>List</h2>
         </div>
         <div class="column-options">
           <nav class="tabs">
@@ -41,7 +41,7 @@
       </div>
       <div class="content-column activity">
         <div class="column-header">
-          <h2>App Settings</h2>
+          <h2>Settings</h2>
         </div>
         <div class="column-options">
           <!--
