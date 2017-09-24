@@ -2,7 +2,7 @@
   <div class="apps-list">
    <div class="app" v-for="app in container.apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
-        <span class="name">{{app.name}}</span>
+        <span class="name">{{app.display || app.name}}</span>
         <p class="small">URL: {{app.url}}<br />{{app.description}}
           <p class="app-actions">
             <a class="name"

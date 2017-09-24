@@ -15,6 +15,8 @@ import (
 type Mountpoint struct {
   // Name of the parent container for the application.
   Container string `json:"container,omitempty" yaml:"container,omitempty"`
+	// User visible name for the application.
+  DisplayName string `json:"display,omitempty" yaml:"display,omitempty"`
 	// The URL location for the application mountpoint.
   Url string `json:"url" yaml:"url"`
 	// The path to pass to the loader.
@@ -81,7 +83,9 @@ func (m *MountpointManager) CreateMountpoint(a *Application) (*Mountpoint, error
 		return nil, err
 	}
 
-  var mt *Mountpoint = &Mountpoint{Path: a.Path, Url: a.Url, Description: a.Description}
+  var mt *Mountpoint = &Mountpoint{
+    DisplayName: a.DisplayName,
+    Path: a.Path, Url: a.Url, Description: a.Description}
   var conf *ServerConfig = m.Config.AddMountpoint(*mt)
   if err = m.Config.WriteFile(conf, ""); err != nil {
     return nil, err
@@ -125,6 +129,7 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
 		}
 
 		app := NewApplication(urlPath, mt.Description)
+    app.DisplayName = mt.DisplayName
     app.IsTemplate = mt.Template
 		fs := NewUrlFileSystem(app)
 		app.FileSystem = fs
