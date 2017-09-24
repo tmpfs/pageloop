@@ -21,17 +21,17 @@
         tabindex="2"
         @click="$store.dispatch('navigate', {href: 'apps'})"
         :class="{selected: selectedView === 'apps'}"
-        title="View and edit applications">Apps</a>
+        title="View and edit applications"><span class="icon">🖸</span> Apps</a>
       <a
         tabindex="3"
         @click="$store.dispatch('navigate', {href: 'docs'})"
         :class="{selected: selectedView === 'docs'}"
-        title="Documentation">Docs</a>
+        title="Documentation"><span class="icon">🗊</span> Docs</a>
       <a
         tabindex="4"
         @click="$store.dispatch('navigate', {href: 'settings'})"
         :class="{selected: selectedView === 'settings'}"
-        title="Settings">Settings</a>
+        title="Settings"><span class="icon">⛭</span> Settings</a>
     </nav>
   </header>
 </template>
@@ -71,7 +71,7 @@ export default {
   }
 
   header a:hover, header a.selected {
-    text-decoration: underline;
+    /* text-decoration: underline; */
     color: var(--base3-color) !important;
     background: var(--blue-color);
   }
@@ -103,6 +103,11 @@ export default {
 
   header nav.home {
     float: left;
+  }
+
+  .main a .icon {
+    font-size: 1.6rem;
+    vertical-align: center;
   }
 
 </style>

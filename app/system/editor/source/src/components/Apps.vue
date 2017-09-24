@@ -47,13 +47,13 @@
           <nav class="tabs">
             <a
               :class="{selected: appSettingsView === 'general-app-settings'}"
-              @click="appSettingsView = 'general-app-settings'">General</a>
+              @click="appSettingsView = 'general-app-settings'">⛭ General</a>
             <a
               :class="{selected: appSettingsView === 'export-app-settings'}"
-              @click="appSettingsView = 'export-app-settings'">Export</a>
+              @click="appSettingsView = 'export-app-settings'">🡇 Export</a>
             <a
               :class="{selected: appSettingsView === 'import-app-settings'}"
-              @click="appSettingsView = 'import-app-settings'">Import</a>
+              @click="appSettingsView = 'import-app-settings'">🡅 Import</a>
           </nav>
         </div>
         <div class="scroll">
