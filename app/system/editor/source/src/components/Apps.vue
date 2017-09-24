@@ -3,53 +3,41 @@
     <div class="content">
       <div class="content-column settings">
         <div class="column-header">
-          <h2>New Application</h2>
+          <!-- <h2>New</h2> -->
         </div>
         <div class="column-options">
-          <!--
           <nav class="tabs">
             <a
               :class="{selected: settingsView === 'profile-settings'}"
-              @click="settingsView = 'profile-settings'">Profile</a>
+              @click="settingsView = 'profile-settings'">Info</a>
             <a
               :class="{selected: settingsView === 'organization-settings'}"
-              @click="settingsView = 'organization-settings'">Organization</a>
+              @click="settingsView = 'organization-settings'">Template</a>
             <a
               :class="{selected: settingsView === 'about-settings'}"
-              @click="settingsView = 'about-settings'">About</a>
+              @click="settingsView = 'about-settings'">Create</a>
           </nav>
-          -->
         </div>
-        <!--
         <div class="scroll">
-          <component v-bind:is="settingsView"></component>
+          <component is="new-app"></component>
         </div>
-        -->
       </div>
       <div class="content-column preferences">
         <div class="column-header">
           <h2>Apps</h2>
         </div>
         <div class="column-options">
-          <!--
           <nav class="tabs">
             <a
-              :class="{selected: preferencesView === 'editor-preferences'}"
-              @click="preferencesView = 'editor-preferences'">Editor</a>
-            <a
-              :class="{selected: preferencesView === 'template-preferences'}"
-              @click="preferencesView = 'template-preferences'">Templates</a>
-            <a
-              :class="{selected: preferencesView === 'storage-preferences'}"
-             @click="preferencesView = 'storage-preferences'">Storage</a>
+              @click="listApplications(container, $event)"
+              :title="getLinkTitle(container)"
+              :class="{selected: isSelected(container)}"
+              v-for="container in list" v-if="enabled[container.name]">{{container.name}}</a>
           </nav>
-          -->
         </div>
-        <!--
         <div class="scroll">
-          <component v-bind:is="preferencesView"></component>
+          <component :containerName="containerName" is="apps-list"></component>
         </div>
-        -->
       </div>
       <div class="content-column activity">
         <div class="column-header">

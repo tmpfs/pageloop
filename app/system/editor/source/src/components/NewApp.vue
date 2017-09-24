@@ -1,21 +1,14 @@
 <template>
   <div class="new-app">
-    <div class="new-app-fields">
-      <h2>New Application</h2>
-      <form @submit="createApplication">
-        <label class="small">Application name:</label>
-        <input type="text" name="name"
-          :value="applicationName" v-model="applicationName" />
-        <label class="small">Short description:</label>
-        <input type="text" name="description"
-          :value="applicationDescription" v-model="applicationDescription" />
-        <div class="form-actions">
-          <input type="submit" value="Create Application" class="primary" />
-        </div>
-      </form>
-    </div>
-    <div class="new-app-templates scroll">
-      <h2>Choose Template</h2>
+    <form @submit="createApplication">
+      <label class="small">Application name:</label>
+      <input type="text" name="name"
+        :value="applicationName" v-model="applicationName" />
+      <label class="small">Short description:</label>
+      <input type="text" name="description"
+        :value="applicationDescription" v-model="applicationDescription" />
+
+      <label class="small">Choose a template:</label>
       <div class="templates-list">
         <div
           @click="selectTemplate"
@@ -32,11 +25,17 @@
             <label :for="tpl.name">{{tpl.name}}</label>
           </span>
           <p class="small">{{tpl.description}}</p>
+          <!--
           <p class="small">{{tpl.url}}</p>
           <iframe @load="loaded" :src="tpl.url"></iframe>
+          -->
         </div>
       </div>
-    </div>
+
+      <div class="form-actions">
+        <input type="submit" value="Create Application" class="primary" />
+      </div>
+    </form>
   </div>
 </template>
 
@@ -103,15 +102,11 @@ export default {
 
 <style scoped>
   .new-app {
-    display: flex;
     width: 100%;
-    padding: 0;
-    border-right: 1px solid var(--border-color)
+    padding: 1rem;
   }
 
   .new-app-fields {
-    max-width: 20%;
-    padding: 2rem;
   }
 
   input[type="radio"] {
@@ -122,13 +117,9 @@ export default {
     vertical-align: middle;
   }
 
-  .new-app > * {
-    flex: 1 0;
-  }
-
   .new-app-templates {
-    margin-left: 2rem;
-    padding: 2rem 0;
+    margin-left: 1rem;
+    padding: 1rem 0;
   }
 
   iframe {
@@ -138,25 +129,19 @@ export default {
     user-select: none;
   }
 
-  .templates-list {
-    display: flex;
-    flex-direction: column;
-    margin-top: 2rem;
-  }
-
   .app-template {
-    flex: 1 0;
-    padding: 1rem 0;
     background: var(--base03-color);
-    padding: 1rem;
     border: 1px solid var(--base00-color);
-    margin: 0 2rem 2rem 0;
     transition: all 0.3s ease-out;
     cursor: pointer;
   }
 
   .app-template label {
     vertical-align: middle;
+  }
+
+  .app-template p {
+    margin: 0;
   }
 
   .app-template.selected {
