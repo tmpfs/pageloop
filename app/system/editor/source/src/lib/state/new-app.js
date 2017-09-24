@@ -1,12 +1,8 @@
+const defaultView = 'new-app-info'
+
 class NewApp {
   constructor () {
-    this.view = 'new-app-info'
-    this.templateUrl = ''
-    this.template = undefined
-    this.description = ''
-
-    this._id = ''
-    this._name = ''
+    this.reset()
   }
 
   get id () {
@@ -32,6 +28,16 @@ class NewApp {
 
   get valid () {
     return this.name !== '' && this.description !== ''
+  }
+
+  reset () {
+    this.view = defaultView
+    this.templateUrl = ''
+    this.template = undefined
+    this.description = ''
+
+    this._id = ''
+    this._name = ''
   }
 }
 
