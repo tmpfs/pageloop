@@ -144,48 +144,6 @@ export default {
 </script>
 
 <style>
-
-  .apps-list {
-    /*
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 2rem;
-    width: 100%;
-    */
-  }
-
-  .app {
-    /* flex: 1 0;
-    margin-right: 2rem;
-    min-width: 24rem; */
-  }
-
-  /*
-  .app > p.small {
-    margin-bottom: 0;
-  }
-
-  .app > .app-actions {
-    margin-top: 0;
-    font-size: 1.5rem;
-  }
-
-  .app-actions > *:not(:last-child) {
-    margin-right: 1rem;
-  }
-
-  .name.container, .new-app h2 {
-    font-size: 1.4rem;
-    text-decoration: underline;
-    text-transform: uppercase;
-  }
-
-  .name + p.small {
-    margin-top: 0.2rem;
-  }
-  */
-
   .apps-nav {
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
