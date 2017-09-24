@@ -1,36 +1,15 @@
 <template>
-  <div class="new-app">
+  <div class="new-app-create">
     <form @submit="createApplication">
+
+      <!--
       <label class="small">Application name:</label>
       <input type="text" name="name"
         :value="applicationName" v-model="applicationName" />
       <label class="small">Short description:</label>
       <input type="text" name="description"
         :value="applicationDescription" v-model="applicationDescription" />
-
-      <label class="small">Choose a template:</label>
-      <div class="templates-list">
-        <div
-          @click="selectTemplate"
-          class="app-template"
-          :class="{selected: applicationTemplate === tpl.url}"
-          v-for="tpl, index in templates">
-          <span>
-            <input
-              :id="tpl.name"
-              type="radio"
-              :value="tpl.url"
-              v-model="applicationTemplate"
-              name="template" />
-            <label :for="tpl.name">{{tpl.name}}</label>
-          </span>
-          <p class="small">{{tpl.description}}</p>
-          <!--
-          <p class="small">{{tpl.url}}</p>
-          <iframe @load="loaded" :src="tpl.url"></iframe>
-          -->
-        </div>
-      </div>
+      -->
 
       <div class="form-actions">
         <input type="submit" value="Create Application" class="primary" />
@@ -41,7 +20,7 @@
 
 <script>
 export default {
-  name: 'new-app',
+  name: 'new-app-create',
   data: function () {
     return {
       applicationName: 'new-app',
@@ -49,31 +28,7 @@ export default {
       applicationTemplate: ''
     }
   },
-  computed: {
-    templates: function () {
-      return this.$store.state.templates
-    }
-  },
-  mounted: function () {
-    this.$store.dispatch('list-templates')
-  },
   methods: {
-    loaded: function (e) {
-      // Hide scrollbars for preview iframes
-      e.currentTarget.contentDocument.querySelector('body').style = 'overflow: hidden'
-    },
-    selectTemplate: function (e) {
-      e.preventDefault()
-      const radio = e.currentTarget.querySelector('input[type="radio"]')
-      radio.checked = true
-      this.applicationTemplate = radio.value
-      const templates = this.$store.state.templates
-      for (let i = 0; i < templates.length; i++) {
-        if (radio.value === templates[i].url) {
-          this.template = templates[i]
-        }
-      }
-    },
     createApplication: function (e) {
       e.preventDefault()
 

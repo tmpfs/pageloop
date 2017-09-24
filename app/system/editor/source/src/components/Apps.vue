@@ -8,18 +8,18 @@
         <div class="column-options">
           <nav class="tabs">
             <a
-              :class="{selected: settingsView === 'profile-settings'}"
-              @click="settingsView = 'profile-settings'">Info</a>
+              :class="{selected: newAppView === 'new-app-info'}"
+              @click="newAppView = 'new-app-info'">Info</a>
             <a
-              :class="{selected: settingsView === 'organization-settings'}"
-              @click="settingsView = 'organization-settings'">Template</a>
+              :class="{selected: newAppView === 'new-app-template'}"
+              @click="newAppView = 'new-app-template'">Template</a>
             <a
-              :class="{selected: settingsView === 'about-settings'}"
-              @click="settingsView = 'about-settings'">Create</a>
+              :class="{selected: newAppView === 'new-app-create'}"
+              @click="newAppView = 'new-app-create'">Create</a>
           </nav>
         </div>
         <div class="scroll">
-          <component is="new-app"></component>
+          <component v-bind:is="newAppView"></component>
         </div>
       </div>
       <div class="content-column preferences">
@@ -96,13 +96,16 @@
 
 <script>
 
-import NewApp from '@/components/NewApp'
+import NewAppInfo from '@/components/NewAppInfo'
+import NewAppTemplate from '@/components/NewAppTemplate'
+import NewAppCreate from '@/components/NewAppCreate'
 import AppsList from '@/components/AppsList'
 
 export default {
   name: 'apps',
   data: function () {
     return {
+      newAppView: 'new-app-info',
       currentView: 'apps-list',
       containerName: 'user',
       user: true
@@ -152,7 +155,7 @@ export default {
       return `Show applications in ${container.name}`
     }
   },
-  components: {NewApp, AppsList}
+  components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList}
 }
 </script>
 
