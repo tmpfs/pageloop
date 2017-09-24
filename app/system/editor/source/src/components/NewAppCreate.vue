@@ -1,14 +1,11 @@
 <template>
   <div class="new-app-create small">
     <form @submit="createApplication">
-
       <label>Name: {{applicationName}}</label>
       <label>Description: {{applicationDescription}}</label>
       <div v-if="template">
-        <label>{{template.name}}</label>
-        <label>{{template.description}}</label>
+        <label>Template: {{template.name}} ({{template.description}})</label>
       </div>
-
       <div class="form-actions">
         <input type="submit" value="Create Application" class="primary" />
       </div>
@@ -21,6 +18,7 @@ export default {
   name: 'new-app-create',
   data: function () {
     return {
+      applicationId: this.$store.state.newApp.id,
       applicationName: this.$store.state.newApp.name,
       applicationDescription: this.$store.state.newApp.description,
       applicationTemplate: this.$store.state.newApp.templateUrl,
@@ -32,8 +30,11 @@ export default {
       e.preventDefault()
 
       let app = {}
+      if (this.applicationId) {
+        app.name = this.applicationId
+      }
       if (this.applicationName) {
-        app.name = this.applicationName
+        app['display-name'] = this.applicationName
       }
       if (this.applicationDescription) {
         app.description = this.applicationDescription

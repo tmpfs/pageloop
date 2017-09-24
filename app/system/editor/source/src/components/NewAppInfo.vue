@@ -6,7 +6,6 @@
         :value="applicationName" v-model="applicationName" />
       <label class="small">Description:</label>
       <input type="text" name="description" placeholder="Enter an app description"
-        @change="applicationDescription = this.value"
         :value="applicationDescription" v-model="applicationDescription" />
       <div class="form-actions">
         <input type="submit"

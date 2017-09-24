@@ -18,6 +18,16 @@ class NewApp {
 
   set name (val) {
     this._name = val
+    // Remove invalid characters
+    let id = val.replace(/[^-a-zA-Z0-9 ]/g, '')
+    // Normalize whitespace to hyphens
+    id = id.replace(/\s+/g, '-')
+    // May not begin with a hyphen
+    id = id.replace(/^-/, '')
+    // Should be lowercase
+    id = id.toLowerCase()
+
+    this._id = id
   }
 
   get valid () {

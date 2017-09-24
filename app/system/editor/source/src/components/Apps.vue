@@ -115,6 +115,9 @@ export default {
     newAppValid: function () {
       return this.$store.state.newApp.valid
     },
+    newAppId: function () {
+      return this.$store.state.newApp.id
+    },
     list: function () {
       return this.$store.state.containers
     },
