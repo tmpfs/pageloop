@@ -46,21 +46,19 @@
         <div class="column-options">
           <nav class="tabs">
             <a
-              :class="{selected: activityView === 'notification-activity'}"
-              @click="activityView = 'notification-activity'">General</a>
+              :class="{selected: appSettingsView === 'general-app-settings'}"
+              @click="appSettingsView = 'general-app-settings'">General</a>
             <a
-              :class="{selected: activityView === 'job-activity'}"
-              @click="activityView = 'job-activity'">Export</a>
+              :class="{selected: appSettingsView === 'export-app-settings'}"
+              @click="appSettingsView = 'export-app-settings'">Export</a>
             <a
-              :class="{selected: activityView === 'log-activity'}"
-              @click="activityView = 'log-activity'">Import</a>
+              :class="{selected: appSettingsView === 'import-app-settings'}"
+              @click="appSettingsView = 'import-app-settings'">Import</a>
           </nav>
         </div>
-        <!--
         <div class="scroll">
-          <component v-bind:is="activityView"></component>
+          <component v-bind:is="appSettingsView"></component>
         </div>
-        -->
       </div>
     </div>
   </div>
@@ -78,6 +76,7 @@ export default {
   data: function () {
     return {
       currentView: 'apps-list',
+      appSettingsView: '',
       containerName: 'user',
       user: true
     }
