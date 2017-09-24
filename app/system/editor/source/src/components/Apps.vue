@@ -47,13 +47,13 @@
           <nav class="tabs">
             <a
               :class="{selected: appSettingsView === 'general-app-settings'}"
-              @click="appSettingsView = 'general-app-settings'">⛭ General</a>
+              @click="appSettingsView = 'general-app-settings'">General</a>
             <a
               :class="{selected: appSettingsView === 'export-app-settings'}"
-              @click="appSettingsView = 'export-app-settings'">🡇 Export</a>
+              @click="appSettingsView = 'export-app-settings'">Export</a>
             <a
               :class="{selected: appSettingsView === 'import-app-settings'}"
-              @click="appSettingsView = 'import-app-settings'">🡅 Import</a>
+              @click="appSettingsView = 'import-app-settings'">Import</a>
           </nav>
         </div>
         <div class="scroll">
@@ -142,18 +142,6 @@ export default {
   components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList}
 }
 </script>
-
-<style>
-  .apps-nav {
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .apps-nav .tabs {
-    max-width: 40%;
-  }
-
-</style>
 
 <style scoped>
   .scroll {

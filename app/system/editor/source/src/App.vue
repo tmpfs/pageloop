@@ -232,7 +232,6 @@ export default {
   button, input[type="submit"], input[type="reset"] {
     cursor: pointer;
     border-style: none;
-    border: 2px solid var(--base1-color);
     background: var(--base03-color);
     color: var(--base2-color);
     min-width: 6rem;
