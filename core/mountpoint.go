@@ -161,8 +161,6 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
 // Unmount an application from the web server.
 func (m *MountpointManager) UnmountApplication(app *Application) {
   delete(m.MountpointMap, app.PublishUrl())
-  delete(m.MountpointMap, app.SourceUrl())
-  delete(m.MountpointMap, app.RawUrl())
 }
 
 // Test if a mountpoint exists by URL.

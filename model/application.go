@@ -39,6 +39,7 @@ type Application struct {
   Path string `json:"-"`
 
   Name string `json:"name"`
+  DisplayName string `json:"display"`
   Description string `json:"description"`
   Pages []*Page `json:"-"`
   Files []*File `json:"-"`
@@ -435,14 +436,6 @@ func (app *Application) MountpointUrl(c *Container) string {
 
 func (app *Application) PublishUrl() string {
   return app.Url
-}
-
-func (app *Application) SourceUrl() string {
-	return "/apps/src/" + app.Container.Name + "/" + app.Name + "/"
-}
-
-func (app *Application) RawUrl() string {
-  return "/apps/raw/" + app.Container.Name + "/" + app.Name + "/"
 }
 
 // Private methods

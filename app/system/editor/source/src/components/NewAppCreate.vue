@@ -35,7 +35,7 @@ export default {
         app.name = this.applicationId
       }
       if (this.applicationName) {
-        app['display-name'] = this.applicationName
+        app.display = this.applicationName
       }
       if (this.applicationDescription) {
         app.description = this.applicationDescription
