@@ -3,7 +3,7 @@
     <div class="content">
       <div class="content-column settings">
         <div class="column-header">
-          <!-- <h2>New</h2> -->
+          <h2>New App</h2>
         </div>
         <div class="column-options">
           <nav class="tabs">
@@ -24,7 +24,7 @@
       </div>
       <div class="content-column preferences">
         <div class="column-header">
-          <h2>Apps</h2>
+          <h2>App List</h2>
         </div>
         <div class="column-options">
           <nav class="tabs">
@@ -41,7 +41,7 @@
       </div>
       <div class="content-column activity">
         <div class="column-header">
-          <h2>Config</h2>
+          <h2>App Settings</h2>
         </div>
         <div class="column-options">
           <!--
