@@ -6,13 +6,13 @@
         <p class="small">URL: {{app.url}}<br />{{app.description}}
           <p class="app-actions">
             <a class="name"
-              @click="editApplication(container, app)"
+              @click="editApplication(app)"
               :title="title(app, 'Edit')">Edit</a>
             <a class="name"
-              :href="linkify(container, app, true)"
+              :href="linkify(app, true)"
               :title="title(app, 'Open')">Open</a>
             <a v-if="!app.protected" class="name"
-              @click="confirmDeleteApplication(container, app)"
+              @click="confirmDeleteApplication(app)"
               :title="title(app, 'Delete')">Delete</a>
           </p>
         </p>
@@ -28,42 +28,41 @@ export default {
       type: Array
     }
   },
-  computed: {
-    list: function () {
-      return this.$store.state.containers
-    },
-    container: function () {
-      return this.$store.state.getContainerByName(this.containerName)
-    }
-  },
   methods: {
-    editApplication: function (container, app) {
+    getContainer: function (app) {
+      return this.$store.state.getContainerByName(app.container)
+    },
+    editApplication: function (app) {
+      const container = this.getContainer(app)
       return this.$store.dispatch('edit-app', {container: container, application: app})
     },
-    confirmDeleteApplication: function (container, application) {
+    confirmDeleteapp: function (app) {
+      const container = this.getContainer(app)
       let details = {
-        title: `Delete Application (${application.name})`,
-        message: `Are you sure you want to permanently delete ${application.name}?`,
-        note: 'Be careful deleting an application will remove all application files forever.',
+        title: `Delete app (${app.name})`,
+        message: `Are you sure you want to permanently delete ${app.name}?`,
+        note: 'Be careful deleting an app will remove all app files forever.',
         ok: () => {
-          this.deleteApplication(container, application)
+          this.deleteapp(container, app)
         }
       }
       this.$store.commit('alert-show', details)
     },
-    deleteApplication: function (container, application) {
-      this.$store.dispatch('del-app', {container: container.name, application: application.name})
+    deleteapp: function (app) {
+      const container = this.getContainer(app)
+      this.$store.dispatch('del-app', {container: container.name, app: app.name})
         .catch((e) => console.error(e))
       return false
     },
-    linkify: function (c, a, open) {
+    linkify: function (app, open) {
+      const container = this.getContainer(app)
       if (open) {
-        return a.url
+        return app.url
       }
-      return `apps/${c.name}/${a.name}`
+      return `apps/${container.name}/${app.name}`
     },
-    title: function (a, prefix) {
-      return `${prefix} ${a.name}`
+    title: function (app, prefix) {
+      return `${prefix} ${app.name}`
     }
   }
 }

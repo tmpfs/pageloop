@@ -30,15 +30,15 @@
           <nav class="tabs">
             <a
               title="Show all applications"
-              :class="{selected: listAppView === 'all'}"
+              :class="{selected: appListView === 'all'}"
               @click="listApps('all')">All</a>
             <a
               title="Show template applications"
-              :class="{selected: listAppView === 'templates'}"
+              :class="{selected: appListView === 'templates'}"
               @click="listApps('templates')">Templates</a>
             <a
               title="Show open applications"
-              :class="{selected: listAppView === 'open'}"
+              :class="{selected: appListView === 'open'}"
               @click="listApps('open')">Open</a>
 
             <!--
@@ -95,7 +95,6 @@ export default {
       currentView: 'apps-list',
       appListView: 'all',
       appSettingsView: '',
-      /* containerName: 'user', */
       user: true
     }
   },
@@ -122,8 +121,6 @@ export default {
         system: this.system,
         template: this.template
       }
-
-      // o.user = this.system || this.template
 
       return o
     },
