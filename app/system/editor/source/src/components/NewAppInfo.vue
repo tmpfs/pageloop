@@ -2,7 +2,7 @@
   <div class="new-app-info">
     <ul class="new-app-step small">
       <li>
-        <span>Enter application info</span>
+        <span>Application info</span>
         <span>Step 1/3</span>
       </li>
     </ul>

@@ -13,20 +13,22 @@
           class="app-template"
           :class="{selected: applicationTemplate === tpl.url}"
           v-for="tpl, index in templates">
-          <span>
+          <div>
             <input
               :id="tpl.name"
               type="radio"
               :value="tpl.url"
               v-model="applicationTemplate"
               name="template" />
+          </div>
+          <div>
             <label :for="tpl.name">{{tpl.name}}</label>
-          </span>
-          <p class="small">{{tpl.description}}</p>
-          <!--
-          <p class="small">{{tpl.url}}</p>
-          <iframe @load="loaded" :src="tpl.url"></iframe>
-          -->
+            <p class="small">{{tpl.description}}</p>
+            <!--
+            <p class="small">{{tpl.url}}</p>
+            <iframe @load="loaded" :src="tpl.url"></iframe>
+            -->
+          </div>
         </div>
       </div>
 
@@ -90,14 +92,6 @@ export default {
 </script>
 
 <style scoped>
-  .new-app {
-    width: 100%;
-    padding: 1rem;
-  }
-
-  .new-app-fields {
-  }
-
   input[type="radio"] {
     display: inline-block;
     line-height: 3rem;
@@ -119,10 +113,24 @@ export default {
   }
 
   .app-template {
+    display: flex;
     background: var(--base03-color);
-    border: 1px solid var(--base00-color);
     transition: all 0.3s ease-out;
     cursor: pointer;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid transparent;
+    padding: 1rem 0;
+  }
+
+  .app-template > div:first-child {
+    min-width: 4rem; 
+    border-right: 2px solid var(--base00-color);
+    text-align: center;
+  }
+
+  .app-template > div:last-child {
+    flex: 1 0;
+    padding-left: 1rem;
   }
 
   .app-template label {
@@ -134,6 +142,6 @@ export default {
   }
 
   .app-template.selected {
-    border: 1px solid var(--base3-color);
+    border-bottom: 2px solid var(--base3-color);
   }
 </style>
