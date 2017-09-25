@@ -18,6 +18,7 @@
             <li v-for="app in apps">
               <a
                 :class="{selected: isSelected(app)}"
+                :title="app.description"
                 @click="editApplication(app)">
               {{app.display}}
               </a>
