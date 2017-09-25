@@ -99,14 +99,16 @@ export default {
   }
 
   .content-main {
-    /* flex: 1 1; */
+    /* NOTE: auto is required here */
+    flex: 1 0 auto;
     display: flex;
     flex-direction: row;
-    width: 100%;
+    /* NOTE: needs this set for the main menu */
+    width: 50%;
   }
 
   .main-menu + .content-main {
-    width: 84%;
+    /* width: 84%; */
   }
 
   .content {

@@ -60,7 +60,7 @@ mountpoints:
     description: |
       Pure2 application template
   -
-    display: Directory listing
+    display: Directory Listing
     container: template
     url: /template/listing/
     path: app/template/listing/

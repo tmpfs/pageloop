@@ -87,6 +87,36 @@ class State {
     return this.notifier.notify(info, del)
   }
 
+  get apps () {
+    let apps = []
+    const enabled = {
+      system: this.settings.showSystemApplications,
+      template: this.settings.showTemplateApplications
+    }
+    this.containers.forEach((container) => {
+      if (enabled[container.name] !== undefined && !enabled[container.name]) {
+        return
+      }
+      apps = apps.concat(container.apps)
+    })
+
+    /*
+
+    if (type === 'templates') {
+      apps = apps.filter((app) => {
+        return app['is-template']
+      })
+    } else if (type === 'open') {
+      apps = apps.filter((app) => {
+        return app.open
+      })
+    }
+    */
+    // this.appListView = type
+    // this.apps = apps
+    return apps
+  }
+
   getAppHref (...args) {
     let p = ['apps', this.container, this.application]
 
