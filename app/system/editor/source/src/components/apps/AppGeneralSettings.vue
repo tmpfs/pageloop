@@ -4,7 +4,7 @@
     <ul class="details small">
       <li>
         <span>Name</span>
-        <span>{{app && app.display ? app.display : na}}</span>
+        <span>{{app ? app.display : na}}</span>
       </li>
       <li>
         <span>Description</span>
@@ -37,9 +37,11 @@
       <nav>
         <a @click="exportSourceArchive()"
            class="download"
+           :class="{disabled: !app}"
            title="Export source files as zip archive">🡇 Download source files</a>
         <a @click="exportPublicArchive()"
            class="download"
+           :class="{disabled: !app}"
            title="Export public files as zip archive">🡇 Download public files</a>
       </nav>
     </div>
@@ -77,7 +79,8 @@ export default {
   h3 {
     margin: 0;
     padding: 0 0 0.5rem 0;
-    border-bottom: 1px solid var(--border-color)
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.5rem;
   }
 
   .details {
@@ -134,6 +137,7 @@ export default {
     color: var(--base2-color);
     text-align: center;
     font-size: 1.6rem;
+    transition: all 0.4s ease-out;
   }
 
 </style>

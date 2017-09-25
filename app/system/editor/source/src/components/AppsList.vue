@@ -9,7 +9,7 @@
           :class="{selected: app === selectedApp}"
           v-for="app in apps">
           <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
-          <span class="name">{{app.display || app.name}}</span>
+          <span class="name">{{app.display}}</span>
           <p class="small">
             {{app.description}}
           </p>
@@ -71,13 +71,10 @@ export default {
       this.$store.commit('alert-show', details)
     },
     deleteApp: function (app) {
-      console.log('delete app')
-      console.log(app)
       this.$store.dispatch('del-app', {container: app.container, application: app.name})
         .then(() => {
           for (let i = 0; i < this.apps.length; i++) {
             if (app === this.apps[i]) {
-              console.log('deleting app from list!!!')
               this.apps = this.apps.splice(i, 1)
               break
             }
