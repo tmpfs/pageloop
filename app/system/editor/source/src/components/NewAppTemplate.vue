@@ -24,10 +24,10 @@
           <div>
             <label :for="tpl.name">{{tpl.name}}</label>
             <p class="small">{{tpl.description}}</p>
-            <!--
-            <p class="small">{{tpl.url}}</p>
-            <iframe @load="loaded" :src="tpl.url"></iframe>
-            -->
+            <a
+              class="small"
+              @click="preview(tpl)">Preview</a>
+            <iframe v-if="previewUrl === tpl.url" @load="loaded" :src="tpl.url"></iframe>
           </div>
         </div>
       </div>
@@ -42,6 +42,12 @@
 <script>
 export default {
   name: 'new-app-template',
+  data: function () {
+    return {
+      previews: {},
+      previewUrl: ''
+    }
+  },
   computed: {
     templates: function () {
       return this.$store.state.templates
@@ -67,6 +73,16 @@ export default {
     this.$store.dispatch('list-templates')
   },
   methods: {
+    preview: function (tpl) {
+      console.log('toggle preview called: ' + tpl.url)
+      this.previews[tpl.url] = !this.previews[tpl.url]
+      console.log('toggle preview called: ' + this.previews[tpl.url])
+      if (this.previewUrl !== tpl.url) {
+        this.previewUrl = tpl.url
+      } else {
+        this.previewUrl = ''
+      }
+    },
     loaded: function (e) {
       // Hide scrollbars for preview iframes
       e.currentTarget.contentDocument.querySelector('body').style = 'overflow: hidden'
@@ -130,7 +146,7 @@ export default {
 
   .app-template > div:last-child {
     flex: 1 0;
-    padding-left: 1rem;
+    padding: 0 1rem;
   }
 
   .app-template label {
@@ -143,5 +159,6 @@ export default {
 
   .app-template.selected {
     border-bottom: 2px solid var(--base3-color);
+    pointer-events: auto;
   }
 </style>
