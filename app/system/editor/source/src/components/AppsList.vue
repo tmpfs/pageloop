@@ -131,7 +131,6 @@ export default {
     margin-top: 0.2rem;
   }
 
-
   .reveal-enter {
 		opacity: 0;
   }
@@ -144,5 +143,11 @@ export default {
   .reveal-enter, .reveal-leave-to {
 		opacity: 0;
   }
+
+  /*
+  .reveal-move {
+    transition: transform 1s;
+  }
+  */
 
 </style>

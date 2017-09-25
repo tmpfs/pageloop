@@ -87,8 +87,6 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "File.ReadSourceRaw":
       fallthrough
     case "File.Read":
-      fallthrough
-    case "File.Create":
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: route.Parameters.Item}
@@ -106,6 +104,8 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         return nil, err
       }
       argv = f
+    case "File.Create":
+      fallthrough
     case "File.Save":
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
