@@ -50,15 +50,17 @@
 <script>
 export default {
   name: 'new-app-template',
-  data: function () {
-    return {
-      previews: {},
-      previewUrl: ''
-    }
-  },
   computed: {
     templates: function () {
       return this.$store.state.templates
+    },
+    previewUrl: {
+      get: function () {
+        return this.$store.state.newApp.previewUrl
+      },
+      set: function (val) {
+        this.$store.state.newApp.previewUrl = val
+      }
     },
     applicationTemplate: {
       get: function () {
@@ -82,7 +84,6 @@ export default {
   },
   methods: {
     preview: function (tpl) {
-      this.previews[tpl.url] = !this.previews[tpl.url]
       if (this.previewUrl !== tpl.url) {
         this.previewUrl = tpl.url
       } else {
@@ -147,7 +148,7 @@ export default {
   }
 
   .app-template > div:first-child {
-    min-width: 4rem; 
+    min-width: 4rem;
     border-right: 2px solid var(--base00-color);
     text-align: center;
   }
@@ -167,7 +168,6 @@ export default {
 
   .app-template.selected {
     border-bottom: 2px solid var(--base3-color);
-    pointer-events: auto;
   }
 
   .reveal-enter {

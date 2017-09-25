@@ -33,6 +33,7 @@ class NewApp {
   reset () {
     this.view = defaultView
     this.templateUrl = ''
+    this.previewUrl = ''
     this.template = undefined
     this.description = ''
 

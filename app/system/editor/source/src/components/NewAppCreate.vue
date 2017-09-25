@@ -7,11 +7,21 @@
       </li>
     </ul>
     <form @submit="createApplication">
-      <label>Name: {{applicationName}}</label>
-      <label>Description: {{applicationDescription}}</label>
-      <div v-if="template">
-        <label>Template: {{template.name}} ({{template.description}})</label>
-      </div>
+      <ul class="details">
+        <li>
+          <span>Name</span>
+          <span>{{applicationName}}</span>
+        </li>
+        <li>
+          <span>Description</span>
+          <span>{{applicationDescription}}</span>
+        </li>
+        <li>
+          <span>Template</span>
+          <span v-if="!template">None</span>
+          <span v-else>{{template.name}}<br>{{template.description}}</span>
+        </li>
+      </ul>
       <div class="form-actions">
         <input type="submit" value="Create Application" class="primary" v-focus />
       </div>
@@ -63,7 +73,32 @@ export default {
 </script>
 
 <style scoped>
-  label {
-    display: block;
+  .details {
+    margin: 0 0 2rem 0;
+    padding: 0;
+    list-style-type: none;
+    display: table;
+    width: 100%;
+  }
+
+  .details > li {
+    display: table-row;
+    width: 100%;
+  }
+
+  .details > li > span:first-child {
+    text-align: right;
+  }
+
+
+  .details > li > span:first-child::after {
+    content: ':';
+    display: inline-block;
+  }
+
+  .details > li > span {
+    display: table-cell;
+    width: 50%;
+    padding: 0 1rem;
   }
 </style>
