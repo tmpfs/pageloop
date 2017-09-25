@@ -1,51 +1,58 @@
 addr: :3577
-publish: public
 source: app/user
 mountpoints:
   -
+    display: Pageloop Editor
     container: system
     url: /
     path: app/system/editor/
     description: |
       Application editor
   -
+    display: Pageloop Assets
     container: system
     url: /assets/
     path: app/system/assets/
     description: |
       Common assets
   -
+    display: Documents
     container: system
     url: /docs/
     path: app/system/docs/
     description: |
       Documentation & help files
   -
+    display: Browser
     container: system
     url: /tools/api/browser/
     path: app/system/tools/api/browser/
     description: |
       API Browser
   -
+    display: Probe
     container: system
     url: /tools/api/probe/
     path: app/system/tools/api/probe/
     description: |
       API Probe
   -
+    display: Document Templates
     container: template
     url: /template/documents/
     path: app/template/documents/
     description: |
-      Document templates
+      Template files for new documents
   -
+    display: Pure
     container: template
     url: /template/applications/pure/
     path: app/template/applications/pure/
     template: true
     description: |
-      Pure application template
+      Minimal application using vanilla HTML, CSS and Javascript
   -
+    display: Pure2 (mock)
     container: template
     url: /template/applications/pure2/
     path: app/template/applications/pure2/
@@ -53,8 +60,9 @@ mountpoints:
     description: |
       Pure2 application template
   -
+    display: Directory listing
     container: template
     url: /template/listing/
     path: app/template/listing/
     description: |
-      Directory listing
+      HTML markup used when listing directories
