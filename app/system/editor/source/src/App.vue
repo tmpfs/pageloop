@@ -98,11 +98,12 @@ export default {
     min-height: 100%;
   }
 
-  main > .content-main {
+  .content-main {
     flex: 1 1;
-    height: calc(100% - 6rem);
+    height: 100%;
     display: flex;
     flex-direction: row;
+    width: 100%;
   }
 
   .content {

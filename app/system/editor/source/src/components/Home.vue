@@ -22,6 +22,7 @@ export default {
 
 <style scoped>
 	.scroll {
+    width: 100%;
 		height: 100%;
 	}
 

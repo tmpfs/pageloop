@@ -1,9 +1,12 @@
 <template>
-  <div class="main-menu">
-    <div class="column-header">
-      <h2>Navigation</h2>
-    </div>
+  <div class="main-menu" v-if="show">
     <nav>
+      <a
+        tabindex="1"
+        @click="$store.dispatch('navigate', {href: 'home'})"
+        class="home"
+        :class="{selected: selectedView === 'home'}"
+        title="Home page">Home</a>
       <a
         tabindex="2"
         @click="$store.dispatch('navigate', {href: 'apps'})"
@@ -29,6 +32,9 @@ export default {
   computed: {
     selectedView: function () {
       return this.$store.state.main.view
+    },
+    show: function () {
+      return this.$store.state.showMainMenu
     }
   }
 }
@@ -36,9 +42,19 @@ export default {
 
 <style scoped>
   .main-menu {
-    width: 18rem;
+    /*
+    position: absolute;
+    left: 0;
+    top: 2.8rem;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    */
+    width: 20%;
+    border-top: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     font-size: 1.5rem;
+    background: var(--base03-color);
   }
 
   .main-menu > nav {
@@ -50,6 +66,7 @@ export default {
     transition: all 0.4s ease-out;
     color: var(--base00-color);
     margin-bottom: 0.5rem;
+    border-bottom: 1px solid transparent;
   }
 
   .main-menu > nav > a:hover {
@@ -60,5 +77,4 @@ export default {
     color: var(--base2-color);
     border-bottom: 1px solid var(--base2-color);
   }
-
 </style>

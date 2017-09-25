@@ -11,6 +11,10 @@ export default {
 </script>
 
 <style scoped>
+  .content-main {
+    border-top: 1px solid var(--border-color);
+  }
+
   iframe.docs {
     height: 100%;
   }

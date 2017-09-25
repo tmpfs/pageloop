@@ -1,39 +1,11 @@
 <template>
   <header class="clearfix">
-    <!--
     <nav class="home">
       <a
-        tabindex="0"
-        @click="$store.dispatch('navigate', {href: 'edit'})"
-        title="Applications">
-          <span>Apps</span>
-          <span v-if="name"> / {{name}}</span>
-        </a>
-        <build-tasks v-if="buildable"></build-tasks>
-    </nav>
-    -->
-    <nav class="main">
-      <a
         tabindex="1"
-        @click="$store.dispatch('navigate', {href: 'home'})"
+        @click="show = !show"
         class="home"
-        :class="{selected: selectedView === 'home'}"
-        title="Home page">Ꝏ </a>
-      <a
-        tabindex="2"
-        @click="$store.dispatch('navigate', {href: 'apps'})"
-        :class="{selected: selectedView === 'apps'}"
-        title="View and edit applications">Apps</a>
-      <a
-        tabindex="3"
-        @click="$store.dispatch('navigate', {href: 'docs'})"
-        :class="{selected: selectedView === 'docs'}"
-        title="Documentation">Docs</a>
-      <a
-        tabindex="4"
-        @click="$store.dispatch('navigate', {href: 'settings'})"
-        :class="{selected: selectedView === 'settings'}"
-        title="Settings">Settings</a>
+        title="Navigation Menu">Ꝏ  Menu</a>
     </nav>
   </header>
 </template>
@@ -53,6 +25,14 @@ export default {
     },
     selectedView: function () {
       return this.$store.state.main.view
+    },
+    show: {
+      get: function () {
+        return this.$store.state.showMainMenu
+      },
+      set: function (val) {
+        this.$store.state.showMainMenu = val
+      }
     }
   },
   components: {BuildTasks}

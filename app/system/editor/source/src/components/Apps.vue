@@ -1,6 +1,5 @@
 <template>
   <div class="content-main">
-    <main-menu></main-menu>
     <div class="content">
       <div class="content-column settings">
         <div class="column-header">
@@ -73,8 +72,6 @@
 </template>
 
 <script>
-
-import MainMenu from '@/components/MainMenu'
 
 import NewAppInfo from '@/components/NewAppInfo'
 import NewAppTemplate from '@/components/NewAppTemplate'
@@ -171,7 +168,7 @@ export default {
       this.apps = apps
     }
   },
-  components: {MainMenu, NewAppInfo, NewAppTemplate, NewAppCreate, AppsList, AppGeneralSettings, AppArchiveSettings, AppPublishSettings}
+  components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList, AppGeneralSettings, AppArchiveSettings, AppPublishSettings}
 }
 </script>
 

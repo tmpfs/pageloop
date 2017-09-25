@@ -56,6 +56,8 @@ class State {
     this.setApplication('', '')
 
     this.activity = new Activity(this.log)
+
+    this.showMainMenu = false
   }
 
   getContainerByName (name) {
