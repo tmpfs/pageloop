@@ -1,9 +1,10 @@
 <template>
   <div class="apps-list">
-   <div class="app" v-for="app in apps">
+
+    <div class="app" v-for="app in apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
         <span class="name">{{app.display || app.name}}</span>
-        <p class="small">URL: {{app.url}}<br />{{app.description}}
+        <div class="small">URL: {{app.url}}<br />{{app.description}}
           <p class="app-actions">
             <a class="name"
               @click="editApplication(app)"
@@ -15,7 +16,7 @@
               @click="confirmDeleteApplication(app)"
               :title="title(app, 'Delete')">Delete</a>
           </p>
-        </p>
+        </div>
     </div>
   </div>
 </template>

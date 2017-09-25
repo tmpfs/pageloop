@@ -10,7 +10,7 @@ export default {
   name: 'bitmap-editor',
   computed: {
     src: function () {
-      return this.$store.state.app.url + this.$store.state.current.uri
+      return this.$store.state.app.url.replace(/\/$/, '') + this.$store.state.current.uri
     }
   }
 }
