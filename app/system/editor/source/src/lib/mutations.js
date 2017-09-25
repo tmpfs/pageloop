@@ -133,6 +133,9 @@ const Mutations = {
   },
   'new-app-view': function (state, view) {
     state.newApp.view = view
+  },
+  'app-list-selected': function (state, app) {
+    state.appList.selected = app
   }
 }
 

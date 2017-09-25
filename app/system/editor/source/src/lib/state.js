@@ -19,6 +19,7 @@ import Settings from './state/settings'
 import {KeyManager} from './keymap'
 
 import NewApp from './state/new-app'
+import AppList from './state/app-list'
 
 class State {
   constructor () {
@@ -48,6 +49,7 @@ class State {
     this.client.log = this.network
 
     this.newApp = new NewApp()
+    this.appList = new AppList()
 
     this.containers = []
     this.templates = []

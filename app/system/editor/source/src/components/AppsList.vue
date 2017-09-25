@@ -1,7 +1,10 @@
 <template>
   <div class="apps-list">
-
-    <div class="app" v-for="app in apps">
+    <div class="small" v-if="!apps.length">No apps found.</div>
+    <div
+        @click="selectApp(app)"
+        class="app"
+        v-for="app in apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
         <span class="name">{{app.display || app.name}}</span>
         <div class="small">URL: {{app.url}}<br />{{app.description}}
@@ -30,6 +33,9 @@ export default {
     }
   },
   methods: {
+    selectApp: function (app) {
+      this.$store.commit('app-list-selected', app)
+    },
     getContainer: function (app) {
       return this.$store.state.getContainerByName(app.container)
     },

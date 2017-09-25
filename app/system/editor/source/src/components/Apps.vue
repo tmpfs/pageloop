@@ -40,18 +40,9 @@
               title="Show open applications"
               :class="{selected: appListView === 'open'}"
               @click="listApps('open')">Open</a>
-
-            <!--
-            <a
-              @click="listApplications(container, $event)"
-              :title="getLinkTitle(container)"
-              :class="{selected: isSelected(container)}"
-              v-for="container in list" v-if="enabled[container.name]">{{container.name}}</a>
-            -->
           </nav>
         </div>
         <div class="scroll">
-          <!--<component :containerName="containerName" is="apps-list"></component>-->
           <component :apps="apps" is="apps-list"></component>
         </div>
       </div>
@@ -62,18 +53,18 @@
         <div class="column-options">
           <nav class="tabs">
             <a
-              :class="{selected: appSettingsView === 'general-app-settings'}"
-              @click="appSettingsView = 'general-app-settings'">General</a>
+              :class="{selected: appSettingsView === 'app-general-settings'}"
+              @click="appSettingsView = 'app-general-settings'">General</a>
             <a
-              :class="{selected: appSettingsView === 'archive-app-settings'}"
-              @click="appSettingsView = 'archive-app-settings'">Archive</a>
+              :class="{selected: appSettingsView === 'app-archive-settings'}"
+              @click="appSettingsView = 'app-archive-settings'">Archive</a>
             <a
-              :class="{selected: appSettingsView === 'build-app-settings'}"
-              @click="appSettingsView = 'build-app-settings'">build</a>
+              :class="{selected: appSettingsView === 'app-publish-settings'}"
+              @click="appSettingsView = 'app-publish-settings'">Publish</a>
           </nav>
         </div>
         <div class="scroll">
-          <component v-bind:is="appSettingsView"></component>
+          <component :app="selectedApp" v-bind:is="appSettingsView"></component>
         </div>
       </div>
     </div>
@@ -87,18 +78,29 @@ import NewAppTemplate from '@/components/NewAppTemplate'
 import NewAppCreate from '@/components/NewAppCreate'
 import AppsList from '@/components/AppsList'
 
+import AppGeneralSettings from '@/components/apps/AppGeneralSettings'
+import AppArchiveSettings from '@/components/apps/AppArchiveSettings'
+import AppPublishSettings from '@/components/apps/AppPublishSettings'
+
 export default {
   name: 'apps',
   data: function () {
     return {
       apps: [],
-      currentView: 'apps-list',
       appListView: 'all',
-      appSettingsView: '',
+      appSettingsView: 'app-general-settings',
       user: true
     }
   },
   computed: {
+    selectedApp: {
+      get: function () {
+        return this.$store.state.appList.selected
+      },
+      set: function (val) {
+        this.$store.commit('app-list-selected', val)
+      }
+    },
     newAppView: {
       get: function () {
         return this.$store.state.newApp.view
@@ -121,7 +123,6 @@ export default {
         system: this.system,
         template: this.template
       }
-
       return o
     },
     system: {
@@ -166,22 +167,8 @@ export default {
       this.appListView = type
       this.apps = apps
     }
-
-    /*
-    isSelected: function (container) {
-      return this.currentView === 'apps-list' && this.containerName === container.name
-    },
-    listApplications: function (container, e) {
-      e.preventDefault()
-      this.containerName = container.name
-      this.currentView = 'apps-list'
-    },
-    getLinkTitle: function (container) {
-      return `Show applications in ${container.name}`
-    }
-    */
   },
-  components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList}
+  components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList, AppGeneralSettings, AppArchiveSettings, AppPublishSettings}
 }
 </script>
 
