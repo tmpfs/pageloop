@@ -64,7 +64,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <component :app="selectedApp" v-bind:is="appSettingsView"></component>
+          <component :app="selectedApp" na="--" v-bind:is="appSettingsView"></component>
         </div>
       </div>
     </div>

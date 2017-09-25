@@ -1,33 +1,33 @@
 <template>
-  <div class="app-general-settings" v-if="app">
+  <div class="app-general-settings">
     <ul class="details small">
-      <li v-if="app.display">
+      <li>
         <span>Name</span>
-        <span>{{app.display}}</span>
+        <span>{{app && app.display ? app.display : na}}</span>
       </li>
       <li>
         <span>Description</span>
-        <span>{{app.description}}</span>
+        <span>{{app ? app.description : na}}</span>
       </li>
       <li>
         <span>Id</span>
-        <span>{{app.name}}</span>
+        <span>{{app ? app.name : na}}</span>
       </li>
       <li>
         <span>URL</span>
-        <span>{{app.url}}</span>
+        <span>{{app ? app.url : na}}</span>
       </li>
       <li>
         <span>Container</span>
-        <span>{{app.container}}</span>
+        <span>{{app ? app.container : na}}</span>
       </li>
       <li>
         <span>Protected</span>
-        <span>{{app.protected ? 'yes' : 'no'}}</span>
+        <span>{{app ? (app.protected ? 'yes' : 'no') : na}}</span>
       </li>
       <li>
         <span>Template</span>
-        <span>{{app['is-template'] ? 'yes' : 'no'}}</span>
+        <span>{{app ? (app['is-template'] ? 'yes' : 'no') : na}}</span>
       </li>
     </ul>
   </div>
@@ -39,6 +39,9 @@ export default {
   props: {
     app: {
       type: Object
+    },
+    na: {
+      type: String
     }
   }
 }
