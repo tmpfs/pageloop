@@ -99,10 +99,14 @@ export default {
   }
 
   .content-main {
-    flex: 1 1;
-    height: calc(100%-6rem);
+    /* flex: 1 1; */
     display: flex;
     flex-direction: row;
+    width: 100%;
+  }
+
+  .main-menu + .content-main {
+    width: 84%;
   }
 
   .content {

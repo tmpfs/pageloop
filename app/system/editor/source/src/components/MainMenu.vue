@@ -50,7 +50,7 @@ export default {
     right: 0;
     z-index: 1000;
     */
-    width: 20%;
+    width: 16%;
     border-top: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     font-size: 1.5rem;
