@@ -30,13 +30,16 @@
           <nav class="tabs">
             <a
               title="Show all applications"
-              @click="appsListView = 'all-apps'">All</a>
+              :class="{selected: listAppView === 'all'}"
+              @click="listApps('all')">All</a>
             <a
               title="Show template applications"
-              @click="appsListView = 'template-apps'">Templates</a>
+              :class="{selected: listAppView === 'templates'}"
+              @click="listApps('templates')">Templates</a>
             <a
               title="Show open applications"
-              @click="appsListView = 'open-apps'">Open</a>
+              :class="{selected: listAppView === 'open'}"
+              @click="listApps('open')">Open</a>
 
             <!--
             <a
@@ -48,7 +51,8 @@
           </nav>
         </div>
         <div class="scroll">
-          <component :containerName="containerName" is="apps-list"></component>
+          <!--<component :containerName="containerName" is="apps-list"></component>-->
+          <component :apps="apps" is="apps-list"></component>
         </div>
       </div>
       <div class="content-column activity">
@@ -61,11 +65,11 @@
               :class="{selected: appSettingsView === 'general-app-settings'}"
               @click="appSettingsView = 'general-app-settings'">General</a>
             <a
-              :class="{selected: appSettingsView === 'export-app-settings'}"
-              @click="appSettingsView = 'export-app-settings'">Export</a>
+              :class="{selected: appSettingsView === 'archive-app-settings'}"
+              @click="appSettingsView = 'archive-app-settings'">Archive</a>
             <a
-              :class="{selected: appSettingsView === 'import-app-settings'}"
-              @click="appSettingsView = 'import-app-settings'">Import</a>
+              :class="{selected: appSettingsView === 'build-app-settings'}"
+              @click="appSettingsView = 'build-app-settings'">build</a>
           </nav>
         </div>
         <div class="scroll">
@@ -87,9 +91,11 @@ export default {
   name: 'apps',
   data: function () {
     return {
+      apps: [],
       currentView: 'apps-list',
+      appListView: 'all',
       appSettingsView: '',
-      containerName: 'user',
+      /* containerName: 'user', */
       user: true
     }
   },
@@ -117,7 +123,7 @@ export default {
         template: this.template
       }
 
-      o.user = this.system || this.template
+      // o.user = this.system || this.template
 
       return o
     },
@@ -138,7 +144,33 @@ export default {
       }
     }
   },
+  mounted: function () {
+    this.listApps('all')
+  },
   methods: {
+    listApps: function (type) {
+      let apps = []
+      this.list.forEach((container) => {
+        if (this.enabled[container.name] !== undefined && !this.enabled[container.name]) {
+          return
+        }
+        apps = apps.concat(container.apps)
+      })
+
+      if (type === 'templates') {
+        apps = apps.filter((app) => {
+          return app['is-template']
+        })
+      } else if (type === 'open') {
+        apps = apps.filter((app) => {
+          return app.open
+        })
+      }
+      this.appListView = type
+      this.apps = apps
+    }
+
+    /*
     isSelected: function (container) {
       return this.currentView === 'apps-list' && this.containerName === container.name
     },
@@ -150,6 +182,7 @@ export default {
     getLinkTitle: function (container) {
       return `Show applications in ${container.name}`
     }
+    */
   },
   components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList}
 }

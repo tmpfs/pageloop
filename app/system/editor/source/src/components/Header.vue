@@ -1,5 +1,6 @@
 <template>
   <header class="clearfix">
+    <!--
     <nav class="home">
       <a
         tabindex="0"
@@ -10,6 +11,7 @@
         </a>
         <build-tasks v-if="buildable"></build-tasks>
     </nav>
+    -->
     <nav class="main">
       <a
         tabindex="1"

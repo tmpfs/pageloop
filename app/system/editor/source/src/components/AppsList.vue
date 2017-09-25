@@ -1,6 +1,6 @@
 <template>
   <div class="apps-list">
-   <div class="app" v-for="app in container.apps">
+   <div class="app" v-for="app in apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
         <span class="name">{{app.display || app.name}}</span>
         <p class="small">URL: {{app.url}}<br />{{app.description}}
@@ -23,7 +23,11 @@
 <script>
 export default {
   name: 'apps-list',
-  props: ['containerName'],
+  props: {
+    apps: {
+      type: Array
+    }
+  },
   computed: {
     list: function () {
       return this.$store.state.containers
