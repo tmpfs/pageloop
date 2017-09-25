@@ -59,7 +59,7 @@ export default {
   methods: {
     isSelected: function (app) {
       const state = this.$store.state
-      return app.container === state.container && app.name === state.application
+      return app.container === state.container && app.name === state.application && this.selectedView === 'edit'
     },
     getContainer: function (app) {
       return this.$store.state.getContainerByName(app.container)
