@@ -101,9 +101,12 @@ export default {
   main > .content-main {
     flex: 1 1;
     height: calc(100% - 6rem);
+    display: flex;
+    flex-direction: row;
   }
 
   .content {
+    flex: 1 0;
     position: relative;
     display: flex;
     flex-direction: row;
