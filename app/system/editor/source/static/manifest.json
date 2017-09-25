@@ -1,4 +1,8 @@
 {
   "name": "Pageloop Editor",
-  "short_name": "Pageloop"
+  "short_name": "Pageloop",
+  "description": "Collaborative realtime web based document manager",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#073642"
 }
