@@ -40,8 +40,6 @@ export default {
     app: {
       type: Object
     }
-  },
-  methods: {
   }
 }
 </script>
@@ -62,17 +60,22 @@ export default {
 
   .details > li > span:first-child {
     text-align: right;
+    width: 33%;
   }
 
+  .details > li > span:last-child {
+    width: 67%;
+    padding-left: 1rem;
+  }
 
   .details > li > span:first-child::after {
     content: ':';
     display: inline-block;
+    margin-left: 0.5rem;
   }
 
   .details > li > span {
     display: table-cell;
-    width: 50%;
-    padding: 0 1rem;
+    padding: 0;
   }
 </style>
