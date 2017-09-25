@@ -59,20 +59,30 @@ export default {
       return this.$store.dispatch('edit-app', {container: container, application: app})
     },
     confirmDeleteApplication: function (app) {
-      const container = this.getContainer(app)
+      // const container = this.getContainer(app)
       let details = {
         title: `Delete app (${app.name})`,
         message: `Are you sure you want to permanently delete ${app.name}?`,
         note: 'Be careful deleting an app will remove all app files forever.',
         ok: () => {
-          this.deleteApp(container, app)
+          this.deleteApp(app)
         }
       }
       this.$store.commit('alert-show', details)
     },
     deleteApp: function (app) {
-      const container = this.getContainer(app)
-      this.$store.dispatch('del-app', {container: container.name, app: app.name})
+      console.log('delete app')
+      console.log(app)
+      this.$store.dispatch('del-app', {container: app.container, application: app.name})
+        .then(() => {
+          for (let i = 0; i < this.apps.length; i++) {
+            if (app === this.apps[i]) {
+              console.log('deleting app from list!!!')
+              this.apps = this.apps.splice(i, 1)
+              break
+            }
+          }
+        })
         .catch((e) => console.error(e))
       return false
     },

@@ -293,6 +293,7 @@ class ApiClient {
   // Delete an application.
   deleteApp (container, application) {
     const ref = this.getApplicationReference(container, application)
+    console.log(ref)
     return this.rpc(Request.rpc('Application.Delete', ref))
   }
 
