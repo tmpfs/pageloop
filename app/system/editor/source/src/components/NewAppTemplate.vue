@@ -25,15 +25,6 @@
           <div>
             <label :for="tpl.name">{{tpl.name}}</label>
             <p class="small">{{tpl.description}}</p>
-            <!--
-            <a
-              class="small"
-              @click="preview($event, tpl)">
-                <span v-if="previewUrl !== tpl.url">Show Preview</span>
-                <span v-else>Hide Preview</span>
-            </a>
-            -->
-
             <transition-group appear name="reveal">
                 <iframe key="preview" v-if="previewUrl === tpl.url" @load="loaded" :src="tpl.url"></iframe>
             </transition-group>
