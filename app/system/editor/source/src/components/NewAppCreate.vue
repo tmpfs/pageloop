@@ -1,6 +1,11 @@
 <template>
   <div class="new-app-create small">
-    <p class="small">Step 3/3: Confirm details</p>
+    <ul class="new-app-step small">
+      <li>
+        <span>Confirm app details</span>
+        <span>Step 3/3</span>
+      </li>
+    </ul>
     <form @submit="createApplication">
       <label>Name: {{applicationName}}</label>
       <label>Description: {{applicationDescription}}</label>

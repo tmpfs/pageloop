@@ -1,6 +1,11 @@
 <template>
   <div class="new-app-info">
-    <p class="small">Step 1/3: Enter application info</p>
+    <ul class="new-app-step small">
+      <li>
+        <span>Enter application info</span>
+        <span>Step 1/3</span>
+      </li>
+    </ul>
     <form @submit="nextStep">
       <input
         type="text" v-focus

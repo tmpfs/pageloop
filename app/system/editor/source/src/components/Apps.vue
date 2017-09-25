@@ -143,6 +143,30 @@ export default {
 }
 </script>
 
+<style>
+  .new-app-step {
+    display: table;
+    width: 100%;
+    margin: 1rem 0 2rem 0;
+    padding: 0;
+  }
+
+  .new-app-step li {
+    display: table-row;
+    width: 100%;
+    background: var(--base03-color);
+  }
+
+  .new-app-step > li > span {
+    display: table-cell;
+    padding: 1rem;
+  }
+
+  .new-app-step > li > span:last-child {
+    text-align: right;
+  }
+</style>
+
 <style scoped>
   .scroll {
     height: calc(100% - 4.6rem);

@@ -1,6 +1,11 @@
 <template>
   <div class="new-app-template">
-    <p class="small">Step 2/3: Choose a template</p>
+    <ul class="new-app-step small">
+      <li>
+        <span>Choose a template</span>
+        <span>Step 2/3</span>
+      </li>
+    </ul>
     <form @submit="nextStep">
       <div class="templates-list">
         <div
