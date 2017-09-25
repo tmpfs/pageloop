@@ -6,8 +6,6 @@
     <div class="column-header">
       <h2>Editor</h2>
       <nav class="toolbar clearfix">
-        <a @click="exportArchive()"
-           title="Export source files as zip archive">Export</a>
         <a @click="save"
           v-bind:class="{hidden: currentView != 'code-editor', disabled: !isDirty}"
           title="Save & Run">Save & Run</a>
@@ -118,9 +116,6 @@ export default {
     }
   },
   methods: {
-    exportArchive: function (e) {
-      this.$store.dispatch('app-export', 'source')
-    },
     save: function (e) {
       if (e) {
         e.preventDefault()
