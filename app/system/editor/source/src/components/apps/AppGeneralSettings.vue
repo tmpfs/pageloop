@@ -1,5 +1,5 @@
 <template>
-  <div class="app-general-settings">
+  <div class="app-general-settings" v-if="app">
     <ul class="details small">
       <li v-if="app.display">
         <span>Name</span>

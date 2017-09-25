@@ -1,27 +1,31 @@
 <template>
   <div class="apps-list">
     <div class="small" v-if="!apps.length">No apps found.</div>
-    <div
-        @click="selectApp(app)"
-        class="app"
-        v-for="app in apps">
-        <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
-        <span class="name">{{app.display || app.name}}</span>
-        <p class="small">
-          {{app.description}}
-        </p>
-        <p class="app-actions small">
-          <a class="name"
-            @click="editApplication(app)"
-            :title="title(app, 'Edit')">Edit</a>
-          <a class="name"
-            :href="linkify(app, true)"
-            :title="title(app, 'Open')">Open</a>
-          <a v-if="!app.protected" class="name"
-            @click="confirmDeleteApplication(app)"
-            :title="title(app, 'Delete')">Delete</a>
-        </p>
-    </div>
+    <transition-group appear name="reveal">
+      <div
+          key="app"
+          @click="selectApp(app)"
+          class="app"
+          :class="{selected: app === selectedApp}"
+          v-for="app in apps">
+          <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
+          <span class="name">{{app.display || app.name}}</span>
+          <p class="small">
+            {{app.description}}
+          </p>
+          <p class="app-actions small">
+            <a class="name"
+              @click="editApplication(app)"
+              :title="title(app, 'Edit')">Edit</a>
+            <a class="name"
+              :href="linkify(app, true)"
+              :title="title(app, 'Open')">Open</a>
+            <a v-if="!app.protected" class="name"
+              @click="confirmDeleteApplication(app)"
+              :title="title(app, 'Delete')">Delete</a>
+          </p>
+      </div>
+    </transition-group>
   </div>
 </template>
 
@@ -31,6 +35,16 @@ export default {
   props: {
     apps: {
       type: Array
+    }
+  },
+  computed: {
+    selectedApp: {
+      get: function () {
+        return this.$store.state.appList.selected
+      },
+      set: function (val) {
+        this.$store.commit('app-list-selected', val)
+      }
     }
   },
   methods: {
@@ -85,7 +99,14 @@ export default {
   .app {
     background: var(--base03-color);
     margin-bottom: 1rem;
-    padding: 1rem;
+    padding: 1rem 1rem 0.8rem 1rem;
+    border-bottom: 2px solid var(--base03-color);
+    transition: all 0.4s ease-out;
+  }
+
+  .app.selected {
+    border-bottom: 2px solid var(--base3-color);
+    pointer-events: auto;
   }
 
   .app > p.small {
@@ -108,6 +129,20 @@ export default {
 
   .name + p.small {
     margin-top: 0.2rem;
+  }
+
+
+  .reveal-enter {
+		opacity: 0;
+  }
+
+  .reveal-enter-active, .reveal-leave-active {
+		transition: all 0.4s ease-in;
+    opacity: 1;
+  }
+
+  .reveal-enter, .reveal-leave-to {
+		opacity: 0;
   }
 
 </style>
