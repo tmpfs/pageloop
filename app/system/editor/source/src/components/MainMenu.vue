@@ -90,9 +90,6 @@ export default {
   }
 
   .main-menu {
-    position: relative;
-    top: 0;
-    left: 0;
     width: 16%;
     border-top: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);

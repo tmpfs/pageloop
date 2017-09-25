@@ -4,8 +4,9 @@
       <a
         tabindex="1"
         @click="show = !show"
-        class="home"
-        title="Navigation Menu">Ꝏ  Menu</a>
+        :class="{selected: show}"
+        class="menu"
+        title="Navigation Menu"><span>Ꝏ</span>Menu</a>
     </nav>
   </header>
 </template>
@@ -45,22 +46,6 @@ export default {
     text-decoration: none;
   }
 
-  header a {
-    font-size: 1.4rem;
-    padding: .3rem 2rem;
-    text-transform: uppercase;
-    color: var(--base2-color) !important;
-  }
-
-  header a:hover, header a.selected {
-    /* text-decoration: underline; */
-    color: var(--base3-color) !important;
-    background: var(--blue-color);
-  }
-
-  header a.selected {
-    background: var(--base03-color);
-  }
 </style>
 
 <style scoped>
@@ -73,6 +58,41 @@ export default {
     cursor: default;
     position: relative;
     z-index: 100;
+  }
+
+  header a {
+    display: inline-block;
+    height: 3rem;
+  }
+
+  header a {
+    font-size: 1.4rem;
+    line-height: 3rem;
+    vertical-align: middle;
+    padding-left: 1rem;
+    text-transform: uppercase;
+    color: var(--base2-color) !important;
+  }
+
+  header a:hover {
+    color: var(--base3-color) !important;
+  }
+
+  header a:hover, header a.selected {
+    background: var(--base03-color);
+  }
+
+  header a.selected {
+    background: var(--base03-color);
+    pointer-events: auto;
+  }
+
+  a.menu {
+    width: 16%;
+  }
+
+  a.menu span {
+    margin-right: 0.5rem;
   }
 
 </style>
