@@ -29,10 +29,22 @@
         <div class="column-options">
           <nav class="tabs">
             <a
+              title="Show all applications"
+              @click="appsListView = 'all-apps'">All</a>
+            <a
+              title="Show template applications"
+              @click="appsListView = 'template-apps'">Templates</a>
+            <a
+              title="Show open applications"
+              @click="appsListView = 'open-apps'">Open</a>
+
+            <!--
+            <a
               @click="listApplications(container, $event)"
               :title="getLinkTitle(container)"
               :class="{selected: isSelected(container)}"
               v-for="container in list" v-if="enabled[container.name]">{{container.name}}</a>
+            -->
           </nav>
         </div>
         <div class="scroll">
