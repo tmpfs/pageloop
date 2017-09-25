@@ -60,9 +60,9 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
 	sys := NewContainer("system", "System applications.", true)
 	tpl := NewContainer("template", "Application & document templates.", true)
 	usr := NewContainer("user", "User applications.", false)
+	l.Host.Add(usr)
 	l.Host.Add(sys)
 	l.Host.Add(tpl)
-	l.Host.Add(usr)
 
 	// REST API global endpoint (/api/)
 	handler = RestService(l.Mux, l.Services, l.Host, l.MountpointManager)
