@@ -1,6 +1,6 @@
 <template>
-  <header class="clearfix">
-    <nav class="home">
+  <header>
+    <nav>
       <a
         tabindex="1"
         @click="show = !show"
@@ -73,18 +73,6 @@ export default {
     cursor: default;
     position: relative;
     z-index: 100;
-  }
-
-  header nav {
-    display: flex;
-    flex-direction: row;
-    float: right;
-    margin: 0;
-    padding: 0;
-  }
-
-  header nav.home {
-    float: left;
   }
 
 </style>

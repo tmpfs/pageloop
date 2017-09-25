@@ -100,10 +100,9 @@ export default {
 
   .content-main {
     flex: 1 1;
-    height: 100%;
+    height: calc(100%-6rem);
     display: flex;
     flex-direction: row;
-    width: 100%;
   }
 
   .content {
