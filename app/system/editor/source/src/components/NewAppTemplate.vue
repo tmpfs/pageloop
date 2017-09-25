@@ -24,13 +24,18 @@
           <div>
             <label :for="tpl.name">{{tpl.name}}</label>
             <p class="small">{{tpl.description}}</p>
+            <!--
             <a
               class="small"
-              @click="preview(tpl)">
+              @click="preview($event, tpl)">
                 <span v-if="previewUrl !== tpl.url">Show Preview</span>
                 <span v-else>Hide Preview</span>
             </a>
-            <iframe v-if="previewUrl === tpl.url" @load="loaded" :src="tpl.url"></iframe>
+            -->
+
+            <transition-group appear name="reveal">
+                <iframe key="preview" v-if="previewUrl === tpl.url" @load="loaded" :src="tpl.url"></iframe>
+            </transition-group>
           </div>
         </div>
       </div>
@@ -97,8 +102,10 @@ export default {
       for (let i = 0; i < templates.length; i++) {
         if (radio.value === templates[i].url) {
           this.template = templates[i]
+          break
         }
       }
+      this.preview(this.template)
     },
     nextStep: function (e) {
       e.preventDefault()
@@ -162,4 +169,21 @@ export default {
     border-bottom: 2px solid var(--base3-color);
     pointer-events: auto;
   }
+
+  .reveal-enter {
+		opacity: 0;
+    height: 0px;
+  }
+
+  .reveal-enter-active, .reveal-leave-active {
+		transition: all 0.4s ease-in;
+    opacity: 1;
+    height: 240px;
+  }
+
+  .reveal-enter, .reveal-leave-to {
+		opacity: 0;
+    height: 0px;
+  }
+
 </style>
