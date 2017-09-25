@@ -1,19 +1,21 @@
 <template>
-  <div class="alert" :class="{hidden: !visible}">
-    <div class="background"></div>
-    <div class="dialog">
-      <a class="close" @click="dismiss"></a>
-      <h2>{{alert.title}}</h2>
-      <div class="dialog-panel">
-        <p v-if="alert.message">{{alert.message}}</p>
-        <small v-if="alert.note">{{alert.note}}</small>
-        <div class="form-actions">
-          <button class="sml" @click="dismiss">Cancel</button>
-          <button class="sml primary" @click="ok">OK</button>
+  <transition name="reveal">
+    <div class="alert" v-if="visible">
+      <div class="background"></div>
+      <div class="dialog" v-if="visible">
+        <a class="close" @click="dismiss"></a>
+        <h2>{{alert.title}}</h2>
+        <div class="dialog-panel">
+          <p v-if="alert.message">{{alert.message}}</p>
+          <small v-if="alert.note">{{alert.note}}</small>
+          <div class="form-actions">
+            <button class="sml" @click="dismiss">Cancel</button>
+            <button class="sml primary" @click="ok">OK</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -21,7 +23,6 @@ export default {
   name: 'app-alert',
   data: function () {
     return {
-      show: false,
       keyMap: {
         'Enter': () => this.ok(),
         'Esc': () => this.dismiss()
@@ -40,6 +41,7 @@ export default {
       } else {
         state.keymap.remove(this.keyMap)
       }
+      this.show = val
       return val
     }
   },
@@ -109,4 +111,27 @@ export default {
 		top: 0;
 		right: 0;
 	}
+
+  .reveal-enter .dialog {
+    transform: translateY(-100%);
+  }
+
+  .reveal-enter-active .dialog, .reveal-leave-active .dialog {
+    transform: translateY(0);
+		transition: all 0.2s ease-in;
+  }
+
+  .reveal-enter .dialog, .reveal-leave-to .dialog {
+    transform: translateY(-100%);
+  }
+
+  .reveal-enter-active, .reveal-leave-active {
+		transition: all 0.4s ease-in;
+    opacity: 1;
+  }
+
+  .reveal-enter, .reveal-leave-to {
+		opacity: 0;
+  }
+
 </style>
