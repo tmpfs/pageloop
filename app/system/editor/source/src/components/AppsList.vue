@@ -7,19 +7,20 @@
         v-for="app in apps">
         <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
         <span class="name">{{app.display || app.name}}</span>
-        <div class="small">URL: {{app.url}}<br />{{app.description}}
-          <p class="app-actions">
-            <a class="name"
-              @click="editApplication(app)"
-              :title="title(app, 'Edit')">Edit</a>
-            <a class="name"
-              :href="linkify(app, true)"
-              :title="title(app, 'Open')">Open</a>
-            <a v-if="!app.protected" class="name"
-              @click="confirmDeleteApplication(app)"
-              :title="title(app, 'Delete')">Delete</a>
-          </p>
-        </div>
+        <p class="small">
+          {{app.description}}
+        </p>
+        <p class="app-actions small">
+          <a class="name"
+            @click="editApplication(app)"
+            :title="title(app, 'Edit')">Edit</a>
+          <a class="name"
+            :href="linkify(app, true)"
+            :title="title(app, 'Open')">Open</a>
+          <a v-if="!app.protected" class="name"
+            @click="confirmDeleteApplication(app)"
+            :title="title(app, 'Delete')">Delete</a>
+        </p>
     </div>
   </div>
 </template>
@@ -43,19 +44,19 @@ export default {
       const container = this.getContainer(app)
       return this.$store.dispatch('edit-app', {container: container, application: app})
     },
-    confirmDeleteapp: function (app) {
+    confirmDeleteApplication: function (app) {
       const container = this.getContainer(app)
       let details = {
         title: `Delete app (${app.name})`,
         message: `Are you sure you want to permanently delete ${app.name}?`,
         note: 'Be careful deleting an app will remove all app files forever.',
         ok: () => {
-          this.deleteapp(container, app)
+          this.deleteApp(container, app)
         }
       }
       this.$store.commit('alert-show', details)
     },
-    deleteapp: function (app) {
+    deleteApp: function (app) {
       const container = this.getContainer(app)
       this.$store.dispatch('del-app', {container: container.name, app: app.name})
         .catch((e) => console.error(e))
@@ -81,13 +82,18 @@ export default {
     padding-top: 1rem;
   }
 
+  .app {
+    background: var(--base03-color);
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
   .app > p.small {
     margin-bottom: 0;
   }
 
   .app > .app-actions {
-    margin-top: 0;
-    font-size: 1.5rem;
+    margin: 0;
   }
 
   .app-actions > *:not(:last-child) {

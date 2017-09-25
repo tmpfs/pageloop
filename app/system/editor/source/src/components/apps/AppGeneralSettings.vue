@@ -1,7 +1,35 @@
 <template>
   <div class="app-general-settings">
-    General
-    {{app}}
+    <ul class="details small">
+      <li v-if="app.display">
+        <span>Name</span>
+        <span>{{app.display}}</span>
+      </li>
+      <li>
+        <span>Description</span>
+        <span>{{app.description}}</span>
+      </li>
+      <li>
+        <span>Id</span>
+        <span>{{app.name}}</span>
+      </li>
+      <li>
+        <span>URL</span>
+        <span>{{app.url}}</span>
+      </li>
+      <li>
+        <span>Container</span>
+        <span>{{app.container}}</span>
+      </li>
+      <li>
+        <span>Protected</span>
+        <span>{{app.protected ? 'yes' : 'no'}}</span>
+      </li>
+      <li>
+        <span>Template</span>
+        <span>{{app['is-template'] ? 'yes' : 'no'}}</span>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -19,4 +47,32 @@ export default {
 </script>
 
 <style scoped>
+  .details {
+    margin: 1rem 0 2rem 0;
+    padding: 0;
+    list-style-type: none;
+    display: table;
+    width: 100%;
+  }
+
+  .details > li {
+    display: table-row;
+    width: 100%;
+  }
+
+  .details > li > span:first-child {
+    text-align: right;
+  }
+
+
+  .details > li > span:first-child::after {
+    content: ':';
+    display: inline-block;
+  }
+
+  .details > li > span {
+    display: table-cell;
+    width: 50%;
+    padding: 0 1rem;
+  }
 </style>
