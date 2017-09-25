@@ -11,6 +11,9 @@ const defaults = {
   `,
   'hint:file-save': `
     Hit <kbd>Ctrl+s</kbd> (or <kbd>:w</kbd> in vim mode) to save and preview your changes.
+  `,
+  'hint:template-preview': `
+    Select a template to see a preview.
   `
 }
 

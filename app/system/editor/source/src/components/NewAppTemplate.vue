@@ -6,6 +6,7 @@
         <span>Step 2/3</span>
       </li>
     </ul>
+    <hint id="hint:template-preview"></hint>
     <form @submit="nextStep">
       <div class="templates-list">
         <div
@@ -48,6 +49,9 @@
 </template>
 
 <script>
+
+import Hint from '@/components/Hint'
+
 export default {
   name: 'new-app-template',
   computed: {
@@ -112,7 +116,8 @@ export default {
       e.preventDefault()
       this.$store.commit('new-app-view', 'new-app-create')
     }
-  }
+  },
+  components: {Hint}
 }
 </script>
 
