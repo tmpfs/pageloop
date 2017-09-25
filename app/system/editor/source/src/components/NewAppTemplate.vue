@@ -26,7 +26,10 @@
             <p class="small">{{tpl.description}}</p>
             <a
               class="small"
-              @click="preview(tpl)">Preview</a>
+              @click="preview(tpl)">
+                <span v-if="previewUrl !== tpl.url">Show Preview</span>
+                <span v-else>Hide Preview</span>
+            </a>
             <iframe v-if="previewUrl === tpl.url" @load="loaded" :src="tpl.url"></iframe>
           </div>
         </div>
@@ -74,9 +77,7 @@ export default {
   },
   methods: {
     preview: function (tpl) {
-      console.log('toggle preview called: ' + tpl.url)
       this.previews[tpl.url] = !this.previews[tpl.url]
-      console.log('toggle preview called: ' + this.previews[tpl.url])
       if (this.previewUrl !== tpl.url) {
         this.previewUrl = tpl.url
       } else {
