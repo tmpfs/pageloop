@@ -101,7 +101,7 @@ type ServiceMethodInfo struct {
   // Method name
   Name string `json:"name"`
   // Number of calls for this method
-  Calls uint `json:"calls"`
+  Calls *uint `json:"calls"`
   // Type for the argument (first argument)
   ArgType string `json:"arg"`
   // Type for the reply value (second argument)
@@ -140,7 +140,7 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
       for _, mt := range srv.method {
         mi := &ServiceMethodInfo{
           ServiceMethod: key + "." + mt.method.Name,
-          Calls: mt.numCalls,
+          Calls: &mt.numCalls,
           ArgType: mt.ArgType.String(),
           ReplyType: mt.ReplyType.String(),
           Name: mt.method.Name}
