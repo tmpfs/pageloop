@@ -96,40 +96,6 @@ export default {
     font-size: 1.5rem;
   }
 
-  .details {
-    /* margin: 1rem 0 2rem 0; */
-    padding: 0;
-    list-style-type: none;
-    display: table;
-    width: 100%;
-  }
-
-  .details > li {
-    display: table-row;
-    width: 100%;
-  }
-
-  .details > li > span:first-child {
-    text-align: right;
-    width: 33%;
-  }
-
-  .details > li > span:last-child {
-    width: 67%;
-    padding-left: 1rem;
-  }
-
-  .details > li > span:first-child::after {
-    content: ':';
-    display: inline-block;
-    margin-left: 0.5rem;
-  }
-
-  .details > li > span {
-    display: table-cell;
-    padding: 0;
-  }
-
   .export nav {
     margin-top: 1rem;
     display: flex;

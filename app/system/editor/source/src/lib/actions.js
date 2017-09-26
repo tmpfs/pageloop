@@ -387,6 +387,8 @@ function Actions (router) {
     'list-services': function (context) {
       return context.state.client.listServices()
         .then(({response, document}) => {
+          console.log('list services response')
+          console.log(document)
           context.commit('services', document)
         })
     },

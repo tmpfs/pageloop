@@ -21,6 +21,8 @@ import {KeyManager} from './keymap'
 import NewApp from './state/new-app'
 import AppList from './state/app-list'
 
+import Services from './state/services'
+
 class State {
   constructor () {
     this.keymap = new KeyManager()
@@ -53,8 +55,9 @@ class State {
 
     this.containers = []
     this.templates = []
-    this.services = []
     this.setApplication('', '')
+
+    this.services = new Services()
 
     this.activity = new Activity(this.log)
 
