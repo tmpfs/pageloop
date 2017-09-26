@@ -125,7 +125,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       }
       argv = f
     case "Service.Read":
-      argv = route.Parameters.Context
+      argv = &ServiceLookupRequest{Service: route.Parameters.Context}
+    case "Service.ReadMethod":
+      argv = &ServiceLookupRequest{
+        Service: route.Parameters.Context,
+        Method: route.Parameters.Target}
   }
   return argv, nil
 }
