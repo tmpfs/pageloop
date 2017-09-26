@@ -33,8 +33,8 @@
               <span>{{fn.method}}</span>
             </li>
             <li>
-              <span>Name</span>
-              <span>{{fn.name}}</span>
+              <span>Description</span>
+              <span>{{fn.meta.description}}</span>
             </li>
             <li>
               <span>Calls</span>

@@ -9,7 +9,7 @@ import(
 type JobService struct {}
 
 // List active jobs.
-func (s *JobService) ActiveJobs(argv *VoidArgs, reply *ServiceReply) *StatusError {
+func (s *JobService) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
   reply.Reply = Jobs.Active
   return nil
 }
@@ -25,7 +25,7 @@ func (s *JobService) Read(id string, reply *ServiceReply) *StatusError {
 }
 
 // Abort an active job.
-func(s *JobService) Abort(id string, reply *ServiceReply) *StatusError {
+func(s *JobService) Delete(id string, reply *ServiceReply) *StatusError {
   if job, err := s.lookup(id); err != nil {
     return err
   } else {

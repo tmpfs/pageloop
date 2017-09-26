@@ -9,6 +9,15 @@ import(
   . "github.com/tmpfs/pageloop/util"
 )
 
+
+var(
+  ServicesMetaInfo map[string]*ServiceMeta
+)
+
+type ServiceMeta struct {
+  Description string `json:"description"`
+}
+
 type ServiceLookupRequest struct {
   Service string `json:"service"`
   Method string `json:"method"`
@@ -26,6 +35,8 @@ func (s *RpcServices) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
   // Inject route information
   for _, srv := range m {
     for _, method := range srv.Methods {
+      method.UserMeta = ServicesMetaInfo[method.ServiceMethod]
+      // TODO: handle multiple matching routes with different verbs etc
       r := s.Router.Get(method.ServiceMethod)
       if r != nil {
         method.UserData = r
@@ -91,4 +102,43 @@ func LookupServiceMethod(mapping map[string]*ServiceInfo, service string, method
     }
   }
   return nil, CommandError(http.StatusNotFound, "Method %s not found for %s service", method, service)
+}
+
+func init () {
+
+  ServicesMetaInfo = make(map[string]*ServiceMeta)
+
+  describe := func (name string, desc string) {
+    ServicesMetaInfo[name] = &ServiceMeta{Description: desc}
+  }
+
+  describe("Core.Meta", `Get server meta information.`)
+  describe("Core.Stats", `Get server statistics.`)
+  describe("Service.List", `List available services.`)
+  describe("Service.Read", `Get service information.`)
+  describe("Service.ReadMethod", `Get service method information.`)
+  describe("Service.ReadMethodCalls", `Get the number of calls for a service method.`)
+  describe("Template.List", `List application templates.`)
+  describe("Job.List", `Get active jobs.`)
+  describe("Job.Read", `Get an active job.`)
+  describe("Job.Delete", `Delete an active job.`)
+  describe("Host.List", `List application containers.`)
+  describe("Container.Read", `Get container information.`)
+  describe("Container.CreateApp", `Create a new application.`)
+  describe("Application.Read", `Get an application.`)
+  describe("Application.Delete", `Delete an application.`)
+  describe("Application.ReadFiles", `Get the files list for an application.`)
+  describe("Application.ReadPages", `Get the pages list for an application.`)
+  describe("Application.DeleteFiles", `Delete files from an application.`)
+  describe("Application.RunTask", `Run an application build task.`)
+  describe("File.Read", `Get file information.`)
+  describe("File.ReadPage", `Get page information.`)
+  describe("File.Create", `Create a new file.`)
+  describe("File.Save", `Save file content.`)
+  describe("File.Delete", `Delete a file.`)
+  describe("File.ReadSource", `Get the contents of a file.`)
+  describe("File.ReadSourceRaw", `Get the raw contents of a file.`)
+  describe("File.Move", `Move a file.`)
+  describe("File.CreateFileTemplate", `Create a file from a template.`)
+  describe("Archive.Export", `Export a zip archive.`)
 }

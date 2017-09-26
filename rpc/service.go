@@ -106,6 +106,8 @@ type ServiceMethodInfo struct {
   ArgType string `json:"arg"`
   // Type for the reply value (second argument)
   ReplyType string `json:"reply"`
+  // Placeholder for meta data associated with the service (description, notes etc)
+  UserMeta interface{} `json:"meta,omitempty"`
   // Placeholder for user data associated with the service (route information)
   UserData interface{} `json:"info,omitempty"`
 }
