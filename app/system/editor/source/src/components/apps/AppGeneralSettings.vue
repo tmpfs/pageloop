@@ -31,8 +31,15 @@
         <span>{{app ? (app['is-template'] ? 'yes' : 'no') : na}}</span>
       </li>
     </ul>
-    <h3>Export</h3>
+    <div class="build-tasks small" v-if="app && app.build">
+      <h3>Build Tasks</h3>
+      <div class="task" v-for="task, name in app.build.tasks">
+        <span>{{name}}</span>
+        <span class="command">$ {{task}}</span>
+      </div>
+    </div>
     <div class="export">
+      <h3>Export</h3>
       <p class="small">Export your application files as a .zip archive to create a backup or snapshot a point in time.</p>
       <nav>
         <a @click="exportFullArchive()"
@@ -90,14 +97,13 @@ export default {
   }
 
   h3 {
-    margin: 0;
+    margin: 0 0 1rem 0;
     padding: 0 0 0.5rem 0;
     border-bottom: 1px solid var(--border-color);
     font-size: 1.5rem;
   }
 
   .export nav {
-    margin-top: 1rem;
     display: flex;
   }
 
@@ -117,6 +123,19 @@ export default {
     text-align: center;
     font-size: 1.6rem;
     transition: all 0.4s ease-out;
+  }
+
+  .build-tasks {
+    margin-bottom: 2rem;
+  }
+
+  .task {
+    padding: 0.5rem;
+    background: var(--base03-color);
+  }
+
+  .command {
+    display: block;
   }
 
 </style>
