@@ -233,7 +233,7 @@ class SocketConnection {
           const res = {
             status: response.status,
             id: response.id,
-            transport: 'ws://json-rpc'}
+            transport: 'websocket/json+rpc'}
 
           let doc = response.result || {}
 

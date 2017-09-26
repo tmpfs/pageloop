@@ -78,8 +78,11 @@
           <p class="small">Use the JSON-RPC API over the websocket transport.</p>
           <!-- TODO: arguments -->
           <p>
-            <a class="small">Call </a>
+            <a
+              @click="callSocketMethod(fn)"
+              class="small">Call </a>
           </p>
+          <method-reply :reply="socketReply"></method-reply>
           <h3>REST</h3>
           <p class="small">Use the REST API over the HTTP transport.</p>
           <!-- TODO: arguments -->
@@ -138,6 +141,15 @@ export default {
     showServiceMethod: function (service, method) {
       // console.log(method)
       this.fn = method
+    },
+    callSocketMethod: function (fn) {
+      const params = undefined
+      const client = this.$store.state.client
+      const req = Request.rpc(fn.method, params)
+      client.rpc(req)
+        .then((res) => {
+          this.socketReply = res
+        })
     },
     callRestMethod: function (fn) {
       const params = undefined

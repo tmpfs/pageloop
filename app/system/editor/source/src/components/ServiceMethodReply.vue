@@ -40,7 +40,6 @@ export default {
 </script>
 
 <style scoped>
-
   h4 {
     margin: 0;
     padding: 0 0 0.5rem 0;
@@ -48,5 +47,4 @@ export default {
     display: inline-block;
     font-size: 1.4rem;
   }
-
 </style>

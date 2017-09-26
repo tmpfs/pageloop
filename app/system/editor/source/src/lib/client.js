@@ -98,7 +98,7 @@ class ApiClient {
     return fetch(url, opts)
       .then((res) => {
         res.method = opts.method
-        res.transport = 'http://rest-api'
+        res.transport = 'application/rest+api'
         res.duration = Date.now() - startTime
         this.postflight(log, res)
         const resType = parseInt(res.headers.get('x-response-type'))
@@ -120,10 +120,14 @@ class ApiClient {
     // Try to send over socket connection first
     if (this.useWebsocket && this.socket.connected && !opts.http) {
       const log = this.preflight(url, {method: 'RPC'})
+      const startTime = Date.now()
       return this.socket.request(req)
         .then((res) => {
           // console.log(res)
           res.url = url
+          res.response.duration = Date.now() - startTime
+          res.response.url = socket.url
+          res.response.method = 'RPC'
           res.status = res.response.status
           this.postflight(log, res)
           return res
