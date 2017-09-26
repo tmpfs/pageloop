@@ -7,13 +7,19 @@
           @click="$store.dispatch('navigate', {href: 'home'})"
           class="home"
           :class="{selected: selectedView === 'home'}"
-          title="Home page">Home</a>
+          title="Home page">
+          <i class="fa fa-home"></i>
+          Home
+        </a>
         <div>
           <a
             tabindex="2"
             @click="$store.dispatch('navigate', {href: 'apps'})"
             :class="{selected: selectedView === 'apps'}"
-            title="View and edit applications">Applications</a>
+            title="View and edit applications">
+            <i class="fa fa-cube"></i>
+            Applications
+          </a>
           <ul class="apps" v-if="apps.length">
             <li v-for="app in apps">
               <a
@@ -29,12 +35,18 @@
           tabindex="3"
           @click="$store.dispatch('navigate', {href: 'docs'})"
           :class="{selected: selectedView === 'docs'}"
-          title="Documentation">Documentation</a>
+          title="Documentation">
+          <i class="fa fa-book"></i>
+          Documentation
+        </a>
         <a
           tabindex="4"
           @click="$store.dispatch('navigate', {href: 'settings'})"
           :class="{selected: selectedView === 'settings'}"
-          title="Settings">Settings</a>
+          title="Settings">
+          <i class="fa fa-cog"></i>
+          Settings
+        </a>
       </nav>
     </div>
   </transition>
