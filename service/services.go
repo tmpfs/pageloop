@@ -32,7 +32,7 @@ func (s *RpcServices) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
 }
 
 // Get a service.
-func (s *RpcServices) Get(name string, reply *ServiceReply) *StatusError {
+func (s *RpcServices) Read(name string, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if srv, err := LookupService(m, name); err != nil {
     return err
