@@ -100,7 +100,7 @@
 
 <script>
 
-import {Request} from '../lib/client'
+import {Request} from '../lib/net/client'
 import MethodReply from '@/components/ServiceMethodReply'
 
 export default {
