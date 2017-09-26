@@ -1,12 +1,22 @@
 <template>
   <header>
     <nav>
+      <!--
       <a
         tabindex="1"
         @click="show = !show"
         :class="{selected: show}"
         class="menu"
         title="Navigation Menu"><span>Ꝏ</span>Menu</a>
+      -->
+      <a
+        tabindex="1"
+        @click="show = !show"
+        :class="{selected: show}"
+        class="menu"
+        title="Navigation Menu">
+        <i class="fa fa-navicon"></i>
+        Menu</a>
     </nav>
   </header>
 </template>
@@ -91,7 +101,7 @@ export default {
     width: 16%;
   }
 
-  a.menu span {
+  a.menu i {
     margin-right: 0.5rem;
   }
 

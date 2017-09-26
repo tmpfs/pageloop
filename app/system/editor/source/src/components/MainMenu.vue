@@ -98,7 +98,7 @@ export default {
   }
 
   .apps {
-    margin-left: 1rem;
+    margin-left: 1.8rem;
   }
 
   .main-menu {
