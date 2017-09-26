@@ -88,33 +88,7 @@
               @click="callRestMethod(fn)"
               class="small">Call</a>
           </p>
-          <div v-if="restReply">
-            <h4>Reply</h4>
-            <ul class="details small">
-              <li>
-                <span>Status</span>
-                <span>{{restReply.response.status}}</span>
-              </li>
-              <li>
-                <span>Duration</span>
-                <span>{{restReply.response.duration}}ms</span>
-              </li>
-              <li>
-                <span>Request Method</span>
-                <span>{{restReply.response.method}}</span>
-              </li>
-              <li>
-                <span>URL</span>
-                <span>{{restReply.response.url}}</span>
-              </li>
-              <li>
-                <span>Transport</span>
-                <span>{{restReply.response.transport}}</span>
-              </li>
-            </ul>
-            <h4>Document</h4>
-            <pre class="small">{{JSON.stringify(restReply.document, undefined, 2)}}</pre>
-          </div>
+          <method-reply :reply="restReply"></method-reply>
         </div>
       </div>
     </div>
@@ -124,11 +98,14 @@
 <script>
 
 import {Request} from '../lib/client'
+import MethodReply from '@/components/ServiceMethodReply'
 
 export default {
   name: 'services',
+  components: {MethodReply},
   data: function () {
     return {
+      socketReply: null,
       restReply: null
     }
   },
@@ -201,6 +178,7 @@ export default {
 
   .service-list {
     font-size: 1.4rem;
+    user-select: none;
   }
 
   .methods {
