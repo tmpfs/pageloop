@@ -46,8 +46,7 @@ class State {
 
     // We use the defaultClient when no application
     // is selected
-    this.client = this.defaultClient = new ApiClient()
-    this.defaultClient.log = this.network
+    this.client = new ApiClient()
     this.client.log = this.network
 
     this.newApp = new NewApp()
@@ -161,9 +160,6 @@ class State {
 
     // current application
     this.app = new Application()
-
-    // Reset to default client
-    this.client = this.defaultClient
   }
 
   setApplication (container, application) {
@@ -172,10 +168,6 @@ class State {
 
     this.container = container
     this.application = application
-
-    // Set up new API client
-    this.client = new ApiClient()
-    this.client.log = this.network
   }
 
   get current () {
