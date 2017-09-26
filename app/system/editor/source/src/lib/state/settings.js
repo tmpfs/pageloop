@@ -1,4 +1,5 @@
 const defaults = {
+  'ui:main-menu-visible': true,
   'setting:show-notifications': true,
   'setting:show-system-applications': false,
   'setting:show-template-applications': false,

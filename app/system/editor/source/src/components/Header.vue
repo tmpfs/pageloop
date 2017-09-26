@@ -39,10 +39,10 @@ export default {
     },
     show: {
       get: function () {
-        return this.$store.state.showMainMenu
+        return this.$store.state.settings.mainMenuVisible
       },
       set: function (val) {
-        this.$store.state.showMainMenu = val
+        this.$store.commit('main-menu-visible', val)
       }
     }
   },

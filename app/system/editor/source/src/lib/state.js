@@ -59,9 +59,6 @@ class State {
     // is selected
     this.client = new ApiClient()
     this.client.log = this.network
-
-    // TODO: bind to setting
-    this.showMainMenu = false
   }
 
   getContainerByName (name) {

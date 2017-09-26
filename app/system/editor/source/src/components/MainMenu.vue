@@ -71,7 +71,7 @@ export default {
       return this.$store.state.main.view
     },
     show: function () {
-      return this.$store.state.showMainMenu
+      return this.$store.state.settings.mainMenuVisible
     },
     apps: function () {
       return this.$store.state.apps
