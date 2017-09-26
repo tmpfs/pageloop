@@ -299,6 +299,7 @@ func init() {
   route("Core.Meta", "", http.MethodGet, http.StatusOK)
   route("Core.Stats", "/stats", http.MethodGet, http.StatusOK)
   route("Service.List", "/services", http.MethodGet, http.StatusOK)
+  route("Service.Get", "/services/*", http.MethodGet, http.StatusOK)
   route("Template.List", "/templates", http.MethodGet, http.StatusOK)
   route("Job.ActiveJob", "/jobs", http.MethodGet, http.StatusOK)
   route("Job.Read", "/jobs/*", http.MethodGet, http.StatusOK)

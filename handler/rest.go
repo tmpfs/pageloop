@@ -124,6 +124,8 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         f.Bytes(content)
       }
       argv = f
+    case "Service.Get":
+      argv = route.Parameters.Context
   }
   return argv, nil
 }

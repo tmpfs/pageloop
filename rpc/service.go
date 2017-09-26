@@ -79,6 +79,9 @@ type Response struct {
 }
 
 type ServiceMap struct {
+  // Public service information
+  Info        map[string]*ServiceInfo
+  // Private fields
   serviceMap  map[string]*service
   mu          sync.RWMutex    // protects the serviceMap
   reqLock     sync.Mutex      // protects freeReq
@@ -128,23 +131,27 @@ func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
 
 // Get a map of public service information.
 func (server *ServiceMap) Map() map[string]*ServiceInfo {
-  m := make(map[string]*ServiceInfo)
-  for key, srv := range server.serviceMap {
-    info := &ServiceInfo{Name: key}
+  // Services do not change at runtime so lazy creation
+  if server.Info == nil {
+    m := make(map[string]*ServiceInfo)
+    for key, srv := range server.serviceMap {
+      info := &ServiceInfo{Name: key}
 
-    for _, mt := range srv.method {
-      mi := &ServiceMethodInfo{
-        ServiceMethod: key + "." + mt.method.Name,
-        Calls: mt.numCalls,
-        ArgType: mt.ArgType.String(),
-        ReplyType: mt.ReplyType.String(),
-        Name: mt.method.Name}
-      info.Methods = append(info.Methods, mi)
+      for _, mt := range srv.method {
+        mi := &ServiceMethodInfo{
+          ServiceMethod: key + "." + mt.method.Name,
+          Calls: mt.numCalls,
+          ArgType: mt.ArgType.String(),
+          ReplyType: mt.ReplyType.String(),
+          Name: mt.method.Name}
+        info.Methods = append(info.Methods, mi)
+      }
+      key = strings.ToLower(key)
+      m[key] = info
     }
-    key = strings.ToLower(key)
-    m[key] = info
+    server.Info = m
   }
-  return m
+  return server.Info
 }
 
 // Register a service with the server.

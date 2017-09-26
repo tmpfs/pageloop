@@ -44,11 +44,6 @@ class State {
     this.log = new Log()
     this.network = new Log()
 
-    // We use the defaultClient when no application
-    // is selected
-    this.client = new ApiClient()
-    this.client.log = this.network
-
     this.newApp = new NewApp()
     this.appList = new AppList()
 
@@ -60,6 +55,12 @@ class State {
 
     this.activity = new Activity(this.log)
 
+    // We use the defaultClient when no application
+    // is selected
+    this.client = new ApiClient()
+    this.client.log = this.network
+
+    // TODO: bind to setting
     this.showMainMenu = false
   }
 
