@@ -71,6 +71,7 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
 
       // Assuming POSIX style fs
       url := strings.TrimPrefix(path, dir)
+      url = prefix + url
 
       f, err := z.Create(url)
       if err != nil {
@@ -99,7 +100,14 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
     return err
   } else {
     z := zip.NewWriter(archive.Writer)
-    if archive.Type == ArchiveSource {
+    if archive.Type == ArchiveFull {
+      if err := source(z, a, "/source"); err != nil {
+        return err
+      }
+      if err := public(z, a, "/public"); err != nil {
+        return err
+      }
+    } else if archive.Type == ArchiveSource {
       if err := source(z, a, ""); err != nil {
         return err
       }
