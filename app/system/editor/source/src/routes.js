@@ -112,7 +112,7 @@ function Routes (router, store) {
           store.commit('main-view', 'edit')
         })
     })
-  router.add(/^(|home|apps|docs|edit|settings)$/, ['section'], (match) => {
+  router.add(/^(|home|apps|docs|edit|settings|services)$/, ['section'], (match) => {
     let section = match.map.section
 
     // Request with just the #

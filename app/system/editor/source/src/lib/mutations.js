@@ -128,6 +128,9 @@ const Mutations = {
   'templates': function (state, templates) {
     state.templates = templates
   },
+  'services': function (state, services) {
+    state.services = services
+  },
   'clear-local-storage': function (state) {
     state.settings.reset()
   },

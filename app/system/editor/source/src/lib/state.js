@@ -53,6 +53,7 @@ class State {
 
     this.containers = []
     this.templates = []
+    this.services = []
     this.setApplication('', '')
 
     this.activity = new Activity(this.log)

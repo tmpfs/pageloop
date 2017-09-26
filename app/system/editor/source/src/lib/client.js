@@ -222,6 +222,11 @@ class ApiClient {
     return this.rpc(Request.rpc('Template.List'))
   }
 
+  // List services
+  listServices () {
+    return this.rpc(Request.rpc('Service.List'))
+  }
+
   // List all containers
   getContainers () {
     return this.rpc(Request.rpc('Host.List'))

@@ -14,6 +14,7 @@ import Apps from '@/components/Apps'
 import Edit from '@/components/Edit'
 import Docs from '@/components/Docs'
 import Settings from '@/components/Settings'
+import Services from '@/components/Services'
 
 export default {
   name: 'app-main',
@@ -22,7 +23,7 @@ export default {
       return this.$store.state.main.view
     }
   },
-  components: {MainMenu, NotFound, Home, Apps, Edit, Docs, Settings}
+  components: {MainMenu, NotFound, Home, Apps, Edit, Docs, Settings, Services}
 }
 </script>
 

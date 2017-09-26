@@ -93,6 +93,12 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'Service.List': (rpc, params) => {
+    return {
+      url: API + 'services/',
+      options: getDefaultOptions(rpc)
+    }
+  },
   'Job.ActiveJobs': (rpc, params) => {
     return {
       url: API + 'jobs/',

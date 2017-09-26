@@ -384,6 +384,12 @@ function Actions (router) {
           context.commit('templates', document)
         })
     },
+    'list-services': function (context) {
+      return context.state.client.listServices()
+        .then(({response, document}) => {
+          context.commit('services', document)
+        })
+    },
     'app-export': function (context, {app, filter}) {
       return context.state.client.exportArchive(app.container, app.name, filter)
     }
