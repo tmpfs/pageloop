@@ -91,4 +91,8 @@ export default {
   > :focus {
     border-top: 1px solid var(--blue-color);
   }
+
+  .content-main {
+    border-top: 0;
+  }
 </style>
