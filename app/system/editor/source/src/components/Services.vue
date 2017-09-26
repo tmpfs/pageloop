@@ -11,10 +11,11 @@
             <ul class="methods">
               <li v-for="fn in srv.methods">
                 <a
-                  @click="showServiceMethod(srv, fn)">
+                  @click="showServiceMethod(srv, fn)"
+                  :title="fn.method">
                   <span class="fn">{{fn.method}}</span>
-                  <span class="calls">{{fn.calls}}</span>
                 </a>
+                <span title="Number of method calls" class="calls">{{fn.calls}}</span>
               </li>
             </ul>
           </div>
@@ -141,6 +142,18 @@ export default {
     margin: 0;
     padding: 0 0 0 2rem;
     list-style-type: none;
+  }
+
+  .methods li {
+    display: flex;
+  }
+
+  .methods li > * {
+    flex: 1 0;
+  }
+
+  .methods li > span.calls {
+    text-align: right;
   }
 
 </style>
