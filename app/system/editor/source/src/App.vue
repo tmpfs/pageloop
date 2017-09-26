@@ -122,6 +122,22 @@ export default {
     min-height: 100%;
   }
 
+  .content-main {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .content > * {
+    width: 33.3%;
+  }
+
+  .content-column:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+  }
+
   .scroll {
     overflow-x: hidden;
     overflow-y: auto;

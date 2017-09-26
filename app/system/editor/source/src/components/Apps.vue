@@ -201,22 +201,6 @@ export default {
     height: calc(100% - 4.6rem);
   }
 
-  .content-main {
-    border-top: 1px solid var(--border-color);
-  }
-
-  .content {
-    padding: 0;
-  }
-
-  .content > * {
-    width: 33.3%;
-  }
-
-  .content-column:not(:last-child) {
-    border-right: 1px solid var(--border-color);
-  }
-
   .settings .scroll, .preferences .scroll {
     padding: 0 1rem;
   }
