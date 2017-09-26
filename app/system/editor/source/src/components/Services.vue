@@ -76,14 +76,45 @@
         <div class="scroll" v-if="fn">
           <h3>Websocket</h3>
           <p class="small">Use the JSON-RPC API over the websocket transport.</p>
+          <!-- TODO: arguments -->
           <p>
             <a class="small">Call </a>
           </p>
           <h3>REST</h3>
           <p class="small">Use the REST API over the HTTP transport.</p>
+          <!-- TODO: arguments -->
           <p>
-            <a class="small">Call</a>
+            <a
+              @click="callRestMethod(fn)"
+              class="small">Call</a>
           </p>
+          <div v-if="restReply">
+            <h4>Reply</h4>
+            <ul class="details small">
+              <li>
+                <span>Status</span>
+                <span>{{restReply.response.status}}</span>
+              </li>
+              <li>
+                <span>Duration</span>
+                <span>{{restReply.response.duration}}ms</span>
+              </li>
+              <li>
+                <span>Request Method</span>
+                <span>{{restReply.response.method}}</span>
+              </li>
+              <li>
+                <span>URL</span>
+                <span>{{restReply.response.url}}</span>
+              </li>
+              <li>
+                <span>Transport</span>
+                <span>{{restReply.response.transport}}</span>
+              </li>
+            </ul>
+            <h4>Document</h4>
+            <pre class="small">{{JSON.stringify(restReply.document, undefined, 2)}}</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -91,8 +122,16 @@
 </template>
 
 <script>
+
+import {Request} from '../lib/client'
+
 export default {
   name: 'services',
+  data: function () {
+    return {
+      restReply: null
+    }
+  },
   computed: {
     services: function () {
       return this.$store.state.services.list
@@ -122,6 +161,15 @@ export default {
     showServiceMethod: function (service, method) {
       // console.log(method)
       this.fn = method
+    },
+    callRestMethod: function (fn) {
+      const params = undefined
+      const client = this.$store.state.client
+      const req = Request.rpc(fn.method, params)
+      client.rpc(req, {http: true})
+        .then((res) => {
+          this.restReply = res
+        })
     }
   }
 }
@@ -139,11 +187,16 @@ export default {
     height: calc(100% - 2.3rem);
   }
 
-  h3 {
+  h3, h4 {
     margin: 0;
     padding: 0 0 0.5rem 0;
     border-bottom: 1px solid var(--border-color);
     font-size: 1.5rem;
+  }
+
+  h4 {
+    display: inline-block;
+    font-size: 1.4rem;
   }
 
   .service-list {

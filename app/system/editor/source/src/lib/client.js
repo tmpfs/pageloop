@@ -93,10 +93,13 @@ class ApiClient {
     console.log(`[rest] (${id}) ${method} ${opts.method} ${url}`)
     console.log(JSON.stringify(opts))
 
+    const startTime = Date.now()
     // console.log(opts)
     return fetch(url, opts)
       .then((res) => {
+        res.method = opts.method
         res.transport = 'http://rest-api'
+        res.duration = Date.now() - startTime
         this.postflight(log, res)
         const resType = parseInt(res.headers.get('x-response-type'))
         if (!isNaN(resType)) {
@@ -368,4 +371,4 @@ class ApiClient {
   }
 }
 
-export default ApiClient
+export {ApiClient, Request}
