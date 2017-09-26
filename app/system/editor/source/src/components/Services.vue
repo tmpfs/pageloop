@@ -74,6 +74,16 @@
           <h2>Method Call</h2>
         </div>
         <div class="scroll" v-if="fn">
+          <h3>Websocket</h3>
+          <p class="small">Use the JSON-RPC API over the websocket transport.</p>
+          <p>
+            <a class="small">Call </a>
+          </p>
+          <h3>REST</h3>
+          <p class="small">Use the REST API over the HTTP transport.</p>
+          <p>
+            <a class="small">Call</a>
+          </p>
         </div>
       </div>
     </div>
@@ -129,13 +139,15 @@ export default {
     height: calc(100% - 2.3rem);
   }
 
-  .service-list {
-    width: 20%;
-    font-size: 1.4rem;
+  h3 {
+    margin: 0;
+    padding: 0 0 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.5rem;
   }
 
-  .method-info, .method-call {
-    width: 40%;
+  .service-list {
+    font-size: 1.4rem;
   }
 
   .methods {
