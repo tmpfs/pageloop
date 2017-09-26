@@ -332,6 +332,8 @@ func init() {
   // TODO: conditional on template object
   route("File.CreateTemplate", "/apps/*/*/files/*", http.MethodPut, http.StatusCreated)
 
+  r = route("Archive.Export", "/apps/*/*/zip/", http.MethodGet, http.StatusOK)
+  r.ResponseType = ResponseTypeNone
   r = route("Archive.Export", "/apps/*/*/zip/source", http.MethodGet, http.StatusOK)
   r.ResponseType = ResponseTypeNone
   r = route("Archive.Export", "/apps/*/*/zip/public", http.MethodGet, http.StatusOK)

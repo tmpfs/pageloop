@@ -48,14 +48,21 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         Name: route.Parameters.Target,
         ContainerName: route.Parameters.Context}
 
+      name := app.Name
+
       // Switch archive type
-      archiveType := ArchiveSource
+      archiveType := ArchiveFull
       filter := strings.TrimSuffix(route.Parameters.Item, SLASH)
-      if strings.HasSuffix(filter, "public") {
+      filter = strings.TrimPrefix(filter, SLASH)
+      if filter == "source" {
+        archiveType = ArchiveSource
+        name += "-" + filter
+      } else if filter == "public" {
         archiveType = ArchivePublic
+        name += "-" + filter
       }
 
-      name := app.Name + ".zip"
+      name += ".zip"
       res.Header().Set("Content-Disposition", "attachment; filename=" + name)
 
       argv = &ArchiveRequest{Application: app, Writer: res, Type: archiveType, Name: name}
