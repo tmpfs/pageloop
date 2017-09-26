@@ -102,6 +102,8 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
       argv = &File{}
     case "Service.Read":
       fallthrough
+    case "Service.ReadMethodCalls":
+      fallthrough
     case "Service.ReadMethod":
       argv = &ServiceLookupRequest{}
   }

@@ -59,6 +59,17 @@ func (s *RpcServices) ReadMethod(req *ServiceLookupRequest, reply *ServiceReply)
   return nil
 }
 
+// Get the number of times a service method has been called.
+func (s *RpcServices) ReadMethodCalls(req *ServiceLookupRequest, reply *ServiceReply) *StatusError {
+  m := s.Services.Map()
+  if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
+    return err
+  } else {
+    reply.Reply = method.Calls
+  }
+  return nil
+}
+
 // Lookup a service.
 func LookupService(mapping map[string]*ServiceInfo, service string) (*ServiceInfo, *StatusError) {
   if mapping[service] == nil {

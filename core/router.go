@@ -301,6 +301,7 @@ func init() {
   route("Service.List", "/services", http.MethodGet, http.StatusOK)
   route("Service.Read", "/services/*", http.MethodGet, http.StatusOK)
   route("Service.ReadMethod", "/services/*/*", http.MethodGet, http.StatusOK)
+  route("Service.ReadMethodCalls", "/services/*/*/calls", http.MethodGet, http.StatusOK)
   route("Template.List", "/templates", http.MethodGet, http.StatusOK)
   route("Job.ActiveJob", "/jobs", http.MethodGet, http.StatusOK)
   route("Job.Read", "/jobs/*", http.MethodGet, http.StatusOK)
