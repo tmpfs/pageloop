@@ -106,6 +106,7 @@ export default {
     background: var(--base03-color);
     border-radius: 0.3rem;
     color: var(--base1-color);
+    vertical-align: top;
   }
 
   .data-input::before, .data-input::after {
