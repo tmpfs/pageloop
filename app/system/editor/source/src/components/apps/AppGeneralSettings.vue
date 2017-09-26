@@ -33,16 +33,26 @@
     </ul>
     <h3>Export</h3>
     <div class="export">
-      <p class="small">Export your application files to create a backup or snapshot a point in time.</p>
+      <p class="small">Export your application files as a .zip archive to create a backup or snapshot a point in time.</p>
       <nav>
+        <a @click="exportFullArchive()"
+           class="download"
+           :class="{disabled: !app}"
+           title="Export all files as zip archive">
+          <i class="fa fa-download"></i>
+          All files</a>
         <a @click="exportSourceArchive()"
            class="download"
            :class="{disabled: !app}"
-           title="Export source files as zip archive">🡇 Download source files</a>
+           title="Export source files as zip archive">
+          <i class="fa fa-download"></i>
+          Source files</a>
         <a @click="exportPublicArchive()"
            class="download"
            :class="{disabled: !app}"
-           title="Export public files as zip archive">🡇 Download public files</a>
+           title="Export public files as zip archive">
+          <i class="fa fa-download"></i>
+          Public files</a>
       </nav>
     </div>
   </div>
@@ -60,6 +70,9 @@ export default {
     }
   },
   methods: {
+    exportFullArchive: function () {
+      this.$store.dispatch('app-export', {app: this.app})
+    },
     exportSourceArchive: function () {
       this.$store.dispatch('app-export', {app: this.app, filter: 'source'})
     },

@@ -50,7 +50,8 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
 
       // Switch archive type
       archiveType := ArchiveSource
-      if strings.HasSuffix(route.Parameters.Item, "public") {
+      filter := strings.TrimSuffix(route.Parameters.Item, SLASH)
+      if strings.HasSuffix(filter, "public") {
         archiveType = ArchivePublic
       }
 

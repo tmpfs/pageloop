@@ -39,6 +39,9 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
   if _, a, err := LookupApplication(s.Host, archive.Application); err != nil {
     return err
   } else {
+
+    //fmt.Printf("%#v\n", archive.Type)
+
     z := zip.NewWriter(archive.Writer)
     // Send using in-memory file data
     if archive.Type == ArchiveSource {

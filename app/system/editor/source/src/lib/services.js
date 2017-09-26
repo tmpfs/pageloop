@@ -54,7 +54,11 @@ function getFileUrl (params, filter) {
 }
 
 function getArchiveUrl (params) {
-  return API + `apps/${params.container}/${params.name}/zip/${params.filter}`
+  let url = API + `apps/${params.container}/${params.name}/zip/`
+  if (params.filter) {
+    url += `${params.filter}/`
+  }
+  return url
 }
 
 // Maps RPC service method names to REST request URLs and fetch options.
