@@ -1,7 +1,9 @@
 <template>
   <div class="content-main not-found">
-    <h2>Not Found</h2>
-    <p>Oops, we could not find a page that matched your request <code v-if="flash">{{flash}}</code></p>
+    <div>
+      <h2>Not Found</h2>
+      <p>Oops, we could not find a page that matched your request <code v-if="flash">{{flash}}</code></p>
+    </div>
   </div>
 </template>
 
@@ -22,7 +24,7 @@ export default {
 
 <style scoped>
   .not-found {
-    padding: 4rem;
+    padding: 0 4rem;
   }
 
   .not-found h2 {

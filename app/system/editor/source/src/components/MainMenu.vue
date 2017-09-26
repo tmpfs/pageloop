@@ -47,6 +47,14 @@
           <i class="fa fa-cog"></i>
           Settings
         </a>
+        <a
+          tabindex="4"
+          @click="$store.dispatch('navigate', {href: 'services'})"
+          :class="{selected: selectedView === 'services'}"
+          title="Services">
+          <i class="fa fa-bug"></i>
+          Services
+        </a>
       </nav>
     </div>
   </transition>
