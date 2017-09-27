@@ -3,6 +3,9 @@
 // Service methods must declare two arguments both of which are of pointer
 // type and the first argument must be a struct. They should return either
 // error or *StatusError.
+//
+// Currently the fields of the method argument must be simple types and slices
+// nested structs are not currently supported.
 package service
 
 import(

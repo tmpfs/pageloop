@@ -1,7 +1,7 @@
 package service
 
 import(
-   "fmt"
+   //"fmt"
   "net/http"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -41,11 +41,7 @@ func (s *ContainerService) CreateApp(req *ApplicationRequest, reply *ServiceRepl
       return CommandError(http.StatusForbidden, "Cannot create applications in a protected container.")
     }
 
-    fmt.Printf("%#v\n", req)
-
     app := req.ToApplication(container)
-
-    fmt.Printf("%#v\n", app)
 
     existing := container.GetByName(app.Name)
     if existing != nil {
