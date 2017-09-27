@@ -44,6 +44,10 @@
               <span>Argument Type</span>
               <span>{{fn.arg}}</span>
             </li>
+            <li v-for="field in fn.fields">
+              <span>Field</span>
+              <span>{{field.type}} {{field.alias}}</span>
+            </li>
             <li>
               <span>Reply Type</span>
               <span>{{fn.reply}}</span>

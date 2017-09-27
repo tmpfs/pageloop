@@ -26,13 +26,13 @@ type ArchiveService struct {
 
 type ArchiveRequest struct {
   // Name of the output file
-  Name string
+  Name string `json:"name"`
+  // Type of archive to create. Full, source only or public only.
+  Type int `json:"type"`
   // Reference to the target application
   Application *Application
   // Output stream
   Writer io.Writer
-  // Type of archive to create. Full, source only or public only.
-  Type int
 }
 
 // Export a zip archive of application files.

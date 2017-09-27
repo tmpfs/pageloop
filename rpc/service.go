@@ -100,6 +100,8 @@ type MethodArgField struct {
   Name string `json:"-"`
   // The alias for the argument struct field
   Alias string `json:"alias"`
+  // A type for the argument struct field
+  Type string `json:"type"`
 }
 
 type ServiceMethodInfo struct {
@@ -168,15 +170,15 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
           for i := 0; i < el.NumField(); i++ {
             field := el.Field(i)
             f := &MethodArgField{Name: field.Name}
-            fmt.Printf("field: %#v\n", field)
+            // fmt.Printf("field: %#v\n", field.Type.String())
             if alias, ok := field.Tag.Lookup("json"); ok {
               // Do not process fields that are not serializable
               if alias == "" || alias == "-" {
                 continue
               }
-              // TODO: strip everything after a comma
               parts := strings.Split(alias, ",")
               f.Alias = parts[0]
+              f.Type = field.Type.String()
 
               // We only add fields with a valid alias
               mi.ArgFields = append(mi.ArgFields, f)
