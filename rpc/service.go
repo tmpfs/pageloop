@@ -105,6 +105,8 @@ type MethodArgField struct {
 }
 
 type ServiceMethodInfo struct {
+  // Service object
+  Service string `json:"service"`
   // Fully qualified method name
   ServiceMethod string `json:"method"`
   // Method name
@@ -151,9 +153,9 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
     m := make(map[string]*ServiceInfo)
     for key, srv := range server.serviceMap {
       info := &ServiceInfo{Name: key}
-
       for _, mt := range srv.method {
         mi := &ServiceMethodInfo{
+          Service: key,
           ServiceMethod: key + "." + mt.method.Name,
           Calls: &mt.numCalls,
           ArgType: mt.ArgType.String(),

@@ -29,6 +29,10 @@
         <div class="scroll" v-if="fn">
           <ul class="details small">
             <li>
+              <span>Service</span>
+              <span>{{fn.service}}</span>
+            </li>
+            <li>
               <span>Method</span>
               <span>{{fn.method}}</span>
             </li>
