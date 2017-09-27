@@ -63,9 +63,6 @@ type Application struct {
 
 	Container *Container `json:"-"`
 
-	// A source template for this application
-	Template *ApplicationTemplate `json:"template,omitempty"`
-
   // An application builder config loaded from build.yml.
   // For applications with no build file this is nil.
   Builder *BuildFile `json:"build,omitempty"`

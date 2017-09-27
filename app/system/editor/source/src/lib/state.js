@@ -19,7 +19,11 @@ import Settings from './state/settings'
 import {KeyManager} from './keymap'
 
 import NewApp from './state/new-app'
+
+// TODO: deprecate app list
 import AppList from './state/app-list'
+
+import Applications from './state/applications'
 
 import Services from './state/services'
 
@@ -47,7 +51,10 @@ class State {
     this.newApp = new NewApp()
     this.appList = new AppList()
 
-    this.containers = []
+    this.apps = new Applications(this.settings)
+
+    this._containers = []
+
     this.templates = []
     this.setApplication('', '')
 
@@ -88,19 +95,16 @@ class State {
     return this.notifier.notify(info, del)
   }
 
-  get apps () {
-    let apps = []
-    const enabled = {
-      system: this.settings.showSystemApplications,
-      template: this.settings.showTemplateApplications
+  get containers () {
+    return this._containers
+  }
+
+  set containers (val) {
+    this._containers = val
+    // Keep apps list in sync when containers change
+    if (val) {
+      this.apps.update(val)
     }
-    this.containers.forEach((container) => {
-      if (enabled[container.name] !== undefined && !enabled[container.name]) {
-        return
-      }
-      apps = apps.concat(container.apps || [])
-    })
-    return apps
   }
 
   getAppHref (...args) {

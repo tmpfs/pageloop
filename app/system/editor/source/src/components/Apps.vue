@@ -93,17 +93,13 @@ export default {
   },
   computed: {
     apps: function () {
-      return this.$store.state.apps
+      return this.$store.state.apps.all
     },
     templateApps: function () {
-      return this.apps.filter((app) => {
-        return app['is-template']
-      })
+      return this.$store.state.apps.template
     },
     openApps: function () {
-      return this.apps.filter((app) => {
-        return app.open
-      })
+      return this.$store.state.apps.open
     },
     selectedApp: {
       get: function () {
