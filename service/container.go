@@ -16,12 +16,12 @@ type ContainerService struct {
   Mountpoints *MountpointManager
 }
 
-type ContainerRef struct {
+type ContainerRequest struct {
   Name string `json:"name"`
 }
 
 // Read a container.
-func (s *ContainerService) Read(container *ContainerRef, reply *ServiceReply) *StatusError {
+func (s *ContainerService) Read(container *ContainerRequest, reply *ServiceReply) *StatusError {
   if c, err := LookupContainer(s.Host, container); err != nil {
     return err
   } else {
@@ -32,7 +32,7 @@ func (s *ContainerService) Read(container *ContainerRef, reply *ServiceReply) *S
 
 // Create application.
 func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *StatusError {
-  var req *ContainerRef = &ContainerRef{}
+  var req *ContainerRequest = &ContainerRequest{}
   if app.ContainerName != "" && app.Container == nil {
     req.Name = app.ContainerName
     // app.Container = &Container{Name: app.ContainerName}
@@ -95,7 +95,7 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
   return nil
 }
 
-func LookupContainer(host *Host, container *ContainerRef) (*Container, *StatusError) {
+func LookupContainer(host *Host, container *ContainerRequest) (*Container, *StatusError) {
   c := host.GetByName(container.Name)
   if c == nil {
     return nil, CommandError(http.StatusNotFound, "Container %s not found", container.Name)
