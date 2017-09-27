@@ -66,6 +66,10 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       res.Header().Set("Content-Disposition", "attachment; filename=" + name)
 
       argv = &ArchiveRequest{Application: app, Writer: res, Type: archiveType, Name: name}
+    case "Job.Delete":
+      fallthrough
+    case "Job.Read":
+      argv = &JobRequest{Id: route.Parameters.Context}
     case "Application.ReadFiles":
       fallthrough
     case "Application.ReadPages":

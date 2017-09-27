@@ -110,6 +110,18 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'Job.Read': (rpc, params) => {
+    return {
+      url: API + `jobs/${params.id}/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Job.Delete': (rpc, params) => {
+    return {
+      url: API + `jobs/${params.id}/`,
+      options: getDeleteOptions(rpc)
+    }
+  },
   'Application.Read': (rpc, params) => {
     return {
       url: API + `apps/${params.container}/${params.name}`,

@@ -107,6 +107,11 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
       fallthrough
     case "Service.ReadMethod":
       argv = &ServiceMethodRequest{}
+    case "Job.Delete":
+      fallthrough
+    case "Job.Read":
+      argv = &JobRequest{}
+
   }
   if argv != nil {
     // Read in the request params to the type we expect
