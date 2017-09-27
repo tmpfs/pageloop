@@ -92,7 +92,9 @@ func (s *AppService) ReadPages(req *ApplicationRequest, reply *ServiceReply) *St
 
 // Delete an application.
 func (s *AppService) Delete(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  println("application delete called")
   if container, app, err := LookupApplication(s.Host, req); err != nil {
+    println("returning err")
     return err
   } else {
     if app.Protected {

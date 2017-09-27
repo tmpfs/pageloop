@@ -130,6 +130,7 @@ class SocketConnection {
     }
 
     this._conn.onmessage = (e) => {
+      console.log(e.data)
       this.onMessage(e)
     }
 
