@@ -153,7 +153,7 @@ func (s *FileService) Create(req *FileRequest, reply *ServiceReply) *StatusError
 }
 
 // Create a file from a template.
-func (s *FileService) CreateFileTemplate(req *FileRequest, reply *ServiceReply) *StatusError {
+func (s *FileService) CreateTemplate(req *FileRequest, reply *ServiceReply) *StatusError {
   template := req.Template
   if template == nil {
     return CommandError(http.StatusBadRequest, "No template given")
@@ -198,6 +198,8 @@ func LookupFile(host *Host, req *FileRequest, appOnly bool) (*Container, *Applic
     f.Owner = &Application{Name: ref.Application, Container: &Container{Name: ref.Container}}
     f.Url = ref.Url
   }
+
+  fmt.Printf("%#v\n", f)
 
   /*
   if f.Owner == nil {

@@ -153,6 +153,6 @@ func init () {
   describe("File.ReadSource", `Get the contents of a file.`)
   describe("File.ReadSourceRaw", `Get the raw contents of a file.`)
   describe("File.Move", `Move a file.`)
-  describe("File.CreateFileTemplate", `Create a file from a template.`)
+  describe("File.CreateTemplate", `Create a file from a template.`)
   describe("Archive.Export", `Export a zip archive.`)
 }
