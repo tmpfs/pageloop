@@ -1,6 +1,6 @@
 <template>
   <div v-if="fn">
-    <method-argv :fn="fn" :params="params"></method-argv>
+    <method-argv :fn="fn" v-on:submit="submit"></method-argv>
     <p>
       <button
         @click="invoke(fn)"
@@ -24,13 +24,20 @@ export default {
       replies: {
         websocket: null,
         rest: null
-      },
-      params: {}
+      }
     }
   },
   computed: {
     reply: function () {
       return this.replies[this.callType]
+    },
+    params: {
+      get: function () {
+        return this.$store.state.services.params
+      },
+      set: function (val) {
+        this.$store.state.services.params = val
+      }
     }
   },
   props: {
@@ -45,15 +52,18 @@ export default {
     fn: function () {
       // Reset replies when the service method changes
       this.replies = {websocket: null, rest: null}
-      this.params = {}
     }
   },
   methods: {
+    submit: function () {
+      this.invoke(this.fn)
+    },
     invoke: function (fn) {
       const params = this.params
+      console.log(`invoke rpc method ${fn.method}`)
+      console.log(this.params)
       const client = this.$store.state.client
       const req = Request.rpc(fn.method, params)
-      console.log(this.callType === 'rest')
       client.rpc(req, {http: this.callType === 'rest'})
         .then((res) => {
           this.replies[this.callType] = res

@@ -128,6 +128,14 @@ export default {
       set: function (val) {
         this.$store.state.services.method = val
       }
+    },
+    params: {
+      get: function () {
+        return this.$store.state.services.params
+      },
+      set: function (val) {
+        this.$store.state.services.params = val
+      }
     }
   },
   created: function () {
@@ -146,6 +154,15 @@ export default {
     showServiceMethod: function (service, method) {
       // console.log(method)
       this.fn = method
+
+      // Set up default parameters for binding
+      let params = {}
+      if (method.fields) {
+        method.fields.forEach((field) => {
+          params[field.alias] = field.type
+        })
+      }
+      this.params = params
     }
   }
 }

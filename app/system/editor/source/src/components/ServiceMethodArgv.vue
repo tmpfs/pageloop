@@ -9,7 +9,9 @@
         <span>{{field.alias}}</span>
         <span
           :data-type="field.type"
+          :data-alias="field.alias"
           contenteditable
+          @keyup="keyup"
           @keydown="keydown"
           @keyup.enter="enter"
           class="type">{{field.type}}</span>
@@ -24,12 +26,29 @@ export default {
   props: {
     fn: {
       type: Object
-    },
+    }
+  },
+  computed: {
     params: {
-      type: Object
+      get: function () {
+        return this.$store.state.services.params
+      },
+      set: function (val) {
+        this.$store.state.services.params = val
+      }
     }
   },
   methods: {
+    keyup: function (e) {
+      const el = e.currentTarget
+      const alias = el.getAttribute('data-alias')
+      const value = el.innerText
+
+      // TODO: type coercion
+      // const type = el.getAttribute('data-type')
+
+      this.params[alias] = value
+    },
     keydown: function (e) {
       if (e.key === 'Enter') {
         e.preventDefault()
@@ -39,8 +58,7 @@ export default {
     enter: function (e) {
       e.preventDefault()
       e.stopImmediatePropagation()
-      console.log('enter called')
-      return true
+      this.$emit('submit')
     }
   }
 }
