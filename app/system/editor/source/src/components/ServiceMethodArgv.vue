@@ -14,7 +14,7 @@
           @keyup="keyup"
           @keydown="keydown"
           @keyup.enter="enter"
-          class="type">{{field.type}}</span>
+          class="type">{{params[field.alias]}}</span>
       </li>
     </ul>
   </div>

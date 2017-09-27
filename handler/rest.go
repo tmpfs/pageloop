@@ -40,7 +40,7 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       }
       argv = app
     case "Container.Read":
-      argv = &Container{Name: route.Parameters.Context}
+      argv = &ContainerRequest{Name: route.Parameters.Context}
     case "Archive.Import":
       fallthrough
     case "Archive.Export":
