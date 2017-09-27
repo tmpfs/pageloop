@@ -8,7 +8,7 @@
           class="app"
           :class="{selected: app === selectedApp}"
           v-for="app in apps">
-          <span :class="{hidden: !app.protected}">🔒&nbsp;</span>
+          <span v-if="app.protected"><i class="fa fa-lock"></i>&nbsp;</span>
           <span class="name">{{app.display}}</span>
           <p class="small">
             {{app.description}}
