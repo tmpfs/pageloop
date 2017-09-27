@@ -2,6 +2,9 @@ class Applications {
   constructor (settings) {
     this.settings = settings
     this.all = []
+    // Selected application in an app list
+    // either the main menu or the listing in the apps view
+    this.selected = undefined
   }
 
   get template () {

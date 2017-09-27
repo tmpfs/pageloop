@@ -138,7 +138,7 @@ const Mutations = {
     state.newApp.view = view
   },
   'app-list-selected': function (state, app) {
-    state.appList.selected = app
+    state.apps.selected = app
   },
   'main-menu-visible': function (state, visibility) {
     state.settings.mainMenuVisible = visibility

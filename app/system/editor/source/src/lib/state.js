@@ -20,9 +20,6 @@ import {KeyManager} from './keymap'
 
 import NewApp from './state/new-app'
 
-// TODO: deprecate app list
-import AppList from './state/app-list'
-
 import Applications from './state/applications'
 
 import Services from './state/services'
@@ -49,7 +46,6 @@ class State {
     this.network = new Log()
 
     this.newApp = new NewApp()
-    this.appList = new AppList()
 
     this.apps = new Applications(this.settings)
 

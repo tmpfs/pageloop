@@ -94,7 +94,7 @@ export default {
   computed: {
     selectedApp: {
       get: function () {
-        return this.$store.state.appList.selected
+        return this.$store.state.apps.selected
       },
       set: function (val) {
         this.$store.commit('app-list-selected', val)

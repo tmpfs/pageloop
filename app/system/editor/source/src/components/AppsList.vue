@@ -43,7 +43,7 @@ export default {
     },
     selectedApp: {
       get: function () {
-        return this.$store.state.appList.selected
+        return this.$store.state.apps.selected
       },
       set: function (val) {
         this.$store.commit('app-list-selected', val)
@@ -62,7 +62,6 @@ export default {
       return this.$store.dispatch('edit-app', {container: container, application: app})
     },
     confirmDeleteApplication: function (app) {
-      // const container = this.getContainer(app)
       let details = {
         title: `Delete app (${app.name})`,
         message: `Are you sure you want to permanently delete ${app.name}?`,
