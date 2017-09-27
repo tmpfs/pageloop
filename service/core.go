@@ -1,4 +1,8 @@
 // Package service exposes methods that may be used over the network.
+//
+// Service methods must declare two arguments both of which are of pointer
+// type and the first argument must be a struct. They should return either
+// error or *StatusError.
 package service
 
 import(

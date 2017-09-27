@@ -97,7 +97,7 @@ type ServiceInfo struct {
 
 type MethodArgField struct {
   // The name of the argument struct field
-  Name string `json:"name"`
+  Name string `json:"-"`
   // The alias for the argument struct field
   Alias string `json:"alias"`
 }
@@ -159,19 +159,30 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
           Name: mt.method.Name}
 
         // Service methods must use a pointer for argument type
+        // If they don't this will error on the call to Elem()
         kind := mt.ArgType.Elem().Kind()
 
         // Must be a struct
         if kind == reflect.Struct {
           el := mt.ArgType.Elem()
-          fmt.Printf("num fields: %#v\n", mt.ArgType.Elem().NumField())
-
           for i := 0; i < el.NumField(); i++ {
             field := el.Field(i)
+            f := &MethodArgField{Name: field.Name}
             fmt.Printf("field: %#v\n", field)
+            if alias, ok := field.Tag.Lookup("json"); ok {
+              // Do not process fields that are not serializable
+              if alias == "" || alias == "-" {
+                continue
+              }
+              // TODO: strip everything after a comma
+              parts := strings.Split(alias, ",")
+              f.Alias = parts[0]
+
+              // We only add fields with a valid alias
+              mi.ArgFields = append(mi.ArgFields, f)
+            }
           }
         }
-
         info.Methods = append(info.Methods, mi)
       }
       key = strings.ToLower(key)
