@@ -6,6 +6,10 @@ import(
   . "github.com/tmpfs/pageloop/util"
 )
 
+type JobRequest struct {
+  Id string `json:"id"`
+}
+
 type JobService struct {}
 
 // List active jobs.
@@ -15,8 +19,8 @@ func (s *JobService) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
 }
 
 // Read a job.
-func (s *JobService) Read(id string, reply *ServiceReply) *StatusError {
-  if job, err := s.lookup(id); err != nil {
+func (s *JobService) Read(req *JobRequest, reply *ServiceReply) *StatusError {
+  if job, err := s.lookup(req.Id); err != nil {
     return err
   } else {
     reply.Reply = job
@@ -25,8 +29,8 @@ func (s *JobService) Read(id string, reply *ServiceReply) *StatusError {
 }
 
 // Abort an active job.
-func(s *JobService) Delete(id string, reply *ServiceReply) *StatusError {
-  if job, err := s.lookup(id); err != nil {
+func(s *JobService) Delete(req *JobRequest, reply *ServiceReply) *StatusError {
+  if job, err := s.lookup(req.Id); err != nil {
     return err
   } else {
     if err := Jobs.Abort(job); err != nil {

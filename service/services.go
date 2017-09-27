@@ -34,14 +34,7 @@ func (s *RpcServices) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
 
   // Inject route information
   for _, srv := range m {
-    for _, method := range srv.Methods {
-      method.UserMeta = ServicesMetaInfo[method.ServiceMethod]
-      // TODO: handle multiple matching routes with different verbs etc
-      r := s.Router.Get(method.ServiceMethod)
-      if r != nil {
-        method.UserData = r
-      }
-    }
+    InjectServiceMeta(srv, s.Router)
   }
 
   reply.Reply = m
@@ -54,6 +47,7 @@ func (s *RpcServices) Read(req *ServiceLookupRequest, reply *ServiceReply) *Stat
   if srv, err := LookupService(m, req.Service); err != nil {
     return err
   } else {
+    InjectServiceMeta(srv, s.Router)
     reply.Reply = srv
   }
   return nil
@@ -65,6 +59,7 @@ func (s *RpcServices) ReadMethod(req *ServiceLookupRequest, reply *ServiceReply)
   if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
     return err
   } else {
+    InjectMethodMeta(method, s.Router)
     reply.Reply = method
   }
   return nil
@@ -79,6 +74,22 @@ func (s *RpcServices) ReadMethodCalls(req *ServiceLookupRequest, reply *ServiceR
     reply.Reply = method.Calls
   }
   return nil
+}
+
+// Inject service meta and route information.
+func InjectServiceMeta(srv *ServiceInfo, router *Router) {
+  for _, method := range srv.Methods {
+    InjectMethodMeta(method, router)
+  }
+}
+
+func InjectMethodMeta(method *ServiceMethodInfo, router *Router) {
+  method.UserMeta = ServicesMetaInfo[method.ServiceMethod]
+  // TODO: handle multiple matching routes with different verbs etc
+  r := router.Get(method.ServiceMethod)
+  if r != nil {
+    method.UserData = r
+  }
 }
 
 // Lookup a service.

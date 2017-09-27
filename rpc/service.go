@@ -95,6 +95,13 @@ type ServiceInfo struct {
   Methods []*ServiceMethodInfo `json:"methods"`
 }
 
+type MethodArgField struct {
+  // The name of the argument struct field
+  Name string `json:"name"`
+  // The alias for the argument struct field
+  Alias string `json:"alias"`
+}
+
 type ServiceMethodInfo struct {
   // Fully qualified method name
   ServiceMethod string `json:"method"`
@@ -104,6 +111,10 @@ type ServiceMethodInfo struct {
   Calls *uint `json:"calls"`
   // Type for the argument (first argument)
   ArgType string `json:"arg"`
+  // Fields of the argument struct,
+  // if it has zero length the service method
+  // is safe to be called with no input arguments
+  ArgFields []*MethodArgField `json:"fields"`
   // Type for the reply value (second argument)
   ReplyType string `json:"reply"`
   // Placeholder for meta data associated with the service (description, notes etc)
@@ -146,6 +157,21 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
           ArgType: mt.ArgType.String(),
           ReplyType: mt.ReplyType.String(),
           Name: mt.method.Name}
+
+        // Service methods must use a pointer for argument type
+        kind := mt.ArgType.Elem().Kind()
+
+        // Must be a struct
+        if kind == reflect.Struct {
+          el := mt.ArgType.Elem()
+          fmt.Printf("num fields: %#v\n", mt.ArgType.Elem().NumField())
+
+          for i := 0; i < el.NumField(); i++ {
+            field := el.Field(i)
+            fmt.Printf("field: %#v\n", field)
+          }
+        }
+
         info.Methods = append(info.Methods, mi)
       }
       key = strings.ToLower(key)
