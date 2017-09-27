@@ -80,6 +80,12 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'Container.Read': (rpc, params) => {
+    return {
+      url: API + `apps/${params.name}/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
   'Container.CreateApp': (rpc, params) => {
     return {
       url: API + `apps/${params.container}/`,
