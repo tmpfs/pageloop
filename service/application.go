@@ -44,6 +44,15 @@ type ApplicationRequest struct {
 	Template *ApplicationTemplate `json:"template,omitempty"`
 }
 
+func (req *ApplicationRequest) ToApplication(container *Container) *Application {
+  return &Application{
+    Container: container,
+    Name: req.Name,
+    DisplayName: req.DisplayName,
+    Description: req.Description,
+    IsTemplate: req.IsTemplate}
+}
+
 type AppService struct {
   Host *Host
 

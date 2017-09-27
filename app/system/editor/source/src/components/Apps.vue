@@ -88,8 +88,7 @@ export default {
     return {
       appsList: [],
       appListView: 'all',
-      appSettingsView: 'app-general-settings',
-      user: true
+      appSettingsView: 'app-general-settings'
     }
   },
   computed: {

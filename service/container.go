@@ -1,7 +1,7 @@
 package service
 
 import(
-  // "fmt"
+   "fmt"
   "net/http"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -31,15 +31,9 @@ func (s *ContainerService) Read(container *ContainerRequest, reply *ServiceReply
 }
 
 // Create application.
-func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *StatusError {
-  var req *ContainerRequest = &ContainerRequest{}
-  if app.ContainerName != "" && app.Container == nil {
-    req.Name = app.ContainerName
-    // app.Container = &Container{Name: app.ContainerName}
-  } else if app.Container != nil {
-    req.Name = app.Container.Name
-  }
-  if container, err := LookupContainer(s.Host, req); err != nil {
+func (s *ContainerService) CreateApp(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  var cr *ContainerRequest = &ContainerRequest{Name: req.Container}
+  if container, err := LookupContainer(s.Host, cr); err != nil {
     return err
   } else {
     // TODO: do not allow creating apps on non-user containers!
@@ -47,7 +41,11 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
       return CommandError(http.StatusForbidden, "Cannot create applications in a protected container.")
     }
 
-    // fmt.Printf("%#v\n", app)
+    fmt.Printf("%#v\n", req)
+
+    app := req.ToApplication(container)
+
+    fmt.Printf("%#v\n", app)
 
     existing := container.GetByName(app.Name)
     if existing != nil {
@@ -68,9 +66,9 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
       return CommandError(http.StatusInternalServerError, err.Error())
     } else {
       // Handle creating from a template.
-      if app.Template != nil {
+      if req.Template != nil {
         // Find the template application.
-        if source, err := s.Host.LookupTemplate(app.Template); err != nil {
+        if source, err := s.Host.LookupTemplate(req.Template); err != nil {
           return CommandError(http.StatusBadRequest, err.Error())
         } else {
           // Copy template source files.
