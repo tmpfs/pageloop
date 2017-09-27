@@ -42,15 +42,15 @@
             </li>
             <li>
               <span>Argument Type</span>
-              <span>{{fn.arg}}</span>
+              <span class="type">{{fn.arg}}</span>
             </li>
             <li v-for="field in fn.fields">
               <span>Field</span>
-              <span>{{field.type}} {{field.alias}}</span>
+              <span><span class="type">{{field.type}}</span> {{field.alias}}</span>
             </li>
             <li>
               <span>Reply Type</span>
-              <span>{{fn.reply}}</span>
+              <span class="type">{{fn.reply}}</span>
             </li>
 
             <li v-if="fn.info">
@@ -213,6 +213,10 @@ export default {
 
   .methods li > span.calls {
     text-align: right;
+  }
+
+  .type {
+    color: var(--yellow-color);
   }
 
 </style>
