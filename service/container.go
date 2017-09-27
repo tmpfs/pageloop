@@ -16,8 +16,12 @@ type ContainerService struct {
   Mountpoints *MountpointManager
 }
 
+type ContainerRequest struct {
+  Name string `json:"name"`
+}
+
 // Read a container.
-func (s *ContainerService) Read(container *Container, reply *ServiceReply) *StatusError {
+func (s *ContainerService) Read(container *ContainerRequest, reply *ServiceReply) *StatusError {
   if c, err := LookupContainer(s.Host, container); err != nil {
     return err
   } else {
@@ -28,10 +32,14 @@ func (s *ContainerService) Read(container *Container, reply *ServiceReply) *Stat
 
 // Create application.
 func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *StatusError {
+  var req *ContainerRequest = &ContainerRequest{}
   if app.ContainerName != "" && app.Container == nil {
-    app.Container = &Container{Name: app.ContainerName}
+    req.Name = app.ContainerName
+    // app.Container = &Container{Name: app.ContainerName}
+  } else if app.Container != nil {
+    req.Name = app.Container.Name
   }
-  if container, err := LookupContainer(s.Host, app.Container); err != nil {
+  if container, err := LookupContainer(s.Host, req); err != nil {
     return err
   } else {
     // TODO: do not allow creating apps on non-user containers!
@@ -87,7 +95,7 @@ func (s *ContainerService) CreateApp(app *Application, reply *ServiceReply) *Sta
   return nil
 }
 
-func LookupContainer(host *Host, container *Container) (*Container, *StatusError) {
+func LookupContainer(host *Host, container *ContainerRequest) (*Container, *StatusError) {
   c := host.GetByName(container.Name)
   if c == nil {
     return nil, CommandError(http.StatusNotFound, "Container %s not found", container.Name)
