@@ -99,8 +99,7 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
     case "File.CreateTemplate":
       fallthrough
     case "File.Save":
-      // TODO: port to FileRequest
-      argv = &File{}
+      argv = &FileRequest{}
     case "Service.Read":
       argv = &ServiceRequest{}
     case "Service.ReadMethodCalls":

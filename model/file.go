@@ -33,21 +33,8 @@ type File struct {
   Mime string `json:"mime"`
   Binary bool `json:"binary"`
 
-  // Destination for file move operations
-  Destination string `json:"destination,omitempty"`
-
 	// Owner application
   Owner *Application `json:"-"`
-
-	// A source template for this file
-	Template *ApplicationTemplate `json:"template,omitempty"`
-
-  // A reference to a file in the form: file://{container}/{application}#{url}
-  Ref string `json:"ref,omitempty"`
-
-  // An input value for the file content, passed in when creating or
-  // updating files that are not binary
-  Value string `json:"value,omitempty"`
 
 	// File stat information.
   info os.FileInfo

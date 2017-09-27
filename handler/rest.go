@@ -2,7 +2,7 @@
 package handler
 
 import (
-  // "fmt"
+  "fmt"
   //"mime"
   "strings"
   "strconv"
@@ -95,15 +95,32 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "File.ReadSourceRaw":
       fallthrough
     case "File.Read":
+      /*
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: route.Parameters.Item}
-      argv = f
+      */
+      // argv = f
+      ref := fmt.Sprintf(
+        "file://%s/%s#%s",
+        route.Parameters.Context,
+        route.Parameters.Target,
+        route.Parameters.Item)
+      argv = &FileRequest{Ref: ref}
     case "File.Move":
+      /*
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
+      */
+      ref := fmt.Sprintf(
+        "file://%s/%s#%s",
+        route.Parameters.Context,
+        route.Parameters.Target,
+        route.Parameters.Item)
+      argv = &FileRequest{Ref: ref, Destination: req.Header.Get("Location")}
     case "File.CreateTemplate":
+      /*
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: route.Parameters.Item}
@@ -112,9 +129,21 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         return nil, err
       }
       argv = f
+      */
+      ref := fmt.Sprintf(
+        "file://%s/%s#%s",
+        route.Parameters.Context,
+        route.Parameters.Target,
+        route.Parameters.Item)
+      f := &FileRequest{Ref: ref, Template: &ApplicationTemplate{}}
+      if err := utils.ReadJson(req, f.Template); err != nil {
+        return nil, err
+      }
+      argv = f
     case "File.Create":
       fallthrough
     case "File.Save":
+      /*
       c := &Container{Name: route.Parameters.Context}
       a := &Application{Name: route.Parameters.Target, Container: c}
       f := &File{Owner: a, Url: route.Parameters.Item}
@@ -122,6 +151,19 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         return nil, CommandError(http.StatusInternalServerError, err.Error())
       } else {
         f.Bytes(content)
+      }
+      argv = f
+      */
+      ref := fmt.Sprintf(
+        "file://%s/%s#%s",
+        route.Parameters.Context,
+        route.Parameters.Target,
+        route.Parameters.Item)
+      f := &FileRequest{Ref: ref}
+      if content, err := utils.ReadBody(req); err != nil {
+        return nil, CommandError(http.StatusInternalServerError, err.Error())
+      } else {
+        f.Bytes = content
       }
       argv = f
     case "Service.Read":
