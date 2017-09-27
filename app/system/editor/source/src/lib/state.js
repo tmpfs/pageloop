@@ -100,21 +100,6 @@ class State {
       }
       apps = apps.concat(container.apps || [])
     })
-
-    /*
-
-    if (type === 'templates') {
-      apps = apps.filter((app) => {
-        return app['is-template']
-      })
-    } else if (type === 'open') {
-      apps = apps.filter((app) => {
-        return app.open
-      })
-    }
-    */
-    // this.appListView = type
-    // this.apps = apps
     return apps
   }
 

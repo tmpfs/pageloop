@@ -167,27 +167,7 @@ export default {
       } else if (type === 'open') {
         this.appsList = this.openApps
       }
-      /*
-      let apps = []
-      this.list.forEach((container) => {
-        if (this.enabled[container.name] !== undefined && !this.enabled[container.name]) {
-          return
-        }
-        apps = apps.concat(container.apps)
-      })
-
-      if (type === 'templates') {
-        apps = apps.filter((app) => {
-          return app['is-template']
-        })
-      } else if (type === 'open') {
-        apps = apps.filter((app) => {
-          return app.open
-        })
-      }
-      */
       this.appListView = type
-      // this.apps = apps
     }
   },
   components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList, AppGeneralSettings, AppArchiveSettings, AppPublishSettings}
