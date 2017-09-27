@@ -23,20 +23,6 @@ mountpoints:
     description: |
       Documentation & help files
   -
-    display: Browser
-    container: system
-    url: /tools/api/browser/
-    path: app/system/tools/api/browser/
-    description: |
-      API Browser
-  -
-    display: Probe
-    container: system
-    url: /tools/api/probe/
-    path: app/system/tools/api/probe/
-    description: |
-      API Probe
-  -
     display: Document Templates
     container: template
     url: /template/documents/
