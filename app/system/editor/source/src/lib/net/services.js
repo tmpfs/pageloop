@@ -23,7 +23,6 @@ function getBodyOptions (rpc, options) {
 
     options.headers['Content-Length'] = body.length
   }
-
   return options
 }
 
@@ -99,7 +98,7 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
-  'Job.ActiveJobs': (rpc, params) => {
+  'Job.List': (rpc, params) => {
     return {
       url: API + 'jobs/',
       options: getDefaultOptions(rpc)

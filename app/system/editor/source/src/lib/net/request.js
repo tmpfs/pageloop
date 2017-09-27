@@ -29,7 +29,7 @@ class Request {
     }
   }
 
-  // Set a raw body for the request.
+  // Set a raw body for the request (REST only).
   body (value, mime) {
     this.request = {
       type: TypeByte,
