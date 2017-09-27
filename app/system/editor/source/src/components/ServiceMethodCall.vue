@@ -1,27 +1,12 @@
 <template>
   <div v-if="fn">
-    <!--
-    <p v-if="callType === 'websocket'" class="small center">JSON-RPC API over the websocket transport</p>
-    <p v-else class="small center">REST API over the HTTP transport</p>
-    -->
     <method-argv :fn="fn"></method-argv>
-    <div v-if="callType === 'websocket'">
-      <p>
-        <a
-          @click="callSocketMethod(fn)"
-          class="small">Call </a>
-      </p>
-      <method-reply :reply="socketReply"></method-reply>
-    </div>
-
-    <div v-if="callType === 'rest'">
-      <p>
-        <a
-          @click="callRestMethod(fn)"
-          class="small">Call</a>
-      </p>
-      <method-reply :reply="restReply"></method-reply>
-    </div>
+    <p>
+      <button
+        @click="callMethod(fn)"
+        class="small">Call {{fn.method}}</button>
+    </p>
+    <method-reply :reply="reply"></method-reply>
   </div>
 </template>
 
@@ -40,6 +25,15 @@ export default {
       restReply: null
     }
   },
+  computed: {
+    reply: function () {
+      if (this.callType === 'websocket') {
+        return this.socketReply
+      } else if (this.callType === 'rest') {
+        return this.restReply
+      }
+    }
+  },
   props: {
     fn: {
       type: Object
@@ -48,7 +42,20 @@ export default {
       type: String
     }
   },
+  watch: {
+    fn: function () {
+      this.restReply = null
+      this.socketReply = null
+    }
+  },
   methods: {
+    callMethod: function (fn) {
+      if (this.callType === 'websocket') {
+        return this.callSocketMethod(fn)
+      } else if (this.callType === 'rest') {
+        return this.callRestMethod(fn)
+      }
+    },
     callSocketMethod: function (fn) {
       const params = undefined
       const client = this.$store.state.client
