@@ -33,11 +33,14 @@
 export default {
   name: 'apps-list',
   props: {
-    apps: {
-      type: Array
+    type: {
+      type: String
     }
   },
   computed: {
+    apps: function () {
+      return this.$store.state.apps[this.type]
+    },
     selectedApp: {
       get: function () {
         return this.$store.state.appList.selected
@@ -71,19 +74,7 @@ export default {
       this.$store.commit('alert-show', details)
     },
     deleteApp: function (app) {
-      this.$store.dispatch('del-app', {container: app.container, application: app.name})
-        .then(() => {
-          /*
-          for (let i = 0; i < this.apps.length; i++) {
-            if (app === this.apps[i]) {
-              this.apps = this.apps.splice(i, 1)
-              break
-            }
-          }
-          */
-        })
-        .catch((e) => console.error(e))
-      return false
+      return this.$store.dispatch('del-app', {container: app.container, application: app.name})
     },
     linkify: function (app, open) {
       const container = this.getContainer(app)

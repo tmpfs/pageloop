@@ -43,7 +43,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <component :apps="appsList" is="apps-list"></component>
+          <component :type="appListView" is="apps-list"></component>
         </div>
       </div>
       <div class="content-column activity">
@@ -92,15 +92,6 @@ export default {
     }
   },
   computed: {
-    apps: function () {
-      return this.$store.state.apps.all
-    },
-    templateApps: function () {
-      return this.$store.state.apps.template
-    },
-    openApps: function () {
-      return this.$store.state.apps.open
-    },
     selectedApp: {
       get: function () {
         return this.$store.state.appList.selected
