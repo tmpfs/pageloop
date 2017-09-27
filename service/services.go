@@ -9,7 +9,6 @@ import(
   . "github.com/tmpfs/pageloop/util"
 )
 
-
 var(
   ServicesMetaInfo map[string]*ServiceMeta
 )
@@ -19,6 +18,10 @@ type ServiceMeta struct {
 }
 
 type ServiceRequest struct {
+  Service string `json:"service"`
+}
+
+type ServiceMethodRequest struct {
   Service string `json:"service"`
   Method string `json:"method"`
 }
@@ -54,7 +57,7 @@ func (s *RpcServices) Read(req *ServiceRequest, reply *ServiceReply) *StatusErro
 }
 
 // Get a service method.
-func (s *RpcServices) ReadMethod(req *ServiceRequest, reply *ServiceReply) *StatusError {
+func (s *RpcServices) ReadMethod(req *ServiceMethodRequest, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
     return err
@@ -66,7 +69,7 @@ func (s *RpcServices) ReadMethod(req *ServiceRequest, reply *ServiceReply) *Stat
 }
 
 // Get the number of times a service method has been called.
-func (s *RpcServices) ReadMethodCalls(req *ServiceRequest, reply *ServiceReply) *StatusError {
+func (s *RpcServices) ReadMethodCalls(req *ServiceMethodRequest, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
     return err
