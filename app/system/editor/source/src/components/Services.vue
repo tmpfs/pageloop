@@ -24,7 +24,7 @@
 
       <div class="content-column method-info">
         <div class="column-header">
-          <h2>Method Info</h2>
+          <h2>Info</h2>
         </div>
         <div class="scroll" v-if="fn">
           <ul class="details small">
@@ -84,27 +84,21 @@
 
       <div class="content-column method-call">
         <div class="column-header">
-          <h2>Method Call</h2>
+          <h2 v-if="fn" class="method-name">{{fn.method}}</h2>
+          <h2 v-else>Call</h2>
+          <nav class="tabs">
+            <a
+              :class="{selected: callType === 'websocket'}"
+              @click="callType = 'websocket'">
+              Websocket</a>
+            <a
+              :class="{selected: callType === 'rest'}"
+              @click="callType = 'rest'">
+              Rest</a>
+          </nav>
         </div>
         <div class="scroll" v-if="fn">
-          <h3>Websocket</h3>
-          <p class="small">Use the JSON-RPC API over the websocket transport.</p>
-          <!-- TODO: arguments -->
-          <p>
-            <a
-              @click="callSocketMethod(fn)"
-              class="small">Call </a>
-          </p>
-          <method-reply :reply="socketReply"></method-reply>
-          <h3>REST</h3>
-          <p class="small">Use the REST API over the HTTP transport.</p>
-          <!-- TODO: arguments -->
-          <p>
-            <a
-              @click="callRestMethod(fn)"
-              class="small">Call</a>
-          </p>
-          <method-reply :reply="restReply"></method-reply>
+          <method-call :fn="fn" :callType="callType"></method-call>
         </div>
       </div>
     </div>
@@ -113,16 +107,14 @@
 
 <script>
 
-import {Request} from '../lib/net/client'
-import MethodReply from '@/components/ServiceMethodReply'
+import MethodCall from '@/components/ServiceMethodCall'
 
 export default {
   name: 'services',
-  components: {MethodReply},
+  components: {MethodCall},
   data: function () {
     return {
-      socketReply: null,
-      restReply: null
+      callType: 'websocket'
     }
   },
   computed: {
@@ -154,24 +146,6 @@ export default {
     showServiceMethod: function (service, method) {
       // console.log(method)
       this.fn = method
-    },
-    callSocketMethod: function (fn) {
-      const params = undefined
-      const client = this.$store.state.client
-      const req = Request.rpc(fn.method, params)
-      client.rpc(req)
-        .then((res) => {
-          this.socketReply = res
-        })
-    },
-    callRestMethod: function (fn) {
-      const params = undefined
-      const client = this.$store.state.client
-      const req = Request.rpc(fn.method, params)
-      client.rpc(req, {http: true})
-        .then((res) => {
-          this.restReply = res
-        })
     }
   }
 }
@@ -187,6 +161,14 @@ export default {
     padding: 1rem;
     width: 100%;
     height: calc(100% - 2.3rem);
+  }
+
+  .method-name {
+    text-transform: none;
+  }
+
+  .tabs > :first-child {
+    border-left: 1px solid var(--border-color);
   }
 
   h3, h4 {
@@ -223,6 +205,10 @@ export default {
   .methods li > span.calls {
     text-align: right;
   }
+
+</style>
+
+<style>
 
   .type {
     color: var(--yellow-color);

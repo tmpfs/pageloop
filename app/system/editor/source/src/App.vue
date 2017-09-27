@@ -457,6 +457,7 @@ export default {
   .details > li > span {
     display: table-cell;
     padding: 0;
+    vertical-align: top;
   }
 
 
