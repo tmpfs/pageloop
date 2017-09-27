@@ -73,12 +73,15 @@ export default {
     deleteApp: function (app) {
       this.$store.dispatch('del-app', {container: app.container, application: app.name})
         .then(() => {
+
+          /*
           for (let i = 0; i < this.apps.length; i++) {
             if (app === this.apps[i]) {
               this.apps = this.apps.splice(i, 1)
               break
             }
           }
+          */
         })
         .catch((e) => console.error(e))
       return false

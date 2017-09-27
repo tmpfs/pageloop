@@ -17,9 +17,9 @@ func ValidName(name string) bool {
 
 // Contains a slice of applications.
 type Container struct {
-	Name string `json:"name,omitempty"`
+	Name string `json:"name"`
 	Description string `json:"description,omitempty"`
-	Apps []*Application `json:"apps"`
+	Apps []*Application `json:"apps,omitempty"`
 
 	// A protected container makes all it's applications protected
 	Protected bool `json:"protected,omitempty"`

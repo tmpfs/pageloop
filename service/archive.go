@@ -30,7 +30,7 @@ type ArchiveRequest struct {
   // Type of archive to create. Full, source only or public only.
   Type int `json:"type"`
   // Reference to the target application
-  Application *Application
+  Application *ApplicationRequest
   // Output stream
   Writer io.Writer
 }

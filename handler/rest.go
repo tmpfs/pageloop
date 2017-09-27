@@ -31,8 +31,8 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
   name := route.ServiceMethod
   switch name {
     case "Container.CreateApp":
-      c := &Container{Name: route.Parameters.Context}
-      var app *Application = &Application{Container: c}
+      var app *ApplicationRequest =
+        &ApplicationRequest{Container: route.Parameters.Context}
 
       // TODO: move validation to service logic
       if _, err := utils.ValidateRequest(SchemaAppNew, app, req); err != nil {
@@ -44,9 +44,9 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "Archive.Import":
       fallthrough
     case "Archive.Export":
-      app := &Application{
+      app := &ApplicationRequest{
         Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context}
+        Container: route.Parameters.Context}
 
       name := app.Name
 
@@ -73,22 +73,22 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "Application.Delete":
       fallthrough
     case "Application.Read":
-      argv = &Application{
+      argv = &ApplicationRequest{
         Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context}
+        Container: route.Parameters.Context}
     case "Application.DeleteFiles":
       var list UrlList = make(UrlList, 0)
       if err := utils.ReadJson(req, &list); err != nil {
         return nil, CommandError(http.StatusInternalServerError, err.Error())
       }
-      argv = &Application{
+      argv = &ApplicationRequest{
         Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context,
+        Container: route.Parameters.Context,
         Batch: &list}
     case "Application.RunTask":
-      argv = &Application{
+      argv = &ApplicationRequest{
         Name: route.Parameters.Target,
-        ContainerName: route.Parameters.Context,
+        Container: route.Parameters.Context,
         Task: route.Parameters.Item}
     case "File.ReadSource":
       fallthrough
@@ -125,11 +125,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       }
       argv = f
     case "Service.Read":
-      argv = &ServiceLookupRequest{Service: route.Parameters.Context}
+      argv = &ServiceRequest{Service: route.Parameters.Context}
     case "Service.ReadMethodCalls":
       fallthrough
     case "Service.ReadMethod":
-      argv = &ServiceLookupRequest{
+      argv = &ServiceRequest{
         Service: route.Parameters.Context,
         Method: route.Parameters.Target}
   }

@@ -71,7 +71,7 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
   argv = &VoidArgs{}
   switch(method) {
     case "Container.Read":
-      argv = &Container{}
+      argv = &ContainerRequest{}
     case "Container.CreateApp":
       fallthrough
     case "Application.ReadFiles":
@@ -85,7 +85,7 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
     case "Application.RunTask":
       fallthrough
     case "Application.Read":
-      argv = &Application{}
+      argv = &ApplicationRequest{}
     case "File.ReadSource":
       fallthrough
     case "File.ReadSourceRaw":
@@ -105,7 +105,7 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
     case "Service.ReadMethodCalls":
       fallthrough
     case "Service.ReadMethod":
-      argv = &ServiceLookupRequest{}
+      argv = &ServiceRequest{}
   }
   if argv != nil {
     // Read in the request params to the type we expect

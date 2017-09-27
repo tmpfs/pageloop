@@ -74,12 +74,15 @@ export default {
       return this.$store.state.settings.mainMenuVisible
     },
     apps: function () {
+      console.log(this.$store.state.apps)
       return this.$store.state.apps
     }
   },
   methods: {
     isSelected: function (app) {
       const state = this.$store.state
+      console.log('is selected: ')
+      console.log(app)
       return app.container === state.container && app.name === state.application && this.selectedView === 'edit'
     },
     getContainer: function (app) {

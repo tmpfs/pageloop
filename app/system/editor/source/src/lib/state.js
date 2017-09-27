@@ -98,7 +98,7 @@ class State {
       if (enabled[container.name] !== undefined && !enabled[container.name]) {
         return
       }
-      apps = apps.concat(container.apps)
+      apps = apps.concat(container.apps || [])
     })
 
     /*

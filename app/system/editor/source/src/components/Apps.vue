@@ -34,8 +34,8 @@
               @click="listApps('all')">All</a>
             <a
               title="Show template applications"
-              :class="{selected: appListView === 'templates'}"
-              @click="listApps('templates')">Templates</a>
+              :class="{selected: appListView === 'template'}"
+              @click="listApps('template')">Templates</a>
             <a
               title="Show open applications"
               :class="{selected: appListView === 'open'}"
@@ -43,7 +43,7 @@
           </nav>
         </div>
         <div class="scroll">
-          <component :apps="apps" is="apps-list"></component>
+          <component :apps="appsList" is="apps-list"></component>
         </div>
       </div>
       <div class="content-column activity">
@@ -86,13 +86,26 @@ export default {
   name: 'apps',
   data: function () {
     return {
-      apps: [],
+      appsList: [],
       appListView: 'all',
       appSettingsView: 'app-general-settings',
       user: true
     }
   },
   computed: {
+    apps: function () {
+      return this.$store.state.apps
+    },
+    templateApps: function () {
+      return this.apps.filter((app) => {
+        return app['is-template']
+      })
+    },
+    openApps: function () {
+      return this.apps.filter((app) => {
+        return app.open
+      })
+    },
     selectedApp: {
       get: function () {
         return this.$store.state.appList.selected
@@ -147,6 +160,14 @@ export default {
   },
   methods: {
     listApps: function (type) {
+      if (type === 'all') {
+        this.appsList = this.apps
+      } else if (type === 'template') {
+        this.appsList = this.templateApps
+      } else if (type === 'open') {
+        this.appsList = this.openApps
+      }
+      /*
       let apps = []
       this.list.forEach((container) => {
         if (this.enabled[container.name] !== undefined && !this.enabled[container.name]) {
@@ -164,8 +185,9 @@ export default {
           return app.open
         })
       }
+      */
       this.appListView = type
-      this.apps = apps
+      // this.apps = apps
     }
   },
   components: {NewAppInfo, NewAppTemplate, NewAppCreate, AppsList, AppGeneralSettings, AppArchiveSettings, AppPublishSettings}

@@ -18,7 +18,7 @@ type ServiceMeta struct {
   Description string `json:"description"`
 }
 
-type ServiceLookupRequest struct {
+type ServiceRequest struct {
   Service string `json:"service"`
   Method string `json:"method"`
 }
@@ -42,7 +42,7 @@ func (s *RpcServices) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
 }
 
 // Get a service.
-func (s *RpcServices) Read(req *ServiceLookupRequest, reply *ServiceReply) *StatusError {
+func (s *RpcServices) Read(req *ServiceRequest, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if srv, err := LookupService(m, req.Service); err != nil {
     return err
@@ -54,7 +54,7 @@ func (s *RpcServices) Read(req *ServiceLookupRequest, reply *ServiceReply) *Stat
 }
 
 // Get a service method.
-func (s *RpcServices) ReadMethod(req *ServiceLookupRequest, reply *ServiceReply) *StatusError {
+func (s *RpcServices) ReadMethod(req *ServiceRequest, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
     return err
@@ -66,7 +66,7 @@ func (s *RpcServices) ReadMethod(req *ServiceLookupRequest, reply *ServiceReply)
 }
 
 // Get the number of times a service method has been called.
-func (s *RpcServices) ReadMethodCalls(req *ServiceLookupRequest, reply *ServiceReply) *StatusError {
+func (s *RpcServices) ReadMethodCalls(req *ServiceRequest, reply *ServiceReply) *StatusError {
   m := s.Services.Map()
   if method, err := LookupServiceMethod(m, req.Service, req.Method); err != nil {
     return err

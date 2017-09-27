@@ -87,10 +87,14 @@ func (l *PageLoop) NewServer(config *ServerConfig) (*http.Server, error) {
   // Load the mountpoints using the container map
   } else {
     // Discarding the returned list of applications
-    if _, err = l.MountpointManager.LoadCollection(collection); err != nil {
+    if apps, err := l.MountpointManager.LoadCollection(collection); err != nil {
       return nil, err
+    } else {
+      fmt.Printf("apps len: %#v\n", len(apps))
     }
   }
+
+  fmt.Printf("system apps len: %#v\n", len(sys.Apps))
 
   // Mount containers and the applications within them
 	l.MountContainer(sys)

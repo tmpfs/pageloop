@@ -153,6 +153,8 @@ func (m *MountpointManager) LoadMountpoints(mountpoints []Mountpoint, container 
       }
     }
 
+    println("Adding app " + app.Name + " to container " + container.Name)
+
 		// Add to the container
 		if err = container.Add(app); err != nil {
 			return nil, err

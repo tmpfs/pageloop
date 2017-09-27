@@ -20,7 +20,7 @@ func (s *JobService) List(argv *VoidArgs, reply *ServiceReply) *StatusError {
 
 // Read a job.
 func (s *JobService) Read(req *JobRequest, reply *ServiceReply) *StatusError {
-  if job, err := s.lookup(req.Id); err != nil {
+  if job, err := LookupJob(req.Id); err != nil {
     return err
   } else {
     reply.Reply = job
@@ -30,7 +30,7 @@ func (s *JobService) Read(req *JobRequest, reply *ServiceReply) *StatusError {
 
 // Abort an active job.
 func(s *JobService) Delete(req *JobRequest, reply *ServiceReply) *StatusError {
-  if job, err := s.lookup(req.Id); err != nil {
+  if job, err := LookupJob(req.Id); err != nil {
     return err
   } else {
     if err := Jobs.Abort(job); err != nil {
@@ -48,7 +48,7 @@ func(s *JobService) Delete(req *JobRequest, reply *ServiceReply) *StatusError {
 
 // Private
 
-func (s *JobService) lookup(id string) (*Job, *StatusError) {
+func LookupJob(id string) (*Job, *StatusError) {
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
     return nil, CommandError(http.StatusNotFound, "Job not found %s", id)

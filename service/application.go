@@ -18,6 +18,32 @@ func (tj *TaskJobComplete) Done(err error, job *Job) {
   Jobs.Stop(job)
 }
 
+type ApplicationRequest struct {
+  // Application name (id)
+  Name string `json:"name"`
+
+  // Container name
+  Container string `json:"container"`
+
+  // Application display name
+  DisplayName string `json:"display"`
+
+  // Application description
+  Description string `json:"description"`
+
+  // Mark this application as a template
+  IsTemplate bool `json:"is-template,omitempty"`
+
+  // Name of a task to find
+  Task string `json:"task,omitempty"`
+
+  // List used for batch operations
+  Batch *UrlList `json:"batch,omitempty"`
+
+	// A source template for this application
+	Template *ApplicationTemplate `json:"template,omitempty"`
+}
+
 type AppService struct {
   Host *Host
 
@@ -26,8 +52,8 @@ type AppService struct {
 }
 
 // Read an application.
-func (s *AppService) Read(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, app); err != nil {
+func (s *AppService) Read(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  if _, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     reply.Reply = app
@@ -36,8 +62,8 @@ func (s *AppService) Read(app *Application, reply *ServiceReply) *StatusError {
 }
 
 // Read the files for an application.
-func (s *AppService) ReadFiles(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, app); err != nil {
+func (s *AppService) ReadFiles(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  if _, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     reply.Reply = app.Files
@@ -46,8 +72,8 @@ func (s *AppService) ReadFiles(app *Application, reply *ServiceReply) *StatusErr
 }
 
 // Read the pages for an application.
-func (s *AppService) ReadPages(app *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, app); err != nil {
+func (s *AppService) ReadPages(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  if _, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     reply.Reply = app.Pages
@@ -56,8 +82,8 @@ func (s *AppService) ReadPages(app *Application, reply *ServiceReply) *StatusErr
 }
 
 // Delete an application.
-func (s *AppService) Delete(app *Application, reply *ServiceReply) *StatusError {
-  if container, app, err := LookupApplication(s.Host, app); err != nil {
+func (s *AppService) Delete(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  if container, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     if app.Protected {
@@ -84,13 +110,13 @@ func (s *AppService) Delete(app *Application, reply *ServiceReply) *StatusError 
 }
 
 // Batch delete files.
-func (s *AppService) DeleteFiles(in *Application, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, in); err != nil {
+func (s *AppService) DeleteFiles(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  if _, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     var file *File
     var files []*File
-    for _, url := range *in.Batch {
+    for _, url := range *req.Batch {
       file  = app.Urls[url]
       if file == nil {
         return CommandError(http.StatusNotFound, "File not found for url %s", url)
@@ -108,9 +134,9 @@ func (s *AppService) DeleteFiles(in *Application, reply *ServiceReply) *StatusEr
 }
 
 // Run an application build task.
-func(s *AppService) RunTask(app *Application, reply *ServiceReply) *StatusError {
-  var task = app.Task
-  if _, app, err := LookupApplication(s.Host, app); err != nil {
+func(s *AppService) RunTask(req *ApplicationRequest, reply *ServiceReply) *StatusError {
+  var task = req.Task
+  if _, app, err := LookupApplication(s.Host, req); err != nil {
     return err
   } else {
     task = strings.TrimPrefix(task, SLASH)
@@ -141,14 +167,14 @@ func(s *AppService) RunTask(app *Application, reply *ServiceReply) *StatusError 
   return nil
 }
 
-func LookupApplication(host *Host, app *Application) (*Container, *Application, *StatusError) {
-  c := host.GetByName(app.ContainerName)
+func LookupApplication(host *Host, req *ApplicationRequest) (*Container, *Application, *StatusError) {
+  c := host.GetByName(req.Container)
   if c == nil {
-    return nil, nil, CommandError(http.StatusNotFound, "Container %s not found", app.ContainerName)
+    return nil, nil, CommandError(http.StatusNotFound, "Container %s not found", req.Container)
   }
-  a := c.GetByName(app.Name)
+  a := c.GetByName(req.Name)
   if a == nil {
-    return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", app.Name)
+    return nil, nil, CommandError(http.StatusNotFound, "reqlication %s not found", req.Name)
   }
   return c, a, nil
 }
