@@ -40,19 +40,6 @@
               <span>Calls</span>
               <span>{{fn.calls}}</span>
             </li>
-            <li>
-              <span>Argument Type</span>
-              <span class="type">{{fn.arg}}</span>
-            </li>
-            <li v-for="field in fn.fields">
-              <span>Field</span>
-              <span><span class="type">{{field.type}}</span> {{field.alias}}</span>
-            </li>
-            <li>
-              <span>Reply Type</span>
-              <span class="type">{{fn.reply}}</span>
-            </li>
-
             <li v-if="fn.info">
               <span>Verb</span>
               <span>{{fn.info.method}}</span>
@@ -69,7 +56,29 @@
               <span>Response Type</span>
               <span>{{getResponseType(fn)}}</span>
             </li>
+            <li>
+              <span>Argument Type</span>
+              <span class="type">{{fn.arg}}</span>
+            </li>
+            <li>
+              <span>Reply Type</span>
+              <span class="type">{{fn.reply}}</span>
+            </li>
           </ul>
+
+          <div v-if="fn.fields">
+            <hr />
+            <ul class="details small">
+              <li>
+                <span>Argument Fields</span>
+                <span class="type">{{fn.arg}}</span>
+              </li>
+              <li v-for="field in fn.fields">
+                <span>{{field.alias}}</span>
+                <span class="type">{{field.type}}</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 

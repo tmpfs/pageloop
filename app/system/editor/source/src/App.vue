@@ -98,6 +98,11 @@ export default {
     min-height: 100%;
   }
 
+  hr {
+    border-style: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
   .content-main {
     /* NOTE: auto is required here */
     flex: 1 0 auto;
