@@ -2,34 +2,13 @@ package model
 
 import (
   "os"
-  "fmt"
+  //"fmt"
 	"mime"
-  "net/url"
   "strings"
   "path/filepath"
 )
 
 const OCTET_STREAM = "application/octet-stream"
-
-type FileRef struct {
-  Container string
-  Application string
-  Url string
-}
-
-func ParseFileUrl(uri string) (ref *FileRef, err error) {
-  var u *url.URL
-  if u, err = url.Parse(uri); err != nil {
-    return
-  }
-  parts := strings.Split(u.Path, "/")
-  if len(parts) != 2 {
-    err = fmt.Errorf("Invalid file reference %s", uri)
-    return
-  }
-  ref = &FileRef{Container: u.Host, Application: parts[1], Url: u.Fragment}
-  return
-}
 
 type File struct {
   Path string `json:"-"`

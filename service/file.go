@@ -1,10 +1,42 @@
 package service
 
 import(
+  "fmt"
+  "strings"
   "net/http"
+  "net/url"
   . "github.com/tmpfs/pageloop/model"
   . "github.com/tmpfs/pageloop/util"
 )
+
+type FileRef struct {
+  Container string
+  Application string
+  Url string
+}
+
+type FileRequest struct {
+  Name string `json:"name"`
+
+  // This is a slash separated path to the source file
+  // relative to the application base, it will start with
+  // a leading slash. Directories will always have a trailing
+  // slash.
+  Url string `json:"url"`
+
+  // Destination for file move operations
+  Destination string `json:"destination,omitempty"`
+
+	// A source template for this file
+	Template *ApplicationTemplate `json:"template,omitempty"`
+
+  // A reference to a file in the form: file://{container}/{application}#{url}
+  Ref string `json:"ref,omitempty"`
+
+  // An input value for the file content, passed in when creating or
+  // updating files that are not binary
+  Value string `json:"value,omitempty"`
+}
 
 type FileService struct {
   Host *Host
@@ -130,6 +162,20 @@ func (s *FileService) CreateFileTemplate(file *File, reply *ServiceReply) *Statu
   }
 
   return nil
+}
+
+func ParseFileUrl(uri string) (ref *FileRef, err error) {
+  var u *url.URL
+  if u, err = url.Parse(uri); err != nil {
+    return
+  }
+  parts := strings.Split(u.Path, "/")
+  if len(parts) != 2 {
+    err = fmt.Errorf("Invalid file reference %s", uri)
+    return
+  }
+  ref = &FileRef{Container: u.Host, Application: parts[1], Url: u.Fragment}
+  return
 }
 
 func LookupFile(host *Host, f *File, appOnly bool) (*Container, *Application, *File, *StatusError) {
