@@ -1,12 +1,12 @@
 package handler
 
 import (
-  "fmt"
+  //"fmt"
   "log"
   "bytes"
 	"net/http"
-  "github.com/gorilla/rpc"
-  "github.com/gorilla/rpc/json"
+  "github.com/gorilla/rpc/v2"
+  "github.com/gorilla/rpc/v2/json"
   "github.com/gorilla/websocket"
   . "github.com/tmpfs/pageloop/core"
   . "github.com/tmpfs/pageloop/model"
@@ -58,23 +58,11 @@ func (writer *WebsocketWriter) Write(p []byte) (int, error) {
 
 // Write an error response to the result object so that clients
 // can inspect the status code for the error.
-func (writer *WebsocketWriter) WriteError(err *StatusError) error {
-  println("writing error response to codec")
-  fmt.Printf("%#v\n", err)
+func (writer *WebsocketWriter) WriteError(err *StatusError) {
   m := make(map[string]*StatusError)
   m["error"] = err
-  return writer.Request.WriteResponse(writer, m, nil)
-  /*
-  if err := writer.Request.WriteResponse(writer, m, nil); err != nil {
-    println("Got error writing error response")
-    fmt.Println(err)
-
-    // Handle json marshal errors, try again
-    // writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
-    return err
-  }
-  return nil
-  */
+  // TODO: use rpc v2 style error handling?
+  writer.Request.WriteResponse(writer, m)
 }
 
 // Determine the type of argument for the given service method and
@@ -123,9 +111,6 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
   if argv != nil {
     // Read in the request params to the type we expect
     err = req.ReadRequest(argv)
-    if err != nil {
-      println("got read request error!!")
-    }
   }
   return
 }
@@ -154,14 +139,15 @@ func (w *WebsocketConnection) ReadRequest() {
       r := bytes.NewBuffer(p)
       if fake, err := http.NewRequest(http.MethodPost, "/ws/", r); err != nil {
         log.Println(err.Error())
+        continue
       } else {
         req := codec.NewRequest(fake)
         writer := &WebsocketWriter{Socket: w, MessageType: messageType, Request: req}
         if method, err := req.Method(); err != nil {
-          req.WriteResponse(writer, nil, err)
+          //req.WriteResponse(writer, nil, err)
+          writer.WriteError(CommandError(http.StatusInternalServerError, err.Error()))
           continue
         } else {
-          // println("websocket method: " + method)
           hasServiceMethod := w.Handler.Services.HasMethod(method)
           // Check if the service method is available
           if !hasServiceMethod {
@@ -177,9 +163,11 @@ func (w *WebsocketConnection) ReadRequest() {
             continue
           } else {
             if argv, err := w.RequestArgv(req, method); err != nil {
-              println("got error on argv")
+              // If we had an error while reading the request
+              // if is likely a JSON unmarshal error so treat as
+              // a bad request
               writer.WriteError(
-                CommandError(http.StatusInternalServerError, err.Error()))
+                CommandError(http.StatusBadRequest, err.Error()))
               continue
             } else {
               if argv != nil {
@@ -223,7 +211,7 @@ func (w *WebsocketConnection) ReadRequest() {
               // status code client side
               replyData = &RpcWebsocketReply{Document: replyData, Status: status}
 
-              req.WriteResponse(writer, replyData, nil)
+              req.WriteResponse(writer, replyData)
             }
           }
         }
