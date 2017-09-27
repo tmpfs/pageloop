@@ -124,16 +124,16 @@ func (s *FileService) Save(req *FileRequest, reply *ServiceReply) *StatusError {
 
 // Create a new file and publish it, the file cannot already exist on disc.
 func (s *FileService) Create(req *FileRequest, reply *ServiceReply) *StatusError {
-  if _, app, _, err := LookupFile(s.Host, req, true); err != nil {
+  if _, app, file, err := LookupFile(s.Host, req, true); err != nil {
     return err
   } else {
-    var exists *File = app.Urls[req.Url]
+    var exists *File = app.Urls[file.Url]
 
     if exists != nil {
-      return CommandError(http.StatusConflict,"File already exists %s", req.Url)
+      return CommandError(http.StatusConflict,"File already exists %s", file.Url)
     }
-    if app.ExistsConflict(req.Url) {
-      return CommandError(http.StatusConflict,"File already exists, publish conflict on %s", req.Url)
+    if app.ExistsConflict(file.Url) {
+      return CommandError(http.StatusConflict,"File already exists, publish conflict on %s", file.Url)
     }
 
     content := req.Bytes
@@ -141,7 +141,7 @@ func (s *FileService) Create(req *FileRequest, reply *ServiceReply) *StatusError
       content = []byte(req.Value)
     }
 
-    if file, err := app.Create(req.Url, content); err != nil {
+    if file, err := app.Create(file.Url, content); err != nil {
       return CommandError(http.StatusInternalServerError, err.Error())
     } else {
       reply.Reply = file
@@ -190,46 +190,32 @@ func ParseFileUrl(uri string) (ref *FileRef, err error) {
 }
 
 func LookupFile(host *Host, req *FileRequest, appOnly bool) (*Container, *Application, *File, *StatusError) {
-  f := req.ToFile()
+  var file *File = req.ToFile()
   // Parse file URL references
   if ref, err := ParseFileUrl(req.Ref); err != nil {
     return nil, nil, nil, CommandError(http.StatusInternalServerError, err.Error())
   } else {
-    f.Owner = &Application{Name: ref.Application, Container: &Container{Name: ref.Container}}
-    f.Url = ref.Url
+    file.Owner = &Application{Name: ref.Application, Container: &Container{Name: ref.Container}}
+    file.Url = ref.Url
   }
 
-  fmt.Printf("%#v\n", f)
-
-  /*
-  if f.Owner == nil {
-    return nil, nil, nil, CommandError(
-      http.StatusNotFound, "File %s missing owner application (detached file)", f.Url)
-  }
-
-  if f.Owner.Container == nil {
-    return nil, nil, nil, CommandError(
-      http.StatusNotFound, "Application %s missing container (detached app)", f.Owner.Name)
-  }
-  */
-
-  c := host.GetByName(f.Owner.Container.Name)
+  c := host.GetByName(file.Owner.Container.Name)
   if c == nil {
-    return nil, nil, nil, CommandError(http.StatusNotFound, "Container %s not found", f.Owner.Container.Name)
+    return nil, nil, nil, CommandError(http.StatusNotFound, "Container %s not found", file.Owner.Container.Name)
   }
 
-  app := c.GetByName(f.Owner.Name)
+  app := c.GetByName(file.Owner.Name)
   if app == nil {
-    return nil, nil, nil, CommandError(http.StatusNotFound, "Application %s not found", f.Owner.Name)
+    return nil, nil, nil, CommandError(http.StatusNotFound, "Application %s not found", file.Owner.Name)
   }
 
-  if appOnly {
-    return c, app, nil, nil
+  if !appOnly {
+    // Lookup existing file
+    file = app.Urls[file.Url]
+    if file == nil {
+      return nil, nil, nil, CommandError(http.StatusNotFound, "File %s not found", file.Url)
+    }
   }
 
-  file := app.Urls[f.Url]
-  if file == nil {
-    return nil, nil, nil, CommandError(http.StatusNotFound, "File %s not found", f.Url)
-  }
   return c, app, file, nil
 }
