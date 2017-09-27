@@ -99,12 +99,6 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "File.ReadSourceRaw":
       fallthrough
     case "File.Read":
-      /*
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      */
-      // argv = f
       ref := fmt.Sprintf(
         "file://%s/%s#%s",
         route.Parameters.Context,
@@ -112,11 +106,6 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         route.Parameters.Item)
       argv = &FileRequest{Ref: ref}
     case "File.Move":
-      /*
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      argv = &File{Owner: a, Url: route.Parameters.Item, Destination: req.Header.Get("Location")}
-      */
       ref := fmt.Sprintf(
         "file://%s/%s#%s",
         route.Parameters.Context,
@@ -124,16 +113,6 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         route.Parameters.Item)
       argv = &FileRequest{Ref: ref, Destination: req.Header.Get("Location")}
     case "File.CreateTemplate":
-      /*
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      f.Template = &ApplicationTemplate{}
-      if err := utils.ReadJson(req, f.Template); err != nil {
-        return nil, err
-      }
-      argv = f
-      */
       ref := fmt.Sprintf(
         "file://%s/%s#%s",
         route.Parameters.Context,
@@ -147,17 +126,6 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "File.Create":
       fallthrough
     case "File.Save":
-      /*
-      c := &Container{Name: route.Parameters.Context}
-      a := &Application{Name: route.Parameters.Target, Container: c}
-      f := &File{Owner: a, Url: route.Parameters.Item}
-      if content, err := utils.ReadBody(req); err != nil {
-        return nil, CommandError(http.StatusInternalServerError, err.Error())
-      } else {
-        f.Bytes(content)
-      }
-      argv = f
-      */
       ref := fmt.Sprintf(
         "file://%s/%s#%s",
         route.Parameters.Context,
