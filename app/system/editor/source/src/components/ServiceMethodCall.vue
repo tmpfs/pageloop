@@ -1,9 +1,9 @@
 <template>
   <div v-if="fn">
-    <method-argv :fn="fn"></method-argv>
+    <method-argv :fn="fn" :params="params"></method-argv>
     <p>
       <button
-        @click="callMethod(fn)"
+        @click="invoke(fn)"
         class="small">Call {{fn.method}}</button>
     </p>
     <method-reply :reply="reply"></method-reply>
@@ -21,17 +21,16 @@ export default {
   components: {MethodReply, MethodArgv},
   data: function () {
     return {
-      socketReply: null,
-      restReply: null
+      replies: {
+        websocket: null,
+        rest: null
+      },
+      params: {}
     }
   },
   computed: {
     reply: function () {
-      if (this.callType === 'websocket') {
-        return this.socketReply
-      } else if (this.callType === 'rest') {
-        return this.restReply
-      }
+      return this.replies[this.callType]
     }
   },
   props: {
@@ -44,34 +43,20 @@ export default {
   },
   watch: {
     fn: function () {
-      this.restReply = null
-      this.socketReply = null
+      // Reset replies when the service method changes
+      this.replies = {websocket: null, rest: null}
+      this.params = {}
     }
   },
   methods: {
-    callMethod: function (fn) {
-      if (this.callType === 'websocket') {
-        return this.callSocketMethod(fn)
-      } else if (this.callType === 'rest') {
-        return this.callRestMethod(fn)
-      }
-    },
-    callSocketMethod: function (fn) {
-      const params = undefined
+    invoke: function (fn) {
+      const params = this.params
       const client = this.$store.state.client
       const req = Request.rpc(fn.method, params)
-      client.rpc(req)
+      console.log(this.callType === 'rest')
+      client.rpc(req, {http: this.callType === 'rest'})
         .then((res) => {
-          this.socketReply = res
-        })
-    },
-    callRestMethod: function (fn) {
-      const params = undefined
-      const client = this.$store.state.client
-      const req = Request.rpc(fn.method, params)
-      client.rpc(req, {http: true})
-        .then((res) => {
-          this.restReply = res
+          this.replies[this.callType] = res
         })
     }
   }

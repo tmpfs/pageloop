@@ -24,6 +24,9 @@ export default {
   props: {
     fn: {
       type: Object
+    },
+    params: {
+      type: Object
     }
   },
   methods: {
@@ -44,13 +47,4 @@ export default {
 </script>
 
 <style scoped>
-  /*
-  h4 {
-    margin: 0;
-    padding: 0 0 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-    display: inline-block;
-    font-size: 1.4rem;
-  }
-  */
 </style>
