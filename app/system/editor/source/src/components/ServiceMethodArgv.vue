@@ -14,7 +14,7 @@
           @keyup="keyup"
           @keydown="keydown"
           @keyup.enter="enter"
-          class="type">{{params[field.alias]}}</span>
+          class="input">{{params[field.alias]}}</span>
       </li>
     </ul>
   </div>
@@ -65,4 +65,7 @@ export default {
 </script>
 
 <style scoped>
+  .input {
+    color: var(--cyan-color);
+  }
 </style>
