@@ -7,7 +7,7 @@
           @click="selectedApp = app"
           class="app"
           v-for="app in apps"
-          :class="{selected: app.url === selectedApp.url}">
+          :class="{selected: selectedApp && app.url === selectedApp.url}">
           <span v-if="app.protected"><i class="fa fa-lock"></i>&nbsp;</span>
           <span class="name">{{app.display}}</span>
           <p class="small">

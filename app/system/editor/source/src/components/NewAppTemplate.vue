@@ -19,6 +19,7 @@
               :id="tpl.name"
               type="radio"
               :value="tpl.url"
+              @keyup.enter="nextStep"
               v-model="applicationTemplate"
               name="template" />
           </div>
@@ -93,6 +94,7 @@ export default {
       e.preventDefault()
       const radio = e.currentTarget.querySelector('input[type="radio"]')
       radio.checked = true
+      radio.focus()
       this.applicationTemplate = radio.value
       const templates = this.$store.state.templates
       for (let i = 0; i < templates.length; i++) {
