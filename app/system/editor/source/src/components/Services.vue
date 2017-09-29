@@ -44,22 +44,6 @@
               <span>Calls</span>
               <span>{{fn.calls}}</span>
             </li>
-            <li v-if="fn.info">
-              <span>Verb</span>
-              <span>{{fn.info.method}}</span>
-            </li>
-            <li v-if="fn.info">
-              <span>Pattern</span>
-              <span>{{fn.info.path}}</span>
-            </li>
-            <li v-if="fn.info">
-              <span>Status</span>
-              <span>{{fn.info.status}}</span>
-            </li>
-            <li v-if="fn.info">
-              <span>Response Type</span>
-              <span>{{getResponseType(fn)}}</span>
-            </li>
             <li>
               <span>Argument Type</span>
               <span class="type">{{fn.arg}}</span>
@@ -83,6 +67,29 @@
               </li>
             </ul>
           </div>
+
+          <div v-if="fn.info" v-for="route in fn.info">
+            <hr />
+            <ul class="details small">
+              <li>
+                <span>Verb</span>
+                <span>{{route.method}}</span>
+              </li>
+              <li>
+                <span>Pattern</span>
+                <span>{{route.path}}</span>
+              </li>
+              <li>
+                <span>Status</span>
+                <span>{{route.status}}</span>
+              </li>
+              <li>
+                <span>Response Type</span>
+                <span>{{getResponseType(fn)}}</span>
+              </li>
+            </ul>
+          </div>
+
         </div>
       </div>
 
