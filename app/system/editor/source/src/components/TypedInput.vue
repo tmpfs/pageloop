@@ -2,19 +2,27 @@
   <span class="typed-input">
     <input
       v-if="isBoolean()"
+      type="checkbox"
       @keyup.enter="enter"
       :name="name"
-      :checked="booleanValue"
-      type="checkbox" />
+      :checked="booleanValue" />
     <input
+      v-else-if="isNumber()"
+      type="number"
+      class="input"
+      @keyup.enter="enter"
+      v-model="numberValue"
+      :name="name" />
+    <input
+      v-else-if="isString()"
       type="text"
-      v-else
       :data-type="type"
       :data-name="name"
       :contenteditable="!isBoolean()"
       @keyup.enter="enter"
       :value="getDefaultValue(value)"
-      class="field input" />
+      class="input" />
+    <span v-else class="input unsupported">{{type}}</span>
   </span>
 </template>
 
@@ -24,7 +32,8 @@ export default {
   data: function () {
     return {
       text: '',
-      booleanValue: false
+      booleanValue: false,
+      numberValue: 0
     }
   },
   props: {
@@ -52,6 +61,12 @@ export default {
     },
     isBoolean: function () {
       return /^bool/i.test(this.type)
+    },
+    isString: function () {
+      return this.type === 'string'
+    },
+    isNumber: function () {
+      return /(int|float)/i.test(this.type)
     },
     getText: function () {
       return this.text || this.value
@@ -129,9 +144,17 @@ export default {
     margin: 0 0 0 1rem;
   }
 
+  input[type="number"] {
+    margin: 0 0 0 1rem;
+  }
+
   .input[contenteditable="true"] {
     user-select: auto;
     cursor: auto;
     border-bottom: 1px solid var(--base00-color);
+  }
+
+  .unsupported {
+    color: var(--red-color);
   }
 </style>
