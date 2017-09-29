@@ -4,10 +4,10 @@
     <transition-group appear name="reveal">
       <div
           key="app"
-          @click="selectApp(app)"
+          @click="selectedApp = app"
           class="app"
-          :class="{selected: app === selectedApp}"
-          v-for="app in apps">
+          v-for="app in apps"
+          :class="{selected: app.url === selectedApp.url}">
           <span v-if="app.protected"><i class="fa fa-lock"></i>&nbsp;</span>
           <span class="name">{{app.display}}</span>
           <p class="small">
@@ -51,9 +51,6 @@ export default {
     }
   },
   methods: {
-    selectApp: function (app) {
-      this.$store.commit('app-list-selected', app)
-    },
     getContainer: function (app) {
       return this.$store.state.getContainerByName(app.container)
     },
