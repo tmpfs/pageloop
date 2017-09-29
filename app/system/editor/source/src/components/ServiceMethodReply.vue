@@ -10,7 +10,7 @@
         <span>Duration</span>
         <span
           class="duration"
-          :class="getDurationClass(reply.response.duration)">{{reply.response.duration}}ms</span>
+          :class="getDurationClass(reply.response.time.duration)">{{reply.response.time.duration}}ms</span>
       </li>
       <li>
         <span>Request Method</span>
@@ -23,6 +23,10 @@
       <li>
         <span>Transport</span>
         <span>{{reply.response.transport}}</span>
+      </li>
+      <li>
+        <span>Time</span>
+        <span>{{getDisplayTime(reply.response.time.start)}}</span>
       </li>
     </ul>
     <h4>Document</h4>
@@ -42,6 +46,11 @@ export default {
     }
   },
   methods: {
+    getDisplayTime: function (timestamp) {
+      const d = new Date()
+      d.setTime(timestamp)
+      return d.toTimeString()
+    },
     getDurationClass: function (duration) {
       const thresholds = [
         {className: 'fatal', limit: 1000},

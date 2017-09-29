@@ -50,7 +50,12 @@ class ApiClient {
       .then((res) => {
         res.method = opts.method
         res.transport = 'application/rest+api'
-        res.duration = Date.now() - startTime
+        const time = {
+          start: startTime,
+          end: Date.now()
+        }
+        time.duration = time.end - time.start
+        res.time = time
         this.postflight(log, res)
         const resType = parseInt(res.headers.get('x-response-type'))
         if (!isNaN(resType)) {
@@ -77,6 +82,13 @@ class ApiClient {
           // console.log(res)
           res.url = url
           res.response.duration = Date.now() - startTime
+
+          const time = {
+            start: startTime,
+            end: Date.now()
+          }
+          time.duration = time.end - time.start
+          res.response.time = time
           res.response.url = socket.url
           res.response.method = 'RPC'
           res.status = res.response.status
