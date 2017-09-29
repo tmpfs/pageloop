@@ -71,6 +71,8 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) {
 func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (argv interface{}, err error) {
   argv = &VoidArgs{}
   switch(method) {
+    case "Archive.Export":
+      argv = &ArchiveRequest{}
     case "Container.Read":
       argv = &ContainerRequest{}
     case "Container.CreateApp":

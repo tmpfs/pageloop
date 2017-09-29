@@ -11,6 +11,8 @@
           :data-type="field.type"
           :data-alias="field.alias"
           contenteditable
+          @focus="focus"
+          @blur="blur"
           @keyup="keyup"
           @keydown="keydown"
           @keyup.enter="enter"
@@ -39,6 +41,14 @@ export default {
     }
   },
   methods: {
+    focus: function (e) {
+      const sel = getSelection()
+      sel.selectAllChildren(e.target)
+    },
+    blur: function (e) {
+      const sel = getSelection()
+      sel.removeAllRanges()
+    },
     keyup: function (e) {
       const el = e.currentTarget
       const alias = el.getAttribute('data-alias')
