@@ -13,10 +13,9 @@
           contenteditable
           @focus="focus"
           @blur="blur"
-          @keyup="keyup"
           @keydown="keydown"
           @keyup.enter="enter"
-          class="input">{{params[field.alias]}}</span>
+          class="field input">{{params[field.alias]}}</span>
       </li>
     </ul>
   </div>
@@ -40,6 +39,12 @@ export default {
       }
     }
   },
+  /*
+  mounted: function () {
+    console.log(arguments)
+    console.log('argv mounted')
+  },
+  */
   methods: {
     focus: function (e) {
       const sel = getSelection()
@@ -48,26 +53,90 @@ export default {
     blur: function (e) {
       const sel = getSelection()
       sel.removeAllRanges()
+      this.setParam(e.currentTarget)
     },
+    /*
     keyup: function (e) {
       const el = e.currentTarget
       const alias = el.getAttribute('data-alias')
-      const value = el.innerText
+      let value = el.innerText
 
       // TODO: type coercion
-      // const type = el.getAttribute('data-type')
+      const type = el.getAttribute('data-type')
+
+      // Strings are passed through verbatim
+      if (type !== 'string') {
+        // Quick type conversion for numbers, booleans and null
+        const doc = `{"value": ${value}}`
+        let result
+        try {
+          result = JSON.parse(doc)
+        } catch (e) {
+          // Can and will fail
+          console.error(e)
+        }
+
+        // Coercion succeeded
+        if (result) {
+          value = result.value
+          console.log('got json parse value: ' + value)
+        }
+      }
+
+      console.log('alias: ' + alias)
+      console.log('field type: ' + type)
+      console.log('field value: ' + value)
+      console.log('value type: ' + typeof (value))
 
       this.params[alias] = value
     },
+    */
     keydown: function (e) {
       if (e.key === 'Enter') {
         e.preventDefault()
         e.stopImmediatePropagation()
       }
     },
+    setParam: function (el) {
+      const alias = el.getAttribute('data-alias')
+      let value = el.innerText
+      const type = el.getAttribute('data-type')
+
+      // Strings are passed through verbatim
+      if (type !== 'string') {
+        // Quick type conversion for numbers, booleans, json arrays/objects and null
+        const doc = `{"value": ${value}}`
+        let result
+        try {
+          result = JSON.parse(doc)
+        } catch (e) {
+          // Can and will fail
+        }
+
+        // Coercion succeeded
+        if (result) {
+          value = result.value
+          // console.log('got json parse value: ' + value)
+        }
+      }
+
+      console.log('alias: ' + alias)
+      console.log('field type: ' + type)
+      console.log('field value: ' + value)
+      console.log('value type: ' + typeof (value))
+
+      this.params[alias] = value
+    },
+    update: function () {
+      const fields = this.$el.querySelectorAll('.field')
+      fields.forEach((el) => {
+        this.setParam(el)
+      })
+    },
     enter: function (e) {
       e.preventDefault()
       e.stopImmediatePropagation()
+      this.update()
       this.$emit('submit')
     }
   }
