@@ -8,7 +8,9 @@
       </li>
       <li>
         <span>Duration</span>
-        <span>{{reply.response.duration}}ms</span>
+        <span
+          class="duration"
+          :class="getDurationClass(reply.response.duration)">{{reply.response.duration}}ms</span>
       </li>
       <li>
         <span>Request Method</span>
@@ -38,6 +40,24 @@ export default {
     reply: {
       type: Object
     }
+  },
+  methods: {
+    getDurationClass: function (duration) {
+      const thresholds = [
+        {className: 'fatal', limit: 1000},
+        {className: 'error', limit: 250},
+        {className: 'warn', limit: 50},
+        {className: 'ok', limit: 0}
+      ]
+
+      for (var i = 0; i < thresholds.length; i++) {
+        if (duration >= thresholds[i].limit) {
+          const o = {}
+          o[thresholds[i].className] = true
+          return o
+        }
+      }
+    }
   }
 }
 </script>
@@ -58,4 +78,22 @@ export default {
   .status.ok {
     color: var(--green-color);
   }
+
+
+  .duration.fatal {
+    color: var(--red-color);
+  }
+
+  .duration.error {
+    color: var(--orange-color);
+  }
+
+  .duration.warn {
+    color: var(--yellow-color);
+  }
+
+  .duration.ok {
+    color: var(--green-color);
+  }
+
 </style>
