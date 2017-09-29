@@ -60,13 +60,20 @@ export default {
     },
     invoke: function (fn) {
       const params = this.params
-      console.log(`invoke rpc method ${fn.method}`)
-      console.log(this.params)
       const client = this.$store.state.client
       const req = Request.rpc(fn.method, params)
       client.rpc(req, {http: this.callType === 'rest'})
         .then((res) => {
           this.replies[this.callType] = res
+
+          // Update the num calls
+          const req = Request.rpc('Service.ReadMethodCalls', {service: fn.service.toLowerCase(), method: fn.name.toLowerCase()})
+          client.rpc(req, {http: this.callType === 'rest'})
+            .then((res) => {
+              if (res.response.status === 200) {
+                fn.calls = res.document
+              }
+            })
         })
     }
   }

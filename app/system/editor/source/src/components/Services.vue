@@ -15,7 +15,7 @@
                   :title="fn.method">
                   <span class="fn">{{fn.method}}</span>
                 </a>
-                <span title="Number of method calls" class="calls">{{fn.calls}}</span>
+                <span v-bind:calls="fn.calls" title="Number of method calls" class="calls">{{fn.calls}}</span>
               </li>
             </ul>
           </div>
