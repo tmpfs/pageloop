@@ -1,5 +1,5 @@
 <template>
-  <div class="app-general-settings">
+  <div class="app-general-settings" :class="{disabled: !app}">
     <h3>Details</h3>
     <ul class="details small">
       <li>
@@ -94,6 +94,11 @@ export default {
 
   .app-general-settings {
     padding: 1rem;
+    transition: all 0.3s ease-out;
+  }
+
+  .app-general-settings:not(.disabled) {
+    opacity: 1;
   }
 
   h3 {
