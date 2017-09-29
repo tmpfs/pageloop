@@ -191,9 +191,32 @@ func (r *Router) Add(route *Route) *Route {
   return route
 }
 
-// Get a route by service method name.
+// Get the first route by service method name.
 func (r *Router) Get(name string) *Route {
   return r.methods[name]
+}
+
+// Get all routes by service method name.
+func (r *Router) GetAll(name string) []*Route {
+  var list []*Route
+  search := func(haystack []*Route) []*Route {
+    var list []*Route
+    for _, route := range haystack {
+      if (route.ServiceMethod == name) {
+        list = append(list, route)
+      }
+    }
+    return list
+  }
+  get := search(r.get)
+  list = append(list, get...)
+  put := search(r.put)
+  list = append(list, put...)
+  post := search(r.post)
+  list = append(list, post...)
+  del := search(r.del)
+  list = append(list, del...)
+  return list
 }
 
 // Find the first route that matches the incoming request.

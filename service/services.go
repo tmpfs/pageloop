@@ -89,7 +89,7 @@ func InjectServiceMeta(srv *ServiceInfo, router *Router) {
 func InjectMethodMeta(method *ServiceMethodInfo, router *Router) {
   method.UserMeta = ServicesMetaInfo[method.ServiceMethod]
   // TODO: handle multiple matching routes with different verbs etc
-  r := router.Get(method.ServiceMethod)
+  r := router.GetAll(method.ServiceMethod)
   if r != nil {
     method.UserData = r
   }
