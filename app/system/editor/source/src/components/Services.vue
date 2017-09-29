@@ -90,7 +90,7 @@
         <div class="column-header">
           <h2 v-if="fn" class="method-name">{{fn.method}}</h2>
           <h2 v-else>Call</h2>
-          <nav class="tabs">
+          <nav class="tabs" v-if="fn">
             <a
               :class="{selected: callType === 'websocket'}"
               @click="callType = 'websocket'">

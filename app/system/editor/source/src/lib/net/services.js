@@ -104,6 +104,24 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'Service.Read': (rpc, params) => {
+    return {
+      url: API + `services/${params.service}/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Service.ReadMethod': (rpc, params) => {
+    return {
+      url: API + `services/${params.service}/${params.method}/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
+  'Service.ReadMethodCalls': (rpc, params) => {
+    return {
+      url: API + `services/${params.service}/${params.method}/calls/`,
+      options: getDefaultOptions(rpc)
+    }
+  },
   'Job.List': (rpc, params) => {
     return {
       url: API + 'jobs/',
@@ -206,7 +224,11 @@ const services = {
 
 function fetchFromRpc (rpc) {
   const o = {}
-  const {url, options} = services[rpc.method](rpc, rpc.parameters)
+  const fn = services[rpc.method]
+  if (typeof (fn) !== 'function') {
+    throw new Error(`No client definition for service method ${rpc.method}`)
+  }
+  const {url, options} = fn(rpc, rpc.parameters)
   o.url = url
   o.options = options || {}
   o.options.headers = o.options.headers || {}
