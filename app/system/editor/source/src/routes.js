@@ -102,12 +102,15 @@ function Routes (router, store) {
           //
           // console.log('current: ' + store.state.hasFile())
 
+          /*
           let index = store.state.getIndexFile()
           if (index) {
             let href = match.href + '/files' + index.url
             // Redirect to index page if there is one
             return router.replace(href, true)
           }
+          */
+
           store.dispatch('reset-current-file')
           store.commit('main-view', 'edit')
         })
