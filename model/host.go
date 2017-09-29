@@ -16,9 +16,9 @@ var(
 // References an existing mounted application (and optionally specific file)
 // used for the intialization of application files from templates.
 type ApplicationTemplate struct {
-	Container string
-	Application string
-	File string
+  Container string `json:"container"`
+  Application string `json:"application"`
+  File string `json:"file"`
 }
 
 // Contains a slice of containers.

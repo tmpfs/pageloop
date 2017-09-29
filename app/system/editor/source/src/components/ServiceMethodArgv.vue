@@ -16,6 +16,9 @@
           @keydown="keydown"
           @keyup.enter="enter"
           class="field input">{{params[field.alias]}}</span>
+        <div v-if="field.fields">
+            has nested fields!
+        </div>
       </li>
     </ul>
   </div>
@@ -39,12 +42,6 @@ export default {
       }
     }
   },
-  /*
-  mounted: function () {
-    console.log(arguments)
-    console.log('argv mounted')
-  },
-  */
   methods: {
     focus: function (e) {
       const sel = getSelection()
@@ -55,42 +52,6 @@ export default {
       sel.removeAllRanges()
       this.setParam(e.currentTarget)
     },
-    /*
-    keyup: function (e) {
-      const el = e.currentTarget
-      const alias = el.getAttribute('data-alias')
-      let value = el.innerText
-
-      // TODO: type coercion
-      const type = el.getAttribute('data-type')
-
-      // Strings are passed through verbatim
-      if (type !== 'string') {
-        // Quick type conversion for numbers, booleans and null
-        const doc = `{"value": ${value}}`
-        let result
-        try {
-          result = JSON.parse(doc)
-        } catch (e) {
-          // Can and will fail
-          console.error(e)
-        }
-
-        // Coercion succeeded
-        if (result) {
-          value = result.value
-          console.log('got json parse value: ' + value)
-        }
-      }
-
-      console.log('alias: ' + alias)
-      console.log('field type: ' + type)
-      console.log('field value: ' + value)
-      console.log('value type: ' + typeof (value))
-
-      this.params[alias] = value
-    },
-    */
     keydown: function (e) {
       if (e.key === 'Enter') {
         e.preventDefault()
@@ -116,14 +77,15 @@ export default {
         // Coercion succeeded
         if (result) {
           value = result.value
-          // console.log('got json parse value: ' + value)
         }
       }
 
+      /*
       console.log('alias: ' + alias)
       console.log('field type: ' + type)
       console.log('field value: ' + value)
       console.log('value type: ' + typeof (value))
+      */
 
       this.params[alias] = value
     },

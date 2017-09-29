@@ -102,6 +102,8 @@ type MethodArgField struct {
   Alias string `json:"alias"`
   // A type for the argument struct field
   Type string `json:"type"`
+  // For nested structs, single level only
+  Fields []*MethodArgField `json:"fields,omitempty"`
 }
 
 type ServiceMethodInfo struct {
@@ -148,6 +150,40 @@ func (server *ServiceMap) MustRegister(rcvr interface{}, name string) {
 
 // Get a map of public service information.
 func (server *ServiceMap) Map() map[string]*ServiceInfo {
+  var getStructFields func (el reflect.Type) []*MethodArgField
+  getStructFields = func (el reflect.Type) []*MethodArgField {
+    var fields []*MethodArgField
+    for i := 0; i < el.NumField(); i++ {
+      field := el.Field(i)
+
+      f := &MethodArgField{Name: field.Name}
+      if alias, ok := field.Tag.Lookup("json"); ok {
+        // Do not process fields that are not serializable
+        if alias == "" || alias == "-" {
+          continue
+        }
+        parts := strings.Split(alias, ",")
+        f.Alias = parts[0]
+        f.Type = field.Type.String()
+
+        // TODO: flag as optional when omitempty given
+
+        // Handle nested struct arguments, must be pointers
+        if field.Type.Kind() == reflect.Ptr {
+          kind := field.Type.Elem().Kind()
+          if kind == reflect.Struct {
+            f.Fields = getStructFields(field.Type.Elem())
+          }
+        }
+
+        // We only add fields with a valid alias
+        fields = append(fields, f)
+      }
+
+    }
+    return fields
+  }
+
   // Services do not change at runtime so lazy creation
   if server.Info == nil {
     m := make(map[string]*ServiceInfo)
@@ -157,6 +193,7 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
         mi := &ServiceMethodInfo{
           Service: key,
           ServiceMethod: key + "." + mt.method.Name,
+          // Convert calls to a pointer so they are updated
           Calls: &mt.numCalls,
           ArgType: mt.ArgType.String(),
           ReplyType: mt.ReplyType.String(),
@@ -168,25 +205,7 @@ func (server *ServiceMap) Map() map[string]*ServiceInfo {
 
         // Must be a struct
         if kind == reflect.Struct {
-          el := mt.ArgType.Elem()
-          for i := 0; i < el.NumField(); i++ {
-            field := el.Field(i)
-            f := &MethodArgField{Name: field.Name}
-            if alias, ok := field.Tag.Lookup("json"); ok {
-              // Do not process fields that are not serializable
-              if alias == "" || alias == "-" {
-                continue
-              }
-              parts := strings.Split(alias, ",")
-              f.Alias = parts[0]
-              f.Type = field.Type.String()
-
-              // TODO: flag as optional when omitempty given
-
-              // We only add fields with a valid alias
-              mi.ArgFields = append(mi.ArgFields, f)
-            }
-          }
+          mi.ArgFields = getStructFields(mt.ArgType.Elem())
         }
         info.Methods = append(info.Methods, mi)
       }
