@@ -85,7 +85,7 @@
               </li>
               <li>
                 <span>Response Type</span>
-                <span>{{getResponseType(fn)}}</span>
+                <span>{{getResponseType(route)}}</span>
               </li>
             </ul>
           </div>
@@ -153,8 +153,8 @@ export default {
     this.$store.dispatch('list-services')
   },
   methods: {
-    getResponseType: function (fn) {
-      const t = fn.info['response-type']
+    getResponseType: function (route) {
+      const t = route['response-type']
       if (t === 0) {
         return 'json'
       }
