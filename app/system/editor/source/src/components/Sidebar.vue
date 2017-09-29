@@ -55,7 +55,9 @@
         </div>
       </div>
       <hint id="hint:drop-upload" class="compact" v-if="currentView !== 'new-file'"></hint>
-      <component v-bind:is="currentView" :filter="filter"></component>
+      <transition name="reveal" appear mode="out-in">
+        <component v-bind:is="currentView" :filter="filter"></component>
+      </transition>
     </div>
     <div class="column-drag" :class="{hidden: maximized}" @mousedown="resizeColumn"></div>
   </div>
@@ -304,5 +306,15 @@ export default {
     margin-left: auto;
   }
 
+  .reveal-enter-active, .reveal-leave-active {
+		transition: all 0.25s ease-out;
+    opacity: 1;
+    transform:translateY(0)
+  }
+
+  .reveal-enter, .reveal-leave-to {
+		opacity: 0;
+    transform:translateY(-100%)
+  }
 
 </style>
