@@ -4,7 +4,7 @@
     <ul class="details small">
       <li>
         <span>Status</span>
-        <span>{{reply.response.status}}</span>
+        <span class="status" :class="{ok: reply.response.status === fn.info.status}">{{reply.response.status}}</span>
       </li>
       <li>
         <span>Duration</span>
@@ -32,6 +32,9 @@
 export default {
   name: 'method-reply',
   props: {
+    fn: {
+      type: Object
+    },
     reply: {
       type: Object
     }
@@ -46,5 +49,13 @@ export default {
     border-bottom: 1px solid var(--border-color);
     display: inline-block;
     font-size: 1.4rem;
+  }
+
+  .status {
+    color: var(--red-color);
+  }
+
+  .status.ok {
+    color: var(--green-color);
   }
 </style>

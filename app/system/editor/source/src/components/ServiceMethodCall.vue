@@ -6,7 +6,7 @@
         @click="invoke(fn)"
         class="small">Call {{fn.method}}</button>
     </p>
-    <method-reply :reply="reply"></method-reply>
+    <method-reply :fn="fn" :reply="reply"></method-reply>
   </div>
 </template>
 
