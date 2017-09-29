@@ -163,7 +163,7 @@ export default {
       let params = {}
       if (method.fields) {
         method.fields.forEach((field) => {
-          params[field.alias] = field.type
+          params[field.alias] = ''
         })
       }
       this.params = params

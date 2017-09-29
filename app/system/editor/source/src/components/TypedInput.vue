@@ -1,15 +1,21 @@
 <template>
-  <span
-    :data-type="type"
-    :data-name="name"
-    contenteditable
-    @focus="focus"
-    @blur="blur"
-    @keyup="keyup"
-    @keydown="keydown"
-    @keyup.enter="enter"
-    v-model="value"
-    class="field input">{{value}}</span>
+  <span class="typed-input">
+    <input
+      v-if="isBoolean()"
+      @keyup.enter="enter"
+      :name="name"
+      :checked="booleanValue"
+      type="checkbox" />
+    <input
+      type="text"
+      v-else
+      :data-type="type"
+      :data-name="name"
+      :contenteditable="!isBoolean()"
+      @keyup.enter="enter"
+      :value="getDefaultValue(value)"
+      class="field input" />
+  </span>
 </template>
 
 <script>
@@ -17,7 +23,8 @@ export default {
   name: 'typed-input',
   data: function () {
     return {
-      text: ''
+      text: '',
+      booleanValue: false
     }
   },
   props: {
@@ -29,11 +36,51 @@ export default {
     },
     value: {
       type: String
+    },
+    placeholder: {
+      type: String
     }
   },
   methods: {
+    getDefaultValue: function (val) {
+      if (val === '') {
+        if (this.isBoolean()) {
+          return false
+        }
+      }
+      return val
+    },
+    isBoolean: function () {
+      return /^bool/i.test(this.type)
+    },
     getText: function () {
-      return this.text
+      return this.text || this.value
+    },
+    toggleBoolean: function () {
+      this.booleanValue = !this.booleanValue
+    },
+    getValue: function () {
+      // const alias = this.name
+      const type = this.type
+      let value = this.getText()
+
+      // Strings are passed through verbatim
+      if (type !== 'string') {
+        // Quick type conversion for numbers, booleans, json arrays/objects and null
+        const doc = `{"value": ${value}}`
+        let result
+        try {
+          result = JSON.parse(doc)
+        } catch (e) {
+          // Can and will fail
+        }
+
+        // Coercion succeeded
+        if (result) {
+          value = result.value
+        }
+      }
+      return value
     },
     focus: function (e) {
       const sel = getSelection()
@@ -43,15 +90,6 @@ export default {
       const sel = getSelection()
       sel.removeAllRanges()
       this.$emit('blur', e, this)
-    },
-    keyup: function (e) {
-      this.text = e.currentTarget.innerText
-    },
-    keydown: function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-      }
     },
     enter: function (e) {
       e.preventDefault()
@@ -63,7 +101,37 @@ export default {
 </script>
 
 <style scoped>
+
+  .typed-input {
+    display: inline-block;
+    padding-left: 0 !important;
+  }
+
   .input {
+    font-size: 1.4rem;
+    padding: 0;
+    min-height: 1.8rem;
+    border-radius: 0;
+    display: inline-block;
+    width: 100%;
     color: var(--cyan-color);
+    user-select: none;
+    cursor: default;
+    padding-bottom: 0.5rem;
+    margin: 0 0 0.5rem 1rem;
+  }
+
+  .input[data-type="bool"] {
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    margin: 0 0 0 1rem;
+  }
+
+  .input[contenteditable="true"] {
+    user-select: auto;
+    cursor: auto;
+    border-bottom: 1px solid var(--base00-color);
   }
 </style>
