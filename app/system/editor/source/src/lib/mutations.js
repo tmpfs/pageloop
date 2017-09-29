@@ -142,6 +142,14 @@ const Mutations = {
   },
   'main-menu-visible': function (state, visibility) {
     state.settings.mainMenuVisible = visibility
+  },
+  'show-system-applications': function (state, visibility) {
+    state.settings.showSystemApplications = visibility
+    state.apps.update(state.containers)
+  },
+  'show-template-applications': function (state, visibility) {
+    state.settings.showTemplateApplications = visibility
+    state.apps.update(state.containers)
   }
 }
 

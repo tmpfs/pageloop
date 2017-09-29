@@ -42,7 +42,7 @@ export default {
         return this.$store.state.settings.showSystemApplications
       },
       set: function (val) {
-        this.$store.state.settings.showSystemApplications = val
+        this.$store.commit('show-system-applications', val)
       }
     },
     showTemplateApplications: {
@@ -50,7 +50,7 @@ export default {
         return this.$store.state.settings.showTemplateApplications
       },
       set: function (val) {
-        this.$store.state.settings.showTemplateApplications = val
+        this.$store.commit('show-template-applications', val)
       }
     }
   }

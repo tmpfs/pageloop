@@ -20,7 +20,7 @@
             <i class="fa fa-cube"></i>
             Applications
           </a>
-          <ul class="apps" v-if="apps.length">
+          <ul class="apps" v-bind="apps" v-if="apps.length">
             <li v-for="app in apps">
               <a
                 :class="{selected: isSelected(app)}"
