@@ -7,7 +7,16 @@
       </li>
       <li v-for="field in fn.fields">
         <span>{{field.alias}}</span>
-        <span
+
+        <typed-input
+          @blur="blur"
+          v-on:submit="enter"
+          :type="field.type"
+          :name="field.alias"
+          v-bind:value="params[field.alias]"
+          :value="params[field.alias]"></typed-input>
+
+        <!-- <span
           :data-type="field.type"
           :data-alias="field.alias"
           contenteditable
@@ -15,18 +24,24 @@
           @blur="blur"
           @keydown="keydown"
           @keyup.enter="enter"
-          class="field input">{{params[field.alias]}}</span>
-        <div v-if="field.fields">
-            has nested fields!
-        </div>
+          class="field input">{{params[field.alias]}}</span> -->
+        <!--
+        <span v-if="field.fields">
+          {{field.fields}}
+        </span>
+        -->
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+
+import TypedInput from '@/components/TypedInput'
+
 export default {
   name: 'method-argv',
+  components: {TypedInput},
   props: {
     fn: {
       type: Object
@@ -47,10 +62,8 @@ export default {
       const sel = getSelection()
       sel.selectAllChildren(e.target)
     },
-    blur: function (e) {
-      const sel = getSelection()
-      sel.removeAllRanges()
-      this.setParam(e.currentTarget)
+    blur: function (e, input) {
+      this.setParam(e.currentTarget, input)
     },
     keydown: function (e) {
       if (e.key === 'Enter') {
@@ -58,10 +71,10 @@ export default {
         e.stopImmediatePropagation()
       }
     },
-    setParam: function (el) {
-      const alias = el.getAttribute('data-alias')
-      let value = el.innerText
-      const type = el.getAttribute('data-type')
+    setParam: function (el, input) {
+      const alias = input.name
+      const type = input.type
+      let value = input.getText()
 
       // Strings are passed through verbatim
       if (type !== 'string') {
@@ -89,16 +102,14 @@ export default {
 
       this.params[alias] = value
     },
-    update: function () {
+    update: function (input) {
       const fields = this.$el.querySelectorAll('.field')
       fields.forEach((el) => {
-        this.setParam(el)
+        this.setParam(el, input)
       })
     },
-    enter: function (e) {
-      e.preventDefault()
-      e.stopImmediatePropagation()
-      this.update()
+    enter: function (e, input) {
+      this.update(input)
       this.$emit('submit')
     }
   }
