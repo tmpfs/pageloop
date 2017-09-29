@@ -62,6 +62,16 @@ export default {
 
   /* Document */
 
+  ::selection {
+    background: var(--magenta-color);
+    color: var(--base3-color);
+  }
+
+  ::-moz-selection {
+    background: var(--magenta-color);
+    color: var(--base3-color);
+  }
+
   html {
     box-sizing: border-box;
     font-size: 62.5%;
