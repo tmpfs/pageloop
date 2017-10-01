@@ -128,12 +128,11 @@ export default {
     min-height: 1.8rem;
     border-radius: 0;
     display: inline-block;
-    width: 100%;
     color: var(--cyan-color);
     user-select: none;
     cursor: default;
     padding-bottom: 0.5rem;
-    margin: 0 0 0.5rem 1rem;
+    margin: 0 1rem 0.5rem 0;
   }
 
   .input[data-type="bool"] {
@@ -141,7 +140,7 @@ export default {
   }
 
   input[type="checkbox"] {
-    margin: 0 0 0 1rem;
+    margin: 0;
   }
 
   input[type="number"] {

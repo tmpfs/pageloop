@@ -1,6 +1,6 @@
 <template>
   <div v-if="fn.fields">
-    <argv-fields label="Argument Fields" :title="fn.arg" :fn="fn" :params="params" :fields="fn.fields"></argv-fields>
+    <argv-fields label="Fields" :title="fn.arg" :fn="fn" :params="params" :fields="fn.fields"></argv-fields>
   </div>
 </template>
 

@@ -439,23 +439,25 @@ export default {
     /* margin: 1rem 0 2rem 0; */
     padding: 0;
     list-style-type: none;
-    display: table;
+    /*display: table; */
     width: 100%;
   }
 
   .details > li {
-    display: table-row;
+    /* display: table-row; */
     width: 100%;
+    display: flex;
   }
 
   .details > li > span:first-child {
     text-align: right;
     width: 33%;
+    flex: 1 0;
+    margin-right: 1rem;
   }
 
   .details > li > span:last-child {
     width: 67%;
-    padding-left: 1rem;
   }
 
   .details > li > span:first-child::after {
@@ -466,6 +468,7 @@ export default {
 
   .details > li > span {
     display: table-cell;
+    line-height: 1.6rem;
     padding: 0;
     vertical-align: top;
   }
