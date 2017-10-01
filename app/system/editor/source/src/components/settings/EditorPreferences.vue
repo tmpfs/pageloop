@@ -10,11 +10,11 @@
     </div>
     <div>
       <input id="use-vim-mode" type="checkbox" v-model="useVimCodeEditor" />
-      <label for="use-vim-mode">Use VIM code editor mode</label>
+      <label for="use-vim-mode">Use VIM text editor mode</label>
     </div>
     <div>
       <input id="frontmatter-display" type="checkbox" v-model="frontmatterDisplay" />
-      <label for="frontmatter-display">Show frontmatter in code view</label>
+      <label for="frontmatter-display">Show frontmatter in text editor</label>
     </div>
   </div>
 </template>
