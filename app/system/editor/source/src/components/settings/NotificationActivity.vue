@@ -48,7 +48,7 @@ export default {
   }
 
   .item :first-child {
-    min-width: 8rem;
+    width: 8rem;
     text-align: right;
   }
 

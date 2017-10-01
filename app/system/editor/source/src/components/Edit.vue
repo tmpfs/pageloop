@@ -34,7 +34,7 @@ export default {
               return f.handle.url
             })
             names = names.join(' ')
-            state.notify({title: `Transfer Complete (${info.files.length})`, message: `Uploaded ${names}`})
+            state.notify({title: `Transfer (${info.files.length})`, message: `Uploaded ${names}`})
           })
           .catch((e) => {
             console.error(e)
