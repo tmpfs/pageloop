@@ -1,36 +1,16 @@
 <template>
   <div v-if="fn.fields">
-    <ul class="details small">
-      <li>
-        <span>Argument Fields</span>
-        <span class="type">{{fn.arg}}</span>
-      </li>
-      <li v-for="field in fn.fields">
-        <span><span class="type">{{field.type}}</span> {{field.alias}}</span>
-        <typed-input
-          @blur="blur"
-          v-on:submit="enter"
-          :type="field.type"
-          :name="field.alias"
-          v-bind:value="params[field.alias]"
-          :value="params[field.alias]"></typed-input>
-        <!--
-        <span v-if="field.fields">
-          {{field.fields}}
-        </span>
-        -->
-      </li>
-    </ul>
+    <argv-fields label="Argument Fields" :title="fn.arg" :fn="fn" :params="params" :fields="fn.fields"></argv-fields>
   </div>
 </template>
 
 <script>
 
-import TypedInput from '@/components/TypedInput'
+import ArgvFields from '@/components/ServiceArgvFields'
 
 export default {
   name: 'method-argv',
-  components: {TypedInput},
+  components: {ArgvFields},
   props: {
     fn: {
       type: Object
@@ -77,6 +57,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-</style>
