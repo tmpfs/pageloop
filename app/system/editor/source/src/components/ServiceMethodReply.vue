@@ -4,7 +4,7 @@
     <ul class="details small">
       <li>
         <span>Status</span>
-        <span class="status" :class="{ok: reply.response.status === fn.info.status}">{{reply.response.status}}</span>
+        <span class="status" :class="{ok: reply.response.status === fn.info[0].status}">{{reply.response.status}}</span>
       </li>
       <li>
         <span>Duration</span>
