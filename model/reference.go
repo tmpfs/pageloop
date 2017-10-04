@@ -18,7 +18,7 @@ type AssetReference struct {
   Application string
   // URL for a file
   Url string
-  // Fully qualified URL to the asset, in the form: file://{container}/{application}#{url}
+  // Fully qualified URL to the asset, in the form: file://domain.com/{container}/{application}#{url}
   Ref string
 }
 
@@ -27,13 +27,16 @@ func (asset *AssetReference) ParseUrl(uri string) (ref Reference, err error) {
   if u, err = url.Parse(uri); err != nil {
     return
   }
-  parts := strings.Split(u.Path, "/")
-  /*
+  path := strings.TrimPrefix(u.Path, "/")
+  parts := strings.Split(path, "/")
   if len(parts) != 2 {
-    err = fmt.Errorf("Invalid file reference %s", uri)
+    err = fmt.Errorf("Invalid reference %s", uri)
     return
   }
-  */
-  ref = &AssetReference{Container: u.Host, Application: parts[1], Url: u.Fragment, Ref: uri}
+  ref = &AssetReference{
+    Container: parts[0],
+    Application: parts[1],
+    Url: u.Fragment,
+    Ref: uri}
   return
 }

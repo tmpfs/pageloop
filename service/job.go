@@ -51,7 +51,7 @@ func(s *JobService) Delete(req *JobRequest, reply *ServiceReply) *StatusError {
 func LookupJob(id string) (*Job, *StatusError) {
   var job *Job = Jobs.ActiveJob(id)
   if job == nil {
-    return nil, CommandError(http.StatusNotFound, "Job not found %s", id)
+    return nil, CommandError(http.StatusNotFound, "Job %s not found", id)
   }
   return job, nil
 }
