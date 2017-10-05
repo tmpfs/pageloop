@@ -4,6 +4,8 @@ import(
   "fmt"
   "strings"
   "net/url"
+  "net/http"
+  . "github.com/tmpfs/pageloop/util"
 )
 
 type Reference interface {
@@ -22,6 +24,7 @@ type AssetReference struct {
   url string
 }
 
+// Returns an error if there is no container id.
 func (asset *AssetReference) AssertContainer() error {
   if asset.container == "" {
     return fmt.Errorf("Asset reference requires a container name")
@@ -29,6 +32,7 @@ func (asset *AssetReference) AssertContainer() error {
   return nil
 }
 
+// Returns an error if there is no container or application id.
 func (asset *AssetReference) AssertApplication() error {
   if err := asset.AssertContainer(); err != nil {
     return err
@@ -39,6 +43,7 @@ func (asset *AssetReference) AssertApplication() error {
   return nil
 }
 
+// Returns an error if there is no container, application or file id.
 func (asset *AssetReference) AssertFile() error {
   if err := asset.AssertApplication(); err != nil {
     return err
@@ -47,6 +52,34 @@ func (asset *AssetReference) AssertFile() error {
     return fmt.Errorf("Asset reference requires a file url")
   }
   return nil
+}
+
+// Attempt to find a container matching this reference.
+func (asset *AssetReference) FindContainer(host *Host) (*Container, *StatusError) {
+  if err := asset.AssertContainer(); err != nil {
+    return nil, CommandError(http.StatusBadRequest, err.Error())
+  }
+  c := host.GetByName(asset.container)
+  if c == nil {
+    return nil, CommandError(http.StatusNotFound, "Container %s not found", asset.container)
+  }
+  return c, nil
+}
+
+// Attempt to find an application matching this reference.
+func (asset *AssetReference) FindApplication(host *Host) (*Container, *Application, *StatusError) {
+  if container, err := asset.FindContainer(host); err != nil {
+    return nil, nil, err
+  } else {
+    if err := asset.AssertApplication(); err != nil {
+      return nil, nil, CommandError(http.StatusBadRequest, err.Error())
+    }
+    application := container.GetByName(asset.application)
+    if application == nil {
+      return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", asset.application)
+    }
+    return container, application, nil
+  }
 }
 
 func (asset *AssetReference) ParseUrl(uri string) (ref Reference, err error) {

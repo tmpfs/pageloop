@@ -185,7 +185,7 @@ func LookupApplication(host *Host, req *ApplicationRequest) (*Container, *Applic
   }
   a := c.GetByName(req.Name)
   if a == nil {
-    return nil, nil, CommandError(http.StatusNotFound, "reqlication %s not found", req.Name)
+    return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", req.Name)
   }
   return c, a, nil
 }
