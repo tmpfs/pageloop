@@ -1,8 +1,9 @@
 <template>
-  <span class="typed-input">
+  <span class="typed-input" :class="{error: error}">
     <input
       v-if="isBoolean()"
       type="checkbox"
+      @blur="blur"
       @keyup.enter="enter"
       :name="name"
       v-model="target[name]"
@@ -11,6 +12,7 @@
       v-else-if="isNumber()"
       type="number"
       class="input"
+      @blur="blur"
       @keyup.enter="enter"
       v-model.number="target[name]"
       :name="name" />
@@ -18,6 +20,7 @@
       v-else-if="isString()"
       type="text"
       :name="name"
+      @blur="blur"
       @keyup.enter="enter"
       v-model="target[name]"
       class="input" />
@@ -30,6 +33,7 @@ export default {
   name: 'typed-input',
   data: function () {
     return {
+      error: false,
       booleanValue: false,
       numberValue: 0,
       stringValue: ''
@@ -53,17 +57,6 @@ export default {
     }
   },
   methods: {
-    input: function (e) {
-      console.log(e)
-    },
-    getDefaultValue: function (val) {
-      if (val === '') {
-        if (this.isBoolean()) {
-          return false
-        }
-      }
-      return val
-    },
     isBoolean: function () {
       return /^bool/i.test(this.type)
     },
@@ -76,10 +69,23 @@ export default {
     toggleBoolean: function () {
       this.booleanValue = !this.booleanValue
     },
+    blur: function (e) {
+      this.error = this.hasError()
+    },
+    hasError: function () {
+      if (this.isString() && this.target[this.name] === '') {
+        return true
+      }
+      return false
+    },
     enter: function (e) {
       e.preventDefault()
       e.stopImmediatePropagation()
       console.log('enter listener called')
+      this.error = this.hasError()
+      if (this.error) {
+        return true
+      }
       this.$emit('submit', e, this)
     }
   }
@@ -91,6 +97,10 @@ export default {
   .typed-input {
     display: inline-block;
     padding-left: 0 !important;
+  }
+
+  .typed-input.error > input[type="text"] {
+    border-color: var(--red-color);
   }
 
   .input {

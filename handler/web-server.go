@@ -53,6 +53,11 @@ func (h ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var handler http.Handler
 	var path string = req.URL.Path
 
+  /*
+  println("Raw request uri: " + req.RequestURI)
+  fmt.Printf("%#v\n", req.URL)
+  */
+
   res.Header().Set("Access-Control-Allow-Origin", "*")
 
   Stats.Http.Add("requests", 1)
