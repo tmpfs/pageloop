@@ -72,7 +72,13 @@ class ApiClient {
   }
 
   rpc (req, opts = {}) {
+    // Build url and options here so we can log the URL
     const {url, options} = fetchFromRpc(req)
+
+    if (/\/\//.test(url) || /\.\.\/?/.test(url)) {
+      throw new Error(`Bad request URL: ${url}`)
+    }
+
     // Try to send over socket connection first
     if (this.useWebsocket && this.socket.connected && !opts.http) {
       const log = this.preflight(url, {method: 'RPC'})
