@@ -98,6 +98,8 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
         Name: route.Parameters.Target,
         Container: route.Parameters.Context,
         Task: route.Parameters.Item}
+    case "File.Delete":
+      fallthrough
     case "File.ReadPage":
       fallthrough
     case "File.ReadSource":

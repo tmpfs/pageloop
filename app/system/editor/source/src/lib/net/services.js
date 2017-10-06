@@ -230,6 +230,12 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'File.Delete': (rpc, params) => {
+    return {
+      url: getFileRefUrl(params, 'files'),
+      options: getDeleteOptions(rpc)
+    }
+  },
   'File.ReadPage': (rpc, params) => {
     return {
       url: getFileRefUrl(params, 'pages'),

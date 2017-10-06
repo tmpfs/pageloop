@@ -95,6 +95,24 @@ func (s *FileService) ReadPage(file *FileReferenceRequest, reply *ServiceReply) 
   return nil
 }
 
+// Delete a file.
+func (s *FileService) Delete(file *FileReferenceRequest, reply *ServiceReply) *StatusError {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for delete operation")
+  }
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, app, f, err := ref.FindFile(s.Host); err != nil {
+    return err
+  } else {
+    if err := app.Del(f); err != nil {
+      return CommandError(http.StatusInternalServerError, err.Error())
+    }
+    reply.Reply = f
+  }
+  return nil
+}
+
 // Move a file.
 func (s *FileService) Move(file *FileMoveRequest, reply *ServiceReply) *StatusError {
   if file.Ref == "" {
