@@ -230,6 +230,12 @@ const services = {
       options: getDefaultOptions(rpc)
     }
   },
+  'File.ReadPage': (rpc, params) => {
+    return {
+      url: getFileRefUrl(params, 'pages'),
+      options: getDefaultOptions(rpc)
+    }
+  },
   'File.ReadSource': (rpc, params) => {
     return {
       url: getFileRefUrl(params, 'src'),

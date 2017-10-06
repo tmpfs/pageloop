@@ -24,6 +24,21 @@ type AssetReference struct {
   url string
 }
 
+// Read only access to the container name,
+func (asset *AssetReference) Container() string {
+  return asset.container
+}
+
+// Read only access to the application name,
+func (asset *AssetReference) Application() string {
+  return asset.application
+}
+
+// Read only access to the file url,
+func (asset *AssetReference) Url() string {
+  return asset.url
+}
+
 // Returns an error if there is no container id.
 func (asset *AssetReference) assertContainer() error {
   if asset.container == "" {

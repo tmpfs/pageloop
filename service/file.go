@@ -77,6 +77,24 @@ func (s *FileService) Read(file *FileReferenceRequest, reply *ServiceReply) *Sta
   return nil
 }
 
+// Read a file as a page.
+func (s *FileService) ReadPage(file *FileReferenceRequest, reply *ServiceReply) *StatusError {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for read page operation")
+  }
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, _, f, err := ref.FindFile(s.Host); err != nil {
+    return err
+  } else {
+    if f.Page() == nil {
+      return CommandError(http.StatusNotFound, "Page %s not found", ref.Url())
+    }
+    reply.Reply = f.Page()
+  }
+  return nil
+}
+
 // Move a file.
 func (s *FileService) Move(file *FileMoveRequest, reply *ServiceReply) *StatusError {
   if file.Ref == "" {
