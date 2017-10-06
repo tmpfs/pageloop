@@ -43,6 +43,7 @@ func (act *Parameters) Parse(path string) {
   act.Path = path
   if act.Path != "" {
     path := strings.TrimPrefix(act.Path, SLASH)
+    // path := act.Path
     path = strings.TrimSuffix(path, SLASH)
     act.Parts = strings.Split(path, SLASH)
     act.Type = act.Parts[0]
@@ -234,8 +235,21 @@ func (r *Router) Find(req *http.Request) (*Route, *StatusError) {
   var match *Route
   var sequence uint64
 
+  path := req.URL.Path
+
+  /*
+  println("Find path: " + req.URL.RequestURI())
+  fmt.Printf("%#v\n", req.URL)
+
+  // Basic bad request tests
+  if strings.Contains(path, "//") || strings.Contains(path, "..") {
+    return nil, CommandError(
+        http.StatusBadRequest, "Invalid request URL %s", path)
+  }
+  */
+
   params := &Parameters{}
-  params.Parse(req.URL.Path)
+  params.Parse(path)
 
   // Get client specified sequence number when available
 	seq := req.Header.Get("X-Method-Seq")
