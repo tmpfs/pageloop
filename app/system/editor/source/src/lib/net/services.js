@@ -54,6 +54,9 @@ function getFileUrl (params, filter) {
 }
 
 function parseFileRef (ref) {
+  if (!ref) {
+    throw new Error('Asset reference is empty, cannot create URL')
+  }
   const u = new URL(ref)
   const parts = u.pathname.replace(/^\//, '').split('/')
   const container = parts[0]

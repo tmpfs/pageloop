@@ -114,7 +114,7 @@ func (s *FileService) ReadSource(file *FileReferenceRequest, reply *ServiceReply
 }
 
 // Read raw file content (includes frontmatter).
-func (s *FileService) ReadSourceRaw(file *FileRequest, reply *ServiceReply) *StatusError {
+func (s *FileService) ReadSourceRaw(file *FileReferenceRequest, reply *ServiceReply) *StatusError {
   if file.Ref == "" {
     return CommandError(http.StatusBadRequest, "No file reference for read source operation")
   }
