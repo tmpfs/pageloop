@@ -46,7 +46,7 @@ type Page struct {
   PrettySize string `json:"filesize,omitempty"`
   PageData map[string] interface{} `json:"data"`
 	PageDataType int `json:"-"`
-  Blocks []Block  `json:"blocks"`
+  Blocks []Block  `json:"blocks,omitempty"`
   Dom *vdom.Vdom `json:"-"`
 
 	Type int `json:"-"`
