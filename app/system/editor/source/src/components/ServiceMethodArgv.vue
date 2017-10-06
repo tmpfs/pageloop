@@ -1,6 +1,6 @@
 <template>
   <div v-if="fn.fields">
-    <argv-fields label="Fields" :title="fn.arg" :fn="fn" :params="params" :fields="fn.fields"></argv-fields>
+    <argv-fields label="Fields" v-on:submit="enter" :title="fn.arg" :fn="fn" :params="params" :fields="fn.fields"></argv-fields>
   </div>
 </template>
 
@@ -51,6 +51,7 @@ export default {
       })
     },
     enter: function (e, input) {
+      console.log('service argv got enter event')
       this.update(input)
       this.$emit('submit')
     }

@@ -9,10 +9,10 @@
         <span v-if="!field.fields"><span class="type">{{field.type}}</span> {{field.alias}}</span>
         <typed-input
           v-if="!field.fields"
-          @blur="blur"
           v-on:submit="enter"
           :type="field.type"
           :name="field.alias"
+          :target="params"
           v-bind:value="params[field.alias]"
           :value="params[field.alias]"></typed-input>
           <argv-fields :label="field.alias" :title="field.type" v-if="field.fields" :fn="fn" :params="params" :fields="field.fields"></argv-fields>
@@ -46,10 +46,8 @@ export default {
     }
   },
   methods: {
-    blur: function (e, input) {
-      this.$emit('blur', e, input)
-    },
     enter: function (e, input) {
+      console.log('field list got submit event')
       this.$emit('submit', e, input)
     }
   }

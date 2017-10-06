@@ -111,11 +111,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       argv = &FileRequest{Ref: ref}
     case "File.Move":
       ref := fmt.Sprintf(
-        "file://%s/%s#%s",
+        "file://pageloop.com/%s/%s#%s",
         route.Parameters.Context,
         route.Parameters.Target,
         route.Parameters.Item)
-      argv = &FileRequest{Ref: ref, Destination: req.Header.Get("Location")}
+      argv = &FileMoveRequest{Ref: ref, Destination: req.Header.Get("Location")}
     case "File.CreateTemplate":
       ref := fmt.Sprintf(
         "file://%s/%s#%s",

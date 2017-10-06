@@ -303,11 +303,19 @@ class ApiClient {
     return this.rpc(req)
   }
 
+  getFileRef (container, application, url) {
+    return `file://pageloop.com/${container}/${application}#${url}`
+  }
+
   // Move a file
   moveFile (container, application, file, newName) {
-    const ref = this.getFileReference(container, application, file.url)
-    ref.destination = newName
-    const req = Request.rpc('File.Move', ref)
+    const params = {
+      ref: this.getFileRef(container, application, file.url)
+    }
+    params.destination = newName
+    console.log('move op')
+    console.log(params)
+    const req = Request.rpc('File.Move', params)
     return this.rpc(req)
   }
 

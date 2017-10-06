@@ -25,7 +25,7 @@ type AssetReference struct {
 }
 
 // Returns an error if there is no container id.
-func (asset *AssetReference) AssertContainer() error {
+func (asset *AssetReference) assertContainer() error {
   if asset.container == "" {
     return fmt.Errorf("Asset reference requires a container name")
   }
@@ -33,10 +33,7 @@ func (asset *AssetReference) AssertContainer() error {
 }
 
 // Returns an error if there is no container or application id.
-func (asset *AssetReference) AssertApplication() error {
-  if err := asset.AssertContainer(); err != nil {
-    return err
-  }
+func (asset *AssetReference) assertApplication() error {
   if asset.application == "" {
     return fmt.Errorf("Asset reference requires an application name")
   }
@@ -44,10 +41,7 @@ func (asset *AssetReference) AssertApplication() error {
 }
 
 // Returns an error if there is no container, application or file id.
-func (asset *AssetReference) AssertFile() error {
-  if err := asset.AssertApplication(); err != nil {
-    return err
-  }
+func (asset *AssetReference) assertFile() error {
   if asset.url == "" {
     return fmt.Errorf("Asset reference requires a file url")
   }
@@ -56,7 +50,7 @@ func (asset *AssetReference) AssertFile() error {
 
 // Attempt to find a container matching this reference.
 func (asset *AssetReference) FindContainer(host *Host) (*Container, *StatusError) {
-  if err := asset.AssertContainer(); err != nil {
+  if err := asset.assertContainer(); err != nil {
     return nil, CommandError(http.StatusBadRequest, err.Error())
   }
   c := host.GetByName(asset.container)
@@ -71,7 +65,7 @@ func (asset *AssetReference) FindApplication(host *Host) (*Container, *Applicati
   if container, err := asset.FindContainer(host); err != nil {
     return nil, nil, err
   } else {
-    if err := asset.AssertApplication(); err != nil {
+    if err := asset.assertApplication(); err != nil {
       return nil, nil, CommandError(http.StatusBadRequest, err.Error())
     }
     application := container.GetByName(asset.application)
@@ -82,6 +76,23 @@ func (asset *AssetReference) FindApplication(host *Host) (*Container, *Applicati
   }
 }
 
+// Attempt to find a file matching this reference.
+func (asset *AssetReference) FindFile(host *Host) (*Container, *Application, *File, *StatusError) {
+  if container, application, err := asset.FindApplication(host); err != nil {
+    return nil, nil, nil, err
+  } else {
+    if err := asset.assertFile(); err != nil {
+      return nil, nil, nil, CommandError(http.StatusBadRequest, err.Error())
+    }
+    file := application.Urls[asset.url]
+    if file == nil {
+      return nil, nil, nil, CommandError(http.StatusNotFound, "File %s not found", asset.url)
+    }
+    return container, application, file, nil
+  }
+}
+
+// Parse a URL into this asset reference.
 func (asset *AssetReference) ParseUrl(uri string) (ref Reference, err error) {
   var u *url.URL
   if u, err = url.Parse(uri); err != nil {
@@ -93,10 +104,10 @@ func (asset *AssetReference) ParseUrl(uri string) (ref Reference, err error) {
     err = fmt.Errorf("Invalid reference %s", uri)
     return
   }
-  ref = &AssetReference{
-    container: parts[0],
-    application: parts[1],
-    url: u.Fragment,
-    ref: uri}
+  asset.container = parts[0]
+  asset.application = parts[1]
+  asset.url = u.Fragment
+  asset.ref = uri
+  ref = asset
   return
 }

@@ -5,22 +5,21 @@
       type="checkbox"
       @keyup.enter="enter"
       :name="name"
+      v-model="target[name]"
       :checked="booleanValue" />
     <input
       v-else-if="isNumber()"
       type="number"
       class="input"
       @keyup.enter="enter"
-      v-model="numberValue"
+      v-model.number="target[name]"
       :name="name" />
     <input
       v-else-if="isString()"
       type="text"
-      :data-type="type"
-      :data-name="name"
-      :contenteditable="!isBoolean()"
+      :name="name"
       @keyup.enter="enter"
-      :value="getDefaultValue(value)"
+      v-model="target[name]"
       class="input" />
     <span v-else class="input unsupported">{{type}}</span>
   </span>
@@ -31,12 +30,15 @@ export default {
   name: 'typed-input',
   data: function () {
     return {
-      text: '',
       booleanValue: false,
-      numberValue: 0
+      numberValue: 0,
+      stringValue: ''
     }
   },
   props: {
+    target: {
+      type: Object
+    },
     type: {
       type: String
     },
@@ -51,6 +53,9 @@ export default {
     }
   },
   methods: {
+    input: function (e) {
+      console.log(e)
+    },
     getDefaultValue: function (val) {
       if (val === '') {
         if (this.isBoolean()) {
@@ -68,47 +73,13 @@ export default {
     isNumber: function () {
       return /(int|float)/i.test(this.type)
     },
-    getText: function () {
-      return this.text || this.value
-    },
     toggleBoolean: function () {
       this.booleanValue = !this.booleanValue
-    },
-    getValue: function () {
-      // const alias = this.name
-      const type = this.type
-      let value = this.getText()
-
-      // Strings are passed through verbatim
-      if (type !== 'string') {
-        // Quick type conversion for numbers, booleans, json arrays/objects and null
-        const doc = `{"value": ${value}}`
-        let result
-        try {
-          result = JSON.parse(doc)
-        } catch (e) {
-          // Can and will fail
-        }
-
-        // Coercion succeeded
-        if (result) {
-          value = result.value
-        }
-      }
-      return value
-    },
-    focus: function (e) {
-      const sel = getSelection()
-      sel.selectAllChildren(e.target)
-    },
-    blur: function (e) {
-      const sel = getSelection()
-      sel.removeAllRanges()
-      this.$emit('blur', e, this)
     },
     enter: function (e) {
       e.preventDefault()
       e.stopImmediatePropagation()
+      console.log('enter listener called')
       this.$emit('submit', e, this)
     }
   }
@@ -147,7 +118,7 @@ export default {
     margin: 0 0 0 1rem;
   }
 
-  .input[contenteditable="true"] {
+  input[type="text"] {
     user-select: auto;
     cursor: auto;
     border-bottom: 1px solid var(--base00-color);

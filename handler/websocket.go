@@ -89,6 +89,8 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
       fallthrough
     case "Application.Read":
       argv = &ApplicationRequest{}
+    case "File.Move":
+      argv = &FileMoveRequest{}
     case "File.ReadSource":
       fallthrough
     case "File.ReadSourceRaw":
@@ -96,8 +98,6 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
     case "File.Read":
       fallthrough
     case "File.Create":
-      fallthrough
-    case "File.Move":
       fallthrough
     case "File.CreateTemplate":
       fallthrough

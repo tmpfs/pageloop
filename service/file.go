@@ -16,6 +16,9 @@ type FileRef struct {
 }
 
 type FileRequest struct {
+  // A reference to a file in the form: file://{container}/{application}#{url}
+  Ref string `json:"ref,omitempty"`
+
   Name string `json:"name"`
 
   // This is a slash separated path to the source file
@@ -30,9 +33,6 @@ type FileRequest struct {
 	// A source template for this file
 	Template *ApplicationTemplate `json:"template,omitempty"`
 
-  // A reference to a file in the form: file://{container}/{application}#{url}
-  Ref string `json:"ref,omitempty"`
-
   // An input value for the file content, passed in when creating or
   // updating files that are not binary
   Value string `json:"value,omitempty"`
@@ -43,6 +43,13 @@ type FileRequest struct {
 
 func (req *FileRequest) ToFile () *File {
   return &File{Name: req.Name, Url: req.Url}
+}
+
+type FileMoveRequest struct {
+  // A reference to a file in the form: file://{container}/{application}#{url}
+  Ref string `json:"ref,omitempty"`
+  // Destination for file move operations
+  Destination string `json:"destination,omitempty"`
 }
 
 type FileService struct {
@@ -60,11 +67,16 @@ func (s *FileService) Read(file *FileRequest, reply *ServiceReply) *StatusError 
 }
 
 // Move a file.
-func (s *FileService) Move(file *FileRequest, reply *ServiceReply) *StatusError {
+func (s *FileService) Move(file *FileMoveRequest, reply *ServiceReply) *StatusError {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for move operation")
+  }
   if file.Destination == "" {
     return CommandError(http.StatusBadRequest, "No destination for move operation")
   }
-  if _, app, f, err := LookupFile(s.Host, file, false); err != nil {
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, app, f, err := ref.FindFile(s.Host); err != nil {
     return err
   } else {
     if err := app.Move(f, file.Destination); err != nil {

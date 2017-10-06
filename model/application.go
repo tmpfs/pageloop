@@ -176,6 +176,9 @@ func (app *Application) Move(file *File, dest string) error {
   file.Path = pth
   delete(app.Urls, file.Url)
   app.setComputedFileFields(file)
+  if file.Page() != nil {
+    app.setComputedPageFields(file.Page())
+  }
   return nil
 }
 

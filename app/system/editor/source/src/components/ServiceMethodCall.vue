@@ -60,6 +60,8 @@ export default {
     },
     invoke: function (fn) {
       const params = this.params
+      console.log('got service method call params')
+      console.log(params)
       const client = this.$store.state.client
       const req = Request.rpc(fn.method, params)
       client.rpc(req, {http: this.callType === 'rest'})
