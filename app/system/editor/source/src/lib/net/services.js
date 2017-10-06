@@ -52,6 +52,25 @@ function getFileUrl (params, filter) {
   return u
 }
 
+function parseFileRef (ref) {
+  const u = new URL(ref)
+  const parts = u.pathname.replace(/^\//, '').split('/')
+  const container = parts[0]
+  const application = parts[1]
+  const url = u.hash.replace(/^#/, '')
+
+  return {
+    container: container,
+    application: application,
+    url: url
+  }
+}
+
+function getFileRefUrl (params, filter) {
+  const {container, application, url} = parseFileRef(params.ref)
+  return API + `apps/${container}/${application}/${filter}${url}`
+}
+
 function getArchiveUrl (params) {
   let url = API + `apps/${params.container}/${params.name}/zip/`
   if (params.filter) {
@@ -198,7 +217,7 @@ const services = {
     const o = getPostOptions(rpc)
     o.headers.Location = params.destination
     return {
-      url: getFileUrl(params, 'files'),
+      url: getFileRefUrl(params, 'files'),
       options: o
     }
   },
