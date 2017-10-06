@@ -45,6 +45,7 @@ function getDeleteOptions (rpc) {
   return getBodyOptions(rpc, o)
 }
 
+// TODO: deprecate this function: use getFileRefUrl() for everything
 function getFileUrl (params, filter) {
   const u = API + `apps/${params.container}/${params.application}/${filter}${params.url}`
   delete params.container
@@ -58,7 +59,6 @@ function parseFileRef (ref) {
   const container = parts[0]
   const application = parts[1]
   const url = u.hash.replace(/^#/, '')
-
   return {
     container: container,
     application: application,
@@ -221,15 +221,21 @@ const services = {
       options: o
     }
   },
+  'File.Read': (rpc, params) => {
+    return {
+      url: getFileRefUrl(params, 'files'),
+      options: getDefaultOptions(rpc)
+    }
+  },
   'File.ReadSource': (rpc, params) => {
     return {
-      url: getFileUrl(params, 'src'),
+      url: getFileRefUrl(params, 'src'),
       options: getDefaultOptions(rpc)
     }
   },
   'File.ReadSourceRaw': (rpc, params) => {
     return {
-      url: getFileUrl(params, 'raw'),
+      url: getFileRefUrl(params, 'raw'),
       options: getDefaultOptions(rpc)
     }
   },

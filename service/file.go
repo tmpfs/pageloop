@@ -15,6 +15,19 @@ type FileRef struct {
   Url string
 }
 
+type FileReferenceRequest struct {
+  // A reference to a file in the form: file://{container}/{application}#{url}
+  Ref string `json:"ref,omitempty"`
+}
+
+type FileMoveRequest struct {
+  // A reference to a file in the form: file://{container}/{application}#{url}
+  Ref string `json:"ref,omitempty"`
+  // Destination for file move operations
+  Destination string `json:"destination,omitempty"`
+}
+
+// TODO: deprecate generic argument struct
 type FileRequest struct {
   // A reference to a file in the form: file://{container}/{application}#{url}
   Ref string `json:"ref,omitempty"`
@@ -45,20 +58,18 @@ func (req *FileRequest) ToFile () *File {
   return &File{Name: req.Name, Url: req.Url}
 }
 
-type FileMoveRequest struct {
-  // A reference to a file in the form: file://{container}/{application}#{url}
-  Ref string `json:"ref,omitempty"`
-  // Destination for file move operations
-  Destination string `json:"destination,omitempty"`
-}
-
 type FileService struct {
   Host *Host
 }
 
 // Read a file.
-func (s *FileService) Read(file *FileRequest, reply *ServiceReply) *StatusError {
-  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
+func (s *FileService) Read(file *FileReferenceRequest, reply *ServiceReply) *StatusError {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for read operation")
+  }
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, _, f, err := ref.FindFile(s.Host); err != nil {
     return err
   } else {
     reply.Reply = f
@@ -88,8 +99,13 @@ func (s *FileService) Move(file *FileMoveRequest, reply *ServiceReply) *StatusEr
 }
 
 // Read file content.
-func (s *FileService) ReadSource(file *FileRequest, reply *ServiceReply) *StatusError {
-  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
+func (s *FileService) ReadSource(file *FileReferenceRequest, reply *ServiceReply) *StatusError {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for read source operation")
+  }
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, _, f, err := ref.FindFile(s.Host); err != nil {
     return err
   } else {
     reply.Reply = f.Source(false)
@@ -99,7 +115,12 @@ func (s *FileService) ReadSource(file *FileRequest, reply *ServiceReply) *Status
 
 // Read raw file content (includes frontmatter).
 func (s *FileService) ReadSourceRaw(file *FileRequest, reply *ServiceReply) *StatusError {
-  if _, _, f, err := LookupFile(s.Host, file, false); err != nil {
+  if file.Ref == "" {
+    return CommandError(http.StatusBadRequest, "No file reference for read source operation")
+  }
+  ref := &AssetReference{}
+  ref.ParseUrl(file.Ref)
+  if _, _, f, err := ref.FindFile(s.Host); err != nil {
     return err
   } else {
     reply.Reply = f.Source(true)

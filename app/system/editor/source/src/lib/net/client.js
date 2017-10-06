@@ -313,8 +313,6 @@ class ApiClient {
       ref: this.getFileRef(container, application, file.url)
     }
     params.destination = newName
-    console.log('move op')
-    console.log(params)
     const req = Request.rpc('File.Move', params)
     return this.rpc(req)
   }
@@ -324,8 +322,11 @@ class ApiClient {
   // When the raw option is given the response document will include
   // frontmatter data when available.
   getFileSource (container, application, file, raw) {
-    const ref = this.getFileReference(container, application, file.url)
-    const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource', ref)
+    // const ref = this.getFileReference(container, application, file.url)
+    const params = {
+      ref: this.getFileRef(container, application, file.url)
+    }
+    const req = Request.rpc(raw ? 'File.ReadSourceRaw' : 'File.ReadSource', params)
 
     // TODO: allow this over websocket so we don't need to force a transport
     return this.rpc(req, {http: true})
