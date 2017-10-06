@@ -46,12 +46,14 @@ function getDeleteOptions (rpc) {
 }
 
 // TODO: deprecate this function: use getFileRefUrl() for everything
+/*
 function getFileUrl (params, filter) {
   const u = API + `apps/${params.container}/${params.application}/${filter}${params.url}`
   delete params.container
   delete params.application
   return u
 }
+*/
 
 function parseFileRef (ref) {
   if (!ref) {
@@ -200,19 +202,19 @@ const services = {
   },
   'File.Create': (rpc, params) => {
     return {
-      url: getFileUrl(params, 'files'),
+      url: getFileRefUrl(params, 'files'),
       options: getPutOptions(rpc)
     }
   },
   'File.CreateTemplate': (rpc, params) => {
     return {
-      url: getFileUrl(params, 'files'),
+      url: getFileRefUrl(params, 'files'),
       options: getPutOptions(rpc)
     }
   },
   'File.Save': (rpc, params) => {
     return {
-      url: getFileUrl(params, 'files'),
+      url: getFileRefUrl(params, 'files'),
       options: getPostOptions(rpc)
     }
   },

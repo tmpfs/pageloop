@@ -275,27 +275,31 @@ class ApiClient {
   // Create a new file optionally using the specified
   // template reference.
   createFile (container, application, url, template) {
-    const ref = this.getFileReference(container, application, url)
+    const params = {
+      ref: this.getFileRef(container, application, url)
+    }
     if (template) {
-      ref.template = template
-      return this.rpc(Request.rpc('File.CreateTemplate', ref))
+      params.template = template
+      return this.rpc(Request.rpc('File.CreateTemplate', params))
     }
     // Create an empty file
-    return this.rpc(Request.rpc('File.Create', ref))
+    return this.rpc(Request.rpc('File.Create', params))
   }
 
   // Save a file sending value as the new file content
   saveFile (container, application, file, value) {
-    const ref = this.getFileReference(container, application, file.url)
+    const params = {
+      ref: this.getFileRef(container, application, file.url)
+    }
 
     // Text files can be sent as strings (websocket only)
     if (!file.binary) {
-      ref.value = value
+      params.value = value
     } else {
       // TODO: send as binary when file is binary
     }
 
-    const req = Request.rpc('File.Save', ref)
+    const req = Request.rpc('File.Save', params)
 
     // Send as raw request (REST requests only)
     req.body(value, file.mime)

@@ -122,11 +122,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       argv = &FileMoveRequest{Ref: ref, Destination: req.Header.Get("Location")}
     case "File.CreateTemplate":
       ref := fmt.Sprintf(
-        "file://%s/%s#%s",
+        "file://pageloop.com/%s/%s#%s",
         route.Parameters.Context,
         route.Parameters.Target,
         route.Parameters.Item)
-      f := &FileRequest{Ref: ref, Template: &ApplicationTemplate{}}
+      f := &FileTemplateRequest{Ref: ref, Template: &ApplicationTemplate{}}
       if err := utils.ReadJson(req, f.Template); err != nil {
         return nil, err
       }
@@ -135,11 +135,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       fallthrough
     case "File.Save":
       ref := fmt.Sprintf(
-        "file://%s/%s#%s",
+        "file://pageloop.com/%s/%s#%s",
         route.Parameters.Context,
         route.Parameters.Target,
         route.Parameters.Item)
-      f := &FileRequest{Ref: ref}
+      f := &FileContentRequest{Ref: ref}
       if content, err := utils.ReadBody(req); err != nil {
         return nil, CommandError(http.StatusInternalServerError, err.Error())
       } else {
