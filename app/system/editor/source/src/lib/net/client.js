@@ -244,14 +244,26 @@ class ApiClient {
 
   // Get the files for an application
   getFiles (container, application) {
-    const ref = this.getApplicationReference(container, application)
-    return this.rpc(Request.rpc('Application.ReadFiles', ref))
+    // const ref = this.getApplicationReference(container, application)
+    // return this.rpc(Request.rpc('Application.ReadFiles', ref))
+    const params = {
+      ref: this.getAppRef(container, application)
+    }
+    const req = Request.rpc('Application.ReadFiles', params)
+    return this.rpc(req)
   }
 
   // Get the pages for an application
   getPages (container, application) {
+    /*
     const ref = this.getApplicationReference(container, application)
     return this.rpc(Request.rpc('Application.ReadPages', ref))
+    */
+    const params = {
+      ref: this.getAppRef(container, application)
+    }
+    const req = Request.rpc('Application.ReadPages', params)
+    return this.rpc(req)
   }
 
   // Delete a list of files from an application

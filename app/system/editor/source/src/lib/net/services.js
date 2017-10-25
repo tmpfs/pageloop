@@ -171,14 +171,20 @@ const services = {
   },
   'Application.ReadFiles': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.name}/files/`,
+      url: getAppRefUrl(params, 'files'),
       options: getDefaultOptions(rpc)
     }
   },
   'Application.ReadPages': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.name}/pages/`,
+      url: getAppRefUrl(params, 'pages'),
       options: getDefaultOptions(rpc)
+    }
+  },
+  'Application.Delete': (rpc, params) => {
+    return {
+      url: getAppRefUrl(params),
+      options: getDeleteOptions(rpc)
     }
   },
   'Application.DeleteFiles': (rpc, params) => {
@@ -191,12 +197,6 @@ const services = {
     return {
       url: API + `apps/${params.container}/${params.name}/tasks/${params.task}`,
       options: getPutOptions(rpc)
-    }
-  },
-  'Application.Delete': (rpc, params) => {
-    return {
-      url: API + `apps/${params.container}/${params.name}`,
-      options: getDeleteOptions(rpc)
     }
   },
   'File.Create': (rpc, params) => {

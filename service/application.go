@@ -78,8 +78,10 @@ func (s *AppService) Read(req *ApplicationReferenceRequest, reply *ServiceReply)
 }
 
 // Read the files for an application.
-func (s *AppService) ReadFiles(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, req); err != nil {
+func (s *AppService) ReadFiles(req *ApplicationReferenceRequest, reply *ServiceReply) *StatusError {
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if _, app, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     reply.Reply = app.Files
@@ -88,8 +90,10 @@ func (s *AppService) ReadFiles(req *ApplicationRequest, reply *ServiceReply) *St
 }
 
 // Read the pages for an application.
-func (s *AppService) ReadPages(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, req); err != nil {
+func (s *AppService) ReadPages(req *ApplicationReferenceRequest, reply *ServiceReply) *StatusError {
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if _, app, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     reply.Reply = app.Pages
