@@ -34,12 +34,6 @@ type ApplicationRequest struct {
   // Mark this application as a template
   IsTemplate bool `json:"is-template,omitempty"`
 
-  // Name of a task to find
-  Task string `json:"task,omitempty"`
-
-  // List used for batch operations
-  Batch *UrlList `json:"batch,omitempty"`
-
 	// A source template for this application
 	Template *ApplicationTemplate `json:"template,omitempty"`
 }
