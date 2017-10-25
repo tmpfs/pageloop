@@ -61,18 +61,21 @@ function parseFileRef (ref) {
   }
 }
 
-function getAppRefUrl (params, filter) {
+function getFileRefUrl (params, filter) {
+  const {container, application, url} = parseFileRef(params.ref)
+  return API + `apps/${container}/${application}/${filter}${url}`
+}
+
+function getAppRefUrl (params, filter, item) {
   const {container, application} = parseFileRef(params.ref)
   let url = API + `apps/${container}/${application}`
   if (filter) {
     url += `/${filter}`
   }
+  if (item) {
+    url += `/${item}`
+  }
   return url
-}
-
-function getFileRefUrl (params, filter) {
-  const {container, application, url} = parseFileRef(params.ref)
-  return API + `apps/${container}/${application}/${filter}${url}`
 }
 
 function getArchiveUrl (params) {
@@ -189,13 +192,13 @@ const services = {
   },
   'Application.DeleteFiles': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.name}/files/`,
+      url: getAppRefUrl(params, 'files'),
       options: getDeleteOptions(rpc)
     }
   },
   'Application.RunTask': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.name}/tasks/${params.task}`,
+      url: getAppRefUrl(params, 'tasks', params.task),
       options: getPutOptions(rpc)
     }
   },

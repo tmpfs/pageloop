@@ -242,10 +242,23 @@ class ApiClient {
     return this.rpc(req)
   }
 
+  // Delete an application.
+  deleteApp (container, application) {
+    /*
+    const ref = this.getApplicationReference(container, application)
+    console.log(ref)
+    return this.rpc(Request.rpc('Application.Delete', ref))
+    */
+
+    const params = {
+      ref: this.getAppRef(container, application)
+    }
+    const req = Request.rpc('Application.Delete', params)
+    return this.rpc(req)
+  }
+
   // Get the files for an application
   getFiles (container, application) {
-    // const ref = this.getApplicationReference(container, application)
-    // return this.rpc(Request.rpc('Application.ReadFiles', ref))
     const params = {
       ref: this.getAppRef(container, application)
     }
@@ -255,10 +268,6 @@ class ApiClient {
 
   // Get the pages for an application
   getPages (container, application) {
-    /*
-    const ref = this.getApplicationReference(container, application)
-    return this.rpc(Request.rpc('Application.ReadPages', ref))
-    */
     const params = {
       ref: this.getAppRef(container, application)
     }
@@ -271,16 +280,23 @@ class ApiClient {
     const urls = files.map((f) => {
       return f.url
     })
-    const ref = this.getApplicationReference(container, application)
-    ref.batch = urls
-    const req = Request.rpc('Application.DeleteFiles', ref)
+    const params = {
+      ref: this.getAppRef(container, application),
+      batch: urls
+    }
+    const req = Request.rpc('Application.DeleteFiles', params)
     req.json(urls)
     return this.rpc(req)
   }
 
   // Run an application build task
-  runTask (container, name, task) {
-    return this.rpc(Request.rpc('Application.RunTask', {container, name, task}))
+  runTask (container, application, task) {
+    const params = {
+      ref: this.getAppRef(container, application),
+      task: task
+    }
+    const req = Request.rpc('Application.RunTask', params)
+    return this.rpc(req)
   }
 
   // Create a new application.
@@ -290,13 +306,6 @@ class ApiClient {
     const req = Request.rpc('Container.CreateApp', app)
     req.json(app)
     return this.rpc(req)
-  }
-
-  // Delete an application.
-  deleteApp (container, application) {
-    const ref = this.getApplicationReference(container, application)
-    console.log(ref)
-    return this.rpc(Request.rpc('Application.Delete', ref))
   }
 
   // Create a new file optionally using the specified

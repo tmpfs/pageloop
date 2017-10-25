@@ -58,6 +58,22 @@ type ApplicationReferenceRequest struct {
   Ref string `json:"ref,omitempty"`
 }
 
+type ApplicationBatchRequest struct {
+  // A reference to an application in the form: file://pageloop.com/{container}/{application}
+  Ref string `json:"ref,omitempty"`
+
+  // List used for batch operations
+  Batch *UrlList `json:"batch,omitempty"`
+}
+
+type ApplicationTaskRequest struct {
+  // A reference to an application in the form: file://pageloop.com/{container}/{application}
+  Ref string `json:"ref,omitempty"`
+
+  // Name of a task to find
+  Task string `json:"task,omitempty"`
+}
+
 type AppService struct {
   Host *Host
 
@@ -102,10 +118,12 @@ func (s *AppService) ReadPages(req *ApplicationReferenceRequest, reply *ServiceR
 }
 
 // Delete an application.
-func (s *AppService) Delete(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  println("application delete called")
-  if container, app, err := LookupApplication(s.Host, req); err != nil {
-    println("returning err")
+func (s *AppService) Delete(req *ApplicationReferenceRequest, reply *ServiceReply) *StatusError {
+  //println("application delete called")
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if container, app, err := ref.FindApplication(s.Host); err != nil {
+    //println("returning err")
     return err
   } else {
     if app.Protected {
@@ -132,8 +150,10 @@ func (s *AppService) Delete(req *ApplicationRequest, reply *ServiceReply) *Statu
 }
 
 // Batch delete files.
-func (s *AppService) DeleteFiles(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, req); err != nil {
+func (s *AppService) DeleteFiles(req *ApplicationBatchRequest, reply *ServiceReply) *StatusError {
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if _, app, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     var file *File
@@ -156,9 +176,11 @@ func (s *AppService) DeleteFiles(req *ApplicationRequest, reply *ServiceReply) *
 }
 
 // Run an application build task.
-func(s *AppService) RunTask(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  var task = req.Task
-  if _, app, err := LookupApplication(s.Host, req); err != nil {
+func(s *AppService) RunTask(req *ApplicationTaskRequest, reply *ServiceReply) *StatusError {
+  task := req.Task
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if _, app, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     task = strings.TrimPrefix(task, SLASH)

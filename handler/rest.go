@@ -91,15 +91,23 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       if err := utils.ReadJson(req, &list); err != nil {
         return nil, CommandError(http.StatusInternalServerError, err.Error())
       }
+      /*
       argv = &ApplicationRequest{
         Name: route.Parameters.Target,
         Container: route.Parameters.Context,
         Batch: &list}
+      */
+      ref := fmt.Sprintf(
+        "file://pageloop.com/%s/%s",
+        route.Parameters.Context,
+        route.Parameters.Target)
+      argv = &ApplicationBatchRequest{Ref: ref, Batch: &list}
     case "Application.RunTask":
-      argv = &ApplicationRequest{
-        Name: route.Parameters.Target,
-        Container: route.Parameters.Context,
-        Task: route.Parameters.Item}
+      ref := fmt.Sprintf(
+        "file://pageloop.com/%s/%s",
+        route.Parameters.Context,
+        route.Parameters.Target)
+      argv = &ApplicationTaskRequest{Ref: ref, Task: route.Parameters.Item}
     case "File.Delete":
       fallthrough
     case "File.ReadPage":
