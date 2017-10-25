@@ -86,9 +86,9 @@ func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (
     case "Application.Delete":
       fallthrough
     case "Application.RunTask":
-      fallthrough
-    case "Application.Read":
       argv = &ApplicationRequest{}
+    case "Application.Read":
+      argv = &ApplicationReferenceRequest{}
     case "File.Move":
       argv = &FileMoveRequest{}
     case "File.Delete":

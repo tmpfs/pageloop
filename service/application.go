@@ -53,6 +53,11 @@ func (req *ApplicationRequest) ToApplication(container *Container) *Application 
     IsTemplate: req.IsTemplate}
 }
 
+type ApplicationReferenceRequest struct {
+  // A reference to an application in the form: file://pageloop.com/{container}/{application}
+  Ref string `json:"ref,omitempty"`
+}
+
 type AppService struct {
   Host *Host
 
@@ -61,8 +66,10 @@ type AppService struct {
 }
 
 // Read an application.
-func (s *AppService) Read(req *ApplicationRequest, reply *ServiceReply) *StatusError {
-  if _, app, err := LookupApplication(s.Host, req); err != nil {
+func (s *AppService) Read(req *ApplicationReferenceRequest, reply *ServiceReply) *StatusError {
+  ref := &AssetReference{}
+  ref.ParseUrl(req.Ref)
+  if _, app, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     reply.Reply = app

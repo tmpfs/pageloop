@@ -81,9 +81,11 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "Application.Delete":
       fallthrough
     case "Application.Read":
-      argv = &ApplicationRequest{
-        Name: route.Parameters.Target,
-        Container: route.Parameters.Context}
+      ref := fmt.Sprintf(
+        "file://pageloop.com/%s/%s",
+        route.Parameters.Context,
+        route.Parameters.Target)
+      argv = &ApplicationReferenceRequest{Ref: ref}
     case "Application.DeleteFiles":
       var list UrlList = make(UrlList, 0)
       if err := utils.ReadJson(req, &list); err != nil {

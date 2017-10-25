@@ -9,11 +9,13 @@ import(
   . "github.com/tmpfs/pageloop/util"
 )
 
+/*
 type FileRef struct {
   Container string
   Application string
   Url string
 }
+*/
 
 type FileReferenceRequest struct {
   // A reference to a file in the form: file://pageloop.com/{container}/{application}#{url}

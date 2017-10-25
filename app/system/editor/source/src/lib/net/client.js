@@ -209,28 +209,37 @@ class ApiClient {
   }
 
   getApplicationReference (container, application) {
+    /*
     return {
       name: application,
       container: container
     }
-  }
-
-  getFileReference (container, application, url) {
+    */
     return {
-      // For websocket file refs
-      ref: `file://${container}/${application}#${url}`,
+      // For websocket app refs
+      ref: `file://${container}/${application}`,
 
       // For rest parameter path building
       container: container,
-      application: application,
-      url: url
+      name: application
     }
+  }
+
+  getAppRef (container, application) {
+    return `file://pageloop.com/${container}/${application}`
+  }
+
+  getFileRef (container, application, url) {
+    return `file://pageloop.com/${container}/${application}#${url}`
   }
 
   // Get a single application
   getApplication (container, application) {
-    const ref = this.getApplicationReference(container, application)
-    return this.rpc(Request.rpc('Application.Read', ref))
+    const params = {
+      ref: this.getAppRef(container, application)
+    }
+    const req = Request.rpc('Application.Read', params)
+    return this.rpc(req)
   }
 
   // Get the files for an application
@@ -313,10 +322,6 @@ class ApiClient {
     return this.rpc(req)
   }
 
-  getFileRef (container, application, url) {
-    return `file://pageloop.com/${container}/${application}#${url}`
-  }
-
   // Move a file
   moveFile (container, application, file, newName) {
     const params = {
@@ -332,7 +337,6 @@ class ApiClient {
   // When the raw option is given the response document will include
   // frontmatter data when available.
   getFileSource (container, application, file, raw) {
-    // const ref = this.getFileReference(container, application, file.url)
     const params = {
       ref: this.getFileRef(container, application, file.url)
     }

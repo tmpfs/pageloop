@@ -45,16 +45,6 @@ function getDeleteOptions (rpc) {
   return getBodyOptions(rpc, o)
 }
 
-// TODO: deprecate this function: use getFileRefUrl() for everything
-/*
-function getFileUrl (params, filter) {
-  const u = API + `apps/${params.container}/${params.application}/${filter}${params.url}`
-  delete params.container
-  delete params.application
-  return u
-}
-*/
-
 function parseFileRef (ref) {
   if (!ref) {
     throw new Error('Asset reference is empty, cannot create URL')
@@ -69,6 +59,15 @@ function parseFileRef (ref) {
     application: application,
     url: url
   }
+}
+
+function getAppRefUrl (params, filter) {
+  const {container, application} = parseFileRef(params.ref)
+  let url = API + `apps/${container}/${application}`
+  if (filter) {
+    url += `/${filter}`
+  }
+  return url
 }
 
 function getFileRefUrl (params, filter) {
@@ -166,7 +165,7 @@ const services = {
   },
   'Application.Read': (rpc, params) => {
     return {
-      url: API + `apps/${params.container}/${params.name}`,
+      url: getAppRefUrl(params),
       options: getDefaultOptions(rpc)
     }
   },
