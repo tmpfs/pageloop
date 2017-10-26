@@ -44,11 +44,13 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
     case "Archive.Import":
       fallthrough
     case "Archive.Export":
+      /*
       app := &ApplicationRequest{
         Name: route.Parameters.Target,
         Container: route.Parameters.Context}
+      */
 
-      name := app.Name
+      name := route.Parameters.Target
 
       // Switch archive type
       archiveType := ArchiveFull
@@ -65,8 +67,13 @@ func Argv(route *Route, req *http.Request, res http.ResponseWriter) (argv interf
       name += ".zip"
       res.Header().Set("Content-Disposition", "attachment; filename=" + name)
 
+      ref := fmt.Sprintf(
+        "file://pageloop.com/%s/%s",
+        route.Parameters.Context,
+        route.Parameters.Target)
+
       argv = &ArchiveRequest{
-        Application: app,
+        Ref: ref,
         Writer: res,
         Type: archiveType,
         Name: name}

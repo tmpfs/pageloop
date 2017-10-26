@@ -29,14 +29,20 @@ type ArchiveRequest struct {
   Name string `json:"name"`
   // Type of archive to create. Full, source only or public only.
   Type int `json:"type"`
-  // Reference to the target application
-  Application *ApplicationRequest
+  // A reference to an application in the form: file://pageloop.com/{container}/{application}
+  Ref string `json:"ref,omitempty"`
   // Output stream
   Writer io.Writer
 }
 
 // Export a zip archive of application files.
 func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *StatusError {
+
+  //fmt.Printf("%#v\n", archive)
+
+  if archive.Writer == nil {
+    return CommandError(http.StatusInternalServerError, "No writer for archive stream.")
+  }
 
   // Add source files to the archive
   source := func (z *zip.Writer, app *Application, prefix string) *StatusError {
@@ -96,7 +102,9 @@ func (s *ArchiveService) Export(archive *ArchiveRequest, reply *ServiceReply) *S
     return nil
   }
 
-  if _, a, err := LookupApplication(s.Host, archive.Application); err != nil {
+  ref := &AssetReference{}
+  ref.ParseUrl(archive.Ref)
+  if _, a, err := ref.FindApplication(s.Host); err != nil {
     return err
   } else {
     z := zip.NewWriter(archive.Writer)

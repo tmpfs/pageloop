@@ -204,15 +204,3 @@ func(s *AppService) RunTask(req *ApplicationTaskRequest, reply *ServiceReply) *S
   }
   return nil
 }
-
-func LookupApplication(host *Host, req *ApplicationRequest) (*Container, *Application, *StatusError) {
-  c := host.GetByName(req.Container)
-  if c == nil {
-    return nil, nil, CommandError(http.StatusNotFound, "Container %s not found", req.Container)
-  }
-  a := c.GetByName(req.Name)
-  if a == nil {
-    return nil, nil, CommandError(http.StatusNotFound, "Application %s not found", req.Name)
-  }
-  return c, a, nil
-}

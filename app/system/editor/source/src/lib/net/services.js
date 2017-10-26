@@ -79,7 +79,8 @@ function getAppRefUrl (params, filter, item) {
 }
 
 function getArchiveUrl (params) {
-  let url = API + `apps/${params.container}/${params.name}/zip/`
+  const {container, application} = parseFileRef(params.ref)
+  let url = API + `apps/${container}/${application}/zip/`
   if (params.filter) {
     url += `${params.filter}/`
   }

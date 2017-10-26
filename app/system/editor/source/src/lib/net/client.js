@@ -369,11 +369,19 @@ class ApiClient {
 
   // Export public zip
   exportArchive (container, application, filter) {
+    const params = {
+      ref: this.getAppRef(container, application)
+    }
+    if (filter) {
+      params.filter = filter
+    }
+    /*
     const ref = this.getApplicationReference(container, application)
     if (filter) {
       ref.filter = filter
     }
-    const req = Request.rpc('Archive.Export', ref)
+    */
+    const req = Request.rpc('Archive.Export', params)
     const fetch = fetchFromRpc(req)
     console.log('download from: ' + fetch.url)
     // TODO: try not to use replace()
