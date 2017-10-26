@@ -68,11 +68,11 @@ func (writer *WebsocketWriter) WriteError(err *StatusError) {
 // Determine the type of argument for the given service method and
 // call ReadRequest() on the CodecRequest to parse the input params
 // into the correct type.
-func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, method string) (argv interface{}, err error) {
+func (w *WebsocketConnection) RequestArgv(req rpc.CodecRequest, writer http.ResponseWriter, method string) (argv interface{}, err error) {
   argv = &VoidArgs{}
   switch(method) {
     case "Archive.Export":
-      argv = &ArchiveRequest{}
+      argv = &ArchiveRequest{Writer: writer}
     case "Container.Read":
       argv = &ContainerRequest{}
     case "Container.CreateApp":
@@ -173,7 +173,7 @@ func (w *WebsocketConnection) ReadRequest() {
               CommandError(http.StatusInternalServerError, err.Error()))
             continue
           } else {
-            if argv, err := w.RequestArgv(req, method); err != nil {
+            if argv, err := w.RequestArgv(req, writer, method); err != nil {
               // If we had an error while reading the request
               // if is likely a JSON unmarshal error so treat as
               // a bad request
